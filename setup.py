@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-
+print(find_packages())
 # read the contents of your README file
 from os import path
 this_directory = path.abspath(path.dirname(__file__))
@@ -12,7 +12,7 @@ long_description = ''.join(lines)
 
 setup(
     name="pykin",
-    packages=find_packages(exclude = []),
+    packages=find_packages(exclude=["tests"]),
     install_requires=[
         "numpy>=1.13.3",
         "matplotlib>=3.3.4",
@@ -25,7 +25,7 @@ setup(
     url="https://github.com/jdj2261/pykin.git",
     download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
     author_email="wlseoeo@gmain.com",
-    version="0.0.1",
+    version="0.1.0",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
