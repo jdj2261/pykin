@@ -4,9 +4,8 @@ import sys
 import os
 import argparse
 
-dir_path = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-print(dir_path)
-sys.path.append(dir_path + "/src")
+import sys
+sys.path.append('../src')
 
 from robot import Robot
 from pprint import pprint
