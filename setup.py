@@ -14,8 +14,8 @@ setup(
     name="pykin",
     packages=find_packages(exclude=["tests"]),
     install_requires=[
-        "numpy>=1.13.3",
-        "matplotlib>=3.3.4",
+        "numpy",
+        "matplotlib",
     ],
     eager_resources=['*'],
     include_package_data=True,
@@ -23,9 +23,12 @@ setup(
     description="Robotics Kinematics Library",
     author="Dae Jong Jin",
     url="https://github.com/jdj2261/pykin.git",
-    download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
+	download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
     author_email="wlseoeo@gmain.com",
-    version="0.1.3",
+    version="0.1.7",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
+
+# python setup.py sdist bdist_wheel
+# twine upload --skip-existing dist/*

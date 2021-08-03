@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: pykin
+Version: 0.1.7
+Summary: Robotics Kinematics Library
+Home-page: https://github.com/jdj2261/pykin.git
+Author: Dae Jong Jin
+Author-email: wlseoeo@gmain.com
+License: UNKNOWN
+Download-URL: https://github.com/jdj2261/pykin/archive/refs/heads/main.zip
+Description: # pykin
+        # TODO
+        
+Platform: UNKNOWN
+Requires-Python: >=3
+Description-Content-Type: text/markdown
