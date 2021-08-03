@@ -1,5 +1,5 @@
 # pykin
-[![PyPI version](https://badge.fury.io/py/kinpy.svg)](https://badge.fury.io/py/pykin)[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Python Kinematics library
 
