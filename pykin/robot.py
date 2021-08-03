@@ -1,39 +1,20 @@
 import sys, os
 import numpy as np
 from pprint import pprint
-
-import kin_utils.utils.plot as plt
-from kin_utils.kinematics.transform import Transform
-from kin_utils.urdf.urdf_parser import URDFParser
-from kin_utils.kinematics.kinematics import Kinematics
-from kin_utils.utils.shell_color import ShellColors as scolors
-from kin_utils.kinematics import jacobian as jac
-
-
-def show_robot_info(robot):
-    print("*" * 20)
-    print(f"robot information: \n{robot}")
-    print(f"robot's dof : {robot.num_dofs}")
-    print(f"active joint's info: \n{robot.get_active_joint_names}")
-    print("*" * 20)
-
-
-def convert_string_color(string: str, color: str) -> str:
-    if color == "green":
-        return scolors.OKGREEN + string + scolors.ENDC
-    elif color == "blue":
-        return scolors.OKBLUE + string + scolors.ENDC
-    elif color == "cyan":
-        return scolors.OKCYAN + string + scolors.ENDC
-    elif color == "header":
-        return scolors.HEADER + string + scolors.ENDC
-
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
+sys.path.append(pykin_path)
+# print(os.path.abspath(__file__))
+from pykin.utils import plot as plt
+from pykin.kinematics.transform import Transform
+from pykin.urdf.urdf_parser import URDFParser
+from pykin.kinematics.kinematics import Kinematics
+from pykin.utils.shell_color import ShellColors as scolors
+from pykin.kinematics import jacobian as jac
 
 class Robot:
     def __init__(self, filename=None, offset=Transform()):
         if filename is None:
-            filename = "./asset/urdf/baxter.urdf"
-
+            filename = pykin_path + "/asset/urdf/baxter.urdf"
         self.tree = None
         self.root = None
         self.desired_frame = None
@@ -93,6 +74,14 @@ class Robot:
         self.desired_frame = self.tree._get_desired_tree(root_link, end_link)
         return self.desired_frame
 
+
+    def show_robot_info(self):
+        print("*" * 20)
+        print(f"robot information: \n{self}")
+        print(f"robot's dof : {self.num_dofs}")
+        print(f"active joint's info: \n{self.get_active_joint_names}")
+        print("*" * 20)
+
     def forward_kinematics(self, theta, desired_tree=None):
         self.transformations = self.__kinematics.forward_kinematics(
             theta, desired_tree=self.desired_frame
@@ -114,13 +103,12 @@ class Robot:
 
 
 if __name__ == "__main__":
-
-    file_name = "./asset/urdf/baxter.urdf"
+    file_name = str(pykin_path) + "/asset/urdf/baxter.urdf"
     if len(sys.argv) > 1:
         file_name = sys.argv[1]
 
     robot = Robot(file_name)
-    show_robot_info(robot)
+    robot.show_robot_info()
     # print(robot)
     ##################################################################
     ## Forward Kinematics

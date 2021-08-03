@@ -1,7 +1,7 @@
 import numpy as np
-import kin_utils.kinematics.transformation as tf
-from kin_utils.kinematics.transform import Transform
-from kin_utils.utils.shell_color import ShellColors as scolors
+import pykin.kinematics.transformation as tf
+from pykin.kinematics.transform import Transform
+from pykin.utils.shell_color import ShellColors as scolors
 
 class Link:
     def __init__(self, name=None, offset=Transform()):

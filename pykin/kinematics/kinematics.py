@@ -1,9 +1,8 @@
 from collections import OrderedDict
-from kin_utils.kinematics.transform import Transform
-import kin_utils.kinematics.transformation as tf
-import kin_utils.kinematics.jacobian as jac
+from pykin.kinematics.transform import Transform
+from pykin.kinematics import transformation as tf
+from pykin.kinematics import jacobian as jac
 import numpy as np
-
 
 class Kinematics:
     def __init__(self, tree):

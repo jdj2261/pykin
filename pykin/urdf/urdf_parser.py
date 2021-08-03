@@ -3,9 +3,9 @@ from xml.etree import ElementTree as ET
 from collections import OrderedDict
 from pprint import pprint
 
-from kin_utils.urdf.urdf_tree import URDFTree
-from kin_utils.geometry.frame import Joint, Link, Frame
-from kin_utils.kinematics.transform import Transform
+from pykin.urdf.urdf_tree import URDFTree
+from pykin.geometry.frame import Joint, Link, Frame
+from pykin.kinematics.transform import Transform
 
 JOINT_TYPE_MAP = {'revolute': 'revolute',
                   'fixed': 'fixed',

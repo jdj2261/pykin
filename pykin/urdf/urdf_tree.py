@@ -1,6 +1,6 @@
 import numpy as np
-import kin_utils.kinematics.transform as tf
-import kin_utils.kinematics.transformation
+import pykin.kinematics.transform as tf
+import pykin.kinematics.transformation
 from collections import OrderedDict
 
 

@@ -4,15 +4,15 @@ import sys
 import os
 import argparse
 
-import sys
-sys.path.append('../src')
+# import sys
+sys.path.append(os.path.abspath(os.path.dirname(__file__)+"../"))
 
-from robot import Robot
+from pykin.robot import Robot
 from pprint import pprint
-import kin_utils.utils.plot as plt
+from pykin.utils import plot as plt
 
 if __name__ == "__main__":
-    file_name = "../src/asset/urdf/baxter.urdf"
+    file_name = "../asset/urdf/baxter.urdf"
     if len(sys.argv) > 1:
         file_name = sys.argv[1]
 

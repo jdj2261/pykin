@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.animation
 import matplotlib.pyplot as plt
-import kin_utils.kinematics.transformation as tf
+from pykin.kinematics import transformation as tf
 # Colors of each directions axes. For ex X is green
 directions_colors = ["green", "cyan", "orange"]
 
