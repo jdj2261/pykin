@@ -2,3 +2,6 @@
 MUJOCO_LOG.TXT
 __pycache__
 robosuite
+build
+dist
+*.egg-info
