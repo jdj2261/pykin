@@ -1,7 +1,8 @@
 import numpy as np
-import pykin.kinematics.transform as tf
-import pykin.kinematics.transformation
 from collections import OrderedDict
+
+from pykin.kinematics import transform as tf
+from pykin.kinematics import transformation
 
 
 class URDFTree:
@@ -92,7 +93,7 @@ class URDFTree:
             self._get_joint_parameter_names(joint_names, child)
         return joint_names
 
-    def _get_desired_tree(self, root_link_name="", end_link_name=""):
+    def _set_desired_tree(self, root_link_name="", end_link_name=""):
         if root_link_name == "":
             self.desired_root = self.root
         else:

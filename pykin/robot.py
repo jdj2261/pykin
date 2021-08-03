@@ -15,25 +15,20 @@ class Robot:
     def __init__(self, filename=None, offset=Transform()):
         if filename is None:
             filename = pykin_path + "/asset/urdf/baxter.urdf"
+        self._offset = offset
         self.tree = None
-        self.root = None
         self.desired_frame = None
-
-        self.active_head = []
-        self.active_right_arm = []
-        self.active_left_arm = []
-
-        self.load_urdf(filename)
+        self._load_urdf(filename)
 
     def __repr__(self):
         return f"""ROBOT : {__class__.__name__} 
         {self.links} 
         {self.joints}"""
 
-    def load_urdf(self, filename):
+    def _load_urdf(self, filename):
         parser = URDFParser(filename)
         self.tree = parser.tree
-        self.root = self.tree.root
+        self.tree.offset = self.offset
         self.__kinematics = Kinematics(self.tree)
 
     @property
@@ -49,6 +44,14 @@ class Robot:
         for joint in self.tree.joints.values():
             joints.append(joint)
         return joints
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset):
+        self._offset = offset
 
     @property
     def num_dofs(self):
@@ -70,11 +73,6 @@ class Robot:
     def get_active_joint_names(self):
         return self.tree.get_joint_parameter_names
 
-    def get_desired_tree(self, root_link="", end_link=""):
-        self.desired_frame = self.tree._get_desired_tree(root_link, end_link)
-        return self.desired_frame
-
-
     def show_robot_info(self):
         print("*" * 20)
         print(f"robot information: \n{self}")
@@ -82,9 +80,13 @@ class Robot:
         print(f"active joint's info: \n{self.get_active_joint_names}")
         print("*" * 20)
 
+    def set_desired_tree(self, root_link="", end_link=""):
+        self.desired_frame = self.tree._set_desired_tree(root_link, end_link)
+        return self.desired_frame
+
     def forward_kinematics(self, theta, desired_tree=None):
         self.transformations = self.__kinematics.forward_kinematics(
-            theta, desired_tree=self.desired_frame
+            theta, offset=self._offset, desired_tree=self.desired_frame
         )
         return self.transformations
 
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     # # left_arm_thetas = [0, -np.pi/6, np.pi, -np.pi, 0, -np.pi/6, 0]
 
     # for jacobian
-    robot.get_desired_tree("base", "left_wrist")
+    robot.set_desired_tree("base", "left_wrist")
     print(robot.tree.get_desired_joint_parameter_names())
 
     fk = robot.forward_kinematics(left_arm_thetas)

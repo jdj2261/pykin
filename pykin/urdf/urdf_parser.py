@@ -49,8 +49,8 @@ class URDFParser:
         root_frame.link = Link(root_name, offset=_convert_transform(root_frame.link.offset))
         root_frame.children = self._build_chain_recursive(tree.root, tree.links, tree.joints)
 
-        self.tree = tree
         tree.root = root_frame
+        self.tree = tree
         return tree
 
     def _parse_link(self, link_tag, idx):
