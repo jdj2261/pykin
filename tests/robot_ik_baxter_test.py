@@ -16,9 +16,11 @@ robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 # baxter_example
 
 # set target joints angle
-head_thetas = [0.0]
-right_arm_thetas = [np.pi/6, 0, np.pi/6, 0, 0, 0, 0]
-left_arm_thetas = [-np.pi/6, 0, 0, 0, 0, 0, np.pi/6]
+head_thetas =  np.zeros(1)
+# right_arm_thetas = [np.pi/6, 0, np.pi/6, 0, 0, 0, 0]
+# left_arm_thetas = [-np.pi/6, 0, 0, np.pi/6, 0, -np.pi/6, np.pi/6]
+right_arm_thetas = np.random.randn(7)
+left_arm_thetas = np.random.randn(7)
 print(f"{scolors.OKBLUE}Target Right arm Angle{scolors.ENDC}: \n{right_arm_thetas}")
 print(f"{scolors.OKBLUE}Target Left arm Angle{scolors.ENDC}: \n{left_arm_thetas}")
 
@@ -26,7 +28,7 @@ print(f"{scolors.OKBLUE}Target Left arm Angle{scolors.ENDC}: \n{left_arm_thetas}
 #                                Forward Kinematics                             #
 #################################################################################
 # First, show FK graph
-thetas = head_thetas + right_arm_thetas + left_arm_thetas
+thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
 fk = robot.forward_kinematics(thetas)
 target_r_pose = np.concatenate(
     (fk["right_wrist"].pos, fk["right_wrist"].rot))
@@ -41,13 +43,12 @@ plt.plot_robot(robot, fk, ax, "baxter")
 ax.legend()
 plt.show_figure()
 
-
 #################################################################################
 #                                Inverse Kinematics                             #
 #################################################################################
 # init joints
-init_right_thetas = [0, 0, 0, 0, 0, 0, 0]
-init_left_thetas = [0, 0, 0, 0, 0, 0, 0]
+init_right_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
+init_left_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 
 robot.set_desired_tree("base", "right_wrist")
 right_arm_fk = robot.forward_kinematics(right_arm_thetas)
@@ -71,7 +72,7 @@ ik_left_result = robot.inverse_kinematics(init_left_thetas, target_l_pose, metho
 print(f"\n{scolors.HEADER}Current Right arm Angles{scolors.ENDC}: \n{ik_right_result}")
 print(f"{scolors.HEADER}Current Left arm Angles{scolors.ENDC}: \n{ik_left_result}")
 
-thetas = head_thetas + ik_right_result + ik_left_result
+thetas = np.concatenate((head_thetas, ik_right_result, ik_left_result))
 robot.desired_frame = None
 result_fk = robot.forward_kinematics(thetas)
 

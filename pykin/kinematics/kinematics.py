@@ -247,5 +247,5 @@ class Kinematics:
             if iterator > maxIter:
                 break
 
-        current_joints = [float(current_joint) for current_joint in current_joints]
+        current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
