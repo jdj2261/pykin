@@ -103,6 +103,7 @@ class URDFTree:
         )
         if self.desired_root is None:
             raise ValueError("Invalid end frame name %s." % end_link_name)
+        self.desired_frame = [self.desired_root] + self.desired_frame
         return self.desired_frame
 
     @staticmethod
@@ -112,7 +113,7 @@ class URDFTree:
                 return [child]
             else:
                 frames = URDFTree._generate_desired_tree_recursive(child, end_link_name)
-                if not frames is None:
+                if frames is not None:
                     return [child] + frames
 
     def get_desired_joint_parameter_names(self):

@@ -12,4 +12,9 @@ def calc_jacobian(desired_frame, fk: dict, thetas: list) -> np.array:
             w = np.dot(fk[frame.link.name].matrix()[:3, :3], frame.joint.axis)
             v = np.cross(w, target_position - fk[frame.link.name].pos)
             J[:, n - 1] = np.hstack((v, w))
+        elif frame.joint.dtype == "prismatic":
+            n += 1
+            w = np.zeros(3)
+            v = np.dot(fk[frame.link.name].matrix()[:3, :3], frame.joint.axis)
+            J[:, n - 1] = np.hstack((v, w))
     return J

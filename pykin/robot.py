@@ -1,15 +1,17 @@
+
 import sys, os
 import numpy as np
 from pprint import pprint
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
-# print(os.path.abspath(__file__))
-from pykin.utils import plot as plt
+
+from pykin.kinematics import jacobian as jac
+from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
 from pykin.urdf.urdf_parser import URDFParser
-from pykin.kinematics.kinematics import Kinematics
+from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
-from pykin.kinematics import jacobian as jac
+
 
 class Robot:
     def __init__(self, filepath=None, offset=Transform()):

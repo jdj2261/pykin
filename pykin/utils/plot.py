@@ -35,6 +35,8 @@ def plot_basis(robot, ax, arm_length=1):
 
 
 def plot_robot(robot, fk, ax, name=None):
+    # TODO
+    # nodes : list to dict (name, value)
     if name is not None:
         name = os.path.splitext(os.path.basename(name))[0].strip()
 
@@ -67,14 +69,13 @@ def plot_robot(robot, fk, ax, name=None):
         left_lines = ax.plot([x[0] for x in left_nodes], [x[1] for x in left_nodes], [
             x[2] for x in left_nodes], linewidth=5, label="left arm")
 
-
-        head_label = '(%0.2f, %0.2f, %0.2f)' % (
+        head_label = '(%0.4f, %0.4f, %0.4f)' % (
             head_nodes[-1][0], head_nodes[-1][1], head_nodes[-1][2])
-        pedestal_label = '(%0.2f, %0.2f, %0.2f)' % (
+        pedestal_label = '(%0.4f, %0.4f, %0.4f)' % (
             pedestal_nodes[-1][0], pedestal_nodes[-1][1], pedestal_nodes[-1][2])
-        right_label = '(%0.2f, %0.2f, %0.2f)' % (
+        right_label = '(%0.4f, %0.4f, %0.4f)' % (
             right_nodes[8][0], right_nodes[8][1], right_nodes[8][2])
-        left_label = '(%0.2f, %0.2f, %0.2f)' % (
+        left_label = '(%0.4f, %0.4f, %0.4f)' % (
             left_nodes[8][0], left_nodes[8][1], left_nodes[8][2])
 
         ax.text(head_nodes[-1][0], head_nodes[-1][1],
@@ -98,7 +99,7 @@ def plot_robot(robot, fk, ax, name=None):
         lines = ax.plot([x[0] for x in nodes], [x[1] for x in nodes], [
             x[2] for x in nodes], linewidth=5, label=name)
 
-        label = '(%0.2f, %0.2f, %0.2f)' % (
+        label = '(%0.4f, %0.4f, %0.4f)' % (
             nodes[-1][0], nodes[-1][1], nodes[-1][2])
 
         ax.text(nodes[-1][0], nodes[-1][1],
