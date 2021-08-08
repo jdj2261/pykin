@@ -184,6 +184,9 @@ class Kinematics:
 
     # TODO
     # singularity problem
+    # Initial Joints Random pick
+    # Trajectory 
+    # self collision checker 
     def numerical_inverse_kinematics(self, current_joints, target, desired_tree=None):
 
         lamb = 0.5
@@ -193,7 +196,7 @@ class Kinematics:
         dof = len(current_joints)
 
         def rot_to_omega(R):
-            
+            # referred p36
             el = np.array(
                 [[R[2, 1] - R[1, 2]], 
                  [R[0, 2] - R[2, 0]], 
@@ -209,7 +212,7 @@ class Kinematics:
             return w
 
         def calc_pose_error(T_ref, T_cur):
-
+            
             pos_err = np.array([T_ref[:3, -1] - T_cur[:3, -1]])
             rot_err = np.dot(T_cur[:3, :3].T, T_ref[:3, :3])
             w_err = np.dot(T_cur[:3, :3], rot_to_omega(rot_err))
