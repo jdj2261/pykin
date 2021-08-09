@@ -108,7 +108,54 @@ def plot_robot(robot, fk, ax, name=None):
         ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
 
-    
+
+def plot_cylinder(robot, fk, ax=None, length=1.0, radius=1.0,
+                  A2B=np.eye(4), n_steps=100,
+                  alpha=1.0, color="k"):
+
+    for (link, transformation) in fk.items():
+
+        A2B = tf.get_homogeneous_matrix(transformation.pos, transformation.rot)
+        print(A2B)
+        axis_start = A2B.dot(np.array([0, 0, -0.5 * length, 1]))[:3]
+        axis_end = A2B.dot(np.array([0, 0, 0.5 * length, 1]))[:3]
+        axis = axis_end - axis_start
+        axis /= length
+        not_axis = np.array([1, 0, 0])
+        if (axis == not_axis).all():
+            not_axis = np.array([0, 1, 0])
+
+        n1 = np.cross(axis, not_axis)
+        n1 /= np.linalg.norm(n1)
+        n2 = np.cross(axis, n1)
+
+        t = np.array([0, length])
+        # print(t)
+        theta = np.linspace(0, 2 * np.pi, n_steps)
+        t, theta = np.meshgrid(t, theta)
+
+        X, Y, Z = [axis_start[i] + axis[i] * t
+                + radius * np.sin(theta) * n1[i]
+                + radius * np.cos(theta) * n2[i] for i in [0, 1, 2]]
+
+        ax.plot_surface(X, Y, Z, color=color, alpha=alpha, linewidth=0)
+
+    return ax
+
+
+def plot_sphere(robot, fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1, wireframe=True,
+                n_steps=20, alpha=1.0, color="k"):
+
+    phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
+    x = p[0] + radius * np.sin(phi) * np.cos(theta)
+    y = p[1] + radius * np.sin(phi) * np.sin(theta)
+    z = p[2] + radius * np.cos(phi)
+
+    ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=0)
+
+    return ax
+
+
 def init_3d_figure(name=None):
     from mpl_toolkits.mplot3d import axes3d, Axes3D
     fig = plt.figure(name)
