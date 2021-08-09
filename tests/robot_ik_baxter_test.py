@@ -18,10 +18,14 @@ robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint
 head_thetas =  np.zeros(1)
 # right_arm_thetas = np.array([np.pi/2, 0, 0, 0, 0, 0, 0])
 # left_arm_thetas = np.array([-np.pi/2, 0, 0, 0, 0, 0, 0])
-right_arm_thetas = np.clip(np.random.randn(
-    7), robot.joint_limits_lower[:7], robot.joint_limits_upper[:7])
-left_arm_thetas = np.clip(np.random.randn(
-    7), robot.joint_limits_lower[:7], robot.joint_limits_upper[:7])
+right_arm_thetas = np.random.randn(7)
+left_arm_thetas = np.random.randn(7)
+
+if robot.joint_safety:
+    right_arm_thetas = np.clip(np.random.randn(
+        7), robot.joint_limits_lower[:7], robot.joint_limits_upper[:7])
+    left_arm_thetas = np.clip(np.random.randn(
+        7), robot.joint_limits_lower[:7], robot.joint_limits_upper[:7])
 
 print(f"{scolors.OKBLUE}Target Right arm Angle{scolors.ENDC}: \n{right_arm_thetas}")
 print(f"{scolors.OKBLUE}Target Left arm Angle{scolors.ENDC}: \n{left_arm_thetas}")
@@ -54,8 +58,12 @@ ax.legend()
 robot.set_desired_tree("base", "right_wrist")
 right_arm_fk = robot.forward_kinematics(right_arm_thetas)
 
-init_right_thetas = np.clip(np.random.randn(7), robot.joint_limits_lower, robot.joint_limits_upper)
-init_left_thetas = np.clip(np.random.randn(7), robot.joint_limits_lower, robot.joint_limits_upper)
+init_right_thetas = np.random.randn(7)
+init_left_thetas = np.random.randn(7)
+
+if robot.joint_safety:
+    init_right_thetas = np.clip(np.random.randn(7), robot.joint_limits_lower, robot.joint_limits_upper)
+    init_left_thetas = np.clip(np.random.randn(7), robot.joint_limits_lower, robot.joint_limits_upper)
 
 target_r_pose = np.concatenate(
     (right_arm_fk["right_wrist"].pos, right_arm_fk["right_wrist"].rot))
@@ -130,12 +138,18 @@ print(f"\n{scolors.OKCYAN}Target Left wrist Pose{scolors.ENDC}: \n{l_pose}")
 print(f"{scolors.OKCYAN}LM Method: Current Left wrist Pose{scolors.ENDC}: \n{l_pose_new_LM}")
 print(f"{scolors.OKCYAN}NR Method: Current Left wrist Pose{scolors.ENDC}: \n{l_pose_new_NR}")
 
-right_error = np.linalg.norm(
-    np.dot(l_pose_new_LM, np.linalg.inv(r_pose)) - np.mat(np.eye(4)))
-left_error = np.linalg.norm(
+right_error_LM = np.linalg.norm(
+    np.dot(r_pose_new_LM, np.linalg.inv(r_pose)) - np.mat(np.eye(4)))
+left_error_LM = np.linalg.norm(
     np.dot(l_pose_new_LM, np.linalg.inv(l_pose)) - np.mat(np.eye(4)))
 
-print(f"\n{scolors.WARNING}Error{scolors.ENDC}: {right_error}, {left_error}")
+right_error_NR = np.linalg.norm(
+    np.dot(r_pose_new_NR, np.linalg.inv(r_pose)) - np.mat(np.eye(4)))
+left_error_NR = np.linalg.norm(
+    np.dot(l_pose_new_NR, np.linalg.inv(l_pose)) - np.mat(np.eye(4)))
+
+print(f"\n{scolors.WARNING}LM Method Error: {scolors.ENDC}: {right_error_LM}, {left_error_LM}")
+print(f"{scolors.WARNING}NR Method Error: {scolors.ENDC}: {right_error_NR}, {left_error_NR}")
 
 _, ax = plt.init_3d_figure("LM IK Result")
 plt.plot_robot(robot, result_fk_LM, ax, "baxter")

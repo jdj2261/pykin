@@ -22,6 +22,8 @@ class Robot:
         self.desired_frame = None
         self._load_urdf(filepath)
         self.joint_safety = joint_safety
+        self.joint_limits_lower = None
+        self.joint_limits_upper = None
         if self.joint_safety and self.desired_frame is None:
             self._set_joint_limit()
 
@@ -94,7 +96,7 @@ class Robot:
     def _set_joint_limit(self):
         self.joint_limits_lower = []
         self.joint_limits_upper = []
-
+        
         def replace_none(x, v):
             if x is None:
                 return v
@@ -112,7 +114,7 @@ class Robot:
                     if f.joint.name == joint_name:
                         self.joint_limits_lower.append(f.joint.limit[0])
                         self.joint_limits_upper.append(f.joint.limit[1])
-
+                        
         self.joint_limits_lower = np.array([replace_none(jl, -np.inf)
                                             for jl in self.joint_limits_lower])
         self.joint_limits_upper = np.array([replace_none(jl, np.inf)

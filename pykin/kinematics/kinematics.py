@@ -245,11 +245,12 @@ class Kinematics:
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
 
-            for i in range(len(current_joints)):
-                if current_joints[i] < lower[i]:
-                    current_joints[i] = lower[i]
-                if current_joints[i] > upper[i]:
-                    current_joints[i] = upper[i]
+            if lower is not None and upper is not None:
+                for i in range(len(current_joints)):
+                    if current_joints[i] < lower[i]:
+                        current_joints[i] = lower[i]
+                    if current_joints[i] > upper[i]:
+                        current_joints[i] = upper[i]
 
             cur_fk = self.forward_kinematics(
                 current_joints, desired_tree=desired_tree)
@@ -309,11 +310,12 @@ class Kinematics:
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
 
-            for i in range(len(current_joints)):
-                if current_joints[i] < lower[i]:
-                    current_joints[i] = lower[i]
-                if current_joints[i] > upper[i]:
-                    current_joints[i] = upper[i]
+            if lower is not None and upper is not None:
+                for i in range(len(current_joints)):
+                    if current_joints[i] < lower[i]:
+                        current_joints[i] = lower[i]
+                    if current_joints[i] > upper[i]:
+                        current_joints[i] = upper[i]
 
             cur_fk = self.forward_kinematics(
                 current_joints, desired_tree=desired_tree)

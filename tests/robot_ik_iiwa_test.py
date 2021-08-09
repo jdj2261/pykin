@@ -11,7 +11,8 @@ from pykin.utils import plot as plt
 
 file_path = '../asset/urdf/iiwa14.urdf'
 
-robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+robot = Robot(file_path, tf.Transform(
+    rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=True)
 
 # panda_example
 target_thetas = [0, np.pi/2, 0, 0, 0, 0, 0]
