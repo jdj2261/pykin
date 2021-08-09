@@ -66,7 +66,7 @@ class URDFParser:
         joint_name = attrib.get('name', 'joint_' + str(idx))
 
         frame = Frame(joint_name + '_frame',
-                      joint=Joint(name=joint_name, offset=Transform(), dtype=attrib['type']))
+                      joint=Joint(name=joint_name, offset=Transform(), dtype=attrib['type'], limit=[None, None]))
 
         parent_tag = joint_tag.find('parent')
         frame.joint.parent = parent_tag.attrib['link']
@@ -85,6 +85,14 @@ class URDFParser:
         if axis_tag is not None:
             frame.joint.axis = _convert_string_to_narray(axis_tag.attrib.get('xyz'))
 
+        # limit
+        limit_tag = joint_tag.find('limit')
+        if limit_tag is not None:
+            if "lower" in limit_tag.attrib:
+                frame.joint.limit[0] = float(limit_tag.attrib["lower"])
+            if "upper" in limit_tag.attrib:
+                frame.joint.limit[1] = float(limit_tag.attrib["upper"])
+                
         return frame
 
     def _build_chain_recursive(self, root: Link, links: OrderedDict, joints: OrderedDict) -> list:
@@ -93,7 +101,8 @@ class URDFParser:
 
             if joint.parent == root.name:
                 child_frame = Frame(joint.child + "_frame")
-                child_frame.joint = Joint(joint.name, offset=_convert_transform(joint.offset), dtype=JOINT_TYPE_MAP[joint.dtype], axis=joint.axis)
+                child_frame.joint = Joint(joint.name, offset=_convert_transform(
+                    joint.offset), dtype=JOINT_TYPE_MAP[joint.dtype], axis=joint.axis, limit=joint.limit)
 
                 chil_link = links[joint.child]
                 child_frame.link = Link(chil_link.name, offset=_convert_transform(chil_link.offset))

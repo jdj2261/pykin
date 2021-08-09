@@ -23,7 +23,7 @@ class Joint:
     TYPES = ['fixed', 'revolute', 'prismatic']
 
     def __init__(self, name=None, offset=Transform(),
-                 dtype='fixed', axis=None, parent=None, child=None):
+                 dtype='fixed', axis=None, limit=[None, None], parent=None, child=None):
         self.name = name
         self.offset = offset
         self.parent = parent
@@ -31,13 +31,15 @@ class Joint:
         self.num_dof = 0
         self.dtype = dtype
         self.axis = np.array(axis)
+        self.limit = limit
  
     def __repr__(self):
         return f"""
         {scolors.OKGREEN}Joint{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC} 
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
             dtype= {scolors.HEADER}'{self.dtype}'{scolors.ENDC}
-            axis= {scolors.HEADER}{self.axis}{scolors.ENDC})"""
+            axis= {scolors.HEADER}{self.axis}{scolors.ENDC})
+            limit= {scolors.HEADER}{self.limit}{scolors.ENDC})"""
 
     @property
     def dtype(self):
@@ -65,14 +67,6 @@ class Joint:
     @num_dof.setter
     def num_dof(self, dof):
         self._num_dof = int(dof)
-
-    # @property
-    # def offset(self):
-    #     return self._offset
-
-    # @offset.setter
-    # def offset(self, offset):
-    #     self._offset = offset
 
 
 class Frame:

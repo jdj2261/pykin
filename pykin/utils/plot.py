@@ -109,9 +109,9 @@ def plot_robot(robot, fk, ax, name=None):
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
 
     
-def init_3d_figure():
+def init_3d_figure(name=None):
     from mpl_toolkits.mplot3d import axes3d, Axes3D
-    fig = plt.figure()
+    fig = plt.figure(name)
     ax = fig.add_subplot(111, projection='3d')
 
     return fig, ax

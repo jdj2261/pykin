@@ -187,37 +187,42 @@ class Kinematics:
     # Initial Joints Random pick
     # Trajectory 
     # self collision checker 
-    def numerical_inverse_kinematics(self, current_joints, target, desired_tree=None):
+    # joint limit
 
-        lamb = 0.5
-        iterator = 1
-        maxIter = 10000
-        EPS = float(1e-6)
-        dof = len(current_joints)
+
+    def calc_pose_error(self, T_ref, T_cur, EPS):
 
         def rot_to_omega(R):
             # referred p36
             el = np.array(
-                [[R[2, 1] - R[1, 2]], 
-                 [R[0, 2] - R[2, 0]], 
-                 [R[1, 0] - R[0, 1]]]
+                [[R[2, 1] - R[1, 2]],
+                    [R[0, 2] - R[2, 0]],
+                    [R[1, 0] - R[0, 1]]]
             )
             norm_el = np.linalg.norm(el)
             if norm_el > EPS:
                 w = np.dot(np.arctan2(norm_el, np.trace(R) - 1) / norm_el, el)
-            elif (R[0, 0] > 0 and R[1,1] > 0 and R[2, 2] > 0):
+            elif (R[0, 0] > 0 and R[1, 1] > 0 and R[2, 2] > 0):
                 w = np.zeros((3, 1))
             else:
-                w = np.dot(np.pi/2, np.array([[R[0,0] + 1], [R[1,1] + 1], [R[2,2] + 1]]))
+                w = np.dot(
+                    np.pi/2, np.array([[R[0, 0] + 1], [R[1, 1] + 1], [R[2, 2] + 1]]))
             return w
 
-        def calc_pose_error(T_ref, T_cur):
-            
-            pos_err = np.array([T_ref[:3, -1] - T_cur[:3, -1]])
-            rot_err = np.dot(T_cur[:3, :3].T, T_ref[:3, :3])
-            w_err = np.dot(T_cur[:3, :3], rot_to_omega(rot_err))
+        pos_err = np.array([T_ref[:3, -1] - T_cur[:3, -1]])
+        rot_err = np.dot(T_cur[:3, :3].T, T_ref[:3, :3])
+        w_err = np.dot(T_cur[:3, :3], rot_to_omega(rot_err))
 
-            return np.vstack((pos_err.T, w_err))
+        return np.vstack((pos_err.T, w_err))
+
+    def numerical_inverse_kinematics_NR(self, current_joints, target, desired_tree, lower, upper, maxIter):
+
+        lamb = 0.5
+        iterator = 0
+        maxIter = maxIter
+        EPS = float(1e-6)
+        dof = len(current_joints)
+
 
         # Step 1. Prepare the position and attitude of the target link
         target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
@@ -227,9 +232,9 @@ class Kinematics:
         cur_pose = list(cur_fk.values())[-1].matrix()
 
         # Step 3. Calculate the difference in position and attitude
-        err_pose = calc_pose_error(target_pose, cur_pose)
+        err_pose = self.calc_pose_error(target_pose, cur_pose, EPS)
         err = np.linalg.norm(err_pose)
-
+        # out = [0 for i in range(dof)]
         # Step 4. If error is small enough, stop the calculation
         while err > EPS:
             # Step 5. If error is not small enough, calculate dq which would reduce the error 
@@ -240,9 +245,16 @@ class Kinematics:
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
 
-            cur_fk = self.forward_kinematics(current_joints, desired_tree=desired_tree)
+            for i in range(len(current_joints)):
+                if current_joints[i] < lower[i]:
+                    current_joints[i] = lower[i]
+                if current_joints[i] > upper[i]:
+                    current_joints[i] = upper[i]
+
+            cur_fk = self.forward_kinematics(
+                current_joints, desired_tree=desired_tree)
             cur_pose = list(cur_fk.values())[-1].matrix()
-            err_pose = calc_pose_error(target_pose, cur_pose)
+            err_pose = self.calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
 
             # Avoid infinite calculation
@@ -250,5 +262,73 @@ class Kinematics:
             if iterator > maxIter:
                 break
 
-        current_joints = np.array([float(current_joint) for current_joint in current_joints])
+        print(f"Iterators : {iterator}")
+        current_joints = np.array([float(current_joint)
+                                  for current_joint in current_joints])
+        return current_joints
+
+    def numerical_inverse_kinematics_LM(self, current_joints, target, desired_tree, lower, upper, maxIter):
+
+        iterator = 0
+        maxIter = maxIter
+        EPS = float(1E-12)
+        dof = len(current_joints)
+        wn_pos = 1/0.3
+        wn_ang = 1/(2*np.pi)
+        We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
+        Wn = np.eye(dof)
+
+        # Step 1. Prepare the position and attitude of the target link
+        target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
+
+        # Step 2. Use forward kinematics to calculate the position and attitude of the target link
+        cur_fk = self.forward_kinematics(
+            current_joints, desired_tree=desired_tree)
+        cur_pose = list(cur_fk.values())[-1].matrix()
+
+        # # Step 3. Calculate the difference in position and attitude
+        err = self.calc_pose_error(target_pose, cur_pose, EPS)
+        Ek = float(np.dot(np.dot(err.T, We), err)[0])
+
+        # # Step 4. If error is small enough, stop the calculation
+        while Ek > EPS:
+            # Avoid infinite calculation
+            iterator += 1
+            if iterator > maxIter:
+                break
+            
+            lamb = Ek + 0.002
+            # Step 5. If error is not small enough, calculate dq which would reduce the error
+            # Get jacobian to calculate dq
+            J = jac.calc_jacobian(desired_tree, cur_fk, current_joints)
+            Jh = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
+            
+            gerr = np.dot(np.dot(J.T, We), err)
+            dq = np.dot(np.linalg.pinv(Jh), gerr)
+
+            # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
+            current_joints = [current_joints[i] + dq[i] for i in range(dof)]
+
+            for i in range(len(current_joints)):
+                if current_joints[i] < lower[i]:
+                    current_joints[i] = lower[i]
+                if current_joints[i] > upper[i]:
+                    current_joints[i] = upper[i]
+
+            cur_fk = self.forward_kinematics(
+                current_joints, desired_tree=desired_tree)
+            cur_pose = list(cur_fk.values())[-1].matrix()
+            err = self.calc_pose_error(target_pose, cur_pose, EPS)
+            Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
+            if Ek2 < Ek:
+                Ek = Ek2
+            else:
+                current_joints = [current_joints[i] - dq[i]
+                                  for i in range(dof)]
+                cur_fk = self.forward_kinematics(
+                    current_joints, desired_tree=desired_tree)
+                break
+        print(f"Iterators : {iterator}")
+        current_joints = np.array([float(current_joint)
+                                  for current_joint in current_joints])
         return current_joints
