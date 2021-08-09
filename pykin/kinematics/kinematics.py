@@ -183,12 +183,11 @@ class Kinematics:
         return result1, result2
 
     # TODO
-    # singularity problem
-    # Initial Joints Random pick
-    # Trajectory 
-    # self collision checker 
-    # joint limit
-
+    # singularity problem           [O]
+    # Initial Joints Random pick    [O]  
+    # joint limit                   [O]
+    # self collision checker        [ ]
+    # Trajectory                    [ ]
 
     def calc_pose_error(self, T_ref, T_cur, EPS):
 
@@ -214,6 +213,15 @@ class Kinematics:
         w_err = np.dot(T_cur[:3, :3], rot_to_omega(rot_err))
 
         return np.vstack((pos_err.T, w_err))
+
+    def limit_joints(self, cur_jnt, lower, upper):
+        if lower is not None and upper is not None:
+            for i in range(len(cur_jnt)):
+                if cur_jnt[i] < lower[i]:
+                    cur_jnt[i] = lower[i]
+                if cur_jnt[i] > upper[i]:
+                    cur_jnt[i] = upper[i]
+        return cur_jnt
 
     def numerical_inverse_kinematics_NR(self, current_joints, target, desired_tree, lower, upper, maxIter):
 
@@ -244,13 +252,7 @@ class Kinematics:
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
-
-            if lower is not None and upper is not None:
-                for i in range(len(current_joints)):
-                    if current_joints[i] < lower[i]:
-                        current_joints[i] = lower[i]
-                    if current_joints[i] > upper[i]:
-                        current_joints[i] = upper[i]
+            current_joints = self.limit_joints(current_joints, lower, upper)
 
             cur_fk = self.forward_kinematics(
                 current_joints, desired_tree=desired_tree)
@@ -310,12 +312,7 @@ class Kinematics:
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
 
-            if lower is not None and upper is not None:
-                for i in range(len(current_joints)):
-                    if current_joints[i] < lower[i]:
-                        current_joints[i] = lower[i]
-                    if current_joints[i] > upper[i]:
-                        current_joints[i] = upper[i]
+            current_joints = self.limit_joints(current_joints, lower, upper)
 
             cur_fk = self.forward_kinematics(
                 current_joints, desired_tree=desired_tree)
