@@ -11,7 +11,7 @@ from pykin.robot import Robot
 from pykin import robot
 
 
-file_path = '../asset/urdf/baxter.urdf'
+file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 

@@ -9,7 +9,7 @@ from pykin import robot
 from pykin.robot import Robot
 from pykin.kinematics import transform as tf
 from pykin.utils import plot as plt
-file_path = '../asset/urdf/baxter.urdf'
+file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 

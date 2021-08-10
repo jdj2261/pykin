@@ -9,7 +9,7 @@ from pykin.robot import Robot
 from pykin.kinematics import transform as tf
 from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
-file_path = '../asset/urdf/baxter.urdf'
+file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=True)
 # baxter_example
@@ -76,7 +76,7 @@ ik_right_LM_result = robot.inverse_kinematics(
 # Right's arm IK solution by NR
 print("\nik_right_NR_result")
 ik_right_NR_result = robot.inverse_kinematics(
-    init_right_thetas, target_r_pose, method="NR")
+    init_right_thetas, target_r_pose, method="NR", maxIter=100)
 
 # Set desired link (root, end)
 robot.set_desired_tree("base", "left_wrist")
@@ -88,12 +88,12 @@ target_l_pose = np.concatenate(
 # Left's arm IK solution by LM
 print("\nik_left_LM_result")
 ik_left_LM_result = robot.inverse_kinematics(
-    init_left_thetas, target_l_pose, method="LM", maxIter=100)
+    init_left_thetas, target_l_pose, method="LM", maxIter=10)
 
 # Left's arm IK solution by NR
 print("\nik_left_NR_result")
 ik_left_NR_result = robot.inverse_kinematics(
-    init_left_thetas, target_l_pose, method="NR")
+    init_left_thetas, target_l_pose, method="NR", maxIter=100)
 
 print(f"\n{scolors.HEADER}LM Method: Current Right arm Angles{scolors.ENDC}: \n{ik_right_LM_result}")
 print(f"{scolors.HEADER}LM Method: Current Left arm Angles{scolors.ENDC}: \n{ik_left_LM_result}")

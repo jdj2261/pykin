@@ -7,12 +7,11 @@ sys.path.append(pykin_path)
 import pykin.robot
 from pykin.robot import Robot
 
-file_path = '../asset/urdf/baxter.urdf'
+file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path)
 robot.show_robot_info()
-robot.set_desired_tree("base", "left_wrist")
-robot.set_joint_limit()
+
 # print(robot.joints)
 # print(robot.links)
 # print(robot.tree.root)

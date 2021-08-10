@@ -121,3 +121,28 @@ git clone https://github.com/jdj2261/pykin.git
 
   ![baxter img](img/baxter.png)
 
+## Inverse Kinematics 
+
+You can see an example of IK by running the command below.
+
+~~~shell
+$ cd pykin/tests
+$ python robot_ik_baxter_test.py
+~~~
+
+- **Forward Kinematics**
+
+  <img src="img/FK.png" height="400">
+
+- **IK Newton Raphson method**
+
+  <img src="img/NR.png" height="400">
+
+- **IK Levenberg-Marquardt method**
+
+  <img src="img/LM.png" height="400">
+
+
+
+**It can be seen that the LM method is faster and more accurate than the NR method when using IK.**
+

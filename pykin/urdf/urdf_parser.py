@@ -10,7 +10,10 @@ from pykin.kinematics.transform import Transform
 JOINT_TYPE_MAP = {'revolute': 'revolute',
                   'fixed': 'fixed',
                   'prismatic': 'prismatic'}
-
+LINK_TYPE_MAP = { 'cylinder' : 'cylinder',
+                  'sphere'   : 'sphere',
+                  'box'      : 'box',
+                  'mesh'     : 'mesh'}
 
 def _convert_transform(origin):
     if origin is None:
@@ -19,7 +22,8 @@ def _convert_transform(origin):
         return Transform(rot=origin.rot, pos=origin.pos)
 
 def _convert_string_to_narray(str_input):
-    return np.array([float(data) for data in str_input.split()])
+    if str_input is not None:
+        return np.array([float(data) for data in str_input.split()])
 
 class URDFParser:
     def __init__(self, filepath=None):
@@ -57,8 +61,36 @@ class URDFParser:
         attrib = link_tag.attrib
         link_name = attrib.get('name', 'link_' + str(idx))
         frame = Frame(link_name + '_frame',
-                      link=Link(link_name, offset=Transform()))
+                      link=Link(link_name, offset=Transform(), dtype=None, radius=0, length=0, size=np.zeros(3)))
 
+        # dtype, length, radius
+        for collision_tag in link_tag.findall('collision'):
+            for origin_tag in collision_tag.findall('origin'):
+                frame.link.offset.pos = _convert_string_to_narray(
+                    origin_tag.attrib.get('xyz'))
+                frame.link.offset.rot = _convert_string_to_narray(
+                    origin_tag.attrib.get('rpy'))
+            for geometry_tag in collision_tag.findall('geometry'):
+                for shape_type in ["cylinder", "sphere", "mesh"]:
+                    for shapes in geometry_tag.findall(shape_type):
+                        if "visual" in link_name:
+                            continue 
+                        frame.link.dtype = shapes.tag
+                        frame.link.length = shapes.attrib.get('length', 0)
+                        frame.link.radius = shapes.attrib.get('radius', 0)
+
+        for visual_tag in link_tag.findall('visual'):
+            for geometry_tag in visual_tag.findall('geometry'):
+                for shape_type in ["box", "mesh"]:
+                    for shapes in geometry_tag.findall(shape_type):
+                        if shape_type != "mesh":
+                            frame.link.dtype = shapes.tag
+                        frame.link.size = _convert_string_to_narray(shapes.attrib.get('size', None))
+                        frame.link.mesh = shapes.attrib.get('filename', None)
+
+            for material_tag in visual_tag.findall('material'):
+                frame.link.color = material_tag.get('name')
+        
         return frame
 
     def _parse_joint(self, joint_tag, idx):
@@ -92,7 +124,7 @@ class URDFParser:
                 frame.joint.limit[0] = float(limit_tag.attrib["lower"])
             if "upper" in limit_tag.attrib:
                 frame.joint.limit[1] = float(limit_tag.attrib["upper"])
-                
+        
         return frame
 
     def _build_chain_recursive(self, root: Link, links: OrderedDict, joints: OrderedDict) -> list:
@@ -101,11 +133,20 @@ class URDFParser:
 
             if joint.parent == root.name:
                 child_frame = Frame(joint.child + "_frame")
-                child_frame.joint = Joint(joint.name, offset=_convert_transform(
-                    joint.offset), dtype=JOINT_TYPE_MAP[joint.dtype], axis=joint.axis, limit=joint.limit)
+                child_frame.joint = Joint(joint.name, 
+                                        offset=_convert_transform(joint.offset), 
+                                        dtype=JOINT_TYPE_MAP[joint.dtype], 
+                                        axis=joint.axis, 
+                                        limit=joint.limit)
 
                 chil_link = links[joint.child]
-                child_frame.link = Link(chil_link.name, offset=_convert_transform(chil_link.offset))
+                child_frame.link = Link(chil_link.name, 
+                                        offset=_convert_transform(chil_link.offset),
+                                        dtype=LINK_TYPE_MAP.get(
+                                            chil_link.dtype),
+                                        radius=chil_link.radius,
+                                        length=chil_link.length)
+
                 child_frame.children = self._build_chain_recursive(child_frame.link, links, joints)
                 children.append(child_frame)
 

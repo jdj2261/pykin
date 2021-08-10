@@ -4,20 +4,25 @@ from pykin.kinematics.transform import Transform
 from pykin.utils.shell_color import ShellColors as scolors
 
 class Link:
-    def __init__(self, name=None, offset=Transform()):
+    def __init__(self, name=None, offset=Transform(), dtype=None, radius=0, length=0, size=None):
         self.name = name
         self.offset = offset
+        self.dtype = dtype
+        self.radius = radius
+        self.length = length
+        self.size = np.array(size)
+        self.color = None
+        self.mesh = None
+
     def __repr__(self):
+        radius = "radius= " + self.radius + ", " if self.dtype in ['cylinder', 'sphere'] else ""
+        length = "length= " + self.length if self.dtype in ['cylinder'] else ""
+        size = "size= "     + str(self.size) if self.dtype in ['box'] else ""
         return f"""
-        {scolors.OKBLUE}Link{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC})"""
-
-    # @property
-    # def offset(self):
-    #     return self._offset
-
-    # @offset.setter
-    # def offset(self, offset):
-    #     self._offset = offset
+        {scolors.OKBLUE}Link{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC}
+            offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
+            dtype= {scolors.HEADER}{self.dtype}{scolors.ENDC} 
+            {radius} {length} {size}"""
 
 class Joint:
     TYPES = ['fixed', 'revolute', 'prismatic']
@@ -38,8 +43,8 @@ class Joint:
         {scolors.OKGREEN}Joint{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC} 
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
             dtype= {scolors.HEADER}'{self.dtype}'{scolors.ENDC}
-            axis= {scolors.HEADER}{self.axis}{scolors.ENDC})
-            limit= {scolors.HEADER}{self.limit}{scolors.ENDC})"""
+            axis= {scolors.HEADER}{self.axis}{scolors.ENDC}
+            limit= {scolors.HEADER}{self.limit}{scolors.ENDC}"""
 
     @property
     def dtype(self):
