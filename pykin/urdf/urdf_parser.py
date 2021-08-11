@@ -73,8 +73,8 @@ class URDFParser:
             for geometry_tag in collision_tag.findall('geometry'):
                 for shape_type in ["cylinder", "sphere", "mesh"]:
                     for shapes in geometry_tag.findall(shape_type):
-                        if "visual" in link_name:
-                            continue 
+                        # if "visual" in link_name:
+                        #     continue 
                         frame.link.dtype = shapes.tag
                         frame.link.length = shapes.attrib.get('length', 0)
                         frame.link.radius = shapes.attrib.get('radius', 0)

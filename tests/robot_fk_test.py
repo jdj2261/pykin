@@ -2,8 +2,8 @@ import sys
 import os
 import numpy as np
 from pprint import pprint
-# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-# sys.path.append(pykin_path)
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
+sys.path.append(pykin_path)
 
 from pykin import robot
 from pykin.robot import Robot
@@ -25,9 +25,9 @@ fk = robot.forward_kinematics(thetas)
 If you want to know transformations of all links,
 you don't have to write get_desired_tree and desired_frame.
 """
-pprint(fk)
-for link, T in fk.items():
-    print(f"link: {link}, pose:{np.concatenate((T.pos, T.rot))} ")
+# pprint(fk)
+# for link, T in fk.items():
+#     print(f"link: {link}, pose:{np.concatenate((T.pos, T.rot))} ")
 
 """
 If you want to know transformation of desired link,
@@ -35,12 +35,12 @@ you must write get_desried_tree.
 """
 robot.set_desired_tree("base", "left_wrist")
 fk = robot.forward_kinematics(left_arm_thetas)
-pprint(fk)
+# pprint(fk)
 for link, T in fk.items():
     print(f"link: {link}, pose:{np.concatenate((T.pos, T.rot))} ")
 
 _, ax = plt.init_3d_figure()
-plt.plot_robot(robot, fk, ax, "left_wrist")
+plt.plot_robot(robot, fk, ax, "left_wrist",visible_collision=True)
 ax.legend()
 plt.show_figure()
 

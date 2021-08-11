@@ -12,7 +12,8 @@ from pykin.utils.shell_color import ShellColors as scolors
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=True)
-# baxter_example
+visible_collision = True
+visible_mesh = False
 
 # set target joints angle
 head_thetas =  np.zeros(1)
@@ -47,7 +48,7 @@ l_pose = fk["left_wrist"].matrix()
 
 # show FK graph
 _, ax = plt.init_3d_figure("FK Result")
-plt.plot_robot(robot, fk, ax, "baxter")
+plt.plot_robot(robot, fk, ax, "baxter", visible_collision, visible_mesh)
 ax.legend()
 # plt.show_figure()
 
@@ -69,12 +70,10 @@ target_r_pose = np.concatenate(
     (right_arm_fk["right_wrist"].pos, right_arm_fk["right_wrist"].rot))
 
 # Right's arm IK solution by LM
-print("ik_right_LM_result")
 ik_right_LM_result = robot.inverse_kinematics(
     init_right_thetas, target_r_pose, method="LM", maxIter=100)
 
 # Right's arm IK solution by NR
-print("\nik_right_NR_result")
 ik_right_NR_result = robot.inverse_kinematics(
     init_right_thetas, target_r_pose, method="NR", maxIter=100)
 
@@ -86,12 +85,10 @@ target_l_pose = np.concatenate(
     (left_arm_fk["left_wrist"].pos, left_arm_fk["left_wrist"].rot))
 
 # Left's arm IK solution by LM
-print("\nik_left_LM_result")
 ik_left_LM_result = robot.inverse_kinematics(
-    init_left_thetas, target_l_pose, method="LM", maxIter=10)
+    init_left_thetas, target_l_pose, method="LM", maxIter=100)
 
 # Left's arm IK solution by NR
-print("\nik_left_NR_result")
 ik_left_NR_result = robot.inverse_kinematics(
     init_left_thetas, target_l_pose, method="NR", maxIter=100)
 
@@ -152,11 +149,11 @@ print(f"\n{scolors.WARNING}LM Method Error: {scolors.ENDC}: {right_error_LM}, {l
 print(f"{scolors.WARNING}NR Method Error: {scolors.ENDC}: {right_error_NR}, {left_error_NR}")
 
 _, ax = plt.init_3d_figure("LM IK Result")
-plt.plot_robot(robot, result_fk_LM, ax, "baxter")
+plt.plot_robot(robot, result_fk_LM, ax, "baxter", visible_collision, visible_mesh)
 ax.legend()
 
 _, ax = plt.init_3d_figure("NR IK Result")
-plt.plot_robot(robot, result_fk_NR, ax, "baxter")
+plt.plot_robot(robot, result_fk_NR, ax, "baxter", visible_collision, visible_mesh)
 ax.legend()
 
 plt.show_figure()

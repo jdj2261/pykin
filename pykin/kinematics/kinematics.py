@@ -44,7 +44,30 @@ class Kinematics:
                     cnt += 1
                 if cnt >= len(thetas):
                     cnt -= 1
+                self._add_visual_link(link_transforms, f, trans)
+
             return link_transforms
+
+    def _add_visual_link(self, link_transforms, f, trans):
+        if "left_upper_elbow" in f.link.name:
+            link_transforms["left_upper_elbow_visual"] = link_transforms["left_upper_elbow"] * \
+                self.tree.links["left_upper_elbow_visual"].offset
+            # self.tree.joints["left_e0_fixed"].offset * \
+            
+
+        if "left_upper_forearm" in f.link.name:
+            link_transforms["left_upper_forearm_visual"] = link_transforms["left_upper_forearm"] * \
+                self.tree.links["left_upper_forearm_visual"].offset
+
+        if "right_upper_elbow" in f.link.name:
+            link_transforms["right_upper_elbow_visual"] = trans * \
+                self.tree.links["right_upper_elbow_visual"].offset
+
+        if "right_upper_forearm" in f.link.name:
+            link_transforms["right_upper_forearm_visual"] = trans * \
+                self.tree.links["right_upper_forearm_visual"].offset
+        
+        # return link_transforms
 
     def analytical_inverse_kinematics(self, pose):
         # Link Length [m]
@@ -245,6 +268,10 @@ class Kinematics:
         # out = [0 for i in range(dof)]
         # Step 4. If error is small enough, stop the calculation
         while err > EPS:
+            # Avoid infinite calculation
+            iterator += 1
+            if iterator > maxIter:
+                break
             # Step 5. If error is not small enough, calculate dq which would reduce the error 
             # Get jacobian to calculate dq 
             J = jac.calc_jacobian(desired_tree, cur_fk, current_joints)
@@ -260,12 +287,8 @@ class Kinematics:
             err_pose = self.calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
 
-            # Avoid infinite calculation
-            iterator += 1
-            if iterator > maxIter:
-                break
 
-        print(f"Iterators : {iterator}")
+        print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint)
                                   for current_joint in current_joints])
         return current_joints
@@ -319,15 +342,19 @@ class Kinematics:
             cur_pose = list(cur_fk.values())[-1].matrix()
             err = self.calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
+            
             if Ek2 < Ek:
                 Ek = Ek2
             else:
                 current_joints = [current_joints[i] - dq[i]
                                   for i in range(dof)]
+                current_joints = self.limit_joints(
+                    current_joints, lower, upper)
                 cur_fk = self.forward_kinematics(
                     current_joints, desired_tree=desired_tree)
                 break
-        print(f"Iterators : {iterator}")
+            
+        print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint)
                                   for current_joint in current_joints])
         return current_joints

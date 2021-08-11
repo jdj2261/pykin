@@ -37,7 +37,7 @@ def plot_basis(robot, ax, arm_length=1):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, fk, ax, name=None, visible_collision=True, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=False, mesh_path='../asset/urdf/baxter/'):
 
     if name is not None:
         name = os.path.splitext(os.path.basename(name))[0].strip()
@@ -53,6 +53,8 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, mesh_path='../a
             tf.get_homogeneous_matrix(transformation.pos, transformation.rot))
 
     for link, matrix in zip(links, transformation_matrix):
+        if "visual" in link:
+            continue
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
 
     if name == "baxter":
@@ -111,43 +113,47 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, mesh_path='../a
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
 
     if visible_collision:
-        for i, (link, transformation) in enumerate(fk.items()):
-            if robot.links[i].dtype == 'cylinder':
+        for link, transformation in fk.items():
+            if robot.tree.links[link].dtype == 'cylinder':
                 A2B = tf.get_homogeneous_matrix(
-                    fk[robot.links[i].name].pos, fk[robot.links[i].name].rot)
-                length = float(robot.links[i].length)
-                radius = float(robot.links[i].radius)
+                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
+                length = float(robot.tree.links[link].length)
+                radius = float(robot.tree.links[link].radius)
                 plot_cylinder(
-                    robot.links[i], fk, ax, length=length, radius=radius, A2B=A2B, alpha=0.8, color=robot.links[i].color)
-            if robot.links[i].dtype == 'sphere':
-                radius = float(robot.links[i].radius)
-                pos = fk[robot.links[i].name].pos
+                    robot.tree.links[link], fk, ax, length=length, radius=radius, A2B=A2B, alpha=0.8, color=robot.tree.links[link].color)
+
+            if robot.tree.links[link].dtype == 'sphere':
+                radius = float(robot.tree.links[link].radius)
+                pos = fk[robot.tree.links[link].name].pos
                 plot_sphere(
-                    robot.links[i], fk, ax, radius=radius, alpha=0.1, color=robot.links[i].color, p=pos, n_steps=20, ax_s=0.5)
-            if robot.links[i].dtype == 'box':
-                size = robot.links[i].size
+                    robot.tree.links[link], fk, ax, radius=radius, alpha=0.5, color=robot.tree.links[link].color, p=pos, n_steps=20, ax_s=0.5)
+            if robot.tree.links[link].dtype == 'box':
+                size = robot.tree.links[link].size
                 A2B = tf.get_homogeneous_matrix(
-                    fk[robot.links[i].name].pos, fk[robot.links[i].name].rot)
-                plot_box(robot.links[i], fk, ax, size, A2B=A2B,
-                         alpha=0.6, color=robot.links[i].color)
-        filename = mesh_path + 'meshes/base/pedestal_link_collision.stl'
-        plot_mesh(ax, filename=filename, alpha=0.3)
-        filename = mesh_path + 'meshes/torso/base_link.stl'
-        plot_mesh(ax, filename=filename, alpha=0.3)
-            # if robot.links[i].mesh is not None:
-            #     filename = mesh_path + robot.links[i].mesh
-            #     A2B = tf.get_homogeneous_matrix(
-            #         fk[robot.links[i].name].pos, fk[robot.links[i].name].rot)
-            #     plot_mesh(ax, filename=filename, A2B=A2B, alpha=0.3)
-                
+                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
+                plot_box(
+                    robot.tree.links[link], fk, ax, size, A2B=A2B, alpha=0.6, color=robot.tree.links[link].color)
+                    
+    if visible_mesh:
+        for i, (link, transformation) in enumerate(fk.items()):
+            if robot.tree.links[link].mesh is not None:
+                # if 2 < i < len(fk.items()):
+                filename = mesh_path + robot.tree.links[link].mesh
+                A2B = tf.get_homogeneous_matrix(
+                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
+                plot_mesh(ax, filename=filename, A2B=A2B, alpha=0.2,
+                        color=robot.tree.links[link].color)
+        # filename = mesh_path + 'meshes/base/pedestal_link_collision.stl'
+        # plot_mesh(ax, filename=filename, alpha=0.3, color=robot.tree.links[link].color)
+        # filename = mesh_path + 'meshes/torso/base_link.stl'
+        # plot_mesh(ax, filename=filename, alpha=0.3, color=robot.tree.links[link].color)
 
 def plot_cylinder(link, fk, ax=None, length=1.0, radius=1.0,
                   A2B=np.eye(4), n_steps=100,
                   alpha=1.0, color="k"):
-
-    A2B[:3,-1] = np.add(A2B[:3,-1],link.offset.pos)
-    axis_start = A2B.dot(np.array([0, 0, -length, 1]))[:3]
-    axis_end =  A2B.dot(np.array([0, 0, length, 1]))[:3]
+                  
+    axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
+    axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
 
     axis = axis_end - axis_start
     axis /= length
@@ -226,7 +232,7 @@ def plot_box(link, fk, ax=None, size=np.ones(3), A2B=np.eye(4), ax_s=1,
 
 
 def plot_mesh(ax=None, filename=None, A2B=np.eye(4),
-              s=np.array([1.0, 1.0, 1.0]), ax_s=1, wireframe=False,
+              s=np.array([1.0, 1.0, 1.0]), ax_s=10, wireframe=False,
               convex_hull=False, alpha=1.0, color="k"):
 
     try:

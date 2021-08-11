@@ -16,6 +16,7 @@ setup(
     install_requires=[
         "numpy",
         "matplotlib",
+        "trimesh",
     ],
     eager_resources=['*'],
     include_package_data=True,
@@ -24,7 +25,7 @@ setup(
     author="Dae Jong Jin",
     url="https://github.com/jdj2261/pykin.git",
 	download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
-    author_email="wlseoeo@gmain.com",
+    author_email="wlseoeo@gmail.com",
     version="0.1.13",
     long_description=long_description,
     long_description_content_type='text/markdown'

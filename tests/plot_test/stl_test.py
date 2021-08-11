@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
 sys.path.append(pykin_path)
 
-filename = '../asset/urdf/baxter/meshes/base/pedestal_link_collision.stl'
+filename = '../../asset/urdf/baxter/meshes/base/pedestal_link_collision.stl'
 
 def plot_mesh(ax=None, filename=None, A2B=np.eye(4),
               s=np.array([1.0, 1.0, 1.0]), ax_s=1, wireframe=False,
