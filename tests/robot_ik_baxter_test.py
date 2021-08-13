@@ -11,9 +11,9 @@ from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
-robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=True)
+robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=False)
 visible_collision = True
-visible_mesh = False
+visible_mesh = True
 
 # set target joints angle
 head_thetas =  np.zeros(1)

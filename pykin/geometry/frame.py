@@ -11,7 +11,7 @@ class Link:
         self.radius = radius
         self.length = length
         self.size = np.array(size)
-        self.color = None
+        self.color = {}
         self.mesh = None
 
     def __repr__(self):

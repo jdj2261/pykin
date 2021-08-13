@@ -206,8 +206,8 @@ class Kinematics:
         return result1, result2
 
     # TODO
-    # singularity problem           [O]
-    # Initial Joints Random pick    [O]  
+    # singularity problem (LM)      [O]
+    # Random initial Joints         [O]
     # joint limit                   [O]
     # self collision checker        [ ]
     # Trajectory                    [ ]
@@ -324,6 +324,7 @@ class Kinematics:
                 break
             
             lamb = Ek + 0.002
+
             # Step 5. If error is not small enough, calculate dq which would reduce the error
             # Get jacobian to calculate dq
             J = jac.calc_jacobian(desired_tree, cur_fk, current_joints)

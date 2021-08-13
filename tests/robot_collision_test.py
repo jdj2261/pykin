@@ -26,7 +26,7 @@ target_pos = left_arm_fk["left_wrist"].matrix()
 
 _, ax = plt.init_3d_figure("Target")
 plt.plot_robot(robot, left_arm_fk, ax, "Left arm", visible_collision=True,
-               visible_mesh=False, mesh_path='../asset/urdf/baxter/')
+               visible_mesh=True, mesh_path='../asset/urdf/baxter/')
 ax.legend()
 # plt.show_figure()
 init_left_thetas = np.random.randn(7)
@@ -43,39 +43,39 @@ ik_left_LM_result = robot.inverse_kinematics(
 
 result_fk_LM = robot.forward_kinematics(ik_left_LM_result)
 
-eps = float(1e-12)
-for i, (link, transform) in enumerate(left_arm_fk.items()):
-    cur_link = link
-    cur_position = transform.pos
-    cur_radius = float(robot.tree.links[cur_link].radius)
-    for j in range(i+1, len(left_arm_fk.items())):
+# eps = float(1e-12)
+# for i, (link, transform) in enumerate(left_arm_fk.items()):
+#     cur_link = link
+#     cur_position = transform.pos
+#     cur_radius = float(robot.tree.links[cur_link].radius)
+#     for j in range(i+1, len(left_arm_fk.items())):
 
-        if "left_lower" in cur_link and j == i+1:
-            continue
+#         if "left_lower" in cur_link and j == i+1:
+#             continue
 
-        next_link = list(left_arm_fk.keys())[j]
-        next_position = list(left_arm_fk.values())[j].pos
-        next_radius = float(robot.tree.links[next_link].radius)
+#         next_link = list(left_arm_fk.keys())[j]
+#         next_position = list(left_arm_fk.values())[j].pos
+#         next_radius = float(robot.tree.links[next_link].radius)
 
-        diff = np.zeros(3)
-        diff[0] = cur_position[0] - next_position[0]
-        diff[1] = cur_position[1] - next_position[1]
-        diff[2] = cur_position[2] - next_position[2]
+#         diff = np.zeros(3)
+#         diff[0] = cur_position[0] - next_position[0]
+#         diff[1] = cur_position[1] - next_position[1]
+#         diff[2] = cur_position[2] - next_position[2]
 
-        distance = np.linalg.norm(diff)
+#         distance = np.linalg.norm(diff)
 
-        if distance < eps:
-            continue
+#         if distance < eps:
+#             continue
 
-        if distance > cur_radius + next_radius:
-            print(cur_link, next_link, cur_radius, next_radius, end=" ")
-            print(f"{scolors.OKCYAN}Not Collision{scolors.ENDC}")
-        else:
-            print(cur_link, next_link, distance, cur_radius, next_radius, end=" ")
-            print(f"{scolors.FAIL}Collision{scolors.ENDC}")
-        # print(cur_link, next_link, np.linalg.norm(diff))
-        # print(cur_link, next_link, cur_radius, next_radius)
-    print()
+#         if distance > cur_radius + next_radius:
+#             print(cur_link, next_link, cur_radius, next_radius, end=" ")
+#             print(f"{scolors.OKCYAN}Not Collision{scolors.ENDC}")
+#         else:
+#             print(cur_link, next_link, distance, cur_radius, next_radius, end=" ")
+#             print(f"{scolors.FAIL}Collision{scolors.ENDC}")
+#         # print(cur_link, next_link, np.linalg.norm(diff))
+#         # print(cur_link, next_link, cur_radius, next_radius)
+#     print()
 
 l_pose_new_LM = result_fk_LM["left_wrist"].matrix()
 
