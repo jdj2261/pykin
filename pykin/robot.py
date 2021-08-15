@@ -8,6 +8,7 @@ sys.path.append(pykin_path)
 from pykin.kinematics import jacobian as jac
 from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
+# from pykin.geometry.collision import Collision
 from pykin.urdf.urdf_parser import URDFParser
 from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
@@ -156,3 +157,6 @@ class Robot:
 
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
+
+    def collision_check(self, robot, fk):
+        pass

@@ -88,9 +88,6 @@ class URDFParser:
                         frame.link.size = _convert_string_to_narray(shapes.attrib.get('size', None))
                         frame.link.mesh = shapes.attrib.get('filename', None)
 
-            # for material_tag in visual_tag.findall('material'):
-            #     frame.link.color = material_tag.get('name')
-        
             for material_tag in visual_tag.findall('material'):
                 for colors in material_tag.findall('color'):
                     frame.link.color[material_tag.get('name')] = _convert_string_to_narray(
@@ -149,7 +146,8 @@ class URDFParser:
                                         dtype=LINK_TYPE_MAP.get(
                                             chil_link.dtype),
                                         radius=chil_link.radius,
-                                        length=chil_link.length)
+                                        length=chil_link.length,
+                                        size=chil_link.size)
 
                 child_frame.children = self._build_chain_recursive(child_frame.link, links, joints)
                 children.append(child_frame)

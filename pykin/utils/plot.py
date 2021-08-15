@@ -5,6 +5,7 @@ import matplotlib.animation
 import matplotlib.pyplot as plt
 from pykin.kinematics import transformation as tf
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import fcl
 try:
     import trimesh
 except ImportError:
@@ -51,18 +52,16 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=Fa
     nodes = []
     transformation_matrix = []
 
-    for (link, transformation) in fk.items():
+    for i, (link, transformation) in enumerate(fk.items()):
         links.append(link)
         transformation_matrix.append(
             tf.get_homogeneous_matrix(transformation.pos, transformation.rot))
 
     for link, matrix in zip(links, transformation_matrix):
-        if "visual" in link:
-            continue
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
 
     if name == "baxter":
-        torso_nodes = [nodes[0], nodes[3]]
+        torso_nodes = [nodes[0]] + [nodes[3]]
         head_nodes = torso_nodes + nodes[7:12]
         pedestal_nodes = torso_nodes + [nodes[6]]
         right_nodes = torso_nodes + nodes[13:18] + nodes[20:29]
@@ -116,49 +115,64 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=Fa
         ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
 
+
     if visible_collision:
-        for link, transformation in fk.items():
-            if robot.tree.links[link].dtype == 'cylinder':
-                A2B = tf.get_homogeneous_matrix(
-                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-                length = float(robot.tree.links[link].length)
-                radius = float(robot.tree.links[link].radius)
-                plot_cylinder(
-                    robot.tree.links[link], fk, ax, length=length, radius=radius, A2B=A2B, alpha=0.8, color=list(robot.tree.links[link].color.keys()))
+        plot_collision(robot, fk, ax)
 
-            if robot.tree.links[link].dtype == 'sphere':
-                radius = float(robot.tree.links[link].radius)
-                pos = fk[robot.tree.links[link].name].pos
-
-                plot_sphere(
-                    robot.tree.links[link], fk, ax, radius=radius, alpha=0.5, color=list(robot.tree.links[link].color.keys())[0], p=pos, n_steps=20, ax_s=0.5)
-            if robot.tree.links[link].dtype == 'box':
-                size = robot.tree.links[link].size
-                A2B = tf.get_homogeneous_matrix(
-                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-                plot_box(robot.tree.links[link], fk, ax, size, A2B=A2B, alpha=0.6, color=list(robot.tree.links[link].color.keys())[0])
-                    
     if visible_mesh:
-
         scene = trimesh.Scene()
-        for i, (link, transformation) in enumerate(fk.items()):
+        for link in fk.keys():
             if robot.tree.links[link].mesh is not None:
-                # if 2 < i < len(fk.items()):
                 filename = mesh_path + robot.tree.links[link].mesh
                 A2B = tf.get_homogeneous_matrix(
                     fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-                scene = plot_mesh(scene, ax, filename=filename, A2B=A2B, alpha=0.2,
+                scene = plot_mesh(scene, filename=filename, A2B=A2B,
                                   color=np.array([color for color in robot.tree.links[link].color.values()]).flatten())
                 scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5)
         scene.show()
 
-def plot_cylinder(link, fk, ax=None, length=1.0, radius=1.0,
+def plot_collision(robot, fk, ax):
+    for link in fk.keys():
+        if robot.tree.links[link].dtype == 'cylinder':
+            A2B = tf.get_homogeneous_matrix(
+                fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
+            length = float(robot.tree.links[link].length)
+            radius = float(robot.tree.links[link].radius)
+            plot_cylinder(fk, ax, length=length, radius=radius, A2B=A2B, alpha=0.3, color=list(robot.tree.links[link].color.keys()))
+
+        if robot.tree.links[link].dtype == 'sphere':
+            radius = float(robot.tree.links[link].radius)
+            pos = fk[robot.tree.links[link].name].pos
+            plot_sphere(fk, ax, radius=radius, alpha=0.5, color=list(robot.tree.links[link].color.keys())[0], p=pos, n_steps=20, ax_s=0.5)
+        
+        if robot.tree.links[link].dtype == 'box':
+            size = robot.tree.links[link].size
+            A2B = tf.get_homogeneous_matrix(
+                fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
+            plot_box(fk, ax, size, A2B=A2B, alpha=0.6, color=list(
+                robot.tree.links[link].color.keys())[0])
+
+def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
                   A2B=np.eye(4), n_steps=100,
                   alpha=1.0, color="k"):
 
     if len(color) == 0:
         color = 'k'
     color = list(color)[0]
+
+    # box = fcl.Box(1.0, 2.0, 3.0)
+    # cyl = fcl.Cylinder(2.0, 2.0)
+    # req = fcl.ContinuousCollisionRequest()
+    # res = fcl.ContinuousCollisionResult()
+
+    # dist = fcl.continuousCollide(fcl.CollisionObject(box, fcl.Transform()),
+    #                             fcl.Transform(np.array([5.0, 0.0, 0.0])),
+    #                             fcl.CollisionObject(cyl, fcl.Transform(
+    #                                 np.array([5.0, 0.0, 0.0]))),
+    #                             fcl.Transform(np.array([0.0, 0.0, 0.0])),
+    #                             req, res)
+
+    # print(res.is_collide)
 
     axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
@@ -185,7 +199,7 @@ def plot_cylinder(link, fk, ax=None, length=1.0, radius=1.0,
     ax.plot_surface(X, Y, Z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_sphere(link, fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
+def plot_sphere(fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
                 n_steps=20, alpha=1.0, color="k"):
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = p[0] + radius * np.sin(phi) * np.cos(theta)
@@ -195,8 +209,7 @@ def plot_sphere(link, fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_box(link, fk, ax=None, size=np.ones(3), A2B=np.eye(4), ax_s=1,
-             color="k", alpha=1.0):
+def plot_box(fk=None, ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
 
     corners = np.array([
         [0, 0, 0],
@@ -238,21 +251,13 @@ def plot_box(link, fk, ax=None, size=np.ones(3), A2B=np.eye(4), ax_s=1,
     ax.add_collection3d(p3c)
 
 
-def plot_mesh(scene, ax=None, filename=None, A2B=np.eye(4),
-              s=np.array([1.0, 1.0, 1.0]), ax_s=10, wireframe=False,
-              convex_hull=False, alpha=1.0, color="k"):
-
+def plot_mesh(scene, filename=None, A2B=np.eye(4), color="k"):
     mesh = trimesh.load(filename)
-    # tm = trimesh.collision.CollisionManager()
-    
+
     if len(color) == 0:
         color = np.array([0.2, 0.2, 0.2, 1.])
 
     mesh.visual.face_colors = color
-
-    # t = tm.add_object(filename,mesh, A2B)
-    # result, name = tm.in_collision_other(tm, return_names=True)
-
     scene.add_geometry(mesh, transform=A2B)
 
     return scene

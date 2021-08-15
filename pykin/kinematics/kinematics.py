@@ -54,17 +54,16 @@ class Kinematics:
                 self.tree.links["left_upper_elbow_visual"].offset
             # self.tree.joints["left_e0_fixed"].offset * \
             
-
         if "left_upper_forearm" in f.link.name:
             link_transforms["left_upper_forearm_visual"] = link_transforms["left_upper_forearm"] * \
                 self.tree.links["left_upper_forearm_visual"].offset
 
         if "right_upper_elbow" in f.link.name:
-            link_transforms["right_upper_elbow_visual"] = trans * \
+            link_transforms["right_upper_elbow_visual"] = link_transforms["right_upper_elbow"] * \
                 self.tree.links["right_upper_elbow_visual"].offset
 
         if "right_upper_forearm" in f.link.name:
-            link_transforms["right_upper_forearm_visual"] = trans * \
+            link_transforms["right_upper_forearm_visual"] = link_transforms["right_upper_forearm"] * \
                 self.tree.links["right_upper_forearm_visual"].offset
         
         # return link_transforms
