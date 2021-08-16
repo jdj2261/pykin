@@ -4,14 +4,14 @@ from pykin.kinematics.transform import Transform
 from pykin.utils.shell_color import ShellColors as scolors
 
 class Link:
-    def __init__(self, name=None, offset=Transform(), dtype=None, radius=0, length=0, size=None):
+    def __init__(self, name=None, offset=Transform(), dtype=None, radius=0, length=0, size=None, color={}):
         self.name = name
         self.offset = offset
         self.dtype = dtype
         self.radius = radius
         self.length = length
         self.size = np.array(size)
-        self.color = {}
+        self.color = color
         self.mesh = None
 
     def __repr__(self):

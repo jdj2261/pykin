@@ -131,26 +131,29 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=Fa
                 scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5)
         scene.show()
 
-def plot_collision(robot, fk, ax):
+def plot_collision(robot, fk, ax, alpha=0.5):
+    plot_basis(robot, ax)
     for link in fk.keys():
         if robot.tree.links[link].dtype == 'cylinder':
             A2B = tf.get_homogeneous_matrix(
                 fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
             length = float(robot.tree.links[link].length)
             radius = float(robot.tree.links[link].radius)
-            plot_cylinder(fk, ax, length=length, radius=radius, A2B=A2B, alpha=0.3, color=list(robot.tree.links[link].color.keys()))
+            plot_cylinder(fk, ax, length=length, radius=radius, A2B=A2B,
+                          alpha=alpha, color=list(robot.tree.links[link].color.keys()))
 
         if robot.tree.links[link].dtype == 'sphere':
             radius = float(robot.tree.links[link].radius)
             pos = fk[robot.tree.links[link].name].pos
-            plot_sphere(fk, ax, radius=radius, alpha=0.5, color=list(robot.tree.links[link].color.keys())[0], p=pos, n_steps=20, ax_s=0.5)
+            plot_sphere(fk, ax, radius=radius, alpha=alpha, color=list(
+                robot.tree.links[link].color.keys()), p=pos, n_steps=20, ax_s=0.5)
         
         if robot.tree.links[link].dtype == 'box':
             size = robot.tree.links[link].size
             A2B = tf.get_homogeneous_matrix(
                 fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-            plot_box(fk, ax, size, A2B=A2B, alpha=0.6, color=list(
-                robot.tree.links[link].color.keys())[0])
+            plot_box(fk, ax, size, A2B=A2B, alpha=alpha, color=list(
+                robot.tree.links[link].color.keys()))
 
 def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
                   A2B=np.eye(4), n_steps=100,
@@ -199,8 +202,11 @@ def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
     ax.plot_surface(X, Y, Z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_sphere(fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
+def plot_sphere(fk=None, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
                 n_steps=20, alpha=1.0, color="k"):
+    if len(color) == 0:
+        color = 'k'
+    color = list(color)[0]
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = p[0] + radius * np.sin(phi) * np.cos(theta)
     y = p[1] + radius * np.sin(phi) * np.sin(theta)
@@ -210,6 +216,9 @@ def plot_sphere(fk, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
 
 
 def plot_box(fk=None, ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
+    if len(color) == 0:
+        color = 'k'
+    color = list(color)[0]
 
     corners = np.array([
         [0, 0, 0],

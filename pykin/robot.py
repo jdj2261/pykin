@@ -2,18 +2,19 @@
 import sys, os
 import numpy as np
 from pprint import pprint
+from collections import OrderedDict
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
 
 from pykin.kinematics import jacobian as jac
 from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
-# from pykin.geometry.collision import Collision
+from pykin.geometry.geometry import Geometry
 from pykin.urdf.urdf_parser import URDFParser
 from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
 from pykin.utils.logs import logging_time
-
+from pykin.kinematics import transformation as tf
 class Robot:
     def __init__(self, filepath=None, offset=Transform(), joint_safety=False):
         if filepath is None:
@@ -21,6 +22,7 @@ class Robot:
         self._offset = offset
         self.tree = None
         self.desired_frame = None
+        self.link_type = OrderedDict()
         self._load_urdf(filepath)
         self.joint_safety = joint_safety
         self.joint_limits_lower = None
@@ -158,5 +160,53 @@ class Robot:
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
 
-    def collision_check(self, robot, fk):
+    def get_link_type(self):
+        if self.desired_frame is not None:
+            for desired_frame in self.desired_frame:
+                self._link_type_check(frame=desired_frame)
+        else:
+            self._link_type_check(robot=self)
+
+    def _link_type_check(self, robot=None, frame=None):
+        if robot is not None:
+            for info in robot.tree.links.values():
+                self.link_type[info.name] = info
+
+        if frame is not None:
+            if frame.link.dtype in ['box', 'sphere', 'cylinder', 'mesh']:
+                self.link_type[frame.link.name] = frame.link
+
+    def plot_geomtry(self, ax, fk):
+        self.geo = Geometry(robot=self, fk=fk)
+        plt.plot_basis(self, ax)
+
+        for info in self.geo.link_type.values():
+            if info.dtype == 'cylinder':
+                radius = float(info.radius)
+                length = float(info.length)
+                cylinder = {info.name: ({'radius': radius}, 
+                                        {'length': length})}
+                A2B = tf.get_homogeneous_matrix(
+                    fk[info.name].pos, fk[info.name].rot)
+                self.geo.add_objects(info.dtype, cylinder)
+                plt.plot_cylinder(ax=ax, A2B=A2B, radius=radius,
+                                  length=length, alpha=0.5, color=info.color)
+                
+            if info.dtype == 'box':
+                box = {info.name: {'size': info.size}}
+                A2B = tf.get_homogeneous_matrix(
+                    fk[info.name].pos, fk[info.name].rot)
+                self.geo.add_objects(info.dtype, box)
+                plt.plot_box(ax=ax, size=info.size, A2B=A2B,
+                             alpha=0.5, color=info.color)
+
+            if info.dtype == 'sphere':
+                radius = float(info.radius)
+                pos = fk[info.name].pos
+                sphere = {info.name: {'radius': radius}}
+                self.geo.add_objects(info.dtype, sphere)
+                plt.plot_sphere(ax=ax, radius=float(info.radius),
+                                p=pos, alpha=0.1, color=info.color)
+
+    def collision_check(self, fk):
         pass

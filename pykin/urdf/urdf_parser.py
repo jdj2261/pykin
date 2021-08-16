@@ -61,7 +61,7 @@ class URDFParser:
         attrib = link_tag.attrib
         link_name = attrib.get('name', 'link_' + str(idx))
         frame = Frame(link_name + '_frame',
-                      link=Link(link_name, offset=Transform(), dtype=None, radius=0, length=0, size=np.zeros(3)))
+                      link=Link(link_name, offset=Transform(), dtype=None, radius=0, length=0, size=np.zeros(3), color={}))
 
         # dtype, length, radius
         for collision_tag in link_tag.findall('collision'):
@@ -147,7 +147,8 @@ class URDFParser:
                                             chil_link.dtype),
                                         radius=chil_link.radius,
                                         length=chil_link.length,
-                                        size=chil_link.size)
+                                        size=chil_link.size,
+                                        color=chil_link.color)
 
                 child_frame.children = self._build_chain_recursive(child_frame.link, links, joints)
                 children.append(child_frame)
