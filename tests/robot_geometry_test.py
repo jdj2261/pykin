@@ -27,9 +27,10 @@ right_arm_fk = robot.forward_kinematics(right_arm_thetas)
 # print(right_arm_fk)
 _, ax = plt.init_3d_figure("Target")
 robot.plot_geomtry(ax, fk=right_arm_fk)
+print(robot.geo)
 
+for idx, obj in enumerate(robot.geo.objects):
+    print(idx, obj)
 
-# for obj in robot.geo.objects:
-#     print(obj)
 ax.legend()
 plt.show_figure()

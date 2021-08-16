@@ -15,11 +15,13 @@ except ImportError:
 directions_colors = ["green", "cyan", "orange"]
 
 
-def plot_basis(robot, ax, arm_length=1):
+def plot_basis(robot=None, ax=None, arm_length=1):
     """Plot a frame fitted to the robot size"""
-
-    offset = np.linalg.norm(robot.offset.pos)
-
+    if robot is not None:
+        offset = np.linalg.norm(robot.offset.pos)
+    else:
+        offset = 1
+        
     if offset == 0:
         offset = 1
 

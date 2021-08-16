@@ -160,22 +160,6 @@ class Robot:
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
 
-    def get_link_type(self):
-        if self.desired_frame is not None:
-            for desired_frame in self.desired_frame:
-                self._link_type_check(frame=desired_frame)
-        else:
-            self._link_type_check(robot=self)
-
-    def _link_type_check(self, robot=None, frame=None):
-        if robot is not None:
-            for info in robot.tree.links.values():
-                self.link_type[info.name] = info
-
-        if frame is not None:
-            if frame.link.dtype in ['box', 'sphere', 'cylinder', 'mesh']:
-                self.link_type[frame.link.name] = frame.link
-
     def plot_geomtry(self, ax, fk):
         self.geo = Geometry(robot=self, fk=fk)
         plt.plot_basis(self, ax)
