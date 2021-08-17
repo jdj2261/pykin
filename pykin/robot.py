@@ -15,6 +15,8 @@ from pykin.utils import plot as plt
 from pykin.utils.shell_color import ShellColors as scolors
 from pykin.utils.logs import logging_time
 from pykin.kinematics import transformation as tf
+
+
 class Robot:
     def __init__(self, filepath=None, offset=Transform(), joint_safety=False):
         if filepath is None:
@@ -160,37 +162,6 @@ class Robot:
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
 
-    def plot_geomtry(self, ax, fk):
+    def set_geomtry(self, fk, visible=False):
         self.geo = Geometry(robot=self, fk=fk)
-        plt.plot_basis(self, ax)
-
-        for info in self.geo.link_type.values():
-            if info.dtype == 'cylinder':
-                radius = float(info.radius)
-                length = float(info.length)
-                cylinder = {info.name: ({'radius': radius}, 
-                                        {'length': length})}
-                A2B = tf.get_homogeneous_matrix(
-                    fk[info.name].pos, fk[info.name].rot)
-                self.geo.add_objects(info.dtype, cylinder)
-                plt.plot_cylinder(ax=ax, A2B=A2B, radius=radius,
-                                  length=length, alpha=0.5, color=info.color)
-                
-            if info.dtype == 'box':
-                box = {info.name: {'size': info.size}}
-                A2B = tf.get_homogeneous_matrix(
-                    fk[info.name].pos, fk[info.name].rot)
-                self.geo.add_objects(info.dtype, box)
-                plt.plot_box(ax=ax, size=info.size, A2B=A2B,
-                             alpha=0.5, color=info.color)
-
-            if info.dtype == 'sphere':
-                radius = float(info.radius)
-                pos = fk[info.name].pos
-                sphere = {info.name: {'radius': radius}}
-                self.geo.add_objects(info.dtype, sphere)
-                plt.plot_sphere(ax=ax, radius=float(info.radius),
-                                p=pos, alpha=0.1, color=info.color)
-
-    def collision_check(self, fk):
-        pass
+        self.geo.collision_check(visible=visible)

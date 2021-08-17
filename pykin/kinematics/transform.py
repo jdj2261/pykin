@@ -65,10 +65,15 @@ class Transform(object):
         rot = tf.get_quaternion_inverse(self.rot)
         pos = -self._rotation_vec(rot, self.pos)
         return Transform(rot, pos)
-
+    
     def matrix(self):
         mat = tf.quaternion_matrix(self.rot)
         mat[:3, 3] = self.pos
+        return mat
+    
+    @property
+    def R_mat(self):
+        mat = tf.get_rotation_matrix(self.rot)
         return mat
 
     @property

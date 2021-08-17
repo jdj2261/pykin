@@ -165,20 +165,6 @@ def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
         color = 'k'
     color = list(color)[0]
 
-    # box = fcl.Box(1.0, 2.0, 3.0)
-    # cyl = fcl.Cylinder(2.0, 2.0)
-    # req = fcl.ContinuousCollisionRequest()
-    # res = fcl.ContinuousCollisionResult()
-
-    # dist = fcl.continuousCollide(fcl.CollisionObject(box, fcl.Transform()),
-    #                             fcl.Transform(np.array([5.0, 0.0, 0.0])),
-    #                             fcl.CollisionObject(cyl, fcl.Transform(
-    #                                 np.array([5.0, 0.0, 0.0]))),
-    #                             fcl.Transform(np.array([0.0, 0.0, 0.0])),
-    #                             req, res)
-
-    # print(res.is_collide)
-
     axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
 
@@ -218,9 +204,14 @@ def plot_sphere(fk=None, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
 
 
 def plot_box(fk=None, ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
-    if len(color) == 0:
-        color = 'k'
-    color = list(color)[0]
+    if isinstance(color, str):
+        color = color
+
+    if isinstance(color, (np.ndarray, list)):
+        if len(color) == 0:
+            color = 'k'
+        else:
+            color = list(color)[0]
 
     corners = np.array([
         [0, 0, 0],

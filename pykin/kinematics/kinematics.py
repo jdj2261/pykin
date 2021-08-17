@@ -32,7 +32,8 @@ class Kinematics:
                 thetas_dict = dict((j, thetas[i]) for i, j in enumerate(joint_names))
             else:
                 thetas_dict = thetas
-            return self._forward_kinematics(self.tree.root, thetas_dict, offset)
+            link_transforms = self._forward_kinematics(self.tree.root, thetas_dict, offset)
+            return link_transforms
         else:
             cnt = 0
             link_transforms = {}
@@ -49,24 +50,25 @@ class Kinematics:
             return link_transforms
 
     def _add_visual_link(self, link_transforms, f, trans):
-        if "left_upper_elbow" in f.link.name:
-            link_transforms["left_upper_elbow_visual"] = link_transforms["left_upper_elbow"] * \
-                self.tree.links["left_upper_elbow_visual"].offset
-            # self.tree.joints["left_e0_fixed"].offset * \
-            
-        if "left_upper_forearm" in f.link.name:
-            link_transforms["left_upper_forearm_visual"] = link_transforms["left_upper_forearm"] * \
-                self.tree.links["left_upper_forearm_visual"].offset
+        if "left_lower_shoulder" in f.link.name:
+            link_transforms["left_upper_elbow_visual"] = np.dot(np.dot(link_transforms["left_lower_shoulder"],
+                                                                        self.tree.joints["left_w0_fixed"].offset),
+                                                                        self.tree.links["left_upper_elbow_visual"].offset)
 
-        if "right_upper_elbow" in f.link.name:
-            link_transforms["right_upper_elbow_visual"] = link_transforms["right_upper_elbow"] * \
-                self.tree.links["right_upper_elbow_visual"].offset
+        if "left_lower_elbow" in f.link.name:
+            link_transforms["left_upper_forearm_visual"] = np.dot(np.dot(link_transforms["left_lower_elbow"],
+                                                                        self.tree.joints["left_w0_fixed"].offset),
+                                                                        self.tree.links["left_upper_forearm_visual"].offset)
 
-        if "right_upper_forearm" in f.link.name:
-            link_transforms["right_upper_forearm_visual"] = link_transforms["right_upper_forearm"] * \
-                self.tree.links["right_upper_forearm_visual"].offset
-        
-        # return link_transforms
+        if "right_lower_shoulder" in f.link.name:
+            link_transforms["right_upper_elbow_visual"] = np.dot(np.dot(link_transforms["right_lower_shoulder"],
+                                                                        self.tree.joints["right_e0_fixed"].offset),
+                                                                        self.tree.links["right_upper_elbow_visual"].offset)
+
+        if "right_lower_elbow" in f.link.name:
+            link_transforms["right_upper_forearm_visual"] = np.dot(np.dot(link_transforms["right_lower_elbow"], 
+                                                                        self.tree.joints["right_w0_fixed"].offset),
+                                                                        self.tree.links["right_upper_forearm_visual"].offset)
 
     def analytical_inverse_kinematics(self, pose):
         # Link Length [m]
