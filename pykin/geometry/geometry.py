@@ -90,24 +90,24 @@ class Geometry(Collision):
         super(Geometry, self).__init__(robot, obj, fk)
 
         if robot is not None:
-            self.get_link_type()
+            self.get_links()
         if fk is not None:
             self.fk = fk
 
     def __repr__(self):
         if self.robot is not None:
-            return f"""Robot Collision Info: {list(self.link_type.values())}"""
+            return f"""Robot Geometry Info: {list(self.links.values())}"""
         else:
-            return f"""Geometry Info: {self._obj}"""
+            return f"""Geometry Info: {self.objects}"""
 
-    def get_link_type(self):
+    def get_links(self):
         for link in self.fk.keys():
             link_info = self.robot.tree.links[link]
-            self.link_type[link_info.name] = link_info
-        self.seperate_link_type()
+            self.links[link_info.name] = link_info
+        self.get_objects()
 
-    def seperate_link_type(self):
-        for info in self.link_type.values():
+    def get_objects(self):
+        for info in self.links.values():
             if info.dtype == 'cylinder':
                 radius = float(info.radius)
                 length = float(info.length)
@@ -147,7 +147,7 @@ class Geometry(Collision):
 
 
 if __name__ == "__main__":
-    geo = Geometry()
+    geo = Geometry(robot=None, fk=None)
     box_size1 = (0.1, 0.2, 0.3)
     box_size2= (0.1, 0.2, 0.3)
 
@@ -156,25 +156,6 @@ if __name__ == "__main__":
     
     fcl_box1 = fcl.Box(*box_size1)
     fcl_box2 = fcl.Box(*box_size2)
-
-    req = fcl.CollisionRequest(enable_contact=True) 
-    res = fcl.CollisionResult()
-
-    n_contacts = fcl.collide(fcl.CollisionObject(fcl_box1, fcl.Transform(np.array([0.3, 0, 0]))),
-                             fcl.CollisionObject(
-                                fcl_box2, fcl.Transform(np.array([0.35, 0, 0]))),
-                             req, res)
-    geo.print_collision_result('Box', 'Box', res)
-
-    req = fcl.DistanceRequest(enable_nearest_points=True)
-    res = fcl.DistanceResult()
-
-    dist = fcl.distance(fcl.CollisionObject(fcl_box1, fcl.Transform(np.array([0.3, 0, 0]))),
-                        fcl.CollisionObject(
-                            fcl_box1, fcl.Transform(np.array([0.35, 0, 0]))),
-                        req, res)
-
-    geo.print_distance_result('Box', 'Box', res)
 
     # cyl1 = {'cylinder1': ({'radius': 0.2}, {'length' : 0.4})}
     # cyl2 = {'cylinder2': ({'radius': 0.6}, {'length' : 0.4})}
@@ -189,10 +170,9 @@ if __name__ == "__main__":
     # geo.add_objects('cylinder', cyl2)
     # geo.add_objects('sphere', sphere1)
 
-    geo.collision_check(visible=False)
+    geo.collision_check(visible=True)
     for obj in geo.objects:
         print(obj)
-    
     plt.show_figure()
 
 

@@ -1,3 +1,4 @@
+from pykin.utils.logs import logging_time
 import os
 import warnings
 import numpy as np
@@ -5,6 +6,7 @@ import matplotlib.animation
 import matplotlib.pyplot as plt
 from pykin.kinematics import transformation as tf
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from pykin.utils.logs import logging_time
 import fcl
 try:
     import trimesh
@@ -43,7 +45,7 @@ def plot_basis(robot=None, ax=None, arm_length=1):
     ax.plot([0, 0], [0, 0], [0, offset * 1.5],
             c=directions_colors[2], label="Z")
 
-
+@logging_time
 def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=False, mesh_path='../asset/urdf/baxter/'):
 
     if name is not None:

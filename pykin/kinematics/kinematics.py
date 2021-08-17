@@ -52,7 +52,7 @@ class Kinematics:
     def _add_visual_link(self, link_transforms, f, trans):
         if "left_lower_shoulder" in f.link.name:
             link_transforms["left_upper_elbow_visual"] = np.dot(np.dot(link_transforms["left_lower_shoulder"],
-                                                                        self.tree.joints["left_w0_fixed"].offset),
+                                                                        self.tree.joints["left_e0_fixed"].offset),
                                                                         self.tree.links["left_upper_elbow_visual"].offset)
 
         if "left_lower_elbow" in f.link.name:

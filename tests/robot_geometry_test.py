@@ -15,13 +15,14 @@ robot = Robot(file_path, Transform(
     rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=False)
 
 head_thetas = np.zeros(1)
-right_arm_thetas = np.array([0, 0, 0, np.pi, 0, 0, 0])
+right_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 left_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 
 thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
-# robot.set_desired_tree("base", "right_wrist")
-# right_arm_fk = robot.forward_kinematics(right_arm_thetas)
-fk = robot.forward_kinematics(thetas)
+robot.set_desired_tree("base", "right_wrist")
+right_arm_fk = robot.forward_kinematics(right_arm_thetas)
+# fk = robot.forward_kinematics(thetas)
 
-robot.set_geomtry(fk=fk, visible=True)
+robot.set_geomtry(fk=right_arm_fk, visible=True)
+print(robot.geo)
 plt.show_figure()

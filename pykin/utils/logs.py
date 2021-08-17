@@ -7,6 +7,6 @@ def logging_time(original_fn):
         result = original_fn(*args, **kwargs)
         end_time = time.time()
         print(
-            f"{kwargs}\nWorkingTime[{original_fn.__name__}]: {end_time-start_time:.4f} sec\n")
+            f"WorkingTime[{original_fn.__name__}]: {end_time-start_time:.4f} sec\n")
         return result
     return wrapper_fn

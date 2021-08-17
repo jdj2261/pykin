@@ -162,6 +162,7 @@ class Robot:
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
 
+    @logging_time
     def set_geomtry(self, fk, visible=False):
         self.geo = Geometry(robot=self, fk=fk)
         self.geo.collision_check(visible=visible)
