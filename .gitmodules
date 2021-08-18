@@ -1,0 +1,3 @@
+[submodule "asset/urdf"]
+	path = asset/urdf
+	url = https://github.com/jdj2261/urdf.git
