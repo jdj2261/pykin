@@ -45,11 +45,11 @@ class Kinematics:
                     cnt += 1
                 if cnt >= len(thetas):
                     cnt -= 1
-                self._add_visual_link(link_transforms, f, trans)
+                self._add_visual_link(link_transforms, f)
 
             return link_transforms
 
-    def _add_visual_link(self, link_transforms, f, trans):
+    def _add_visual_link(self, link_transforms, f):
         if "left_lower_shoulder" in f.link.name:
             link_transforms["left_upper_elbow_visual"] = np.dot(np.dot(link_transforms["left_lower_shoulder"],
                                                                         self.tree.joints["left_e0_fixed"].offset),

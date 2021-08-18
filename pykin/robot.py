@@ -1,7 +1,6 @@
 
 import sys, os
 import numpy as np
-from pprint import pprint
 from collections import OrderedDict
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
@@ -11,10 +10,7 @@ from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
 from pykin.geometry.geometry import Geometry
 from pykin.urdf.urdf_parser import URDFParser
-from pykin.utils import plot as plt
-from pykin.utils.shell_color import ShellColors as scolors
 from pykin.utils.logs import logging_time
-from pykin.kinematics import transformation as tf
 
 
 class Robot:
@@ -128,16 +124,14 @@ class Robot:
     def get_joint_limit(self, joints):
         return np.clip(joints, self.joint_limits_lower, self.joint_limits_upper)
 
-    def forward_kinematics(self, theta, desired_tree=None):
+    def forward_kinematics(self, theta):
         self.transformations = self.__kinematics.forward_kinematics(
             theta, offset=self._offset, desired_tree=self.desired_frame
         )
         return self.transformations
 
     @logging_time
-    def inverse_kinematics(
-        self, current_joints, target_pose, method="LM", desired_tree=None, maxIter=1000
-    ):
+    def inverse_kinematics(self, current_joints, target_pose, method="LM", maxIter=1000):
 
         if method == "analytical":
             joints = self.__kinematics.analytical_inverse_kinematics(target_pose)
@@ -149,7 +143,7 @@ class Robot:
                 upper=self.joint_limits_upper,
                 maxIter=maxIter
             )
-        else:
+        if method == "LM":
             joints = self.__kinematics.numerical_inverse_kinematics_LM(
                 current_joints, target_pose, 
                 desired_tree=self.desired_frame, 
@@ -162,6 +156,10 @@ class Robot:
     def jacobian(self, fk, th):
         return jac.calc_jacobian(self.desired_frame, fk, th)
 
+    def compute_pose_error(self, target, result):
+        error = np.linalg.norm(np.dot(result, np.linalg.inv(target)) - np.mat(np.eye(4)))
+        return error
+        
     @logging_time
     def set_geomtry(self, fk, visible=False):
         self.geo = Geometry(robot=self, fk=fk)

@@ -47,9 +47,7 @@ class Collision:
         if self._obj.keys():
             if len(self.objects) != 0:
                 objects = [obj[1] for obj in self.objects]
-                assert objects[0].keys() != self._obj.keys(
-                ), f"Duplicate name. please check again"
-            
+                assert objects[0].keys() != self._obj.keys(), f"Duplicate name. please check again"
             self.objects.append((gtype, self._obj, offset, color))
  
     def collision_check(self, visible=False):
@@ -82,7 +80,7 @@ class Collision:
             print('Object {} in collision with object {}!'.format(
                 coll_pair[0], coll_pair[1]))
 
-    def convert_fcl(self, visible, ax):
+    def convert_fcl(self, visible=False, ax=None):
         geoms = []
         objs = []
         names = []
@@ -94,20 +92,17 @@ class Collision:
             obj_color = object[3]
 
             if obj_type == 'cylinder':
-                geom, obj, name = self.fcl_cylinder(
-                    obj_info, obj_pose, obj_color, visible, ax)
+                geom, obj, name = self.fcl_cylinder(obj_info, obj_pose, obj_color, visible, ax)
             if obj_type == 'sphere':
-                geom, obj, name = self.fcl_sphere(
-                    obj_info, obj_pose, obj_color, visible, ax)
+                geom, obj, name = self.fcl_sphere(obj_info, obj_pose, obj_color, visible, ax)
             if obj_type == 'box':
-                geom, obj, name = self.fcl_box(
-                    obj_info, obj_pose, obj_color, visible, ax)
+                geom, obj, name = self.fcl_box(obj_info, obj_pose, obj_color, visible, ax)
 
             geoms.append(geom)
             objs.append(obj)
             names.append(name)
         
-        return geoms, objs, names,
+        return geoms, objs, names
 
     def fcl_cylinder(self, info, pose, color, visible, ax=None):
         radius = float(list(info.values())[0][0].get('radius'))
@@ -165,6 +160,7 @@ class Collision:
             coll_names = [geom_id_to_name[id(coll_geom_0)], geom_id_to_name[id(coll_geom_1)]]
             coll_names = tuple(sorted(coll_names))
 
+            # aboue baxter
             if 'lower_forearm'  in coll_names[0] and 'wrist'                in coll_names[1]: continue
             if 'upper_forearm'  in coll_names[0] and 'upper_forearm_visual' in coll_names[1]: continue
             if 'lower_forearm'  in coll_names[0] and 'upper_forearm_visual' in coll_names[1]: continue

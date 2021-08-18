@@ -68,7 +68,7 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 @logging_time
-def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, fk, ax, name=None, visible_collision=False, visible_mesh=False, mesh_path='../asset/urdf/baxter/'):
 
     if name is not None:
         name = os.path.splitext(os.path.basename(name))[0].strip()
@@ -159,6 +159,7 @@ def plot_collision(robot, fk, ax, alpha=0.5):
     for link in fk.keys():
         A2B = fk[robot.tree.links[link].name].matrix()
         color = list(robot.tree.links[link].color.keys())
+        print(robot.tree.links[link].dtype)
         if robot.tree.links[link].dtype == 'cylinder':
             length = float(robot.tree.links[link].length)
             radius = float(robot.tree.links[link].radius)
