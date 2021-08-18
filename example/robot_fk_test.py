@@ -2,8 +2,8 @@ import sys
 import os
 import numpy as np
 from pprint import pprint
-#pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-#sys.path.append(pykin_path)
+# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
+# sys.path.append(pykin_path)
 
 from pykin import robot
 from pykin.robot import Robot
@@ -59,6 +59,6 @@ you must write "baxter" in plot_robot method
 Otherwise, you can't see correct result plot
 """
 _, ax = plt.init_3d_figure()
-plt.plot_robot(robot, fk, ax, "baxter")
+plt.plot_robot(robot, fk, ax, "baxter", visible_collision=True)
 ax.legend()
 plt.show_figure()

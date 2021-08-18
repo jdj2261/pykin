@@ -2,8 +2,8 @@ import sys
 import os
 import numpy as np
 from pprint import pprint
-#pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-#sys.path.append(pykin_path)
+# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
+# sys.path.append(pykin_path)
 from pykin.utils import plot as plt
 from pykin.kinematics import transform as tf
 from pykin.robot import Robot

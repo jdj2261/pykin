@@ -25,17 +25,17 @@ def _check_color_type(color):
     if isinstance(color, str):
         color = color
     
-    if isinstance(color, (np.ndarray, list)):
+    if isinstance(color, list):
+        if len(color) == 0:
+            color = 'k'
+        else:
+            color = color[0]
+    
+    if isinstance(color, np.ndarray):
         if len(color) == 0:
             color = np.array([0.2, 0.2, 0.2, 1.])
         else:
-            color = list(color)[0]
-
-    if isinstance(color, dict):
-        if len(color) == 0:
-            color = np.array([0.2, 0.2, 0.2, 1.])
-        else:
-            color = list(color.values())[0]
+            color = color
 
     return color
 
