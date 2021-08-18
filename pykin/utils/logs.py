@@ -1,4 +1,3 @@
-import logging
 import time
 
 def logging_time(original_fn):

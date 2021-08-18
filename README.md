@@ -1,7 +1,7 @@
 # pykin
-[![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+[![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-Python Kinematics library
+Python Interface for the Robot Kinematics Library
 
 This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git).
 
@@ -9,21 +9,26 @@ This library has been created simply by referring to [ikpy](https://github.com/P
 
 - Pure python library
 - Support only URDF file
-- Calculate Forward, Inverse Kinematics and Jacobian
+- Compute Forward, Inverse Kinematics and Jacobian
+- Compute Collision checkinkg
+- Plot Robot Kinematic Chain
+- Show Robot Mesh
 
 ## Installation
+
+- You need a package to do collision checking.
 
 ~~~
 pip install pykin
 ~~~
 
-## Git Clone
+
 
 ~~~
 git clone https://github.com/jdj2261/pykin.git
 ~~~
 
-## Demo
+## Quick Start
 
 - Robot Info
 

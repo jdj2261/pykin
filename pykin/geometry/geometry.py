@@ -1,14 +1,10 @@
 import os, sys
 import numpy as np
-from collections import OrderedDict
-import numpy as np
-import fcl
+
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
 sys.path.append(pykin_path)
 from pykin.geometry.collision import Collision
 from pykin.kinematics.transform import Transform
-from pykin.kinematics import transformation as tf
-from pykin.utils.shell_color import ShellColors as scolors
 from pykin.utils import plot as plt
 
 class Box:
@@ -147,6 +143,7 @@ class Geometry(Collision):
 
 
 if __name__ == "__main__":
+    import fcl
     geo = Geometry(robot=None, fk=None)
     box_size1 = (0.1, 0.2, 0.3)
     box_size2= (0.1, 0.2, 0.3)
@@ -173,6 +170,7 @@ if __name__ == "__main__":
     geo.collision_check(visible=True)
     for obj in geo.objects:
         print(obj)
+    print(geo)
     plt.show_figure()
 
 

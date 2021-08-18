@@ -1,23 +1,45 @@
-from pykin.utils.logs import logging_time
 import os
 import warnings
 import numpy as np
-import matplotlib.animation
 import matplotlib.pyplot as plt
-from pykin.kinematics import transformation as tf
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from pykin.kinematics import transformation as tf
 from pykin.utils.logs import logging_time
-import fcl
+
+try:
+    import fcl
+except ImportError:
+    warnings.warn(
+        "Cannot display mesh. Library 'fcl' not installed.")
+
 try:
     import trimesh
 except ImportError:
     warnings.warn(
         "Cannot display mesh. Library 'trimesh' not installed.")
+
 # Colors of each directions axes. For ex X is green
 directions_colors = ["green", "cyan", "orange"]
 
+def _check_color_type(color):
+    if isinstance(color, str):
+        color = color
+    
+    if isinstance(color, (np.ndarray, list)):
+        if len(color) == 0:
+            color = np.array([0.2, 0.2, 0.2, 1.])
+        else:
+            color = list(color)[0]
 
-def plot_basis(robot=None, ax=None, arm_length=1):
+    if isinstance(color, dict):
+        if len(color) == 0:
+            color = np.array([0.2, 0.2, 0.2, 1.])
+        else:
+            color = list(color.values())[0]
+
+    return color
+
+def plot_basis(robot=None, ax=None):
     """Plot a frame fitted to the robot size"""
     if robot is not None:
         offset = np.linalg.norm(robot.offset.pos)
@@ -58,8 +80,7 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=Fa
 
     for i, (link, transformation) in enumerate(fk.items()):
         links.append(link)
-        transformation_matrix.append(
-            tf.get_homogeneous_matrix(transformation.pos, transformation.rot))
+        transformation_matrix.append(transformation.matrix())
 
     for link, matrix in zip(links, transformation_matrix):
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
@@ -128,45 +149,35 @@ def plot_robot(robot, fk, ax, name=None, visible_collision=True, visible_mesh=Fa
         for link in fk.keys():
             if robot.tree.links[link].mesh is not None:
                 filename = mesh_path + robot.tree.links[link].mesh
-                A2B = tf.get_homogeneous_matrix(
-                    fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-                scene = plot_mesh(scene, filename=filename, A2B=A2B,
-                                  color=np.array([color for color in robot.tree.links[link].color.values()]).flatten())
+                A2B = fk[robot.tree.links[link].name].matrix()
+                color = np.array([color for color in robot.tree.links[link].color.values()]).flatten()
+                scene = plot_mesh(scene, filename=filename, A2B=A2B, color=color)
                 scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5)
         scene.show()
 
 def plot_collision(robot, fk, ax, alpha=0.5):
-    plot_basis(robot, ax)
     for link in fk.keys():
+        A2B = fk[robot.tree.links[link].name].matrix()
+        color = list(robot.tree.links[link].color.keys())
         if robot.tree.links[link].dtype == 'cylinder':
-            A2B = tf.get_homogeneous_matrix(
-                fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
             length = float(robot.tree.links[link].length)
             radius = float(robot.tree.links[link].radius)
-            plot_cylinder(fk, ax, length=length, radius=radius, A2B=A2B,
-                          alpha=alpha, color=list(robot.tree.links[link].color.keys()))
+            plot_cylinder(ax, length=length, radius=radius, A2B=A2B, alpha=alpha, color=color)
 
         if robot.tree.links[link].dtype == 'sphere':
             radius = float(robot.tree.links[link].radius)
             pos = fk[robot.tree.links[link].name].pos
-            plot_sphere(fk, ax, radius=radius, alpha=alpha, color=list(
-                robot.tree.links[link].color.keys()), p=pos, n_steps=20, ax_s=0.5)
-        
+            plot_sphere(ax, radius=radius, p=pos, n_steps=20, alpha=alpha, color=color)
+    
         if robot.tree.links[link].dtype == 'box':
             size = robot.tree.links[link].size
-            A2B = tf.get_homogeneous_matrix(
-                fk[robot.tree.links[link].name].pos, fk[robot.tree.links[link].name].rot)
-            plot_box(fk, ax, size, A2B=A2B, alpha=alpha, color=list(
-                robot.tree.links[link].color.keys()))
+            plot_box(ax, size, A2B=A2B, alpha=alpha, color=color)
 
-def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
+def plot_cylinder(ax=None, length=1.0, radius=1.0,
                   A2B=np.eye(4), n_steps=100,
                   alpha=1.0, color="k"):
 
-    if len(color) == 0:
-        color = 'k'
-    color = list(color)[0]
-
+    color = _check_color_type(color)
     axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
 
@@ -192,11 +203,8 @@ def plot_cylinder(fk=None, ax=None, length=1.0, radius=1.0,
     ax.plot_surface(X, Y, Z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_sphere(fk=None, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
-                n_steps=20, alpha=1.0, color="k"):
-    if len(color) == 0:
-        color = 'k'
-    color = list(color)[0]
+def plot_sphere(ax=None, radius=1.0, p=np.zeros(3), n_steps=20, alpha=1.0, color="k"):
+    color = _check_color_type(color)
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = p[0] + radius * np.sin(phi) * np.cos(theta)
     y = p[1] + radius * np.sin(phi) * np.sin(theta)
@@ -205,15 +213,8 @@ def plot_sphere(fk=None, ax=None, radius=1.0, p=np.zeros(3), ax_s=1,
     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_box(fk=None, ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
-    if isinstance(color, str):
-        color = color
-
-    if isinstance(color, (np.ndarray, list)):
-        if len(color) == 0:
-            color = 'k'
-        else:
-            color = list(color)[0]
+def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
+    color = _check_color_type(color)
 
     corners = np.array([
         [0, 0, 0],
@@ -257,14 +258,12 @@ def plot_box(fk=None, ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color=
 
 def plot_mesh(scene, filename=None, A2B=np.eye(4), color="k"):
     mesh = trimesh.load(filename)
-
-    if len(color) == 0:
-        color = np.array([0.2, 0.2, 0.2, 1.])
-
+    color = _check_color_type(color)
     mesh.visual.face_colors = color
     scene.add_geometry(mesh, transform=A2B)
 
     return scene
+
 
 def init_3d_figure(name=None):
     from mpl_toolkits.mplot3d import axes3d, Axes3D
@@ -276,5 +275,3 @@ def init_3d_figure(name=None):
 
 def show_figure():
     plt.show()
-
-

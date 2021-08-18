@@ -207,12 +207,8 @@ class Kinematics:
         return result1, result2
 
     # TODO
-    # singularity problem (LM)      [O]
-    # Random initial Joints         [O]
-    # joint limit                   [O]
     # self collision checker        [ ]
     # Trajectory                    [ ]
-
     def calc_pose_error(self, T_ref, T_cur, EPS):
 
         def rot_to_omega(R):
@@ -248,13 +244,10 @@ class Kinematics:
         return cur_jnt
 
     def numerical_inverse_kinematics_NR(self, current_joints, target, desired_tree, lower, upper, maxIter):
-
         lamb = 0.5
         iterator = 0
-        maxIter = maxIter
         EPS = float(1e-6)
         dof = len(current_joints)
-
 
         # Step 1. Prepare the position and attitude of the target link
         target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
@@ -282,22 +275,18 @@ class Kinematics:
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
             current_joints = self.limit_joints(current_joints, lower, upper)
 
-            cur_fk = self.forward_kinematics(
-                current_joints, desired_tree=desired_tree)
+            cur_fk = self.forward_kinematics(current_joints, desired_tree=desired_tree)
             cur_pose = list(cur_fk.values())[-1].matrix()
             err_pose = self.calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
 
 
         print(f"Iterators : {iterator-1}")
-        current_joints = np.array([float(current_joint)
-                                  for current_joint in current_joints])
+        current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
 
     def numerical_inverse_kinematics_LM(self, current_joints, target, desired_tree, lower, upper, maxIter):
-
         iterator = 0
-        maxIter = maxIter
         EPS = float(1E-12)
         dof = len(current_joints)
         wn_pos = 1/0.3
@@ -348,15 +337,11 @@ class Kinematics:
             if Ek2 < Ek:
                 Ek = Ek2
             else:
-                current_joints = [current_joints[i] - dq[i]
-                                  for i in range(dof)]
-                current_joints = self.limit_joints(
-                    current_joints, lower, upper)
-                cur_fk = self.forward_kinematics(
-                    current_joints, desired_tree=desired_tree)
+                current_joints = [current_joints[i] - dq[i] for i in range(dof)]
+                current_joints = self.limit_joints(current_joints, lower, upper)
+                cur_fk = self.forward_kinematics(current_joints, desired_tree=desired_tree)
                 break
             
         print(f"Iterators : {iterator-1}")
-        current_joints = np.array([float(current_joint)
-                                  for current_joint in current_joints])
+        current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints

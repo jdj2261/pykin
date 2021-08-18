@@ -3,30 +3,6 @@ import math
 from collections import Iterable
 
 def vector_norm(data, axis=None, out=None):
-    """Return length, i.e. Euclidean norm, of ndarray along axis.
-
-    >>> v = numpy.random.random(3)
-    >>> n = vector_norm(v)
-    >>> numpy.allclose(n, numpy.linalg.norm(v))
-    True
-    >>> v = numpy.random.rand(6, 5, 3)
-    >>> n = vector_norm(v, axis=-1)
-    >>> numpy.allclose(n, numpy.sqrt(numpy.sum(v*v, axis=2)))
-    True
-    >>> n = vector_norm(v, axis=1)
-    >>> numpy.allclose(n, numpy.sqrt(numpy.sum(v*v, axis=1)))
-    True
-    >>> v = numpy.random.rand(5, 4, 3)
-    >>> n = numpy.empty((5, 3))
-    >>> vector_norm(v, axis=1, out=n)
-    >>> numpy.allclose(n, numpy.sqrt(numpy.sum(v*v, axis=1)))
-    True
-    >>> vector_norm([])
-    0.0
-    >>> vector_norm([1])
-    1.0
-
-    """
     data = np.array(data, dtype=np.float64, copy=True)
     if out is None:
         if data.ndim == 1:
@@ -44,8 +20,7 @@ def vector_norm(data, axis=None, out=None):
 def get_rot_mat_from_homogeneous(homogeneous_matrix):
     return homogeneous_matrix[:-1, :-1]
 
-# TODO
-# do change name
+
 def get_pos_mat_from_homogeneous(homogeneous_matrix):
     return homogeneous_matrix[:-1,-1]
 
@@ -168,33 +143,12 @@ def get_quaternion_from_axis_angle(axis, angle, convention='wxyz'):
 
 
 def get_quaternion_inverse(quaternion):
-    """Return inverse of quaternion.
-
-    >>> q0 = random_quaternion()
-    >>> q1 = quaternion_inverse(q0)
-    >>> numpy.allclose(quaternion_multiply(q0, q1), [1, 0, 0, 0])
-    True
-
-    """
     q = np.array(quaternion, dtype=np.float64, copy=True)
     np.negative(q[1:], q[1:])
     return q / np.dot(q, q)
 
 
 def quaternion_matrix(quaternion):
-    """Return homogeneous rotation matrix from quaternion.
-
-    >>> M = quaternion_matrix([0.99810947, 0.06146124, 0, 0])
-    >>> numpy.allclose(M, rotation_matrix(0.123, [1, 0, 0]))
-    True
-    >>> M = quaternion_matrix([1, 0, 0, 0])
-    >>> numpy.allclose(M, numpy.identity(4))
-    True
-    >>> M = quaternion_matrix([0, 1, 0, 0])
-    >>> numpy.allclose(M, numpy.diag([1, -1, -1, 1]))
-    True
-
-    """
     q = np.array(quaternion, dtype=np.float64, copy=True)
     n = np.dot(q, q)
     if n < _EPS:
@@ -209,13 +163,6 @@ def quaternion_matrix(quaternion):
 
 
 def quaternion_multiply(quaternion1, quaternion0):
-    """Return multiplication of two quaternions.
-
-    >>> q = quaternion_multiply([4, 1, -2, 3], [8, -5, 6, 7])
-    >>> numpy.allclose(q, [28, -44, -14, 48])
-    True
-
-    """
     w0, x0, y0, z0 = quaternion0
     w1, x1, y1, z1 = quaternion1
     return np.array(

@@ -1,7 +1,9 @@
 import numpy as np
-import pykin.kinematics.transformation as tf
+
+from pykin.kinematics import transformation as tf
 from pykin.kinematics.transform import Transform
 from pykin.utils.shell_color import ShellColors as scolors
+
 
 class Link:
     def __init__(self, name=None, offset=Transform(), dtype=None, radius=0, length=0, size=None, color={}):
@@ -24,6 +26,7 @@ class Link:
             dtype= {scolors.HEADER}{self.dtype}{scolors.ENDC} 
             {radius} {length} {size}"""
 
+
 class Joint:
     TYPES = ['fixed', 'revolute', 'prismatic']
 
@@ -31,13 +34,13 @@ class Joint:
                  dtype='fixed', axis=None, limit=[None, None], parent=None, child=None):
         self.name = name
         self.offset = offset
-        self.parent = parent
-        self.child = child
         self.num_dof = 0
         self.dtype = dtype
         self.axis = np.array(axis)
         self.limit = limit
- 
+        self.parent = parent
+        self.child = child
+
     def __repr__(self):
         return f"""
         {scolors.OKGREEN}Joint{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC} 

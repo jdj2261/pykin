@@ -1,7 +1,6 @@
 import numpy as np
 from xml.etree import ElementTree as ET
 from collections import OrderedDict
-from pprint import pprint
 
 from pykin.urdf.urdf_tree import URDFTree
 from pykin.geometry.frame import Joint, Link, Frame
@@ -10,6 +9,7 @@ from pykin.kinematics.transform import Transform
 JOINT_TYPE_MAP = {'revolute': 'revolute',
                   'fixed': 'fixed',
                   'prismatic': 'prismatic'}
+
 LINK_TYPE_MAP = { 'cylinder' : 'cylinder',
                   'sphere'   : 'sphere',
                   'box'      : 'box',
@@ -73,8 +73,6 @@ class URDFParser:
             for geometry_tag in collision_tag.findall('geometry'):
                 for shape_type in ["cylinder", "sphere", "mesh"]:
                     for shapes in geometry_tag.findall(shape_type):
-                        # if "visual" in link_name:
-                        #     continue 
                         frame.link.dtype = shapes.tag
                         frame.link.length = shapes.attrib.get('length', 0)
                         frame.link.radius = shapes.attrib.get('radius', 0)
@@ -143,8 +141,7 @@ class URDFParser:
                 chil_link = links[joint.child]
                 child_frame.link = Link(chil_link.name, 
                                         offset=_convert_transform(chil_link.offset),
-                                        dtype=LINK_TYPE_MAP.get(
-                                            chil_link.dtype),
+                                        dtype=LINK_TYPE_MAP.get(chil_link.dtype),
                                         radius=chil_link.radius,
                                         length=chil_link.length,
                                         size=chil_link.size,

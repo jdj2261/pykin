@@ -2,8 +2,6 @@ import numpy as np
 from collections import OrderedDict
 
 from pykin.kinematics import transform as tf
-from pykin.kinematics import transformation
-
 
 class URDFTree:
     def __init__(self, name=None, offset=tf.Transform(), root=None):

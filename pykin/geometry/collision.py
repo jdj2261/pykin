@@ -1,12 +1,17 @@
 
 import os, sys
-import numpy as np
-import fcl
+import warnings
+
+try:
+    import fcl
+except ImportError:
+    warnings.warn(
+        "Cannot display mesh. Library 'fcl' not installed.")
 from collections import OrderedDict
+
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
 sys.path.append(pykin_path)
 
-from pykin.kinematics import transformation as tf
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot as plt
 
