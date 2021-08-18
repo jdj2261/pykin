@@ -69,6 +69,14 @@ pip install python-fcl
 pip install pykin
 ~~~
 
+When git clone, use the --recurse-submodules option. 
+
+The download may take a long time due to the large urdf file size.
+
+~~~
+git clone --recurse-submodules https://github.com/jdj2261/pykin.git
+~~~
+
 ## Quick Start
 
 - Robot Info

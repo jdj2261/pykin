@@ -159,7 +159,6 @@ def plot_collision(robot, fk, ax, alpha=0.5):
     for link in fk.keys():
         A2B = fk[robot.tree.links[link].name].matrix()
         color = list(robot.tree.links[link].color.keys())
-        print(robot.tree.links[link].dtype)
         if robot.tree.links[link].dtype == 'cylinder':
             length = float(robot.tree.links[link].length)
             radius = float(robot.tree.links[link].radius)
