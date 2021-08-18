@@ -165,7 +165,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 You can see an example of IK by running the command below.
 
 ~~~shell
-$ cd pykin/tests
+$ cd pykin/example
 $ python robot_ik_baxter_test.py
 ~~~
 
