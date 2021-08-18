@@ -1,8 +1,8 @@
 import os, sys
 import numpy as np
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
-sys.path.append(pykin_path)
+# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
+# sys.path.append(pykin_path)
 from pykin.geometry.collision import Collision
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot as plt
@@ -83,6 +83,7 @@ class Geometry(Collision):
         self.robot = robot
         self._obj = obj
         self.fk = fk
+        
         super(Geometry, self).__init__(robot, obj, fk)
 
         if robot is not None:

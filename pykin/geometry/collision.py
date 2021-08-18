@@ -90,7 +90,6 @@ class Collision:
             obj_info = object[1]
             obj_pose = object[2]
             obj_color = object[3]
-
             if obj_type == 'cylinder':
                 geom, obj, name = self.fcl_cylinder(obj_info, obj_pose, obj_color, visible, ax)
             if obj_type == 'sphere':

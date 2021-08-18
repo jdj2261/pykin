@@ -37,6 +37,11 @@ def _check_color_type(color):
         else:
             color = color
 
+    if isinstance(color, dict):
+        if len(color) == 0:
+            color = np.array([0.2, 0.2, 0.2, 1.])
+        else:
+            color = list(color.values())[0]
     return color
 
 def plot_basis(robot=None, ax=None):

@@ -12,7 +12,7 @@ file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=False)
 visible_collision = False
-visible_mesh = False
+visible_mesh = True
 
 # set target joints angle
 head_thetas =  np.zeros(1)

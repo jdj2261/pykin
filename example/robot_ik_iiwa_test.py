@@ -34,6 +34,6 @@ ik_result = robot.inverse_kinematics(
 robot.desired_frame = None
 fk = robot.forward_kinematics(ik_result)
 _, ax = plt.init_3d_figure("IK")
-plt.plot_robot(robot, fk, ax, "iiwa14", visible_mesh=False, mesh_path='../asset/urdf/iiwa14/')
+plt.plot_robot(robot, fk, ax, "iiwa14", visible_mesh=True, mesh_path='../asset/urdf/iiwa14/')
 ax.legend()
 plt.show_figure()
