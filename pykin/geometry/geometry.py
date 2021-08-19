@@ -69,7 +69,7 @@ class Sphere:
         if sphere is not None:
             self.spheres.append(sphere)
             self.name = [list(sphere.keys()) for sphere in self.spheres]
-            self.size = [list(sphere.values()) for sphere in self.spheres]
+            self.radius = [list(sphere.values()) for sphere in self.spheres]
 
 
 class Mesh:

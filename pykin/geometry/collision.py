@@ -6,7 +6,7 @@ try:
     import fcl
 except ImportError:
     warnings.warn(
-        "Cannot display mesh. Library 'fcl' not installed.")
+        "Cannot compute collision. Library 'fcl' not installed.")
 from collections import OrderedDict
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
@@ -34,6 +34,12 @@ class Collision:
             {list(self.links.values())}"""
         else:
             return f"""Object Collision Info: {self.objects}"""
+    
+    def get_link(self):
+        pass
+    
+    def get_objects(self):
+        pass
 
     @property
     def obj(self):
@@ -159,7 +165,7 @@ class Collision:
             coll_names = [geom_id_to_name[id(coll_geom_0)], geom_id_to_name[id(coll_geom_1)]]
             coll_names = tuple(sorted(coll_names))
 
-            # aboue baxter
+            # about baxter
             if 'lower_forearm'  in coll_names[0] and 'wrist'                in coll_names[1]: continue
             if 'upper_forearm'  in coll_names[0] and 'upper_forearm_visual' in coll_names[1]: continue
             if 'lower_forearm'  in coll_names[0] and 'upper_forearm_visual' in coll_names[1]: continue
