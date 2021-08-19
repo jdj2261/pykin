@@ -20,11 +20,12 @@ right_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 left_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 
 thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
+# robot.set_desired_tree("base", "left_wrist")
 left_arm_fk = robot.forward_kinematics(thetas)
 target_pos = left_arm_fk["left_wrist"].matrix()
 
 _, ax = plt.init_3d_figure("FK")
-plt.plot_robot(robot, left_arm_fk, ax, "baxter", visible_collision=False,
+plt.plot_robot(robot, left_arm_fk, ax, "left", visible_collision=False,
                visible_mesh=True, mesh_path='../asset/urdf/baxter/')
 # ax.legend()
 # plt.show_figure()

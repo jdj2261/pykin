@@ -66,18 +66,20 @@ class URDFParser:
         # dtype, length, radius
         for collision_tag in link_tag.findall('collision'):
             for origin_tag in collision_tag.findall('origin'):
-                frame.link.offset.pos = _convert_string_to_narray(
-                    origin_tag.attrib.get('xyz'))
-                frame.link.offset.rot = _convert_string_to_narray(
-                    origin_tag.attrib.get('rpy'))
+                frame.link.offset.pos = _convert_string_to_narray(origin_tag.attrib.get('xyz'))
+                frame.link.offset.rot = _convert_string_to_narray(origin_tag.attrib.get('rpy'))
             for geometry_tag in collision_tag.findall('geometry'):
                 for shape_type in ["cylinder", "sphere", "mesh"]:
                     for shapes in geometry_tag.findall(shape_type):
                         frame.link.dtype = shapes.tag
                         frame.link.length = shapes.attrib.get('length', 0)
                         frame.link.radius = shapes.attrib.get('radius', 0)
-
+                        frame.link.mesh = shapes.attrib.get('filename', None)
+                        
         for visual_tag in link_tag.findall('visual'):
+            for origin_tag in visual_tag.findall('origin'):
+                frame.link.offset.pos = _convert_string_to_narray(origin_tag.attrib.get('xyz'))
+                frame.link.offset.rot = _convert_string_to_narray(origin_tag.attrib.get('rpy'))
             for geometry_tag in visual_tag.findall('geometry'):
                 for shape_type in ["box", "mesh"]:
                     for shapes in geometry_tag.findall(shape_type):
