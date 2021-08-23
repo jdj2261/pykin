@@ -9,7 +9,7 @@ from pykin import robot
 from pykin.robot import Robot
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot as plt
-from pykin.utils.shell_color import ShellColors as sc
+from pykin.utils.kin_utils import ShellColors as sc
 
 
 # baxter_example
@@ -26,7 +26,7 @@ fk = robot.forward_kinematics(thetas)
 
 """
 If you want to know transformations of all links,
-you don't have to write get_desired_tree and desired_frame.
+you don't have to write get_desired_tree and desired_tree.
 """
 for link, transform in fk.items():
     print(f"{sc.HEADER}{link}{sc.ENDC}, {transform.rot}, {transform.pos}")
@@ -47,9 +47,9 @@ plt.show_figure()
 
 """
 If you want to reknow transformations of all links,
-you must write desired_frame.
+you must write desired_tree.
 """
-robot.desired_frame = None
+robot.desired_tree = None
 fk = robot.forward_kinematics(thetas)
 pprint(fk)
 

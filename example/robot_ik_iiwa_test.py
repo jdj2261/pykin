@@ -31,7 +31,7 @@ target_pose = np.concatenate(
 ik_result = robot.inverse_kinematics(
     init_thetas, target_pose, method="LM")
 
-robot.desired_frame = None
+robot.desired_tree = None
 fk = robot.forward_kinematics(ik_result)
 _, ax = plt.init_3d_figure("IK")
 plt.plot_robot(robot, fk, ax, "iiwa14", visible_mesh=True, mesh_path='../asset/urdf/iiwa14/')

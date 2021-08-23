@@ -5,6 +5,14 @@ Python Interface for the Robot Kinematics Library
 
 This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git).
 
+[TODO]
+
+-  Code Refactoring
+  - Duplicate function check
+  - Classification by function
+
+
+
 ## Features
 
 - Pure python library

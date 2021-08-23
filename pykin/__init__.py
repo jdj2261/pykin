@@ -1,2 +1,2 @@
-__all__ = ["robot", "geometry", "kinematics", "urdf", "utils"]
+__all__ = ["robot", "geometry", "kinematics", "models", "utils"]
 # from .robot import *

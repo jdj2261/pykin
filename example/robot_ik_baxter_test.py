@@ -7,7 +7,7 @@ from pykin import robot
 from pykin.robot import Robot
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot as plt
-from pykin.utils.shell_color import ShellColors as scolors
+from pykin.utils.kin_utils import ShellColors as scolors
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=False)
@@ -97,7 +97,7 @@ print(f"{scolors.HEADER}NR Method: Current Left arm Angles{scolors.ENDC}: \n{ik_
 
 
 thetas_LM = np.concatenate((head_thetas, ik_right_LM_result, ik_left_LM_result))
-robot.desired_frame = None
+robot.desired_tree = None
 result_fk_LM = robot.forward_kinematics(thetas_LM)
 
 goal_r_pose_LM = np.concatenate(
@@ -113,7 +113,7 @@ l_pose_new_LM = result_fk_LM["left_wrist"].matrix()
 
 thetas_NR = np.concatenate(
     (head_thetas, ik_right_NR_result, ik_left_NR_result))
-robot.desired_frame = None
+robot.desired_tree = None
 result_fk_NR = robot.forward_kinematics(thetas_NR)
 
 goal_r_pose_NR = np.concatenate(

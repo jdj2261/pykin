@@ -13,7 +13,7 @@ pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
-from pykin.utils import plot as plt
+import pykin.utils.plot_utils as plt
 
 
 class Collision:

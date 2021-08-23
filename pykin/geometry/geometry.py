@@ -5,7 +5,7 @@ import numpy as np
 # sys.path.append(pykin_path)
 from pykin.geometry.collision import Collision
 from pykin.kinematics.transform import Transform
-from pykin.utils import plot as plt
+import pykin.utils.plot_utils as plt
 
 class Box:
     boxes = []
@@ -99,7 +99,7 @@ class Geometry(Collision):
 
     def get_links(self):
         for link in self.fk.keys():
-            link_info = self.robot.tree.links[link]
+            link_info = self.robot.robot_tree.links[link]
             self.links[link_info.name] = link_info
         self.get_objects()
 

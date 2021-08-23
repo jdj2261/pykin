@@ -1,8 +1,8 @@
 import numpy as np
 
-from pykin.kinematics import transformation as tf
 from pykin.kinematics.transform import Transform
-from pykin.utils.shell_color import ShellColors as scolors
+from pykin.utils import transform_utils as tf
+from pykin.utils.kin_utils import ShellColors as scolors
 
 
 class Link:
