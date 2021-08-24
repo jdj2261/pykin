@@ -1,6 +1,8 @@
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
@@ -63,8 +65,7 @@ def plot_basis(robot=None, ax=None):
     ax.set_zlim3d([-1.0 * offset, 1.0 * offset])
     ax.set_zlabel('Z')
 
-    # Plot du repère
-    # Sa taille est relative à la taille du bras
+
     ax.plot([0, offset * 1.5], [0, 0], [0, 0],
             c=directions_colors[0], label="X")
     ax.plot([0, 0], [0, offset * 1.5], [0, 0],
@@ -73,13 +74,13 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, ax, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, transformations, ax, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
     plot_basis(robot, ax)
     links = []
     nodes = []
     transformation_matrix = []
 
-    for i, (link, transformation) in enumerate(robot.transformations.items()):
+    for i, (link, transformation) in enumerate(transformations.items()):
         links.append(link)
         transformation_matrix.append(transformation.matrix())
 
@@ -102,10 +103,24 @@ def plot_robot(robot, ax, name=None, visible_visual=False, visible_collision=Fal
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
     
     if visible_visual:
-        plot_mesh(robot, mesh_path)
+        plot_mesh(robot, transformations, mesh_path)
 
     if visible_collision:
-        plot_collision(robot, ax)
+        plot_collision(robot, transformations, ax)
+
+
+
+def plot_anmation(robot, trajectory, interval=100):
+    fig = plt.figure(figsize = (12, 6), dpi = 100)
+    ax = fig.add_subplot(111, projection='3d')
+
+    def update(i):
+        if i == len(trajectory)-1:
+            print("Animation Finished..")
+        ax.clear()
+        plot_robot(robot, trajectory[i], ax, name="baxter", visible_collision=True)
+    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval = interval, repeat = False)
+    plt.show()
 
 
 def plot_baxter(nodes, ax):
@@ -152,7 +167,7 @@ def plot_baxter(nodes, ax):
         [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
 
 
-def plot_collision(robot, ax, alpha=0.5):
+def plot_collision(robot, transformations, ax, alpha=0.5):
     def _get_color(params):
         color = []
         if params is not None:
@@ -161,7 +176,7 @@ def plot_collision(robot, ax, alpha=0.5):
                 color = list(visual_color.keys())
         return color
 
-    for link, transformation in robot.transformations.items():
+    for link, transformation in transformations.items():
         A2B = np.dot(transformation.matrix(), robot.links[link].collision.offset.matrix())
         color = _get_color(robot.links[link].visual.gparam)
 
@@ -263,9 +278,9 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
     ax.add_collection3d(p3c)
 
 
-def plot_mesh(robot, mesh_path):
+def plot_mesh(robot, transformations, mesh_path):
     scene = trimesh.Scene()
-    for link, transformation in robot.transformations.items():
+    for link, transformation in transformations.items():
         if robot.links[link].visual.gtype == "mesh":
             mesh_name = robot.links[link].visual.gparam.get('filename')
             filename = mesh_path + mesh_name

@@ -7,7 +7,7 @@ from pykin.kinematics.transform import Transform
 from pykin.models.urdf_model import URDFModel
 from pykin.utils.fcl_utils import FclUtils, convert_fcl_objects
 import pykin.utils.plot_utils as plt
-
+import matplotlib.animation as animation
 
 class Robot(URDFModel):
     """
@@ -93,47 +93,52 @@ class Robot(URDFModel):
 
 if __name__ == "__main__":
     robot = Robot(fname="../asset/urdf/baxter/baxter.urdf")
-    # print(test)
 
     head_thetas = [0]
     left_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
     right_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 
-    init_thetas = np.random.randn(7)
-    baxter_thetas = np.concatenate((head_thetas, left_thetas, right_thetas))
-    transformations = robot.kin.forward_kinematics(baxter_thetas)
+    # init_thetas = np.random.randn(7)
+    # baxter_thetas = np.concatenate((head_thetas, left_thetas, right_thetas))
+    # transformations = robot.kin.forward_kinematics(baxter_thetas)q
     
-
-    target_l_pose = np.hstack((transformations["left_wrist"].pos, transformations["left_wrist"].rot))
-    target_r_pose = np.hstack((transformations["right_wrist"].pos, transformations["right_wrist"].rot))
+    # target_l_pose = np.hstack((transformations["left_wrist"].pos, transformations["left_wrist"].rot))
+    # target_r_pose = np.hstack((transformations["right_wrist"].pos, transformations["right_wrist"].rot))
 
     robot.set_desired_frame(base_name="base", eef_name="left_wrist")
-    left_arm_thetas = [0, np.pi, 0, 0, 0, 0, 0]
+    left_arm_thetas = [np.pi, 0, 0, 0, 0, 0, 0]
     init_left_thetas = np.random.randn(7)
     left_transformations = robot.kin.forward_kinematics(left_arm_thetas)
-    target_l_pose = np.concatenate(
-    (left_transformations["left_wrist"].pos, left_transformations["left_wrist"].rot))
-    ik_left_result = robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="LM", maxIter=100)
+    target_l_pose = np.concatenate((left_transformations["left_wrist"].pos, left_transformations["left_wrist"].rot))
+    ik_left_result, trajectory_joints_l = robot.kin.inverse_kinematics(init_left_thetas, 
+                                                                     target_l_pose, 
+                                                                     method="LM", 
+                                                                     maxIter=50)
     
-
     robot.set_desired_frame(base_name="base", eef_name="right_wrist")
-    right_arm_thetas = [0, -np.pi, 0, 0, 0, 0, 0]
+    right_arm_thetas = [np.pi, 0, 0, 0, 0, 0, 0]
     init_right_thetas = np.random.randn(7)
     right_transformations = robot.kin.forward_kinematics(right_arm_thetas)
-    target_r_pose = np.concatenate(
-    (right_transformations["right_wrist"].pos, right_transformations["right_wrist"].rot))    
-    ik_right_result = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="NR", maxIter=100)
-    
-    print(ik_left_result, ik_right_result)
+    target_r_pose = np.concatenate((right_transformations["right_wrist"].pos, right_transformations["right_wrist"].rot))
+    ik_right_result, trajectory_joints_r = robot.kin.inverse_kinematics(init_right_thetas, 
+                                                                        target_r_pose, 
+                                                                        method="LM", 
+                                                                        maxIter=50)
 
+
+    trajectory_joints = list(zip(trajectory_joints_l, trajectory_joints_r))
+
+    trajectory_pos = []
     robot.reset_desired_frames()
-    thetas_LM = np.concatenate((np.zeros(1), ik_left_result, ik_right_result))
-    robot.kin.forward_kinematics(thetas_LM)
+    for left_joint, right_joint in trajectory_joints:
+        current_joint = np.concatenate((head_thetas, left_joint, right_joint))
+        test_pose = robot.kin.forward_kinematics(current_joint)
+        trajectory_pos.append(test_pose)
+    # trajectory_pos = np.array(trajectory_pos)
+    # target_pose = left_transformations["left_wrist"].matrix()
+    # result_pose = trajectory_pos[-1]["left_wrist"].matrix()
 
-    _, ax = plt.init_3d_figure()
-    plt.plot_robot(robot, 
-                   ax, 
-                   name="baxter",
-                   visible_visual=False, visible_collision=True, mesh_path='../asset/urdf/baxter/')
-    ax.legend()
-    plt.show_figure()
+    # print(f"Desired Pose: {target_pose}")
+    # print(f"Current Pose: {result_pose}")
+    # # print(f"Current Pose: {}")
+    plt.plot_anmation(robot, trajectory_pos, interval=500)

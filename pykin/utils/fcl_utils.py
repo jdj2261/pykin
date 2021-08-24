@@ -34,11 +34,14 @@ def convert_fcl_box(link, objects):
 
 class FclUtils:
     def __init__(self, fcl_objects=None):
+        self.geoms = []
+        self.objs = []
+        self.names = []
+        
         if fcl_objects is not None:
             self.fcl_objects = fcl_objects
             self.geoms = [object[1] for object in fcl_objects]
             self.names = [object[0] for object in fcl_objects]
-        self.objs = []
 
     def add_object(self, obj_name:str, obj_geom:fcl):
         self.fcl_objects.append((obj_name, obj_geom))

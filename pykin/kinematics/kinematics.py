@@ -64,7 +64,7 @@ class Kinematics:
     def frames(self, frames):
         self._frames = frames
 
-    def forward_kinematics(self, thetas):
+    def forward_kinematics(self, thetas, collision_check=False):
         if not isinstance(self.frames, list):
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
         self._transformations = self._compute_FK(self.frames, self.offset, thetas)
@@ -72,18 +72,18 @@ class Kinematics:
     
     def inverse_kinematics(self, current_joints, target_pose, method="LM", maxIter=1000):
         if method == "NR":
-            joints = self._compute_IK_NR(
+            joints, trajectory_joints = self._compute_IK_NR(
                 current_joints, 
                 target_pose, 
                 maxIter=maxIter
             )
         if method == "LM":
-            joints = self._compute_IK_LM(
+            joints, trajectory_joints = self._compute_IK_LM(
                 current_joints, 
                 target_pose, 
                 maxIter=maxIter
             )
-        return joints
+        return joints, trajectory_joints
 
     def _compute_FK(self, frames, offset, thetas):
         transformations = OrderedDict()
@@ -91,7 +91,7 @@ class Kinematics:
             trans = offset * frames.get_transform(thetas.get(frames.joint.name, 0.0))
             transformations[frames.link.name] = trans * frames.link.offset
             for child in frames.children:
-                transformations.update(self._compute_FK(child, trans,thetas))
+                transformations.update(self._compute_FK(child, trans, thetas))
         else:
             cnt = 0
             trans = offset
@@ -124,6 +124,7 @@ class Kinematics:
         err = np.linalg.norm(err_pose)
 
         # Step 4. If error is small enough, stop the calculation
+        trajectory_joints = []
         while err > EPS:
             # Avoid infinite calculation
             iterator += 1
@@ -137,7 +138,7 @@ class Kinematics:
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
-
+            trajectory_joints.append(np.array([float(current_joint) for current_joint in current_joints]))
             cur_fk = self.forward_kinematics(current_joints)
 
             cur_pose = list(cur_fk.values())[-1].matrix()
@@ -146,7 +147,7 @@ class Kinematics:
 
         print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
-        return current_joints
+        return current_joints, trajectory_joints
 
     def _compute_IK_LM(self, current_joints, target, maxIter):
         iterator = 0
@@ -168,6 +169,7 @@ class Kinematics:
         err = calc_pose_error(target_pose, cur_pose, EPS)
         Ek = float(np.dot(np.dot(err.T, We), err)[0])
 
+        trajectory_joints = []
         # # Step 4. If error is small enough, stop the calculation
         while Ek > EPS:
             # Avoid infinite calculation
@@ -187,11 +189,9 @@ class Kinematics:
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
+            trajectory_joints.append(np.array([float(current_joint) for current_joint in current_joints]))
             
             cur_fk = self.forward_kinematics(current_joints)
-
-
-
             cur_pose = list(cur_fk.values())[-1].matrix()
             err = calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
@@ -205,4 +205,4 @@ class Kinematics:
             
         print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
-        return current_joints
+        return current_joints, trajectory_joints
