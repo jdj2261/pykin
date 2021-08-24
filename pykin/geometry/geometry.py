@@ -1,96 +1,90 @@
 import os, sys
 import numpy as np
-
-# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
-# sys.path.append(pykin_path)
-from pykin.geometry.collision import Collision
+# from pykin.geometry.geometry import Collision
 from pykin.kinematics.transform import Transform
-import pykin.utils.plot_utils as plt
+# import pykin.utils.plot_utils as plt
 
 class Box:
-    boxes = []
-    def __init__(self, box=None):
-        self.box = box
-        
+    def __init__(self, size):
+        self.size = size
+
     def __repr__(self):
-        return f"Box Info: {self.boxes}"
+        return f"""Box(size={self.size})"""
 
-    @property
-    def box(self):
-        return self._box
-
-    @box.setter
-    def box(self, box):
-        self._box = box
-        if box is not None:
-            self.boxes.append(box)
-            self.name = [list(box.keys()) for box in self.boxes]
-            self.size = [list(box.values()) for box in self.boxes]
-            
 
 class Cylinder:
-    cylinders = []
-    def __init__(self, cyl: dict = None):
-        self.cyl = cyl
+    def __init__(self, radius, length):
+        self.radius = radius
+        self.length = length
 
     def __repr__(self):
-        return f"""Cylinder Info: {self.cylinders}"""
-
-    @property
-    def cyl(self):
-        return self._cyl
-
-    @cyl.setter
-    def cyl(self, cyl):
-        self._cyl = cyl
-        if cyl is not None:
-            self.cylinders.append(cyl)
-            self.name = [list(cylinder.keys()) for cylinder in self.cylinders]
-            info = [list(cylinder.values()) for cylinder in self.cylinders]
-            self.radius = [x[0][0] for x in info]
-            self.length = [x[0][1] for x in info]
+        return f"""Cylinder(radius={self.radius} 
+                            length={self.length})"""
 
 
 class Sphere:
-    spheres = []
-    def __init__(self, sphere: dict = None):
-        self.sphere = sphere
+    def __init__(self, radius):
+        self.radius = radius
 
     def __repr__(self):
-        return f"""Sphere Info: {self.sphere}"""
-
-    @property
-    def sphere(self):
-        return self._sphere
-
-    @sphere.setter
-    def sphere(self, sphere):
-        self._sphere = sphere
-        if sphere is not None:
-            self.spheres.append(sphere)
-            self.name = [list(sphere.keys()) for sphere in self.spheres]
-            self.radius = [list(sphere.values()) for sphere in self.spheres]
+        return f"""Sphere(radius={self.radius}"""
 
 
 class Mesh:
-    def __init__(self, mesh: dict = None):
+    def __init__(self):
         pass
 
 
+class Visual:
+    TYPES = ['box', 'cylinder', 'sphere', 'capsule', 'mesh']
+    def __init__(self, offset=Transform(), 
+                 geom_type=None, geom_param=None):
+        self.offset = offset
+        self.gtype = geom_type
+        self.gparam = geom_param
+
+    def __repr__(self):
+        return f"""Visual(offset={self.offset},
+                           geom_type={self.gtype}, 
+                           geom_param={self.gparam})"""
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset):
+        self._offset = Transform(offset.rot, offset.pos)
+
+
+class Collision:
+    TYPES = ['box', 'cylinder', 'sphere', 'mesh']
+    def __init__(self, offset=Transform(), 
+                 geom_type=None, geom_param=None):
+        self.offset = offset
+        self.gtype = geom_type
+        self.gparam = geom_param
+
+    def __repr__(self):
+        return f"""Collision(offset={self.offset},
+                              geom_type={self.gtype}, 
+                              geom_param={self.gparam})"""
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, offset):
+        self._offset = Transform(offset.rot, offset.pos)
+
+
 class Geometry(Collision):
-    def __init__(self, gtype=None, robot=None, obj: dict = None, fk: dict = None):
+    def __init__(self, gtype=None, obj: dict = None):
         self.gtype = gtype
-        self.robot = robot
         self._obj = obj
-        self.fk = fk
-        
-        super(Geometry, self).__init__(robot, obj, fk)
-
-        if robot is not None:
-            self.get_links()
-        if fk is not None:
-            self.fk = fk
-
+        super(Geometry, self).__init__(obj)
+  
     def __repr__(self):
         if self.robot is not None:
             return f"""Robot Geometry Info: {list(self.links.values())}"""

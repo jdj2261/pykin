@@ -1,6 +1,6 @@
 import numpy as np
-
 import time
+
 from pykin.kinematics.transform import Transform
 
 JOINT_TYPE_MAP = {'revolute': 'revolute',
@@ -12,6 +12,7 @@ LINK_TYPE_MAP = { 'cylinder' : 'cylinder',
                   'box'      : 'box',
                   'mesh'     : 'mesh'}
 
+LINK_TYPES = ['box', 'cylinder', 'sphere', 'capsule', 'mesh']
 
 class ShellColors:
     HEADER = '\033[95m'
@@ -31,33 +32,20 @@ class Baxter:
     right_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
     right_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
 
-    left_upper_elbow_visual_offset = Transform(rot=[1., 0., 0., 0.], pos=[0.,     0.,     0.1365])
-    left_upper_forearm_visual_offset = Transform(rot=[1., 0., 0., 0.], pos=[0.,    0.,    0.136])
-    right_upper_elbow_visual_offset = Transform(rot=[1., 0., 0., 0.], pos=[0.,     0.,     0.1365])
-    right_upper_forearm_visual_offset = Transform(rot=[1., 0., 0., 0.], pos=[0.,    0.,   0.136])
-
     @staticmethod
     def add_visual_link(link_transforms, f):
         if "left_lower_shoulder" in f.link.name:
-            link_transforms["left_upper_elbow_visual"] = np.dot(np.dot(link_transforms["left_lower_shoulder"],
-                                                                        Baxter.left_e0_fixed_offset),
-                                                                        Baxter.left_upper_elbow_visual_offset)
-
+            link_transforms["left_upper_elbow_visual"] = np.dot(link_transforms["left_lower_shoulder"],
+                                                                        Baxter.left_e0_fixed_offset)
         if "left_lower_elbow" in f.link.name:
-            link_transforms["left_upper_forearm_visual"] = np.dot(np.dot(link_transforms["left_lower_elbow"],
-                                                                        Baxter.left_w0_fixed_offset),
-                                                                        Baxter.left_upper_forearm_visual_offset)
-
+            link_transforms["left_upper_forearm_visual"] = np.dot(link_transforms["left_lower_elbow"],
+                                                                        Baxter.left_w0_fixed_offset)
         if "right_lower_shoulder" in f.link.name:
-            link_transforms["right_upper_elbow_visual"] = np.dot(np.dot(link_transforms["right_lower_shoulder"],
-                                                                        Baxter.right_e0_fixed_offset),
-                                                                        Baxter.right_upper_elbow_visual_offset)
-
+            link_transforms["right_upper_elbow_visual"] = np.dot(link_transforms["right_lower_shoulder"],
+                                                                        Baxter.right_e0_fixed_offset)
         if "right_lower_elbow" in f.link.name:
-            link_transforms["right_upper_forearm_visual"] = np.dot(np.dot(link_transforms["right_lower_elbow"], 
-                                                                        Baxter.right_w0_fixed_offset),
-                                                                        Baxter.right_upper_forearm_visual_offset)
-        return link_transforms
+            link_transforms["right_upper_forearm_visual"] = np.dot(link_transforms["right_lower_elbow"], 
+                                                                        Baxter.right_w0_fixed_offset)
 
 
 def convert_thetas_to_dict(active_joint_names, thetas):

@@ -1,10 +1,8 @@
-import os
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
-from pykin.utils.kin_utils import logging_time
 
 try:
     import fcl
@@ -75,12 +73,7 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-@logging_time
-def plot_robot(robot, ax, name=None, visible_collision=False, visible_mesh=False, mesh_path='../asset/urdf/baxter/'):
-
-    if robot.name is not None:
-        name = os.path.splitext(os.path.basename(robot.name))[0].strip()
-
+def plot_robot(robot, ax, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
     plot_basis(robot, ax)
     links = []
     nodes = []
@@ -108,12 +101,11 @@ def plot_robot(robot, ax, name=None, visible_collision=False, visible_mesh=False
         ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
             [x[2] for x in nodes], s=55, c=lines[0].get_color())
     
+    if visible_visual:
+        plot_mesh(robot, mesh_path)
+
     if visible_collision:
         plot_collision(robot, ax)
-
-
-    if visible_mesh:
-        plot_mesh(robot, mesh_path)
 
 
 def plot_baxter(nodes, ax):
@@ -161,21 +153,30 @@ def plot_baxter(nodes, ax):
 
 
 def plot_collision(robot, ax, alpha=0.5):
+    def _get_color(params):
+        color = []
+        if params is not None:
+            visual_color = params.get('color')
+            if visual_color is not None:
+                color = list(visual_color.keys())
+        return color
+
     for link, transformation in robot.transformations.items():
-        A2B = transformation.matrix()
-        color = list(robot.links[link].color.keys())
-        if robot.links[link].dtype == 'cylinder':
-            length = float(robot.links[link].length)
-            radius = float(robot.links[link].radius)
+        A2B = np.dot(transformation.matrix(), robot.links[link].collision.offset.matrix())
+        color = _get_color(robot.links[link].visual.gparam)
+
+        if robot.links[link].collision.gtype == 'cylinder':
+            length = float(robot.links[link].collision.gparam.get('length'))
+            radius = float(robot.links[link].collision.gparam.get('radius'))
             plot_cylinder(ax, length=length, radius=radius, A2B=A2B, alpha=alpha, color=color)
 
-        if robot.links[link].dtype == 'sphere':
-            radius = float(robot.links[link].radius)
-            pos = transformation.pos
+        if robot.links[link].collision.gtype == 'sphere':
+            radius = float(robot.links[link].collision.gparam.get('radius'))
+            pos = A2B[:3,-1]
             plot_sphere(ax, radius=radius, p=pos, n_steps=20, alpha=alpha, color=color)
     
-        if robot.links[link].dtype == 'box':
-            size = robot.links[link].size
+        if robot.links[link].collision.gtype == 'box':
+            size = robot.links[link].collision.gparam.get('size')
             plot_box(ax, size, A2B=A2B, alpha=alpha, color=color)
 
 
@@ -265,10 +266,14 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
 def plot_mesh(robot, mesh_path):
     scene = trimesh.Scene()
     for link, transformation in robot.transformations.items():
-        if robot.links[link].mesh is not None:
-            filename = mesh_path + robot.links[link].mesh
-            A2B = transformation.matrix()
-            color = np.array([color for color in robot.links[link].color.values()]).flatten()
+        if robot.links[link].visual.gtype == "mesh":
+            mesh_name = robot.links[link].visual.gparam.get('filename')
+            filename = mesh_path + mesh_name
+            A2B = np.dot(transformation.matrix(), robot.links[link].visual.offset.matrix())
+            visual_color = robot.links[link].visual.gparam.get('color')
+            color = np.array([0.2, 0.2, 0.2, 1.])
+            if visual_color is not None:
+                color = np.array([color for color in visual_color.values()]).flatten()
             scene = convert_trimesh_scene(scene, filename, A2B, color)
             scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5)
     scene.show()

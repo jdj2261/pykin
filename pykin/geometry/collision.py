@@ -1,5 +1,3 @@
-
-import os, sys
 import warnings
 
 try:
@@ -8,9 +6,6 @@ except ImportError:
     warnings.warn(
         "Cannot compute collision. Library 'fcl' not installed.")
 from collections import OrderedDict
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../")
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 import pykin.utils.plot_utils as plt

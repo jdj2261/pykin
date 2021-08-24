@@ -9,10 +9,11 @@ class Kinematics:
     def __init__(self, 
                 robot_name, 
                 offset, 
-                active_joint_names = [],
+                active_joint_names=[],
                 base_name="base", 
                 eef_name=None, 
                 frames=None,
+                fcl_utils=None
                 ):
         self.robot_name = robot_name
         self.offset = offset
@@ -20,9 +21,8 @@ class Kinematics:
         self.base_name = base_name
         self.eef_name = eef_name
         self.frames = frames
-
-        # self.setup_robot_kinematics()
-        self.transformations = None
+        self._fcl_utils = fcl_utils
+        self._transformations = None
 
     @property
     def offset(self):
@@ -64,18 +64,11 @@ class Kinematics:
     def frames(self, frames):
         self._frames = frames
 
-    def setup_robot_kinematics(self):
-        if self.robot_name == "baxter":
-            self._setup_baxter_kin()
-    
-    def _setup_baxter_kin(self):
-        pass
-
     def forward_kinematics(self, thetas):
         if not isinstance(self.frames, list):
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
-        self.transformations = self._compute_FK(self.frames, self.offset, thetas)
-        return self.transformations
+        self._transformations = self._compute_FK(self.frames, self.offset, thetas)
+        return self._transformations
     
     def inverse_kinematics(self, current_joints, target_pose, method="LM", maxIter=1000):
         if method == "NR":
@@ -146,6 +139,7 @@ class Kinematics:
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
 
             cur_fk = self.forward_kinematics(current_joints)
+
             cur_pose = list(cur_fk.values())[-1].matrix()
             err_pose = calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
@@ -193,8 +187,11 @@ class Kinematics:
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
-
+            
             cur_fk = self.forward_kinematics(current_joints)
+
+
+
             cur_pose = list(cur_fk.values())[-1].matrix()
             err = calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])

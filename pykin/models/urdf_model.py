@@ -1,10 +1,10 @@
 import io
-import numpy as np
 from xml.etree import ElementTree as ET
 from collections import OrderedDict
 
 from pykin.models.robot_model import RobotModel
 from pykin.geometry.frame import Joint, Link, Frame
+from pykin.geometry.geometry import Visual, Collision
 from pykin.kinematics.transform import Transform
 from pykin.utils.kin_utils import *
 
@@ -46,7 +46,11 @@ class URDFModel(RobotModel):
     def _make_root_frame(self, root_name):
         root_frame = Frame(root_name + "_frame")
         root_frame.joint = Joint()
-        root_frame.link = Link(root_name, offset=convert_transform(root_frame.link.offset))
+        root_frame.link = Link(root_name, 
+                               offset=convert_transform(root_frame.link.offset), 
+                               visual=root_frame.link.visual, 
+                               collision=root_frame.link.collision)
+
         root_frame.children = self._build_chain_recursive(self.root, self._links, self._joints)
         return root_frame
 
@@ -54,11 +58,10 @@ class URDFModel(RobotModel):
         attrib = link_tag.attrib
         link_name = attrib.get('name', 'link_' + str(idx))
         frame = Frame(link_name + '_frame',
-                      link=Link(link_name, offset=Transform(), dtype=None, radius=0, length=0, size=np.zeros(3), color={}))
+                      link=Link(link_name, offset=Transform(), visual=Visual(), collision=Collision()))
 
-        self._parse_collision(link_tag, frame)
         self._parse_visual(link_tag, frame)
-
+        self._parse_collision(link_tag, frame)
         return frame
 
     def _parse_joint(self, joint_tag, idx):
@@ -90,45 +93,79 @@ class URDFModel(RobotModel):
 
         return frame
 
-    # TODO 
-    # origin
-    def _parse_collision(self, link_tag, frame):
-        for collision_tag in link_tag.findall('collision'):
-            self._parse_origin(collision_tag, frame)
-            self._parse_collision_geometry(collision_tag, frame)
-
     def _parse_visual(self, link_tag, frame):   
         for visual_tag in link_tag.findall('visual'):
-            self._parse_origin(visual_tag, frame)
+            self._parse_visual_origin(visual_tag, frame)
             self._parse_visual_geometry(visual_tag, frame)
-            self._parse_color(visual_tag, frame)
+            self._parse_visual_color(visual_tag, frame)
 
-    def _parse_origin(self, input_tag, frame):
+    def _parse_visual_origin(self, input_tag, frame):
         for origin_tag in input_tag.findall('origin'):
-            frame.link.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
-            frame.link.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
+            frame.link.visual.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
+            frame.link.visual.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
 
     def _parse_visual_geometry(self, input_tag, frame):
         for geometry_tag in input_tag.findall('geometry'):
-            for shape_type in ["box", "mesh"]:
+            for shape_type in LINK_TYPES:
                 for shapes in geometry_tag.findall(shape_type):
-                    frame.link.dtype = shapes.tag
-                    frame.link.size = convert_string_to_narray(shapes.attrib.get('size', None))
-                    frame.link.mesh = shapes.attrib.get('filename', None)
+                    self._convert_visual(shapes, frame)
+
+    def _convert_visual(self, shapes, frame):
+        if shapes.tag == "box":
+            frame.link.visual.gtype = shapes.tag
+            frame.link.visual.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
+        elif shapes.tag == "cylinder":
+            frame.link.visual.gtype = shapes.tag
+            frame.link.visual.gparam = {"length" : shapes.attrib.get('length', 0),
+                                        "radius" : shapes.attrib.get('radius', 0)}
+        elif shapes.tag == "sphere":
+            frame.link.visual.gtype = shapes.tag
+            frame.link.visual.gparam = {"radius" : shapes.attrib.get('radius', 0)}
+        elif shapes.tag == "mesh":
+            frame.link.visual.gtype = shapes.tag
+            frame.link.visual.gparam = {"filename" : shapes.attrib.get('filename', None)}
+        else:
+            frame.link.visual.gtype = None
+            frame.link.visual.gparam = None
+
+    def _parse_visual_color(self, input_tag, frame):
+        for material_tag in input_tag.findall('material'):
+            for colors in material_tag.findall('color'):
+                frame.link.visual.gparam['color'] = {material_tag.get('name'):convert_string_to_narray(colors.attrib.get('rgba'))}
+
+    def _parse_collision(self, link_tag, frame):
+        for collision_tag in link_tag.findall('collision'):
+            self._parse_collision_origin(collision_tag, frame)
+            self._parse_collision_geometry(collision_tag, frame)
+
+    def _parse_collision_origin(self, input_tag, frame):
+        for origin_tag in input_tag.findall('origin'):
+            frame.link.collision.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
+            frame.link.collision.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
 
     def _parse_collision_geometry(self, input_tag, frame):
         for geometry_tag in input_tag.findall('geometry'):
-            for shape_type in ["cylinder", "sphere", "mesh"]:
+            for shape_type in LINK_TYPES:
                 for shapes in geometry_tag.findall(shape_type):
-                    frame.link.dtype = shapes.tag
-                    frame.link.length = shapes.attrib.get('length', 0)
-                    frame.link.radius = shapes.attrib.get('radius', 0)
-                    frame.link.mesh = shapes.attrib.get('filename', None)
+                    self._convert_collision(shapes, frame)
 
-    def _parse_color(self, input_tag, frame):
-        for material_tag in input_tag.findall('material'):
-            for colors in material_tag.findall('color'):
-                frame.link.color[material_tag.get('name')] = convert_string_to_narray(colors.attrib.get('rgba'))
+    def _convert_collision(self, shapes, frame):
+        if shapes.tag == "box":
+            frame.link.collision.gtype = shapes.tag
+            frame.link.collision.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
+        elif shapes.tag == "cylinder":
+            frame.link.collision.gtype = shapes.tag
+            frame.link.collision.gparam = {"length" : shapes.attrib.get('length', 0),
+                                        "radius" : shapes.attrib.get('radius', 0)}
+        elif shapes.tag == "sphere":
+            frame.link.collision.gtype = shapes.tag
+            frame.link.collision.gparam = {"radius" : shapes.attrib.get('radius', 0)}
+        elif shapes.tag == "mesh":
+            frame.link.collision.gtype = shapes.tag
+            frame.link.collision.gparam = {"filename" : shapes.attrib.get('filename', None)}
+        else:
+            frame.link.collision.gtype = None
+            frame.link.collision.gparam = None
 
     def _parse_axis(self, axis_tag, frame):
         if axis_tag is not None:
@@ -156,12 +193,8 @@ class URDFModel(RobotModel):
                 chil_link = links[joint.child]
                 child_frame.link = Link(chil_link.name, 
                                         offset=convert_transform(chil_link.offset),
-                                        dtype=LINK_TYPE_MAP.get(chil_link.dtype),
-                                        radius=chil_link.radius,
-                                        length=chil_link.length,
-                                        size=chil_link.size,
-                                        color=chil_link.color)
-
+                                        visual=chil_link.visual,
+                                        collision=chil_link.collision)
                 child_frame.children = self._build_chain_recursive(child_frame.link, links, joints)
                 children.append(child_frame)
 
@@ -195,7 +228,7 @@ class URDFModel(RobotModel):
             if not ret is None:
                 return ret
 
-    def get_actuated_joint_names(self, desired_frames=None):
+    def _get_actuated_joint_names(self, desired_frames=None):
         if desired_frames is None:
             joint_names = self._get_joint_names(root_frame=self.root)
         else:
@@ -255,4 +288,3 @@ class URDFModel(RobotModel):
                 frames = URDFModel.generate_desired_frame_recursive(child, eef_name)
                 if frames is not None:
                     return [child] + frames
-    

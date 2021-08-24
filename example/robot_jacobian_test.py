@@ -1,15 +1,12 @@
 import sys
 import os
-import numpy as np
-from pprint import pprint
-# pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-# sys.path.append(pykin_path)
 
-from pykin.utils import plot as plt
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
+sys.path.append(pykin_path)
+
 from pykin.kinematics import transform as tf
 from pykin.robot import Robot
-from pykin import robot
-
+from pykin.kinematics import jacobian as jac
 
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
@@ -20,13 +17,13 @@ head_thetas = [0.0]
 right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
 left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
 
-robot.set_desired_tree("base", "left_wrist")
+robot.set_desired_frame("base", "left_wrist")
 
-fk = robot.forward_kinematics(left_arm_thetas)
-J = robot.jacobian(fk, left_arm_thetas)
+fk = robot.kin.forward_kinematics(left_arm_thetas)
+J = jac.calc_jacobian(robot.desired_frames, fk, left_arm_thetas)
 print(J)
 
-robot.set_desired_tree("base", "right_wrist")
-fk = robot.forward_kinematics(right_arm_thetas)
-J = robot.jacobian(fk, right_arm_thetas)
+robot.set_desired_frame("base", "right_wrist")
+fk = robot.kin.forward_kinematics(right_arm_thetas)
+J = jac.calc_jacobian(robot.desired_frames, fk, right_arm_thetas)
 print(J)

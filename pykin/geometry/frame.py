@@ -1,30 +1,24 @@
 import numpy as np
 
 from pykin.kinematics.transform import Transform
+from pykin.geometry.geometry import Visual, Collision
 from pykin.utils import transform_utils as tf
 from pykin.utils.kin_utils import ShellColors as scolors
 
 
 class Link:
-    def __init__(self, name=None, offset=Transform(), dtype=None, radius=0, length=0, size=None, color={}):
+    def __init__(self, name=None, offset=Transform(), visual=Visual(), collision=Collision()):
         self.name = name
         self.offset = offset
-        self.dtype = dtype
-        self.radius = radius
-        self.length = length
-        self.size = np.array(size)
-        self.color = color
-        self.mesh = None
+        self.visual = visual
+        self.collision = collision
 
     def __repr__(self):
-        radius = "radius= " + self.radius + ", " if self.dtype in ['cylinder', 'sphere'] else ""
-        length = "length= " + self.length if self.dtype in ['cylinder'] else ""
-        size = "size= "     + str(self.size) if self.dtype in ['box'] else ""
         return f"""
         {scolors.OKBLUE}Link{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC}
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
-            dtype= {scolors.HEADER}{self.dtype}{scolors.ENDC} 
-            {radius} {length} {size}"""
+            visual= {scolors.HEADER}{self.visual}{scolors.ENDC} 
+            collision= {scolors.HEADER}{self.collision}{scolors.ENDC}"""
 
 
 class Joint:
