@@ -34,15 +34,17 @@ If you want to know transformation of desired link,
 you must write set_desried_frame.
 """
 robot.set_desired_frame("base", "left_wrist")
-fk = robot.kin.forward_kinematics(left_arm_thetas)
-for link, T in fk.items():
+robot_transformations = robot.kin.forward_kinematics(left_arm_thetas)
+for link, T in robot_transformations.items():
     print(f"link: {link}, pose:{np.concatenate((T.pos, T.rot))} ")
 
 _, ax = plt.init_3d_figure()
-plt.plot_robot(robot, 
-               ax, 
-               "left_wrist", 
-               visible_collision=True)
+plt.plot_robot(robot,
+               transformations=robot_transformations,
+               ax=ax,
+               name="baxter_left_arm"
+               )
+              
 ax.legend()
 plt.show_figure()
 
@@ -59,9 +61,10 @@ you must write "baxter" in plot_robot method
 Otherwise, you can't see correct result plot
 """
 _, ax = plt.init_3d_figure()
-plt.plot_robot(robot, 
-               ax, 
-               "baxter", 
+plt.plot_robot(robot,
+               transformations=fk,
+               ax=ax, 
+               name="baxter", 
                visible_collision=True)
 ax.legend()
 plt.show_figure()

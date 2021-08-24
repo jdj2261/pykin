@@ -33,7 +33,7 @@ fk = robot.kin.forward_kinematics(thetas)
 
 # show FK graph
 _, ax = plt.init_3d_figure("FK Result")
-plt.plot_robot(robot, ax, "baxter", 
+plt.plot_robot(robot, fk, ax, "baxter", 
                 visible_visual=visible_visual, 
                 visible_collision=visible_collision )
 ax.legend()
@@ -51,10 +51,10 @@ right_arm_fk = robot.kin.forward_kinematics(right_arm_thetas)
 target_r_pose = np.concatenate((right_arm_fk["right_wrist"].pos, right_arm_fk["right_wrist"].rot))
 
 # Right's arm IK solution by LM
-ik_right_LM_result = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM", maxIter=100)
+ik_right_LM_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM", maxIter=100)
 
 # Right's arm IK solution by NR
-ik_right_NR_result = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="NR", maxIter=100)
+ik_right_NR_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="NR", maxIter=100)
 
 # Set desired link (root, end)
 robot.set_desired_frame("base", "left_wrist")
@@ -62,10 +62,10 @@ left_arm_fk = robot.kin.forward_kinematics(left_arm_thetas)
 target_l_pose = np.concatenate((left_arm_fk["left_wrist"].pos, left_arm_fk["left_wrist"].rot))
 
 # Left's arm IK solution by LM
-ik_left_LM_result = robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="LM", maxIter=100)
+ik_left_LM_result, _= robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="LM", maxIter=100)
 
 # Left's arm IK solution by NR
-ik_left_NR_result = robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="NR", maxIter=100)
+ik_left_NR_result, _ = robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="NR", maxIter=100)
 
 print(f"\n{scolors.HEADER}LM Method: Current Right arm Angles{scolors.ENDC}: \n{ik_right_LM_result}")
 print(f"{scolors.HEADER}LM Method: Current Left arm Angles{scolors.ENDC}: \n{ik_left_LM_result}")
@@ -79,7 +79,7 @@ robot.reset_desired_frames()
 result_fk_LM = robot.kin.forward_kinematics(thetas_LM)
 
 _, ax = plt.init_3d_figure("LM IK Result")
-plt.plot_robot(robot, ax, 
+plt.plot_robot(robot, result_fk_LM, ax,
                "baxter",
                visible_visual=visible_visual, 
                visible_collision=visible_collision)
@@ -100,7 +100,7 @@ robot.reset_desired_frames()
 result_fk_NR = robot.kin.forward_kinematics(thetas_NR)
 
 _, ax = plt.init_3d_figure("NR IK Result")
-plt.plot_robot(robot, ax, 
+plt.plot_robot(robot, result_fk_NR, ax,
                "baxter",
                visible_visual=visible_visual, 
                visible_collision=visible_collision)

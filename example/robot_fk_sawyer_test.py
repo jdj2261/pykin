@@ -18,14 +18,16 @@ robot.set_desired_frame("base", "right_wrist")
 # sawyer_example
 target_thetas = [np.pi/3, 0, 0, 0, 0, 0, 0, 0]
 init_thetas = np.random.randn(8)
-fk = robot.kin.forward_kinematics(target_thetas)
+robot_transformations = robot.kin.forward_kinematics(target_thetas)
 
 _, ax = plt.init_3d_figure("FK")
-plt.plot_robot(robot, 
-               ax, 
-               "sawyer", 
-               visible_visual=True,
+plt.plot_robot(robot,
+               transformations=robot_transformations,
+               ax=ax, 
+               name="sawyer",
+               visible_visual=False,
                visible_collision=True,
                mesh_path='../asset/urdf/sawyer/')
+
 ax.legend()
 plt.show_figure()

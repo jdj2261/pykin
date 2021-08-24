@@ -23,7 +23,9 @@ robot_transformations = robot.kin.forward_kinematics(thetas)
 
 _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(robot,
-               ax, "baxter", 
+               transformations=robot_transformations,
+               ax = ax, 
+               name = "baxter", 
                visible_visual=False, 
                visible_collision=True,
                mesh_path='../asset/urdf/baxter/')
