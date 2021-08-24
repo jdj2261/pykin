@@ -113,7 +113,7 @@ if __name__ == "__main__":
     ik_left_result, trajectory_joints_l = robot.kin.inverse_kinematics(init_left_thetas, 
                                                                      target_l_pose, 
                                                                      method="LM", 
-                                                                     maxIter=50)
+                                                                     maxIter=100)
     
     robot.set_desired_frame(base_name="base", eef_name="right_wrist")
     right_arm_thetas = [np.pi, 0, 0, 0, 0, 0, 0]
@@ -123,8 +123,7 @@ if __name__ == "__main__":
     ik_right_result, trajectory_joints_r = robot.kin.inverse_kinematics(init_right_thetas, 
                                                                         target_r_pose, 
                                                                         method="LM", 
-                                                                        maxIter=50)
-
+                                                                        maxIter=100)
 
     trajectory_joints = list(zip(trajectory_joints_l, trajectory_joints_r))
 
@@ -141,4 +140,4 @@ if __name__ == "__main__":
     # print(f"Desired Pose: {target_pose}")
     # print(f"Current Pose: {result_pose}")
     # # print(f"Current Pose: {}")
-    plt.plot_anmation(robot, trajectory_pos, interval=500)
+    plt.plot_anmation(robot, trajectory_pos, interval=10)

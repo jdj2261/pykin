@@ -108,8 +108,7 @@ def plot_robot(robot, transformations, ax, name=None, visible_visual=False, visi
     if visible_collision:
         plot_collision(robot, transformations, ax)
 
-
-
+#TODO
 def plot_anmation(robot, trajectory, interval=100):
     fig = plt.figure(figsize = (12, 6), dpi = 100)
     ax = fig.add_subplot(111, projection='3d')
