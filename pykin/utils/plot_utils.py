@@ -109,16 +109,19 @@ def plot_robot(robot, transformations, ax, name=None, visible_visual=False, visi
         plot_collision(robot, transformations, ax)
 
 #TODO
-def plot_anmation(robot, trajectory, interval=100):
+
+
+def plot_anmation(robot, results, trajectory, interval=100, repeat=False):
     fig = plt.figure(figsize = (12, 6), dpi = 100)
     ax = fig.add_subplot(111, projection='3d')
 
     def update(i):
+        print(results[i])
         if i == len(trajectory)-1:
             print("Animation Finished..")
         ax.clear()
         plot_robot(robot, trajectory[i], ax, name="baxter", visible_collision=True)
-    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval = interval, repeat = False)
+    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
 

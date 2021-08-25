@@ -13,7 +13,6 @@ class Kinematics:
                 base_name="base", 
                 eef_name=None, 
                 frames=None,
-                fcl_utils=None
                 ):
         self.robot_name = robot_name
         self.offset = offset
@@ -21,7 +20,6 @@ class Kinematics:
         self.base_name = base_name
         self.eef_name = eef_name
         self.frames = frames
-        self._fcl_utils = fcl_utils
         self._transformations = None
 
     @property

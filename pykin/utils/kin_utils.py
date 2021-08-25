@@ -115,3 +115,39 @@ def limit_joints(cur_jnt, lower, upper):
     return cur_jnt
 
 
+def get_robot_geom(link):
+    name = None
+    gtype = None
+    gparam = None
+
+    if link.collision.gtype == "cylinder":
+        name = link.name
+        gtype = link.collision.gtype
+        gparam = get_cylinder_param(link)
+    elif link.collision.gtype == "sphere":
+        name = link.name
+        gtype = link.collision.gtype
+        gparam = get_spehre_param(link)
+    elif link.collision.gtype == "box":
+        name = link.name
+        gtype = link.collision.gtype
+        gparam = get_box_param(link)
+    else:
+        name = link.name
+    return name, gtype, gparam
+
+
+def get_cylinder_param(link):
+    radius = float(link.collision.gparam.get('radius'))
+    length = float(link.collision.gparam.get('length'))
+    return (radius, length)
+
+
+def get_spehre_param(link):
+    radius = float(link.collision.gparam.get('radius'))
+    return radius
+
+
+def get_box_param(link):
+    size = list(link.collision.gparam.get('size'))
+    return size
