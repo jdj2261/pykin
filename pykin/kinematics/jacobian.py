@@ -1,6 +1,6 @@
 import numpy as np
 
-def calc_jacobian(frames, transformations: dict, thetas: list) -> np.array:
+def calc_jacobian(frames: list, transformations: dict, thetas: list) -> np.array:
     jsize = len(thetas)
     target_position = list(transformations.values())[-1].pos
     J = np.zeros((6, jsize))

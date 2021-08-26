@@ -5,13 +5,6 @@ Python Interface for the Robot Kinematics Library
 
 This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git).
 
-[TODO]
-
-  - Duplicate function check
-  - Classification by function
-
-
-
 ## Features
 
 - Pure python library
@@ -100,6 +93,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+      
   robot = Robot(file_path)
   robot.show_robot_info()
   ~~~
@@ -138,7 +132,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   
   # baxter_example
   file_path = '../asset/urdf/baxter/baxter.urdf'
-  robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]), joint_safety=False)
+  robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
   
   # set joints for targe pose
   right_arm_thetas = np.random.randn(7)
@@ -147,20 +141,19 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   init_right_thetas = np.random.randn(7)
   
   # Before compute IK, you must set desired root and end link
-  robot.set_desired_tree("base", "right_wrist")
+  robot.set_desired_frame("base", "right_wrist")
   
   # Compute FK for target pose
-  target_fk = robot.forward_kinematics(right_arm_thetas)
+  target_fk = robot.kin.forward_kinematics(right_arm_thetas)
   
   # get target pose
   target_r_pose = np.hstack((target_fk["right_wrist"].pos, target_fk["right_wrist"].rot))
   
   # Compute IK Solution using LM(Levenberg-Marquardt) or NR(Newton-Raphson) method
-  ik_right_result = robot.inverse_kinematics(
-      init_right_thetas, target_r_pose, method="LM")
+  ik_right_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM")
   
   # Compare error btween Target pose and IK pose
-  result_fk = robot.forward_kinematics(ik_right_result)
+  result_fk = robot.kin.forward_kinematics(ik_right_result)
   error = robot.compute_pose_error(
       target_fk["right_wrist"].matrix(),
       result_fk["right_wrist"].matrix())

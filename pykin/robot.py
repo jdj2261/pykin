@@ -7,9 +7,10 @@ sys.path.append(pykin_path)
 from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
 from pykin.models.urdf_model import URDFModel
-from pykin.utils.fcl_utils import FclManager
-from pykin.utils.kin_utils import get_robot_geom
-import pykin.utils.plot_utils as plt
+
+# from pykin.utils.fcl_utils import FclManager
+# from pykin.utils.kin_utils import get_robot_geom
+# import pykin.utils.plot_utils as plt
 
 class Robot(URDFModel):
     """
@@ -54,6 +55,9 @@ class Robot(URDFModel):
         print(f"active joint names: \n{self._get_actuated_joint_names()}")
         print("*" * 100)
 
+    def compute_pose_error(self, target=np.eye(4), result=np.eye(4)):
+        error = np.linalg.norm(np.dot(result, np.linalg.inv(target)) - np.mat(np.eye(4)))
+        return error
 
     def setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
@@ -63,7 +67,6 @@ class Robot(URDFModel):
                               eef_name=None,
                               frames=self.root
                               )
-
 
     def set_desired_frame(self, base_name="", eef_name=None):
         self.kin.base_name = base_name

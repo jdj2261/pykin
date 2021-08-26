@@ -132,8 +132,7 @@ def get_robot_geom(link):
         name = link.name
         gtype = link.collision.gtype
         gparam = get_box_param(link)
-    else:
-        name = link.name
+
     return name, gtype, gparam
 
 

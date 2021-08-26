@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from pykin.kinematics import jacobian as jac
 from pykin.utils import transform_utils as tf
-from pykin.utils.kin_utils import Baxter, calc_pose_error, convert_thetas_to_dict
+from pykin.utils.kin_utils import Baxter, calc_pose_error, convert_thetas_to_dict, logging_time
 
 class Kinematics:
     def __init__(self, 
@@ -68,6 +68,7 @@ class Kinematics:
         self._transformations = self._compute_FK(self.frames, self.offset, thetas)
         return self._transformations
     
+    @logging_time
     def inverse_kinematics(self, current_joints, target_pose, method="LM", maxIter=1000):
         if method == "NR":
             joints, trajectory_joints = self._compute_IK_NR(

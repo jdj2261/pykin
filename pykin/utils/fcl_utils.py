@@ -6,9 +6,6 @@ try:
 except BaseException:
     fcl = None
 
-from pykin.kinematics.transform import Transform
-import time
-
 class ContactData:
     """
     Data structure for holding information about a collision contact.
@@ -73,6 +70,28 @@ class FclManager:
         self._manager.registerObject(o)
         self._manager.update()
 
+    def set_transform(self, name=None, transform=np.eye(4)):
+        """
+        Set the transform for one of the manager's objects.
+        This replaces the prior transform.
+        Parameters
+        ----------
+        name : str
+          An identifier for the object already in the manager
+        transform : (4,4) float
+          A new homogeneous transform matrix for the object
+        """
+        if name is None:
+            return
+            
+        if name in self._objs:
+            o = self._objs[name]['obj']
+            o.setRotation(transform[:3, :3])
+            o.setTranslation(transform[:3, 3])
+            self._manager.update(o)
+        else:
+            raise ValueError('{} not in collision manager!'.format(name))
+
     def remove_object(self, name):
         if name in self._objs:
             self._manager.unregisterObject(self._objs[name]['obj'])
@@ -109,6 +128,7 @@ class FclManager:
                 coll_names = (self._extract_name(contact.o1),self._extract_name(contact.o2))
                 coll_names = tuple(sorted(coll_names))
 
+                # Baxter
                 if 'lower_forearm' in coll_names[0] and 'wrist' in coll_names[1]:
                     continue
                 if 'upper_forearm' in coll_names[0] and 'upper_forearm_visual' in coll_names[1]:
@@ -153,17 +173,15 @@ class FclManager:
                 if return_data:
                     contact_data.append(ContactData(coll_names, contact))
 
+        if len(objs_in_collision) == 0:
+            result = False
+            objs_in_collision = "No object collided.."
+
         if return_names and return_data:
-            if len(objs_in_collision) == 0:
-                result = False
             return result, objs_in_collision, contact_data
         elif return_names:
-            if len(objs_in_collision) == 0:
-                result = False
             return result, objs_in_collision
         elif return_data:
-            if len(objs_in_collision) == 0:
-                result = False
             return result, contact_data
         else:
             return result
@@ -184,32 +202,5 @@ class FclManager:
 
     def _extract_name(self, geom):
         return self._names[id(geom)]
-
-    # def _is_unique_collision(self, names):
-    #     if any('collision_head_link_1', 'collision_head_link_2') in names:
-    #         print(names)
-    #     # (names[0] == 'collision_head_link_1' and names[1] == 'sonar_ring') or \
-    #     #    (names[0] == 'collision_head_link_2' and names[1] == 'collision_head_link_1') or \
-    #     #    (names[0] == 'collision_head_link_2' and names[1] == 'sonar_ring') or \
-    #     #    (names[0] == 'collision_head_link_2' and names[1] == 'head') or \
-    #     #    (names[0] == 'collision_head_link_2' and names[1] == 'screen') or \
-    #     #    (names[0] == 'collision_head_link_1' and names[1] == 'head') or \
-    #     #    (names[0] == 'collision_head_link_1' and names[1] == 'screen') or \
-    #     #    (names[0] == 'left_upper_forearm' and names[1] == 'left_upper_forearm_visual') or \
-    #     #    (names[0] == 'left_lower_elbow'      and names[1] == 'left_upper_forearm') or \
-    #     #    (names[0] == 'left_lower_elbow'      and names[1] == 'left_upper_forearm_visual') or \
-    #     #    (names[0] == 'left_lower_forearm' and names[1] == 'left_wrist') or \
-    #     #    (names[0] == 'left_upper_elbow' and names[1] == 'left_upper_elbow_visual') or \
-    #     #    (names[0] == 'left_lower_shoulder'   and names[1] == 'left_upper_elbow') or \
-    #     #    (names[0] == 'left_lower_shoulder'   and names[1] == 'left_upper_elbow_visual') or \
-    #     #    (names[0] == 'right_upper_forearm_visual' and names[1] == 'right_lower_elbow') or \
-    #     #    (names[0] == 'right_upper_forearm'   and names[1] == 'right_upper_forearm_visual') or \
-    #     #    (names[0] == 'right_upper_forearm'   and names[1] == 'right_lower_elbow') or \
-    #     #    (names[0] == 'right_upper_elbow_visual' and names[1] == 'right_upper_elbow') or \
-    #     #    (names[0] == 'right_upper_elbow_visual' and names[1] == 'right_lower_shoulder') or \
-    #     #    (names[0] == 'right_upper_elbow'     and names[1] == 'right_lower_shoulder') or \
-    #     #    (names[0] == 'right_wrist'           and names[1] == 'right_lower_forearm'):
-
-    #         return True
 
 
