@@ -74,7 +74,9 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, transformations, ax, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+    if transformations is None:
+        transformations = robot.transformations
     plot_basis(robot, ax)
     links = []
     nodes = []

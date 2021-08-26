@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 class RobotModel:
     def __init__(self, fname=None):
-        self.name = fname
+        self.fname = fname
         self.root = None
         self._links = OrderedDict()
         self._joints = OrderedDict()

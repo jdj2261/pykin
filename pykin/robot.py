@@ -33,7 +33,7 @@ class Robot(URDFModel):
         # self.transformations = None
         self.fcl_utils = None
         self.kin = None
-        self.setup_kinematics()
+        self._setup_kinematics()
 
     def __repr__(self):
         return f"""ROBOT : {self.robot_name} 
@@ -59,7 +59,7 @@ class Robot(URDFModel):
         error = np.linalg.norm(np.dot(result, np.linalg.inv(target)) - np.mat(np.eye(4)))
         return error
 
-    def setup_kinematics(self):
+    def _setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
                               active_joint_names=self._get_actuated_joint_names(),
@@ -67,6 +67,11 @@ class Robot(URDFModel):
                               eef_name=None,
                               frames=self.root
                               )
+        self._init_transform()
+        
+    def _init_transform(self):
+        thetas = np.zeros(self.dof)
+        self.kin.forward_kinematics(thetas)
 
     def set_desired_frame(self, base_name="", eef_name=None):
         self.kin.base_name = base_name
@@ -88,6 +93,10 @@ class Robot(URDFModel):
     @property
     def transformations(self):
         return self.kin._transformations
+
+    @transformations.setter
+    def transformations(self, transformations):
+        self.transformations = transformation
 
     @property
     def active_joint_names(self):
