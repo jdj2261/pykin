@@ -1,8 +1,5 @@
 import sys
-import os
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-sys.path.append(pykin_path)
 from pykin.robot import Robot
 
 file_path = '../asset/urdf/sawyer/sawyer.urdf'

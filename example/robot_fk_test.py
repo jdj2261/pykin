@@ -1,9 +1,4 @@
-import sys
-import os
 import numpy as np
-from pprint import pprint
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-sys.path.append(pykin_path)
 
 from pykin.robot import Robot
 from pykin.kinematics.transform import Transform
@@ -50,7 +45,7 @@ plt.show_figure()
 
 """
 If you want to reknow transformations of all links,
-you must write desired_tree.
+you must write reset_desired_frames.
 """
 robot.reset_desired_frames()
 fk = robot.kin.forward_kinematics(thetas)
