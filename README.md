@@ -7,7 +7,6 @@ This library has been created simply by referring to [ikpy](https://github.com/P
 
 [TODO]
 
--  Code Refactoring
   - Duplicate function check
   - Classification by function
 
