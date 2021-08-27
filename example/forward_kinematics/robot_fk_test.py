@@ -7,7 +7,7 @@ from pykin.utils.kin_utils import ShellColors as sc
 
 
 # baxter_example
-file_path = '../asset/urdf/baxter/baxter.urdf'
+file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 head_thetas = [0.0]

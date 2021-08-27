@@ -218,8 +218,10 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   from pykin.kinematics.transform import Transform
   from pykin.robot import Robot
   
-  # If you want to check robot's collision, install python-fcl 
-  # and then, import FclManager in fcl_utils package
+  """
+  If you want to check robot's collision, install python-fcl 
+  And then, import FclManager in fcl_utils package
+  """
   from pykin.utils.fcl_utils import FclManager
   from pykin.utils.kin_utils import get_robot_geom
   from pykin.utils import plot_utils as plt
@@ -272,7 +274,49 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 ## Visualization
 
 - urdf 
+
+  You can see visualization using matplotlib.
+
+  |          baxter           |          sawyer           |          iiwa14           |          panda          |
+  | :-----------------------: | :-----------------------: | :-----------------------: | :---------------------: |
+  | ![baxter](img/baxter.png) | ![sawyer](img/sawyer.png) | ![iiwa14](img/iiwa14.png) | ![panda](img/panda.png) |
+
+  <details>
+    <summary>Code</summary> 
+
+  ~~~python
+  import sys
+  
+  from pykin.robot import Robot
+  from pykin.utils import plot_utils as plt
+  
+  file_path = '../../asset/urdf/sawyer/sawyer.urdf'
+  
+  if len(sys.argv) > 1:
+      robot_name = sys.argv[1]
+      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+  robot = Robot(file_path)
+  
+  fig, ax = plt.init_3d_figure("URDF")
+  
+  # For Baxter robots, the name argument to the plot_robot function must be baxter.
+  plt.plot_robot(robot, 
+                 transformations=robot.transformations,
+                 ax=ax, 
+                 name=robot.robot_name,
+                 visible_visual=False, 
+                 visible_collision=False, 
+                 mesh_path='../asset/urdf/baxter/')
+  ax.legend()
+  plt.show_figure()
+  ~~~
+
+  </details>
+
+  
+
 - collision
+
 - mesh
 
 - Animation

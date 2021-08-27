@@ -8,10 +8,6 @@ from pykin.kinematics.kinematics import Kinematics
 from pykin.kinematics.transform import Transform
 from pykin.models.urdf_model import URDFModel
 
-# from pykin.utils.fcl_utils import FclManager
-# from pykin.utils.kin_utils import get_robot_geom
-# import pykin.utils.plot_utils as plt
-
 class Robot(URDFModel):
     """
     Initializes a robot object, as defined by a single corresponding robot URDF

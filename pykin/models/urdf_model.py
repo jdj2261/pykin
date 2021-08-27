@@ -1,4 +1,4 @@
-import io
+import io, os
 from xml.etree import ElementTree as ET
 from collections import OrderedDict
 
@@ -12,6 +12,10 @@ from pykin.utils.kin_utils import *
 class URDFModel(RobotModel):
     def __init__(self, fname):
         super().__init__(fname)
+
+        if not os.path.isfile(fname):
+            raise FileNotFoundError(f'{fname} is not Found..')
+
         self.tree_xml = ET.parse(fname)
         self.root = self.tree_xml.getroot()
         self.robot_name = self.root.attrib.get('name')

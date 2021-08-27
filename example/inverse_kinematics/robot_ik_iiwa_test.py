@@ -4,7 +4,7 @@ from pykin.robot import Robot
 from pykin.kinematics import transform as tf
 from pykin.utils import plot_utils as plt
 
-file_path = '../asset/urdf/iiwa14/iiwa14.urdf'
+file_path = '../../asset/urdf/iiwa14/iiwa14.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 

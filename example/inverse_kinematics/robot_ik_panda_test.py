@@ -5,7 +5,7 @@ from pykin.kinematics import transform as tf
 from pykin.robot import Robot
 from pykin.utils import plot_utils as plt
 
-file_path = '../asset/urdf/panda/panda.urdf'
+file_path = '../../asset/urdf/panda/panda.urdf'
 
 robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.set_desired_frame("panda_link0", "panda_hand")

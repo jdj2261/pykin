@@ -4,7 +4,7 @@ from pykin.kinematics.transform import Transform
 from pykin.robot import Robot
 from pykin.utils import plot_utils as plt
 
-file_path = '../asset/urdf/sawyer/sawyer.urdf'
+file_path = '../../asset/urdf/sawyer/sawyer.urdf'
 
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 print(robot)
