@@ -313,11 +313,98 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   </details>
 
-  
-
 - collision
 
+  You can see collision defined in collision/geometry tags in urdf.
+
+  |               baxter                |               sawyer                |
+  | :---------------------------------: | :---------------------------------: |
+  | ![baxter](img/baxter_collision.png) | ![baxter](img/sawyer_collision.png) |
+
+  <details>
+    <summary>Code</summary> 
+
+  ~~~python
+  import sys
+  
+  from pykin.robot import Robot
+  from pykin.utils import plot_utils as plt
+  
+  file_path = '../../asset/urdf/baxter/baxter.urdf'
+  
+  if len(sys.argv) > 1:
+      robot_name = sys.argv[1]
+      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+  robot = Robot(file_path)
+  
+  fig, ax = plt.init_3d_figure("URDF")
+  
+  """
+  Only baxter and sawyer robots can see collisions.
+  It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
+  """
+  # If visible_collision is True, visualize collision
+  plt.plot_robot(robot, 
+                 transformations=robot.transformations,
+                 ax=ax, 
+                 name=robot.robot_name,
+                 visible_visual=False, 
+                 visible_collision=True, 
+                 mesh_path='../asset/urdf/baxter/')
+  ax.legend()
+  plt.show_figure()
+  ~~~
+
+  </details>
+
 - mesh
+
+  You can see  mesh defined in visual/geometry tags in urdf.
+
+  |                          baxter                           |                          sawyer                           |                          iiwa14                           |                          panda                          |
+  | :-------------------------------------------------------: | :-------------------------------------------------------: | :-------------------------------------------------------: | :-----------------------------------------------------: |
+  | ![baxter_mesh](/Users/jindaejong/Desktop/baxter_mesh.png) | ![sawyer_mesh](/Users/jindaejong/Desktop/sawyer_mesh.png) | ![iiwa14_mesh](/Users/jindaejong/Desktop/iiwa14_mesh.png) | ![panda_mesh](/Users/jindaejong/Desktop/panda_mesh.png) |
+
+  <details>
+    <summary>Code</summary> 
+
+  ~~~python
+  import sys
+  
+  from pykin.robot import Robot
+  from pykin.utils import plot_utils as plt
+  
+  file_path = '../../asset/urdf/baxter/baxter.urdf'
+  
+  if len(sys.argv) > 1:
+      robot_name = sys.argv[1]
+      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+  robot = Robot(file_path)
+  
+  fig, ax = plt.init_3d_figure("URDF")
+  
+  """
+  Only baxter and sawyer robots can see collisions.
+  It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
+  """
+  # If visible_visual is True, visualize mesh
+  # and you have to input mesh_path
+  plt.plot_robot(robot, 
+                 transformations=robot.transformations,
+                 ax=ax, 
+                 name=robot.robot_name,
+                 visible_visual=True, 
+                 visible_collision=False, 
+                 mesh_path='../../asset/urdf/'+robot.robot_name+'/')
+  """
+  The mesh file doesn't use matplotlib, 
+  so it's okay to comment out the line below.
+  """
+  # ax.legend()
+  # plt.show_figure()
+  ~~~
+
+  </details>
 
 - Animation
 
