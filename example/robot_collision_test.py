@@ -1,10 +1,5 @@
-import sys
-import os
 import numpy as np
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-sys.path.append(pykin_path)
-print(pykin_path)
 from pykin.kinematics.transform import Transform
 from pykin.robot import Robot
 from pykin.utils.fcl_utils import FclManager
@@ -28,8 +23,8 @@ for link, transformation in transformations.items():
     transform = transformation.matrix()
     fcl_manager.add_object(name, gtype, gparam, transform)
 
-result, datas, t = fcl_manager.collision_check(return_names=True, return_data=True)
-print(result, datas)
+result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+print(result, objs_in_collision, contact_data)
 
 fig, ax = plt.init_3d_figure()
 plt.plot_robot(robot, transformations, ax, name="baxter", visible_collision=True)
@@ -43,8 +38,8 @@ for link, transformation in transformations.items():
     transform = transformation.matrix()
     fcl_manager.set_transform(name=name, transform=transform)
 
-result, datas, t = fcl_manager.collision_check(return_names=True, return_data=True)
-print(result, datas)
+result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+print(result, objs_in_collision, contact_data)
 
 fig, ax = plt.init_3d_figure()
 plt.plot_robot(robot, transformations, ax, name="baxter", visible_collision=True)

@@ -1,13 +1,10 @@
-import sys
-import os
 import numpy as np
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-sys.path.append(pykin_path)
 
 from pykin.robot import Robot
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
 from pykin.utils.kin_utils import ShellColors as scolors
+
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))

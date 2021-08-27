@@ -85,6 +85,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
    `baxter, iiwa14, panda, and sawyer`
 
+  <details>
+    <summary>Code</summary> 
+
   ~~~python
   import sys
   from pykin.robot import Robot
@@ -98,14 +101,17 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   robot.show_robot_info()
   ~~~
 
-  `python robot_info.py baxter`
+  </details>
 
 - Forward Kinematics
 
+  <details>
+    <summary>Code</summary> 
+  
   ~~~python
   from pykin.robot import Robot
   from pykin.kinematics.transform import Transform
-  from pykin.utils.shell_color import ShellColors as sc
+  from pykin.utils.kin_utils import ShellColors as sc
   
   # baxter_example
   file_path = '../asset/urdf/baxter/baxter.urdf'
@@ -118,13 +124,52 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   thetas = head_thetas + right_arm_thetas + left_arm_thetas
   
   # compute FK
-  fk = robot.forward_kinematics(thetas)
+  fk = robot.kin.forward_kinematics(thetas)
   for link, transform in fk.items():
       print(f"{sc.HEADER}{link}{sc.ENDC}, {transform.rot}, {transform.pos}")
   ~~~
   
+  </details>
+  
+- Jacobian
+
+  <details>
+    <summary>Code</summary> 
+  
+  ~~~python
+  from pykin.kinematics import transform as tf
+  from pykin.robot import Robot
+  
+  # import jacobian
+  from pykin.kinematics import jacobian as jac
+  
+  file_path = '../asset/urdf/baxter/baxter.urdf'
+  robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+  
+  left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
+  
+  # Before compute Jacobian, you must set from start link to end link
+  robot.set_desired_frame("base", "left_wrist")
+  fk = robot.kin.forward_kinematics(left_arm_thetas)
+  
+  # If you want to get Jacobian, use calc_jacobian function
+  J = jac.calc_jacobian(robot.desired_frames, fk, left_arm_thetas)
+  print(J)
+  
+  right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
+  robot.set_desired_frame("base", "right_wrist")
+  fk = robot.kin.forward_kinematics(right_arm_thetas)
+  J = jac.calc_jacobian(robot.desired_frames, fk, right_arm_thetas)
+  print(J)
+  ~~~
+  
+  </details>
+  
 - Inverse Kinematics
 
+  <details>
+    <summary>Code</summary> 
+  
   ~~~python
   import numpy as np
   from pykin.robot import Robot
@@ -140,7 +185,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # set init joints
   init_right_thetas = np.random.randn(7)
   
-  # Before compute IK, you must set desired root and end link
+  # Before compute IK, you must set from start link to end link
   robot.set_desired_frame("base", "right_wrist")
   
   # Compute FK for target pose
@@ -159,29 +204,60 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
       result_fk["right_wrist"].matrix())
   print(error)
   ~~~
+  
+  </details>
 
-## Inverse Kinematics 
+- Self-Collision Check
 
-You can see an example of IK by running the command below.
+  <details>
+    <summary>Code</summary> 
 
-~~~shell
-$ cd pykin/example
-$ python robot_ik_baxter_test.py
-~~~
+  ~~~python
+  import numpy as np
+  
+  from pykin.kinematics.transform import Transform
+  from pykin.robot import Robot
+  
+  # If you want to check robot's collision, install python-fcl 
+  # and then, import FclManager in fcl_utils package
+  from pykin.utils.fcl_utils import FclManager
+  from pykin.utils.kin_utils import get_robot_geom
+  from pykin.utils import plot_utils as plt
+  
+  file_path = '../asset/urdf/baxter/baxter.urdf'
+  
+  robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+  
+  head_thetas = np.zeros(1)
+  right_arm_thetas = np.array([np.pi, 0, 0, 0, 0, 0, 0])
+  left_arm_thetas = np.array([-np.pi, 0, 0, 0, 0, 0, 0])
+  
+  thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
+  transformations = robot.kin.forward_kinematics(thetas)
+  
+  # call FclManager class
+  fcl_manager = FclManager()
+  for link, transformation in transformations.items():
+    	# get robot link's name and geometry info 
+      name, gtype, gparam = get_robot_geom(robot.links[link])
+      # get 4x4 size homogeneous transform matrix
+      transform = transformation.matrix()
+      # add link name, geometry info, transform matrix to fcl_manager 
+      fcl_manager.add_object(name, gtype, gparam, transform)
+  
+  # you can get collision result, contacted object name, fcl contatct_data
+  result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+  
+  print(result, objs_in_collision, contact_data)
+  ~~~
 
-- **Forward Kinematics**
+  </details>
 
-  <img src="img/FK.png" height="400">
+## Visualization
 
-- **IK Newton Raphson method**
+- urdf 
+- collision
+- mesh
 
-  <img src="img/NR.png" height="400">
-
-- **IK Levenberg-Marquardt method**
-
-  <img src="img/LM.png" height="400">
-
-
-
-**It can be seen that the LM method is faster and more accurate than the NR method when using IK.**
+- Animation
 

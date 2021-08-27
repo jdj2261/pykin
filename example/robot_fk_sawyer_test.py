@@ -1,9 +1,4 @@
-import sys
-import os
 import numpy as np
-from pprint import pprint
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../")
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robot import Robot
