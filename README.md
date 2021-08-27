@@ -249,6 +249,22 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
   
   print(result, objs_in_collision, contact_data)
+  
+  """
+  If you want to check collision check after transform, 
+  add the link name and transform matrix to the set_transform function.
+  """
+  left_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
+  thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
+  transformations = robot.kin.forward_kinematics(thetas)
+  
+  for link, transformation in transformations.items():
+      name, _, _ = get_robot_geom(robot.links[link])
+      transform = transformation.matrix()
+      fcl_manager.set_transform(name=name, transform=transform)
+  
+  result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+  print(result, objs_in_collision, contact_data)
   ~~~
 
   </details>
