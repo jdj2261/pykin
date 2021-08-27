@@ -238,7 +238,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # call FclManager class
   fcl_manager = FclManager()
   for link, transformation in transformations.items():
-    	# get robot link's name and geometry info 
+      # get robot link's name and geometry info 
       name, gtype, gparam = get_robot_geom(robot.links[link])
       # get 4x4 size homogeneous transform matrix
       transform = transformation.matrix()

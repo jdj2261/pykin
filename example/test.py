@@ -1,32 +1,36 @@
 import numpy as np
-from pykin.robot import Robot
-from pykin.kinematics.transform import Transform
 
-# baxter_example
+from pykin.kinematics.transform import Transform
+from pykin.robot import Robot
+
+# If you want to check robot's collision, install python-fcl 
+# and then, import FclManager in fcl_utils package
+from pykin.utils.fcl_utils import FclManager
+from pykin.utils.kin_utils import get_robot_geom
+from pykin.utils import plot_utils as plt
+
 file_path = '../asset/urdf/baxter/baxter.urdf'
+
 robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
-# set joints for targe pose
-right_arm_thetas = np.random.randn(7)
+head_thetas = np.zeros(1)
+right_arm_thetas = np.array([np.pi, 0, 0, 0, 0, 0, 0])
+left_arm_thetas = np.array([-np.pi, 0, 0, 0, 0, 0, 0])
 
-# set init joints
-init_right_thetas = np.random.randn(7)
+thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
+transformations = robot.kin.forward_kinematics(thetas)
 
-# Before compute IK, you must set desired root and end link
-robot.set_desired_frame("base", "right_wrist")
+# call FclManager class
+fcl_manager = FclManager()
+for link, transformation in transformations.items():
+    # get robot link's name and geometry info 
+    name, gtype, gparam = get_robot_geom(robot.links[link])
+    # get 4x4 size homogeneous transform matrix
+    transform = transformation.matrix()
+    # add link name, geometry info, transform matrix to fcl_manager 
+    fcl_manager.add_object(name, gtype, gparam, transform)
 
-# Compute FK for target pose
-target_fk = robot.kin.forward_kinematics(right_arm_thetas)
+# you can get collision result, contacted object name, fcl contatct_data
+result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
 
-# get target pose
-target_r_pose = np.hstack((target_fk["right_wrist"].pos, target_fk["right_wrist"].rot))
-
-# Compute IK Solution using LM(Levenberg-Marquardt) or NR(Newton-Raphson) method
-ik_right_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM")
-
-# Compare error btween Target pose and IK pose
-result_fk = robot.kin.forward_kinematics(ik_right_result)
-error = robot.compute_pose_error(
-    target_fk["right_wrist"].matrix(),
-    result_fk["right_wrist"].matrix())
-print(error)
+print(result, objs_in_collision, contact_data)
