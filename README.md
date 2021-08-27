@@ -361,9 +361,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   You can see  mesh defined in visual/geometry tags in urdf.
 
-  |                          baxter                           |                          sawyer                           |                          iiwa14                           |                          panda                          |
-  | :-------------------------------------------------------: | :-------------------------------------------------------: | :-------------------------------------------------------: | :-----------------------------------------------------: |
-  | ![baxter_mesh](/Users/jindaejong/Desktop/baxter_mesh.png) | ![sawyer_mesh](/Users/jindaejong/Desktop/sawyer_mesh.png) | ![iiwa14_mesh](/Users/jindaejong/Desktop/iiwa14_mesh.png) | ![panda_mesh](/Users/jindaejong/Desktop/panda_mesh.png) |
+  |               baxter                |               sawyer                |               iiwa14                |               panda               |
+  | :---------------------------------: | :---------------------------------: | :---------------------------------: | :-------------------------------: |
+  | ![baxter_mesh](img/baxter_mesh.png) | ![sawyer_mesh](img/sawyer_mesh.png) | ![iiwa14_mesh](img/iiwa14_mesh.png) | ![panda_mesh](img/panda_mesh.png) |
 
   <details>
     <summary>Code</summary> 
