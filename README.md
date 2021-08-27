@@ -410,5 +410,5 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   *You can see an animation that visualizes trajectory*
 
-  *because the code is long Please refer to [this](example/visualization/robot_animation_test.py)*
+  *Please refer to [this](example/visualization/robot_animation_test.py)*
 
