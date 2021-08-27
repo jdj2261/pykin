@@ -110,16 +110,18 @@ def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=F
     if visible_collision:
         plot_collision(robot, transformations, ax)
 
-#TODO
-
-
-def plot_anmation(robot, results, trajectory, interval=100, repeat=False):
+def plot_anmation(robot, trajectory, interval=100, repeat=False, results=None):
     fig = plt.figure(figsize = (12, 6), dpi = 100)
     ax = fig.add_subplot(111, projection='3d')
 
     def update(i):
-        print(results[i])
+        print(f"{i/len(trajectory) * 100:.1f} %")
+        
+        if results is not None:
+            print(results[i])
+
         if i == len(trajectory)-1:
+            print(f"{i/(len(trajectory)-1) * 100:.1f} %")
             print("Animation Finished..")
         ax.clear()
         plot_robot(robot, trajectory[i], ax, name="baxter", visible_collision=True)

@@ -273,9 +273,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
 ## Visualization
 
-- urdf 
+- **urdf** 
 
-  You can see visualization using matplotlib.
+  *You can see visualization using matplotlib.*
 
   |          baxter           |          sawyer           |          iiwa14           |          panda          |
   | :-----------------------: | :-----------------------: | :-----------------------: | :---------------------: |
@@ -313,9 +313,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   </details>
 
-- collision
+- **collision**
 
-  You can see collision defined in collision/geometry tags in urdf.
+  **You can see collision defined in collision/geometry tags in urdf.*
 
   |               baxter                |               sawyer                |
   | :---------------------------------: | :---------------------------------: |
@@ -357,9 +357,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   </details>
 
-- mesh
+- **mesh**
 
-  You can see  mesh defined in visual/geometry tags in urdf.
+  *You can see  mesh defined in visual/geometry tags in urdf.*
 
   |               baxter                |               sawyer                |               iiwa14                |               panda               |
   | :---------------------------------: | :---------------------------------: | :---------------------------------: | :-------------------------------: |
@@ -407,4 +407,8 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   </details>
 
 - Animation
+
+  *You can see an animation that visualizes the robot's path*
+
+  *because the code is long Please refer to [this file](example/visualization/robot_animation_test.py)*
 
