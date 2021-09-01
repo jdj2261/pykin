@@ -315,7 +315,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
 - **collision**
 
-  **You can see collision defined in collision/geometry tags in urdf.*
+  *You can see collision defined in collision/geometry tags in urdf.*
 
   |               baxter                |               sawyer                |
   | :---------------------------------: | :---------------------------------: |
