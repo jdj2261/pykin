@@ -84,7 +84,7 @@ def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=F
 
     for i, (link, transformation) in enumerate(transformations.items()):
         links.append(link)
-        transformation_matrix.append(transformation.matrix())
+        transformation_matrix.append(transformation.homogeneous_matrix)
 
     for link, matrix in zip(links, transformation_matrix):
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
@@ -183,7 +183,7 @@ def plot_collision(robot, transformations, ax, alpha=0.5):
         return color
 
     for link, transformation in transformations.items():
-        A2B = np.dot(transformation.matrix(), robot.links[link].collision.offset.matrix())
+        A2B = np.dot(transformation.homogeneous_matrix, robot.links[link].collision.offset.homogeneous_matrix)
         color = _get_color(robot.links[link].visual.gparam)
 
         if robot.links[link].collision.gtype == 'cylinder':
@@ -290,7 +290,7 @@ def plot_mesh(robot, transformations, mesh_path):
         if robot.links[link].visual.gtype == "mesh":
             mesh_name = robot.links[link].visual.gparam.get('filename')
             filename = mesh_path + mesh_name
-            A2B = np.dot(transformation.matrix(), robot.links[link].visual.offset.matrix())
+            A2B = np.dot(transformation.homogeneous_matrix, robot.links[link].visual.offset.homogeneous_matrix)
             visual_color = robot.links[link].visual.gparam.get('color')
             color = np.array([0.2, 0.2, 0.2, 1.])
             if visual_color is not None:

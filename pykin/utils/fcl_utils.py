@@ -173,7 +173,7 @@ class FclManager:
                 if return_data:
                     contact_data.append(ContactData(coll_names, contact))
 
-        if len(objs_in_collision) == 0:
+        if not objs_in_collision:
             result = False
             objs_in_collision = "No object collided.."
 

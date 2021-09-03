@@ -200,8 +200,8 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # Compare error btween Target pose and IK pose
   result_fk = robot.kin.forward_kinematics(ik_right_result)
   error = robot.compute_pose_error(
-      target_fk["right_wrist"].matrix(),
-      result_fk["right_wrist"].matrix())
+      target_fk["right_wrist"].homogeneous_matrix,
+      result_fk["right_wrist"].homogeneous_matrix)
   print(error)
   ~~~
   
@@ -243,7 +243,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
       # get robot link's name and geometry info 
       name, gtype, gparam = get_robot_geom(robot.links[link])
       # get 4x4 size homogeneous transform matrix
-      transform = transformation.matrix()
+      transform = transformation.homogeneous_matrix
       # add link name, geometry info, transform matrix to fcl_manager 
       fcl_manager.add_object(name, gtype, gparam, transform)
   
@@ -262,7 +262,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   
   for link, transformation in transformations.items():
       name, _, _ = get_robot_geom(robot.links[link])
-      transform = transformation.matrix()
+      transform = transformation.homogeneous_matrix
       fcl_manager.set_transform(name=name, transform=transform)
   
   result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)

@@ -116,7 +116,7 @@ class Kinematics:
 
         # Step 2. Use forward kinematics to calculate the position and attitude of the target link
         cur_fk = self.forward_kinematics(current_joints)
-        cur_pose = list(cur_fk.values())[-1].matrix()
+        cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
         # Step 3. Calculate the difference in position and attitude
         err_pose = calc_pose_error(target_pose, cur_pose, EPS)
@@ -140,7 +140,7 @@ class Kinematics:
             trajectory_joints.append(np.array([float(current_joint) for current_joint in current_joints]))
             cur_fk = self.forward_kinematics(current_joints)
 
-            cur_pose = list(cur_fk.values())[-1].matrix()
+            cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
             err_pose = calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
 
@@ -162,7 +162,7 @@ class Kinematics:
 
         # Step 2. Use forward kinematics to calculate the position and attitude of the target link
         cur_fk = self.forward_kinematics(current_joints)
-        cur_pose = list(cur_fk.values())[-1].matrix()
+        cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
         # # Step 3. Calculate the difference in position and attitude
         err = calc_pose_error(target_pose, cur_pose, EPS)
@@ -191,7 +191,7 @@ class Kinematics:
             trajectory_joints.append(np.array([float(current_joint) for current_joint in current_joints]))
             
             cur_fk = self.forward_kinematics(current_joints)
-            cur_pose = list(cur_fk.values())[-1].matrix()
+            cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
             err = calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
             

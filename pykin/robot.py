@@ -1,6 +1,5 @@
 import sys, os
 import numpy as np
-from itertools import zip_longest
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
 
@@ -48,7 +47,7 @@ class Robot(URDFModel):
         print("*" * 100)
         print(f"Robot Information: \n{self}")
         print(f"robot's dof : {self.dof}")
-        print(f"active joint names: \n{self._get_actuated_joint_names()}")
+        print(f"active joint names: \n{self.get_actuated_joint_names()}")
         print("*" * 100)
 
     def compute_pose_error(self, target=np.eye(4), result=np.eye(4)):
@@ -58,7 +57,7 @@ class Robot(URDFModel):
     def _setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
-                              active_joint_names=self._get_actuated_joint_names(),
+                              active_joint_names=self.get_actuated_joint_names(),
                               base_name="", 
                               eef_name=None,
                               frames=self.root
@@ -80,11 +79,11 @@ class Robot(URDFModel):
 
         self.desired_frames = self.generate_desired_frame_recursive(desired_base_frame, eef_name)
         self.kin.frames = self.desired_frames
-        self.kin.active_joint_names = self._get_actuated_joint_names(self.kin.frames)
+        self.kin.active_joint_names = self.get_actuated_joint_names(self.kin.frames)
 
     def reset_desired_frames(self):
         self.kin.frames = self.root
-        self.kin.active_joint_names = self._get_actuated_joint_names()
+        self.kin.active_joint_names = self.get_actuated_joint_names()
 
     @property
     def transformations(self):

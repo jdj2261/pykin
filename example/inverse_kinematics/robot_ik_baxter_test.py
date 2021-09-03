@@ -86,11 +86,11 @@ ax.legend()
 goal_r_pose_LM = np.concatenate((result_fk_LM["right_wrist"].pos, result_fk_LM["right_wrist"].rot))
 goal_l_pose_LM = np.concatenate((result_fk_LM["left_wrist"].pos, result_fk_LM["left_wrist"].rot))
 
-r_pose = right_arm_fk["right_wrist"].matrix()
-l_pose = left_arm_fk["left_wrist"].matrix()
+r_pose = right_arm_fk["right_wrist"].homogeneous_matrix
+l_pose = left_arm_fk["left_wrist"].homogeneous_matrix
 
-r_pose_new_LM = result_fk_LM["right_wrist"].matrix()
-l_pose_new_LM = result_fk_LM["left_wrist"].matrix()
+r_pose_new_LM = result_fk_LM["right_wrist"].homogeneous_matrix
+l_pose_new_LM = result_fk_LM["left_wrist"].homogeneous_matrix
 
 thetas_NR = np.concatenate((head_thetas, ik_right_NR_result, ik_left_NR_result))
 robot.reset_desired_frames()
@@ -106,8 +106,8 @@ ax.legend()
 goal_r_pose_NR = np.concatenate((result_fk_NR["right_wrist"].pos, result_fk_NR["right_wrist"].rot))
 goal_l_pose_NR = np.concatenate((result_fk_NR["left_wrist"].pos, result_fk_NR["left_wrist"].rot))
 
-r_pose_new_NR = result_fk_NR["right_wrist"].matrix()
-l_pose_new_NR = result_fk_NR["left_wrist"].matrix()
+r_pose_new_NR = result_fk_NR["right_wrist"].homogeneous_matrix
+l_pose_new_NR = result_fk_NR["left_wrist"].homogeneous_matrix
 
 
 print(f"\n{scolors.OKGREEN}Target Right wrist Pose{scolors.ENDC}: \n{r_pose}")

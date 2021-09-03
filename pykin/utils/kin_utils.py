@@ -56,6 +56,7 @@ def convert_thetas_to_dict(active_joint_names, thetas):
         thetas = dict((j, thetas[i]) for i, j in enumerate(active_joint_names))        
     return thetas
 
+
 def logging_time(original_fn):
     def wrapper_fn(*args, **kwargs):
         start_time = time.time()
@@ -72,7 +73,6 @@ def convert_transform(origin):
         return Transform()
     else:
         return Transform(rot=origin.rot, pos=origin.pos)
-
 
 def convert_string_to_narray(str_input):
     if str_input is not None:

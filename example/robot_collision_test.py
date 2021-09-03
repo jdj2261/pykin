@@ -20,7 +20,7 @@ transformations = robot.kin.forward_kinematics(thetas)
 fcl_manager = FclManager()
 for link, transformation in transformations.items():
     name, gtype, gparam = get_robot_geom(robot.links[link])
-    transform = transformation.matrix()
+    transform = transformation.homogeneous_matrix
     fcl_manager.add_object(name, gtype, gparam, transform)
 
 result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
@@ -35,7 +35,7 @@ transformations = robot.kin.forward_kinematics(thetas)
 
 for link, transformation in transformations.items():
     name, _, _ = get_robot_geom(robot.links[link])
-    transform = transformation.matrix()
+    transform = transformation.homogeneous_matrix
     fcl_manager.set_transform(name=name, transform=transform)
 
 result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)

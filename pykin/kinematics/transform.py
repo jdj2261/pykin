@@ -1,81 +1,140 @@
 import numpy as np
 from pykin.utils import transform_utils as tf
 
-class Transform(object):
+class Transform:
     """
-    ----------
-    rot : np.ndarray
-        The rotation parameter. Give in quaternions or roll pitch yaw.
-    pos : np.ndarray
-        The translation parameter.
+    This class calculates the rotation and translation of a 3D rigid body.
+
+    Args:
+        rot (sequence of float) : The rotation parameter. Give in quaternions or roll pitch yaw.
+
+        pos (sequence of float) : The translation parameter.
     """
-    def __init__(self, rot=[1.0, 0.0, 0.0, 0.0], pos=np.zeros(3)):
-        if rot is None:
-            self.rot = np.array([1.0, 0.0, 0.0, 0.0])
-        elif len(rot) == 3:
-            self.rot = tf.get_quaternion_from_rpy(rot, convention='wxyz')
-        elif len(rot) == 4:
-            self.rot = np.array(rot)
-        else:
-            raise ValueError("Size of rot must be 3 or 4.")
-        if pos is None:
-            self.pos = np.zeros(3)
-        else:
-            self.pos = np.array(pos)
+    def __init__(
+        self, 
+        rot=np.array([1.0, 0.0, 0.0, 0.0]), 
+        pos=np.zeros(3)
+    ):
+        # Set rotation, position
+        self.rot = self._to_quaternion(rot)
+        self.pos = self._to_pos(pos)
 
     def __repr__(self):
         return "Transform(rot={0}, pos={1})".format(self.rot, self.pos)
 
     def __mul__(self, other):
         rot = tf.quaternion_multiply(self.rot, other.rot)
-        pos = self._rotation_vec(self.rot, other.pos) + self.pos
+        pos = self._to_rotation_vec(self.rot, other.pos) + self.pos
         return Transform(rot, pos)
 
     @property
     def rot(self):
+        """
+        Returns:
+            np.array: rotation (quaternion)
+        """
         return self._rot
     
     @rot.setter
     def rot(self, rot):
-        if rot is None:
-            self._rot = np.array([1.0, 0.0, 0.0, 0.0])
-        elif len(rot) == 3:
-            self._rot = tf.get_quaternion_from_rpy(rot, convention='wxyz')
-        elif len(rot) == 4:
-            self._rot = np.array(rot)
-        else:
-            raise ValueError("Size of rot must be 3 or 4.")
-
-    @property
-    def R_mat(self):
-        mat = tf.get_rotation_matrix(self.rot)
-        return mat
+        self._rot = self._to_quaternion(rot)
 
     @property
     def pos(self):
+        """
+        Returns:
+            np.array: position
+        """
         return self._pos
 
     @pos.setter
     def pos(self, pos):
-        self._pos = pos
-
+        self._pos = self._to_pos(pos)
+        
     @property
     def pose(self):
+        """
+        Returns:
+            np.array: pose
+        """
         return np.hstack((self.pos, self.rot))
 
+    @property
+    def rotation_matrix(self):
+        """
+        Returns:
+            np.array: rotation matrix
+        """
+        return tf.get_rotation_matrix(self.rot)
+
+    @property
+    def homogeneous_matrix(self):
+        """
+        Returns:
+            np.array: homogeneous matrix
+        """
+        mat = tf.quaternion_matrix(self.rot)
+        mat[:3, 3] = self.pos
+        return mat
+
+    def inverse(self):
+        """
+        Returns:
+            Transform: inverse transform
+        """
+        rot = tf.get_quaternion_inverse(self.rot)
+        pos = -self._to_rotation_vec(rot, self.pos)
+        return Transform(rot, pos)
+
     @staticmethod
-    def _rotation_vec(rot, vec):
+    def _to_rotation_vec(rot, vec):
+        """
+        Convert with quaternion and position to rotation vector
+
+        Args:
+            rot (np.array): rotation (quaternion)
+            vec (np.array): position
+
+        Returns:
+            np.array: rotation vector
+        """
         v4 = np.hstack([np.array([0.0]), vec])
         inv_rot = tf.get_quaternion_inverse(rot)
         ans = tf.quaternion_multiply(tf.quaternion_multiply(rot, v4), inv_rot)
         return ans[1:]
 
-    def inverse(self):
-        rot = tf.get_quaternion_inverse(self.rot)
-        pos = -self._rotation_vec(rot, self.pos)
-        return Transform(rot, pos)
-    
-    def matrix(self):
-        mat = tf.quaternion_matrix(self.rot)
-        mat[:3, 3] = self.pos
-        return mat
+    @staticmethod
+    def _to_quaternion(rot):
+        """
+        Convert to rotation (qauternion)
+
+        Args:
+            rot (sequence of float): rotation (quaternion)
+
+        Returns:
+            np.array: rotation (quaternion)
+        """
+        if len(rot) == 3:
+            rot = tf.get_quaternion_from_rpy(rot, convention='wxyz')
+        elif len(rot) == 4:
+            rot = np.array(rot)
+        else:
+            raise ValueError("Size of rot must be 3 or 4.")
+        return rot
+
+    @staticmethod
+    def _to_pos(pos):
+        """
+        Convert to pos vector
+
+        Args:
+            pos (sequence of float): position
+
+        Returns:
+            np.array: position
+        """
+        if len(pos) == 3:
+            pos = np.array(pos)
+        else:
+            raise ValueError("Size of pos must be 3.")
+        return pos

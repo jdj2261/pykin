@@ -7,7 +7,13 @@ from pykin.utils.kin_utils import ShellColors as scolors
 
 
 class Link:
-    def __init__(self, name=None, offset=Transform(), visual=Visual(), collision=Collision()):
+    def __init__(
+        self, 
+        name=None, 
+        offset=Transform(), 
+        visual=Visual(), 
+        collision=Collision()
+    ):
         self.name = name
         self.offset = offset
         self.visual = visual
@@ -24,8 +30,16 @@ class Link:
 class Joint:
     TYPES = ['fixed', 'revolute', 'prismatic']
 
-    def __init__(self, name=None, offset=Transform(),
-                 dtype='fixed', axis=None, limit=[None, None], parent=None, child=None):
+    def __init__(
+        self,
+        name=None, 
+        offset=Transform(),
+        dtype='fixed', 
+        axis=None, 
+        limit=[None, None], 
+        parent=None, 
+        child=None
+    ):
         self.name = name
         self.offset = offset
         self.num_dof = 0
@@ -72,8 +86,13 @@ class Joint:
 
 
 class Frame:
-    def __init__(self, name=None, link=Link(),
-                 joint=Joint(), children=[]):
+    def __init__(
+        self, 
+        name=None, 
+        link=Link(),
+        joint=Joint(), 
+        children=[]
+    ):
         self.name = 'None' if name is None else name
         self.link = link
         self.joint = joint

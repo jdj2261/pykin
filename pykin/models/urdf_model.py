@@ -7,11 +7,18 @@ from pykin.geometry.frame import Joint, Link, Frame
 from pykin.geometry.geometry import Visual, Collision
 from pykin.kinematics.transform import Transform
 from pykin.utils.kin_utils import *
+from pykin.utils.urdf_utils import URDF_Link, URDF_Joint
 
 
 class URDFModel(RobotModel):
+    """
+    Initializes a urdf model, as defined by a single corresponding robot URDF
+
+    Args:
+        fname (str): path to the urdf file.
+    """
     def __init__(self, fname):
-        super().__init__(fname)
+        super().__init__()
 
         if not os.path.isfile(fname):
             raise FileNotFoundError(f'{fname} is not Found..')
@@ -20,172 +27,175 @@ class URDFModel(RobotModel):
         self.root = self.tree_xml.getroot()
         self.robot_name = self.root.attrib.get('name')
 
-        self._make_tree()
+        self._set_links()
+        self._set_joints()
+        self._set_root()
 
     def get_urdf(self):
+        """
+        Reads a string of the urdf file.
+
+        Returns:
+            str: xml read in from file
+        """
         with io.StringIO() as string:
             string.write(ET.tostring(self.tree_xml.getroot(), encoding="unicode"))
             return string.getvalue()
 
-    def _make_tree(self):
-        self._make_links()
-        self._make_joints()
+    def find_frame(self, frame_name):
+        """
+        Args:
+            frame_name (str): frame's name
 
-        root_name = next(iter(self._links))
-        self.root = self._links[root_name]
+        Returns:
+            Frame: frame with child frames
+        """
+        if self.root.name == frame_name:
+            return self.root
+        return self._find_recursive(frame_name, self.root, frame_type="frame")
 
-        root_frame = self._make_root_frame(root_name)
-        self.root = root_frame
+    def find_link(self, link_name):
+        """
+        Args:
+            link_name (str): link's name
 
-    def _make_links(self):
-        for idx, link_tag in enumerate(self.root.findall('link')):
-            link_frame = self._parse_link(link_tag, idx=idx)
+        Returns:
+            Link: desired robot's link
+        """
+        if self.root.link.name == link_name:
+            return self.root.link
+        return self._find_recursive(link_name, self.root, frame_type="link")
+
+    def find_joint(self, joint_name):
+        """
+        Args:
+            joint_name (str): joint's name
+
+        Returns:
+            Joint: desired robot's joint
+        """
+        if self.root.joint.name == joint_name:
+            return self.root.joint
+        return self._find_recursive(joint_name, self.root, frame_type="joint")
+
+    def get_actuated_joint_names(self, desired_frames=None):
+        """
+        Returns actuated(revolute, prismatic) joint names
+
+        Args:
+            desired_frames (list): If is not empty, will get desired actuated joint names
+
+        Returns:
+            list: actuated joint names
+        """
+        if desired_frames is None:
+            joint_names = self._get_joint_names(root_frame=self.root)
+        else:
+            joint_names = self._get_joint_names(desired_frames=desired_frames)
+        return joint_names
+
+    def _set_links(self):
+        """
+        Set all links from urdf file
+        """
+        for idx, elem_link in enumerate(self.root.findall('link')):
+            link_frame = self._get_link_frame(idx, elem_link)
             self._links[link_frame.link.name] = link_frame.link
 
-    def _make_joints(self):
-        for idx, joint_tag in enumerate(self.root.findall('joint')):
-            joint_frame = self._parse_joint(joint_tag, idx=idx)
+    def _set_joints(self):
+        """
+        Set all joints from urdf file
+        """
+        for idx, elem_joint in enumerate(self.root.findall('joint')):
+            joint_frame = self._get_joint_frame(idx, elem_joint)
             self._joints[joint_frame.joint.name] = joint_frame.joint
 
-    def _make_root_frame(self, root_name):
+    def _set_root(self):
+        """
+        Set root from urdf file
+        """
+        root_name = next(iter(self._links))
+        self._root_link = self._links[root_name]
+
+        root_frame = self._generate_root_frame(root_name)
+        self.root = root_frame
+
+    def _generate_root_frame(self, root_name):
+        """
+        Generates root frame with all child frames
+
+        Args:
+            root_name (str): root name
+
+        Returns:
+            Frame: root frame with all child frames
+        """
         root_frame = Frame(root_name + "_frame")
         root_frame.joint = Joint()
-        root_frame.link = Link(root_name, 
-                               offset=convert_transform(root_frame.link.offset), 
-                               visual=root_frame.link.visual, 
-                               collision=root_frame.link.collision)
-
-        root_frame.children = self._build_chain_recursive(self.root, self._links, self._joints)
+        root_frame.link = Link(root_name)
+        root_frame.children = self._generate_children_recursive(self._root_link, self._links, self._joints)
         return root_frame
 
-    def _parse_link(self, link_tag, idx):
-        attrib = link_tag.attrib
+    def _get_link_frame(self, idx, elem_link):
+        """
+        Returns link frame from urdf file
+
+        Args:
+            idx (int): index of link parsed from urdf file
+            elem_link (xml.etree.ElementTree.Element): element of link parsed from urdf file
+
+        Returns:
+            Frame: link frame with all child frames
+        """
+        attrib = elem_link.attrib
         link_name = attrib.get('name', 'link_' + str(idx))
-        frame = Frame(link_name + '_frame',
-                      link=Link(link_name, offset=Transform(), visual=Visual(), collision=Collision()))
+        link_frame = Frame(name=link_name + '_frame',
+                      link=Link(
+                          name=link_name, 
+                          offset=Transform(), 
+                          visual=Visual(), 
+                          collision=Collision()))
 
-        self._parse_visual(link_tag, frame)
-        self._parse_collision(link_tag, frame)
-        return frame
+        URDF_Link.set_visual(elem_link, link_frame)
+        URDF_Link.set_collision(elem_link, link_frame)
+        
+        return link_frame
 
-    def _parse_joint(self, joint_tag, idx):
-        attrib = joint_tag.attrib
+    def _get_joint_frame(self, idx, elem_joint):
+        """
+        Returns joint frame from urdf file
+
+        Args:
+            idx (int): index of joint parsed from urdf file
+            elem_joint (xml.etree.ElementTree.Element): element of joint parsed from urdf file
+
+        Returns:
+            Frame: joint frame with all child frames
+        """
+        attrib = elem_joint.attrib
         joint_name = attrib.get('name', 'joint_' + str(idx))
+        joint_frame = Frame(name=joint_name + '_frame',
+                      joint=Joint(
+                          name=joint_name, 
+                          offset=Transform(), 
+                          dtype=attrib['type'], 
+                          limit=[None, None]))
 
-        frame = Frame(joint_name + '_frame',
-                      joint=Joint(name=joint_name, offset=Transform(), dtype=attrib['type'], limit=[None, None]))
+        parent_tag = elem_joint.find('parent')
+        joint_frame.joint.parent = parent_tag.attrib['link']
 
-        parent_tag = joint_tag.find('parent')
-        frame.joint.parent = parent_tag.attrib['link']
+        child_tag = elem_joint.find('child')
+        joint_frame.joint.child = child_tag.attrib['link']
 
-        child_tag = joint_tag.find('child')
-        frame.joint.child = child_tag.attrib['link']
+        URDF_Joint.set_origin(elem_joint, joint_frame)
+        URDF_Joint.set_axis(elem_joint, joint_frame)
+        URDF_Joint.set_limit(elem_joint, joint_frame)
 
-        # origin
-        origin_tag = joint_tag.find('origin')
-        if origin_tag is not None:
-            frame.joint.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
-            frame.joint.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
-
-        # axis
-        axis_tag = joint_tag.find('axis')
-        self._parse_axis(axis_tag, frame)
-
-        # limit
-        limit_tag = joint_tag.find('limit')
-        self._parse_limit(limit_tag, frame)
-
-        return frame
-
-    def _parse_visual(self, link_tag, frame):   
-        for visual_tag in link_tag.findall('visual'):
-            self._parse_visual_origin(visual_tag, frame)
-            self._parse_visual_geometry(visual_tag, frame)
-            self._parse_visual_color(visual_tag, frame)
-
-    def _parse_visual_origin(self, input_tag, frame):
-        for origin_tag in input_tag.findall('origin'):
-            frame.link.visual.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
-            frame.link.visual.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
-
-    def _parse_visual_geometry(self, input_tag, frame):
-        for geometry_tag in input_tag.findall('geometry'):
-            for shape_type in LINK_TYPES:
-                for shapes in geometry_tag.findall(shape_type):
-                    self._convert_visual(shapes, frame)
-
-    def _convert_visual(self, shapes, frame):
-        if shapes.tag == "box":
-            frame.link.visual.gtype = shapes.tag
-            frame.link.visual.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
-        elif shapes.tag == "cylinder":
-            frame.link.visual.gtype = shapes.tag
-            frame.link.visual.gparam = {"length" : shapes.attrib.get('length', 0),
-                                        "radius" : shapes.attrib.get('radius', 0)}
-        elif shapes.tag == "sphere":
-            frame.link.visual.gtype = shapes.tag
-            frame.link.visual.gparam = {"radius" : shapes.attrib.get('radius', 0)}
-        elif shapes.tag == "mesh":
-            frame.link.visual.gtype = shapes.tag
-            frame.link.visual.gparam = {"filename" : shapes.attrib.get('filename', None)}
-        else:
-            frame.link.visual.gtype = None
-            frame.link.visual.gparam = None
-
-    def _parse_visual_color(self, input_tag, frame):
-        for material_tag in input_tag.findall('material'):
-            for colors in material_tag.findall('color'):
-                frame.link.visual.gparam['color'] = {material_tag.get('name'):convert_string_to_narray(colors.attrib.get('rgba'))}
-
-    def _parse_collision(self, link_tag, frame):
-        for collision_tag in link_tag.findall('collision'):
-            self._parse_collision_origin(collision_tag, frame)
-            self._parse_collision_geometry(collision_tag, frame)
-
-    def _parse_collision_origin(self, input_tag, frame):
-        for origin_tag in input_tag.findall('origin'):
-            frame.link.collision.offset.pos = convert_string_to_narray(origin_tag.attrib.get('xyz'))
-            frame.link.collision.offset.rot = convert_string_to_narray(origin_tag.attrib.get('rpy'))
-
-    def _parse_collision_geometry(self, input_tag, frame):
-        for geometry_tag in input_tag.findall('geometry'):
-            for shape_type in LINK_TYPES:
-                for shapes in geometry_tag.findall(shape_type):
-                    self._convert_collision(shapes, frame)
-
-    def _convert_collision(self, shapes, frame):
-        if shapes.tag == "box":
-            frame.link.collision.gtype = shapes.tag
-            frame.link.collision.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
-        elif shapes.tag == "cylinder":
-            frame.link.collision.gtype = shapes.tag
-            frame.link.collision.gparam = {"length" : shapes.attrib.get('length', 0),
-                                        "radius" : shapes.attrib.get('radius', 0)}
-        elif shapes.tag == "sphere":
-            frame.link.collision.gtype = shapes.tag
-            frame.link.collision.gparam = {"radius" : shapes.attrib.get('radius', 0)}
-        elif shapes.tag == "mesh":
-            frame.link.collision.gtype = shapes.tag
-            frame.link.collision.gparam = {"filename" : shapes.attrib.get('filename', None)}
-        else:
-            frame.link.collision.gtype = None
-            frame.link.collision.gparam = None
-
-    def _parse_axis(self, axis_tag, frame):
-        if axis_tag is not None:
-            frame.joint.axis = convert_string_to_narray(axis_tag.attrib.get('xyz'))
+        return joint_frame
     
-    def _parse_limit(self, limit_tag, frame):
-        if limit_tag is not None:
-            if "lower" in limit_tag.attrib:
-                frame.joint.limit[0] = float(limit_tag.attrib["lower"])
-            if "upper" in limit_tag.attrib:
-                frame.joint.limit[1] = float(limit_tag.attrib["upper"])
-
-    def _build_chain_recursive(self, root: Link, links: OrderedDict, joints: OrderedDict) -> list:
+    def _generate_children_recursive(self, root: Link, links: OrderedDict, joints: OrderedDict) -> list:
         children = []
         for joint in joints.values():
-
             if joint.parent == root.name:
                 child_frame = Frame(joint.child + "_frame")
                 child_frame.joint = Joint(joint.name, 
@@ -194,50 +204,28 @@ class URDFModel(RobotModel):
                                         axis=joint.axis, 
                                         limit=joint.limit)
 
-                chil_link = links[joint.child]
-                child_frame.link = Link(chil_link.name, 
-                                        offset=convert_transform(chil_link.offset),
-                                        visual=chil_link.visual,
-                                        collision=chil_link.collision)
-                child_frame.children = self._build_chain_recursive(child_frame.link, links, joints)
+                child_link = links[joint.child]
+                child_frame.link = Link(child_link.name, 
+                                        offset=convert_transform(child_link.offset),
+                                        visual=child_link.visual,
+                                        collision=child_link.collision)
+                child_frame.children = self._generate_children_recursive(child_frame.link, links, joints)
                 children.append(child_frame)
 
         return children
 
-    def find_frame(self, frame_name):
-        if self.root.name == frame_name:
-            return self.root
-        return self._find_recursive(frame_name, self.root, frame_type="frame")
-
-    def find_link(self, link_name):
-        if self.root.link.name == link_name:
-            return self.root.link
-        return self._find_recursive(link_name, self.root, frame_type="link")
-
-    def find_joint(self, joint_name):
-        if self.root.joint.name == joint_name:
-            return self.root.joint
-        return self._find_recursive(joint_name, self.root, frame_type="joint")
-
     @staticmethod
     def _find_recursive(name, frame, frame_type):
-        for child in frame.children:
-            if frame_type == "frame" and child.name == name:
-                return child
-            if frame_type == "link" and child.link.name == name:
-                return child.link
-            if frame_type == "joint" and child.joint.name == name:
-                return child.joint
-            ret = URDFModel._find_recursive(name, child, frame_type)
-            if not ret is None:
+        for frame in frame.children:
+            if frame_type == "frame" and frame.name == name:
+                return frame
+            if frame_type == "link" and frame.link.name == name:
+                return frame.link
+            if frame_type == "joint" and frame.joint.name == name:
+                return frame.joint
+            ret = URDFModel._find_recursive(name, frame, frame_type)
+            if ret is not None:
                 return ret
-
-    def _get_actuated_joint_names(self, desired_frames=None):
-        if desired_frames is None:
-            joint_names = self._get_joint_names(root_frame=self.root)
-        else:
-            joint_names = self._get_joint_names(desired_frames=desired_frames)
-        return joint_names
 
     def _get_joint_names(self, root_frame=None, desired_frames=None):
         if root_frame is not None:
