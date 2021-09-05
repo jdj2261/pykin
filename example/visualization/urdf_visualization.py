@@ -19,6 +19,6 @@ plt.plot_robot(robot,
                name=robot.robot_name,
                visible_visual=False, 
                visible_collision=False, 
-               mesh_path='../asset/urdf/baxter/')
+               mesh_path='../../asset/urdf/baxter/')
 ax.legend()
 plt.show_figure()

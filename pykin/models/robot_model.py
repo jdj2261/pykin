@@ -67,7 +67,7 @@ class RobotModel:
     @property
     def num_fixed_joints(self):
         """
-        Number of fixted joints
+        Number of fixed joints
         """
         raise NotImplementedError
 

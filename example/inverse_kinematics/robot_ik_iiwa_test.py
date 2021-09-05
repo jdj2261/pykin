@@ -26,7 +26,12 @@ ik_result, _ = robot.kin.inverse_kinematics(init_thetas, target_pose, method="LM
 robot.reset_desired_frames()
 fk = robot.kin.forward_kinematics(ik_result)
 _, ax = plt.init_3d_figure("IK")
-plt.plot_robot(robot, fk, ax, "iiwa14", visible_visual=True,
-               mesh_path='../asset/urdf/iiwa14/')
+plt.plot_robot(
+    robot, 
+    fk, 
+    ax, 
+    "iiwa14", 
+    visible_visual=False,
+    mesh_path='../../asset/urdf/iiwa14/')
 ax.legend()
 plt.show_figure()

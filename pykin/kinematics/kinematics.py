@@ -6,6 +6,17 @@ from pykin.utils import transform_utils as tf
 from pykin.utils.kin_utils import Baxter, calc_pose_error, convert_thetas_to_dict, logging_time
 
 class Kinematics:
+    """
+    Class of Kinematics
+
+    Args:
+        robot_name (str): robot's name
+        offset (Transform): robot's offset
+        active_joint_names (list): robot's actuated joints
+        base_name (str): reference link's name
+        eef_name (str): end effector's name
+        frames (list): robot's frames
+    """
     def __init__(self, 
                 robot_name, 
                 offset, 
@@ -62,7 +73,16 @@ class Kinematics:
     def frames(self, frames):
         self._frames = frames
 
-    def forward_kinematics(self, thetas, collision_check=False):
+    def forward_kinematics(self, thetas):
+        """
+        Returns transformations obtained by computing fk
+
+        Args:
+            thetas (sequence of float): input joint angles
+
+        Returns:
+            OrderedDict: transformations
+        """
         if not isinstance(self.frames, list):
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
         self._transformations = self._compute_FK(self.frames, self.offset, thetas)
@@ -70,6 +90,19 @@ class Kinematics:
     
     @logging_time
     def inverse_kinematics(self, current_joints, target_pose, method="LM", maxIter=1000):
+        """
+        Returns transformations obtained by computing fk
+        
+        Args:
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
+            maxIter (int): Maximum number of calculation iterations
+
+        Returns:
+            np.array: target joint angles
+            list: all joint angles(trajectory) obtained while calculating
+        """
         if method == "NR":
             joints, trajectory_joints = self._compute_IK_NR(
                 current_joints, 
@@ -85,8 +118,19 @@ class Kinematics:
         return joints, trajectory_joints
 
     def _compute_FK(self, frames, offset, thetas):
+        """
+        Computes forward kinematics
+
+        Args:
+            frames (Frame or list): frames type is Frame If frames is all robot's frame else list
+            offset (Transform): robot's offset
+            thetas (sequence of float): input joint angles
+
+        Returns:
+            OrderedDict: transformations
+        """
         transformations = OrderedDict()
-        if isinstance(thetas, dict):
+        if not isinstance(frames, list):
             trans = offset * frames.get_transform(thetas.get(frames.joint.name, 0.0))
             transformations[frames.link.name] = trans * frames.link.offset
             for child in frames.children:
@@ -103,9 +147,22 @@ class Kinematics:
                     cnt -= 1     
                 if self.robot_name == "baxter":
                     Baxter.add_visual_link(transformations, frame)
+
         return transformations
 
     def _compute_IK_NR(self, current_joints, target_pose, maxIter):
+        """
+        Computes inverse kinematics using NR
+
+        Args:
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            maxIter (int): Maximum number of calculation iterations
+
+        Returns:
+            np.array: target joint angles
+            list: all joint angles(trajectory) obtained while calculating
+        """
         lamb = 0.5
         iterator = 0
         EPS = float(1e-6)
@@ -132,7 +189,7 @@ class Kinematics:
             
             # Step 5. If error is not small enough, calculate dq which would reduce the error 
             # Get jacobian to calculate dq 
-            J = jac.calc_jacobian(self.frames, cur_fk, current_joints)
+            J = jac.calc_jacobian(self.frames, cur_fk, len(current_joints))
             dq = lamb * np.dot(np.linalg.pinv(J), err_pose)
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
@@ -149,6 +206,18 @@ class Kinematics:
         return current_joints, trajectory_joints
 
     def _compute_IK_LM(self, current_joints, target, maxIter):
+        """
+        Computes inverse kinematics using LM
+
+        Args:
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            maxIter (int): Maximum number of calculation iterations
+
+        Returns:
+            np.array: target joint angles
+            list: all joint angles(trajectory) obtained while calculating
+        """
         iterator = 0
         EPS = float(1E-12)
         dof = len(current_joints)
@@ -180,7 +249,7 @@ class Kinematics:
 
             # Step 5. If error is not small enough, calculate dq which would reduce the error
             # Get jacobian to calculate dq
-            J = jac.calc_jacobian(self.frames, cur_fk, current_joints)
+            J = jac.calc_jacobian(self.frames, cur_fk, len(current_joints))
             Jh = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
             
             gerr = np.dot(np.dot(J.T, We), err)

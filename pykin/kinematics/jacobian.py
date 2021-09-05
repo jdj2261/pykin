@@ -1,7 +1,15 @@
 import numpy as np
 
-def calc_jacobian(frames: list, transformations: dict, thetas: list) -> np.array:
-    jsize = len(thetas)
+def calc_jacobian(frames: list, transformations: dict, jsize: int) -> np.array:
+    """
+    Args:
+        frames (list): frames to compute jacobian
+        transformations (dict): Transformations from forward kinematics
+        thetas (int): size of joint space
+
+    Returns:
+        np.array(6, jsize): return Jacobian
+    """
     target_position = list(transformations.values())[-1].pos
     J = np.zeros((6, jsize))
     n = 0

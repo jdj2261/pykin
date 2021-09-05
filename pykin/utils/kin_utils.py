@@ -74,6 +74,7 @@ def convert_transform(origin):
     else:
         return Transform(rot=origin.rot, pos=origin.pos)
 
+
 def convert_string_to_narray(str_input):
     if str_input is not None:
         return np.array([float(data) for data in str_input.split()])

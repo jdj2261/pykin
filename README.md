@@ -153,13 +153,13 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   fk = robot.kin.forward_kinematics(left_arm_thetas)
   
   # If you want to get Jacobian, use calc_jacobian function
-  J = jac.calc_jacobian(robot.desired_frames, fk, left_arm_thetas)
+  J = jac.calc_jacobian(robot.desired_frames, fk, len(left_arm_thetas))
   print(J)
   
   right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
   robot.set_desired_frame("base", "right_wrist")
   fk = robot.kin.forward_kinematics(right_arm_thetas)
-  J = jac.calc_jacobian(robot.desired_frames, fk, right_arm_thetas)
+  J = jac.calc_jacobian(robot.desired_frames, fk, len(right_arm_thetas))
   print(J)
   ~~~
   
@@ -306,7 +306,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
                  name=robot.robot_name,
                  visible_visual=False, 
                  visible_collision=False, 
-                 mesh_path='../asset/urdf/baxter/')
+                 mesh_path='../../asset/urdf/baxter/')
   ax.legend()
   plt.show_figure()
   ~~~
@@ -350,7 +350,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
                  name=robot.robot_name,
                  visible_visual=False, 
                  visible_collision=True, 
-                 mesh_path='../asset/urdf/baxter/')
+                 mesh_path='../../asset/urdf/baxter/')
   ax.legend()
   plt.show_figure()
   ~~~

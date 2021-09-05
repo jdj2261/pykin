@@ -32,7 +32,8 @@ fk = robot.kin.forward_kinematics(thetas)
 _, ax = plt.init_3d_figure("FK Result")
 plt.plot_robot(robot, fk, ax, "baxter", 
                 visible_visual=visible_visual, 
-                visible_collision=visible_collision )
+                visible_collision=visible_collision,
+                mesh_path='../../asset/urdf/baxter/')
 ax.legend()
 # plt.show_figure()
 
@@ -79,7 +80,8 @@ _, ax = plt.init_3d_figure("LM IK Result")
 plt.plot_robot(robot, result_fk_LM, ax,
                "baxter",
                visible_visual=visible_visual, 
-               visible_collision=visible_collision)
+               visible_collision=visible_collision,
+               mesh_path='../../asset/urdf/baxter/')
 ax.legend()
 
 
@@ -100,7 +102,8 @@ _, ax = plt.init_3d_figure("NR IK Result")
 plt.plot_robot(robot, result_fk_NR, ax,
                "baxter",
                visible_visual=visible_visual, 
-               visible_collision=visible_collision)
+               visible_collision=visible_collision,
+               mesh_path='../../asset/urdf/baxter/')
 ax.legend()
 
 goal_r_pose_NR = np.concatenate((result_fk_NR["right_wrist"].pos, result_fk_NR["right_wrist"].rot))

@@ -52,7 +52,7 @@ class URDFModel(RobotModel):
         """
         if self.root.name == frame_name:
             return self.root
-        return self._find_recursive(frame_name, self.root, frame_type="frame")
+        return self._find_name_recursive(frame_name, self.root, frame_type="frame")
 
     def find_link(self, link_name):
         """
@@ -64,7 +64,7 @@ class URDFModel(RobotModel):
         """
         if self.root.link.name == link_name:
             return self.root.link
-        return self._find_recursive(link_name, self.root, frame_type="link")
+        return self._find_name_recursive(link_name, self.root, frame_type="link")
 
     def find_joint(self, joint_name):
         """
@@ -76,7 +76,7 @@ class URDFModel(RobotModel):
         """
         if self.root.joint.name == joint_name:
             return self.root.joint
-        return self._find_recursive(joint_name, self.root, frame_type="joint")
+        return self._find_name_recursive(joint_name, self.root, frame_type="joint")
 
     def get_actuated_joint_names(self, desired_frames=None):
         """
@@ -89,9 +89,9 @@ class URDFModel(RobotModel):
             list: actuated joint names
         """
         if desired_frames is None:
-            joint_names = self._get_joint_names(root_frame=self.root)
+            joint_names = self._get_actuated_joint_names(root_frame=self.root)
         else:
-            joint_names = self._get_joint_names(desired_frames=desired_frames)
+            joint_names = self._get_actuated_joint_names(desired_frames=desired_frames)
         return joint_names
 
     def _set_links(self):
@@ -193,10 +193,22 @@ class URDFModel(RobotModel):
 
         return joint_frame
     
-    def _generate_children_recursive(self, root: Link, links: OrderedDict, joints: OrderedDict) -> list:
+    @staticmethod
+    def _generate_children_recursive(root_link: Link, links: OrderedDict, joints: OrderedDict) -> list:
+        """
+        Generates child frame recursive from current joint
+
+        Args:
+            root (Link): 
+            links (OrderedDict): element of joint parsed from urdf file
+            joints (OrderedDict): element of joint parsed from urdf file
+
+        Returns:
+            list: Append list If current joint's parent link is root link
+        """
         children = []
         for joint in joints.values():
-            if joint.parent == root.name:
+            if joint.parent == root_link.name:
                 child_frame = Frame(joint.child + "_frame")
                 child_frame.joint = Joint(joint.name, 
                                         offset=convert_transform(joint.offset), 
@@ -209,13 +221,25 @@ class URDFModel(RobotModel):
                                         offset=convert_transform(child_link.offset),
                                         visual=child_link.visual,
                                         collision=child_link.collision)
-                child_frame.children = self._generate_children_recursive(child_frame.link, links, joints)
+
+                child_frame.children = URDFModel._generate_children_recursive(child_frame.link, links, joints)
                 children.append(child_frame)
 
         return children
 
     @staticmethod
-    def _find_recursive(name, frame, frame_type):
+    def _find_name_recursive(name, frame, frame_type):
+        """
+        Return the name of the frame, link, or joint you want to find.
+
+        Args:
+            name (str): name you want to find
+            frame (Frame): frame from root until it finds the desired name
+            frame_type (str): 3 frame types, frame or link or joint
+
+        Returns:
+            3 types: Frame, Link, Joint
+        """
         for frame in frame.children:
             if frame_type == "frame" and frame.name == name:
                 return frame
@@ -223,28 +247,60 @@ class URDFModel(RobotModel):
                 return frame.link
             if frame_type == "joint" and frame.joint.name == name:
                 return frame.joint
-            ret = URDFModel._find_recursive(name, frame, frame_type)
-            if ret is not None:
-                return ret
+            ret = URDFModel._find_name_recursive(name, frame, frame_type)
 
-    def _get_joint_names(self, root_frame=None, desired_frames=None):
+            assert (ret != None), f"Not Found {name}, please check the name again"
+            return ret
+
+    def _get_actuated_joint_names(self, root_frame=None, desired_frames=None):
+        """
+        Return the name of the actuated joint(revolute, prismatic)
+
+        Args:
+            root_frame (str): root frame
+            desired_frames (Frame): frames from root until it finds the desired name
+
+        Returns:
+            list: Append joint if joint's dof is not zero
+        """
         if root_frame is not None:
             joint_names = []
-            joint_names =  self._get_all_joint_names_recursive(joint_names, root_frame)
+            joint_names =  self._get_all_actuated_joint_names_recursive(joint_names, root_frame)
 
         if desired_frames is not None:
-            joint_names = self._get_desired_joint_names(desired_frames)
+            joint_names = self._get_desired_actuated_joint_names(desired_frames)
 
         return joint_names
 
-    def _get_all_joint_names_recursive(self, joint_names, root_frame):
+    @staticmethod
+    def _get_all_actuated_joint_names_recursive(joint_names, root_frame):
+        """
+        Return the name of all actuated joint(revolute, prismatic)
+
+        Args:
+            joint_names (list): all actuated joint names
+            root_frame (Frame): root frame
+
+        Returns:
+            list: Append joint if joint's dof is not zero
+        """
         if root_frame.joint.num_dof != 0:
             joint_names.append(root_frame.joint.name)
         for child in root_frame.children:
-            self._get_all_joint_names_recursive(joint_names, child)
+            URDFModel._get_all_actuated_joint_names_recursive(joint_names, child)
         return joint_names
 
-    def _get_desired_joint_names(self, desired_frames):
+    @staticmethod
+    def _get_desired_actuated_joint_names(desired_frames):
+        """
+        Return the name of desired actuated joint(revolute, prismatic)
+
+        Args:
+            desired_frames (list): desired actuated joint names
+
+        Returns:
+            list: Append joint if joint's dof is not zero
+        """
         joint_names = []
         for f in desired_frames:
             if f.joint.num_dof != 0:
@@ -253,26 +309,56 @@ class URDFModel(RobotModel):
 
     @property
     def dof(self):
+        """
+        Returns:
+            int: robot's dof
+        """
         return sum([joint.num_dof for joint in self.joints.values()])
 
     @property
     def num_links(self):
+        """
+        Returns:
+            int: number of links
+        """
         return len(self.links)
 
     @property
     def num_joints(self):
+        """
+        Returns:
+            int: number of joints
+        """
         return len(self.joints)
 
     @property
     def num_fixed_joints(self):
+        """
+        Returns:
+            int: number of fixed joints
+        """
         return sum([1 for joint in self.joints.values() if joint.num_dof == 0])
 
     @property
     def num_actuated_joints(self):
+        """
+        Returns:
+            int: number of actuated joints
+        """
         return sum([1 for joint in self.joints.values() if joint.num_dof != 0])
 
     @staticmethod
     def generate_desired_frame_recursive(base_frame, eef_name):
+        """
+        Return frames from base_frame to eef_frame you want to find
+
+        Args:
+            base_frame (list): reference frame
+            eef_name (str): end effector name
+
+        Returns:
+            list: Append frame until child link name is eef name
+        """
         for child in base_frame.children:
             if child.link.name == eef_name:
                 return [child]

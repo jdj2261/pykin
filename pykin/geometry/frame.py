@@ -7,6 +7,15 @@ from pykin.utils.kin_utils import ShellColors as scolors
 
 
 class Link:
+    """
+    class of Link
+
+    Args:
+        name (str): link name
+        offset (pykin.kinematics.transform.Transform): link offset described in the urdf file
+        visual (pykin.geometry.geometry.Visual): link visual described in the urdf file
+        collision (pykin.geometry.geometry.Collision): link collision described in the urdf file
+    """
     def __init__(
         self, 
         name=None, 
@@ -28,6 +37,18 @@ class Link:
 
 
 class Joint:
+    """
+    class of Joint
+
+    Args:
+        name (str): join name
+        offset (pykin.kinematics.transform.Transform): joint offset described in the urdf file
+        dtype (str): joint type (fixed, revolute, prismatic) described in the urdf file
+        axis (np.array): joint axis described in the urdf file
+        limit (list): joint limit described in the urdf file
+        parent (Link): joint parent link described in the urdf file
+        child (Link): joint child link described in the urdf file
+    """
     TYPES = ['fixed', 'revolute', 'prismatic']
 
     def __init__(
@@ -63,6 +84,9 @@ class Joint:
 
     @dtype.setter
     def dtype(self, dtype):
+        """
+        Sets dof 0 if dtype is fixed else 1
+        """
         if dtype is not None:
             dtype = dtype.lower().strip()
             if dtype in {'fixed'}:
@@ -86,6 +110,15 @@ class Joint:
 
 
 class Frame:
+    """
+    class of Frame
+
+    Args:
+        name (str): frame name
+        link (Link): Link frame
+        joint (Joint): Joint frame
+        children (list): all child frame
+    """
     def __init__(
         self, 
         name=None, 
@@ -104,21 +137,20 @@ class Frame:
             ret += child.__repr__(level + 1)
         return ret
 
-    def add_child(self, child):
-        self.children.append(child)
-
-    def is_end(self):
-        return (len(self.children) == 0)
-
     def get_transform(self, theta):
+        """
+        Args:
+            theta (list): Angle to convert
+
+        Returns:
+            Transform: Compute transform by multiplying current joint offset and transfrom obtained from input angle
+        """
         if self.joint.dtype == 'revolute':
-            t = Transform(
-                tf.get_quaternion_about_axis(theta, self.joint.axis))
+            t = Transform(tf.get_quaternion_about_axis(theta, self.joint.axis))
         elif self.joint.dtype == 'prismatic':
             t = Transform(pos=theta * self.joint.axis)
         elif self.joint.dtype == 'fixed':
             t = Transform()
         else:
-            raise ValueError("Unsupported joint type %s." %
-                             self.joint.dtype)
+            raise ValueError("Unsupported joint type %s." %self.joint.dtype)
         return self.joint.offset * t

@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from pykin.kinematics import transform as tf
@@ -30,6 +29,6 @@ fk = robot.kin.forward_kinematics(theta)
 print(fk["panda_hand"].pos)
 _, ax = plt.init_3d_figure()
 plt.plot_robot(robot, fk, ax, "panda", visible_visual=False,
-               mesh_path='../asset/urdf/panda/')
+               mesh_path='../../asset/urdf/panda/')
 ax.legend()
 plt.show_figure()

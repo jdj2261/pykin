@@ -1,5 +1,6 @@
 from pykin.utils.kin_utils import convert_string_to_narray, LINK_TYPES
 
+
 class URDF_Link:
     def __init__(self):
         pass
@@ -19,23 +20,23 @@ class URDF_Link:
 
     @staticmethod
     def set_visual_origin(elem_visual, frame):
-        elem_origin = elem_visual.find('origin')
-        frame.link.visual.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
-        frame.link.visual.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
+        for elem_origin in elem_visual.findall('origin'):
+            frame.link.visual.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
+            frame.link.visual.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
 
     @staticmethod
     def set_visual_geometry(elem_visual, frame):
-        elem_geometry = elem_visual.find('geometry')
-        for shape_type in LINK_TYPES:
-            for shapes in elem_geometry.findall(shape_type):
-                URDF_Link.convert_visual(shapes, frame)
+        for elem_geometry in elem_visual.findall('geometry'):
+            for shape_type in LINK_TYPES:
+                for shapes in elem_geometry.findall(shape_type):
+                    URDF_Link.convert_visual(shapes, frame)
 
     @staticmethod
     def set_visual_color(elem_visual, frame):
         for elem_matrial in elem_visual.findall('material'):
-            elem_color = elem_matrial.find('color')
-            rgba = convert_string_to_narray(elem_color.attrib.get('rgba'))
-            frame.link.visual.gparam['color'] = {elem_matrial.get('name') : rgba}
+            for elem_color in elem_matrial.findall('color'):
+                rgba = convert_string_to_narray(elem_color.attrib.get('rgba'))
+                frame.link.visual.gparam['color'] = {elem_matrial.get('name') : rgba}
     
     @staticmethod
     def convert_visual(shapes, frame):
@@ -58,9 +59,9 @@ class URDF_Link:
 
     @staticmethod
     def set_collision_origin(elem_collision, frame):
-        elem_origin = elem_collision.find('origin')
-        frame.link.collision.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
-        frame.link.collision.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
+        for elem_origin in elem_collision.findall('origin'):
+            frame.link.collision.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
+            frame.link.collision.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
 
     @staticmethod
     def set_collision_geometry(elem_collision, frame):
