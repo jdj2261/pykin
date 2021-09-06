@@ -6,3 +6,4 @@ build
 dist
 *.egg-info
 docs/build
+docs_backup
