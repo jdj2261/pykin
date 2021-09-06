@@ -1,0 +1,882 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>pykin.utils package &mdash; pykin 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pykin.models package" href="pykin.models.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pykin
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/jdj2261/pykin">Pykin On Github</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pykin.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pykin.geometry.html">pykin.geometry package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pykin.kinematics.html">pykin.kinematics package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pykin.models.html">pykin.models package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pykin.utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.error_utils">pykin.utils.error_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.fcl_utils">pykin.utils.fcl_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.kin_utils">pykin.utils.kin_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.plot_utils">pykin.utils.plot_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.transform_utils">pykin.utils.transform_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.urdf_utils">pykin.utils.urdf_utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pykin.html#module-pykin.robot">pykin.robot module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pykin</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="pykin.html">pykin package</a> &raquo;</li>
+        
+      <li>pykin.utils package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/pykin.utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pykin-utils-package">
+<h1>pykin.utils package<a class="headerlink" href="#pykin-utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pykin.utils.error_utils">
+<span id="pykin-utils-error-utils-module"></span><h2>pykin.utils.error_utils module<a class="headerlink" href="#module-pykin.utils.error_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pykin.utils.error_utils.NotFoundError">
+<em class="property"><span class="pre">exception</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.error_utils.</span></span><span class="sig-name descname"><span class="pre">NotFoundError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/error_utils.html#NotFoundError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.error_utils.NotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Class of custom Exception</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>all types</em>) – input data</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pykin.utils.fcl_utils">
+<span id="pykin-utils-fcl-utils-module"></span><h2>pykin.utils.fcl_utils module<a class="headerlink" href="#module-pykin.utils.fcl_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.ContactData">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.fcl_utils.</span></span><span class="sig-name descname"><span class="pre">ContactData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#ContactData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.ContactData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data structure for holding information about a collision contact.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<em>str</em>) – The names of the two objects in order.</p></li>
+<li><p><strong>contact</strong> (<em>fcl.Contact</em>) – The contact in question.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.ContactData.depth">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">depth</span></span><a class="headerlink" href="#pykin.utils.fcl_utils.ContactData.depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>The penetration depth of the 3D point of intersection for this contact.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The penetration depth.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.ContactData.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#ContactData.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.ContactData.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index of the face in contact for the mesh with
+the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The name of the target object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The index of the face in collision</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.ContactData.point">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">point</span></span><a class="headerlink" href="#pykin.utils.fcl_utils.ContactData.point" title="Permalink to this definition">¶</a></dt>
+<dd><p>The 3D point of intersection for this contact.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The intersection point.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>(3,) float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.fcl_utils.</span></span><span class="sig-name descname"><span class="pre">FclManager</span></span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A rigid body collision manager.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager.add_object">
+<span class="sig-name descname"><span class="pre">add_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gparam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager.add_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager.add_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an object to the collision manager.
+If an object with the given name is already in the manager, replace it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – An identifier for the object</p></li>
+<li><p><strong>gtype</strong> (<em>str</em>) – object type (cylinder, sphere, box)</p></li>
+<li><p><strong>gparam</strong> (<em>float</em><em> or </em><em>tuple</em>) – object parameter (radius, length, size)</p></li>
+<li><p><strong>transform</strong> (<em>np.array</em>) – Homogeneous transform matrix for the object</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager.collision_check">
+<span class="sig-name descname"><span class="pre">collision_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager.collision_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager.collision_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if any pair of objects in the manager collide with one another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_names</strong> (<em>bool</em>) – If true, a set is returned containing the names of all pairs of objects in collision.</p></li>
+<li><p><strong>return_data</strong> (<em>bool</em>) – If true, a list of ContactData is returned as well</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if a collision occurred between any pair of objects and False otherwise
+names (set of 2-tup): The set of pairwise collisions.
+contacts (list of ContactData): All contacts detected</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>is_collision (bool)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager.remove_object">
+<span class="sig-name descname"><span class="pre">remove_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager.remove_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager.remove_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an object from the collision manager.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – The identifier for the object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager.reset_all_object">
+<span class="sig-name descname"><span class="pre">reset_all_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager.reset_all_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager.reset_all_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all object from the collision manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.fcl_utils.FclManager.set_transform">
+<span class="sig-name descname"><span class="pre">set_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/fcl_utils.html#FclManager.set_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.fcl_utils.FclManager.set_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the transform for one of the manager’s objects.
+This replaces the prior transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – An identifier for the object already in the manager</p></li>
+<li><p><strong>transform</strong> (<em>np.array</em>) – A new homogeneous transform matrix for the object</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pykin.utils.kin_utils">
+<span id="pykin-utils-kin-utils-module"></span><h2>pykin.utils.kin_utils module<a class="headerlink" href="#module-pykin.utils.kin_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">Baxter</span></span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#Baxter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.Baxter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter.add_visual_link">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">add_visual_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">link_transforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#Baxter.add_visual_link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.Baxter.add_visual_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter.left_e0_fixed_offset">
+<span class="sig-name descname"><span class="pre">left_e0_fixed_offset</span></span><em class="property"> <span class="pre">=</span> <span class="pre">pykin.kinematics.transform.Transform()</span></em><a class="headerlink" href="#pykin.utils.kin_utils.Baxter.left_e0_fixed_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter.left_w0_fixed_offset">
+<span class="sig-name descname"><span class="pre">left_w0_fixed_offset</span></span><em class="property"> <span class="pre">=</span> <span class="pre">pykin.kinematics.transform.Transform()</span></em><a class="headerlink" href="#pykin.utils.kin_utils.Baxter.left_w0_fixed_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter.right_e0_fixed_offset">
+<span class="sig-name descname"><span class="pre">right_e0_fixed_offset</span></span><em class="property"> <span class="pre">=</span> <span class="pre">pykin.kinematics.transform.Transform()</span></em><a class="headerlink" href="#pykin.utils.kin_utils.Baxter.right_e0_fixed_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.Baxter.right_w0_fixed_offset">
+<span class="sig-name descname"><span class="pre">right_w0_fixed_offset</span></span><em class="property"> <span class="pre">=</span> <span class="pre">pykin.kinematics.transform.Transform()</span></em><a class="headerlink" href="#pykin.utils.kin_utils.Baxter.right_w0_fixed_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">ShellColors</span></span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#ShellColors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.BOLD">
+<span class="sig-name descname"><span class="pre">BOLD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[1m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.BOLD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.ENDC">
+<span class="sig-name descname"><span class="pre">ENDC</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[0m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.ENDC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.FAIL">
+<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[91m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.FAIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.HEADER">
+<span class="sig-name descname"><span class="pre">HEADER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[95m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.HEADER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.OKBLUE">
+<span class="sig-name descname"><span class="pre">OKBLUE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[94m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.OKBLUE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.OKCYAN">
+<span class="sig-name descname"><span class="pre">OKCYAN</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[96m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.OKCYAN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.OKGREEN">
+<span class="sig-name descname"><span class="pre">OKGREEN</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[92m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.OKGREEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.UNDERLINE">
+<span class="sig-name descname"><span class="pre">UNDERLINE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[4m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.UNDERLINE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.ShellColors.WARNING">
+<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'\x1b[93m'</span></em><a class="headerlink" href="#pykin.utils.kin_utils.ShellColors.WARNING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.calc_pose_error">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">calc_pose_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tar_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EPS</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#calc_pose_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.calc_pose_error" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tar_pos</strong> (<em>np.array</em>) – target pose</p></li>
+<li><p><strong>cur_pos</strong> (<em>np.array</em>) – current pose</p></li>
+<li><p><strong>EPS</strong> (<em>float</em>) – epsilon</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns pose error</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.convert_string_to_narray">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">convert_string_to_narray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str_input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#convert_string_to_narray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.convert_string_to_narray" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>str_input</strong> (<em>str</em>) – string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns string to np.array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.convert_thetas_to_dict">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">convert_thetas_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_joint_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thetas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#convert_thetas_to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.convert_thetas_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if any pair of objects in the manager collide with one another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_joint_names</strong> (<em>list</em>) – actuated joint names</p></li>
+<li><p><strong>thetas</strong> (<em>sequence of float</em>) – If not dict, convert to dict ex. {joint names : thetas}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary of actuated joint angles</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>thetas (dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.convert_transform">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">convert_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#convert_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.convert_transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>origin</strong> (<em>None</em><em> or </em><a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>Transform</em></a>) – offset of object</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns Transform if origin is None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.get_robot_geom">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">get_robot_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#get_robot_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.get_robot_geom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get robot geometry from link</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>link</strong> (<a class="reference internal" href="pykin.geometry.html#pykin.geometry.frame.Link" title="pykin.geometry.frame.Link"><em>Link</em></a>) – robot’s link</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>geom’s name
+gtype: geom’s type
+gparam: geom’s param</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>name (str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.limit_joints">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">limit_joints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_angles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#limit_joints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.limit_joints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set joint angle limit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>joint_angles</strong> (<em>sequence of float</em>) – joint angles</p></li>
+<li><p><strong>lower</strong> (<em>sequence of float</em>) – lower limit</p></li>
+<li><p><strong>upper</strong> (<em>sequence of float</em>) – upper limit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns limited joint angle</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>joint_angles (sequence of float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.kin_utils.logging_time">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.kin_utils.</span></span><span class="sig-name descname"><span class="pre">logging_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_fn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/kin_utils.html#logging_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.kin_utils.logging_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to check time of function</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pykin.utils.plot_utils">
+<span id="pykin-utils-plot-utils-module"></span><h2>pykin.utils.plot_utils module<a class="headerlink" href="#module-pykin.utils.plot_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.convert_trimesh_scene">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">convert_trimesh_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#convert_trimesh_scene"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.convert_trimesh_scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert scene from mesh to trimesh</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.init_3d_figure">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">init_3d_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#init_3d_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.init_3d_figure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes 3d figure</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_animation">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_animation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_animation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot animation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_basis">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_basis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_basis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a frame fitted to the robot size</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_baxter">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_baxter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_baxter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_baxter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot baxter robot</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_box">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([1.0,</span> <span class="pre">1.0,</span> <span class="pre">1.0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot box</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_collision">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_collision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_collision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_collision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot robot’s collision</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_cylinder">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_cylinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A2B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_cylinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_cylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot cylinder</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_mesh">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot mesh</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_robot">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible_visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible_collision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'../asset/urdf/baxter/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_robot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot robot</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.plot_sphere">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">plot_sphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#plot_sphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.plot_sphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot sphere</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.plot_utils.show_figure">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.plot_utils.</span></span><span class="sig-name descname"><span class="pre">show_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/plot_utils.html#show_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.plot_utils.show_figure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show figure</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pykin.utils.transform_utils">
+<span id="pykin-utils-transform-utils-module"></span><h2>pykin.utils.transform_utils module<a class="headerlink" href="#module-pykin.utils.transform_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_homogeneous_matrix">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_homogeneous_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_homogeneous_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_homogeneous_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns homogeneous matrix from position and orientation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_homogeneous_matrix_from_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_homogeneous_matrix_from_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quaternion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_homogeneous_matrix_from_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_homogeneous_matrix_from_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns homogeneous rotation matrix from quaternion.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_identity_homogeneous_matrix">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_identity_homogeneous_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_identity_homogeneous_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_identity_homogeneous_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns identity matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_inverse_homogeneous">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_inverse_homogeneous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_inverse_homogeneous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_inverse_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns homogeneous inverse</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_matrix_from_axis_angle">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_matrix_from_axis_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_matrix_from_axis_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_matrix_from_axis_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rotation matrix from axis angle</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_matrix_from_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_matrix_from_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_matrix_from_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_matrix_from_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rotation matrix from quaternion</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_matrix_from_rpy">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_matrix_from_rpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rpy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_matrix_from_rpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_matrix_from_rpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rotation matrix from rpy</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_pos_mat_from_homogeneous">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_pos_mat_from_homogeneous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">homogeneous_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_pos_mat_from_homogeneous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_pos_mat_from_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns position matrix from homogeneous matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_pose_from_homogeneous">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_pose_from_homogeneous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">homogeneous_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_pose_from_homogeneous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_pose_from_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns (7,1) pose from homogeneous matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion from orientation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion_about_axis">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion_about_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion_about_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion_about_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion for rotation about axis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion_from_axis_angle">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion_from_axis_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion_from_axis_angle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion_from_axis_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion from axis angle</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion_from_matrix">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion_from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion_from_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion_from_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion from rotation matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion_from_rpy">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion_from_rpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rpy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion_from_rpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion_from_rpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion from rpy</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_quaternion_inverse">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_quaternion_inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quaternion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_quaternion_inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_quaternion_inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns quaternion inverse</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_rot_mat_from_homogeneous">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_rot_mat_from_homogeneous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">homogeneous_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_rot_mat_from_homogeneous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_rot_mat_from_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rotation matrix from homogeneous matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_rotation_matrix">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_rotation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_rotation_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_rotation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rotation matrix from orientation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_rpy_from_matrix">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_rpy_from_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_rpy_from_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_rpy_from_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns roll pitch, yaw from Rotation matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.get_rpy_from_quaternion">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">get_rpy_from_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convention</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'wxyz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#get_rpy_from_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.get_rpy_from_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns roll pitch, yaw from quaternion</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.homogeneous_to_pose">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">homogeneous_to_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#homogeneous_to_pose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.homogeneous_to_pose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns pose from homogeneous_matrix</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.pose_to_homogeneous">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">pose_to_homogeneous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#pose_to_homogeneous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.pose_to_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns homogeneous_matrix from pose</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.quaternion_multiply">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">quaternion_multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quaternion1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quaternion0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#quaternion_multiply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.quaternion_multiply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns multiplication of two quaternions.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.utils.transform_utils.vector_norm">
+<span class="sig-prename descclassname"><span class="pre">pykin.utils.transform_utils.</span></span><span class="sig-name descname"><span class="pre">vector_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/transform_utils.html#vector_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.transform_utils.vector_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns length, i.e. Euclidean norm, of ndarray along axis.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pykin.utils.urdf_utils">
+<span id="pykin-utils-urdf-utils-module"></span><h2>pykin.utils.urdf_utils module<a class="headerlink" href="#module-pykin.utils.urdf_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Joint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.urdf_utils.</span></span><span class="sig-name descname"><span class="pre">URDF_Joint</span></span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Joint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class of parsing joint info described in URDF</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Joint.set_axis">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Joint.set_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Joint.set_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set joint’s axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Joint.set_limit">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Joint.set_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Joint.set_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set joint’s limit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Joint.set_origin">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_joint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Joint.set_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Joint.set_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set joint’s origin</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.urdf_utils.</span></span><span class="sig-name descname"><span class="pre">URDF_Link</span></span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class of parsing link info described in URDF</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_collision">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_collision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_collision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_collision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link collision</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_collision_geometry">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_collision_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_collision</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_collision_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_collision_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link collision’s geometry</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_collision_origin">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_collision_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_collision</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_collision_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_collision_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link collision’s origin</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_visual">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_visual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link_frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_visual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_visual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link visual</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_visual_color">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_visual_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_visual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_visual_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_visual_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link visual’s color</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_visual_geometry">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_visual_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_visual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_visual_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_visual_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link visual’s geometry</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.utils.urdf_utils.URDF_Link.set_visual_origin">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_visual_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem_visual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/urdf_utils.html#URDF_Link.set_visual_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.urdf_utils.URDF_Link.set_visual_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set link visual’s origin</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="pykin.models.html" class="btn btn-neutral float-left" title="pykin.models package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, DaeJong Jin.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
