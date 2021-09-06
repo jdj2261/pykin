@@ -23,6 +23,9 @@ directions_colors = ["green", "cyan", "orange"]
 
 
 def _check_color_type(color):
+    """
+    Check color's data type
+    """
     if isinstance(color, str):
         color = color
     
@@ -47,7 +50,9 @@ def _check_color_type(color):
 
 
 def plot_basis(robot=None, ax=None):
-    """Plot a frame fitted to the robot size"""
+    """
+    Plot a frame fitted to the robot size
+    """
     if robot is not None:
         offset = np.linalg.norm(robot.offset.pos)
     else:
@@ -75,8 +80,13 @@ def plot_basis(robot=None, ax=None):
 
 
 def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+    """
+    Plot robot
+    """
+    
     if transformations is None:
         transformations = robot.transformations
+
     plot_basis(robot, ax)
     links = []
     nodes = []
@@ -110,7 +120,10 @@ def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=F
     if visible_collision:
         plot_collision(robot, transformations, ax)
 
-def plot_anmation(robot, trajectory, interval=100, repeat=False, results=None):
+def plot_animation(robot, trajectory, interval=100, repeat=False, results=None):
+    """
+    Plot animation
+    """
     fig = plt.figure(figsize = (12, 6), dpi = 100)
     ax = fig.add_subplot(111, projection='3d')
 
@@ -130,6 +143,9 @@ def plot_anmation(robot, trajectory, interval=100, repeat=False, results=None):
 
 
 def plot_baxter(nodes, ax):
+    """
+    Plot baxter robot
+    """
     torso_nodes = [nodes[0]] + [nodes[3]]
     head_nodes = torso_nodes + nodes[7:12]
     pedestal_nodes = torso_nodes + [nodes[6]]
@@ -174,6 +190,9 @@ def plot_baxter(nodes, ax):
 
 
 def plot_collision(robot, transformations, ax, alpha=0.5):
+    """
+    Plot robot's collision
+    """
     def _get_color(params):
         color = []
         if params is not None:
@@ -204,7 +223,9 @@ def plot_collision(robot, transformations, ax, alpha=0.5):
 def plot_cylinder(ax=None, length=1.0, radius=1.0,
                   A2B=np.eye(4), n_steps=100,
                   alpha=1.0, color="k"):
-
+    """
+    Plot cylinder
+    """
     color = _check_color_type(color)
     axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
@@ -232,6 +253,9 @@ def plot_cylinder(ax=None, length=1.0, radius=1.0,
 
 
 def plot_sphere(ax=None, radius=1.0, p=np.zeros(3), n_steps=20, alpha=1.0, color="k"):
+    """
+    Plot sphere
+    """
     color = _check_color_type(color)
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = p[0] + radius * np.sin(phi) * np.cos(theta)
@@ -242,6 +266,9 @@ def plot_sphere(ax=None, radius=1.0, p=np.zeros(3), n_steps=20, alpha=1.0, color
 
 
 def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
+    """
+    Plot box
+    """
     color = _check_color_type(color)
 
     corners = np.array([
@@ -285,6 +312,9 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
 
 
 def plot_mesh(robot, transformations, mesh_path):
+    """
+    Plot mesh
+    """
     scene = trimesh.Scene()
     for link, transformation in transformations.items():
         if robot.links[link].visual.gtype == "mesh":
@@ -301,6 +331,9 @@ def plot_mesh(robot, transformations, mesh_path):
 
 
 def convert_trimesh_scene(scene, filename=None, A2B=np.eye(4), color="k"):
+    """
+    Convert scene from mesh to trimesh
+    """
     mesh = trimesh.load(filename)
     color = _check_color_type(color)
     mesh.visual.face_colors = color
@@ -310,10 +343,16 @@ def convert_trimesh_scene(scene, filename=None, A2B=np.eye(4), color="k"):
 
 
 def init_3d_figure(name=None):
+    """
+    Initializes 3d figure
+    """
     fig = plt.figure(name)
     ax = fig.add_subplot(111, projection='3d')
     return fig, ax
 
 
 def show_figure():
+    """
+    Show figure
+    """
     plt.show()

@@ -1,4 +1,5 @@
-#  pykin
+# pykin
+
 [![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Python Interface for the Robot Kinematics Library
@@ -25,7 +26,6 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
   `sudo apt install liboctomap-dev`
 
   `sudo apt install libfcl-dev`
-
 - For Mac, First, Download the source and build it.
 
   - octomap
@@ -40,7 +40,6 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ make
     $ make install
     ~~~
-
   - fcl
 
     `git clone https://github.com/flexible-collision-library/fcl.git`
@@ -69,7 +68,7 @@ pip install python-fcl
 pip install pykin
 ~~~
 
-When git clone, use the --recurse-submodules option. 
+When git clone, use the --recurse-submodules option.
 
 The download may take a long time due to the large urdf file size.
 
@@ -83,10 +82,10 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   You can see 4 example robot information.
 
-   `baxter, iiwa14, panda, and sawyer`
+  `baxter, iiwa14, panda, and sawyer`
 
   <details>
-    <summary>Code</summary> 
+    <summary>Code</summary>
 
   ~~~python
   import sys
@@ -96,18 +95,17 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-      
+  
   robot = Robot(file_path)
   robot.show_robot_info()
   ~~~
 
   </details>
-
 - Forward Kinematics
 
   <details>
-    <summary>Code</summary> 
-  
+    <summary>Code</summary>
+
   ~~~python
   from pykin.robot import Robot
   from pykin.kinematics.transform import Transform
@@ -128,14 +126,13 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   for link, transform in fk.items():
       print(f"{sc.HEADER}{link}{sc.ENDC}, {transform.rot}, {transform.pos}")
   ~~~
-  
+
   </details>
-  
 - Jacobian
 
   <details>
-    <summary>Code</summary> 
-  
+    <summary>Code</summary>
+
   ~~~python
   from pykin.kinematics import transform as tf
   from pykin.robot import Robot
@@ -162,14 +159,13 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   J = jac.calc_jacobian(robot.desired_frames, fk, len(right_arm_thetas))
   print(J)
   ~~~
-  
+
   </details>
-  
 - Inverse Kinematics
 
   <details>
-    <summary>Code</summary> 
-  
+    <summary>Code</summary>
+
   ~~~python
   import numpy as np
   from pykin.robot import Robot
@@ -204,13 +200,12 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
       result_fk["right_wrist"].homogeneous_matrix)
   print(error)
   ~~~
-  
-  </details>
 
+  </details>
 - Self-Collision Check
 
   <details>
-    <summary>Code</summary> 
+    <summary>Code</summary>
 
   ~~~python
   import numpy as np
@@ -273,32 +268,33 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
 ## Visualization
 
-- **urdf** 
+- **urdf**
 
   *You can see visualization using matplotlib.*
 
-  |          baxter           |          sawyer           |          iiwa14           |          panda          |
-  | :-----------------------: | :-----------------------: | :-----------------------: | :---------------------: |
-  | ![baxter](img/baxter.png) | ![sawyer](img/sawyer.png) | ![iiwa14](img/iiwa14.png) | ![panda](img/panda.png) |
+
+|          baxter          |          sawyer          |          iiwa14          |          panda          |
+| :-------------------------: | :-------------------------: | :-------------------------: | :-----------------------: |
+| ![baxter](img/baxter.png) | ![sawyer](img/sawyer.png) | ![iiwa14](img/iiwa14.png) | ![panda](img/panda.png) |
 
   <details>
-    <summary>Code</summary> 
+    <summary>Code</summary>
 
   ~~~python
   import sys
-  
+
   from pykin.robot import Robot
   from pykin.utils import plot_utils as plt
-  
+
   file_path = '../../asset/urdf/sawyer/sawyer.urdf'
-  
+
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
   robot = Robot(file_path)
-  
+
   fig, ax = plt.init_3d_figure("URDF")
-  
+
   # For Baxter robots, the name argument to the plot_robot function must be baxter.
   plt.plot_robot(robot, 
                  transformations=robot.transformations,
@@ -310,35 +306,34 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   ax.legend()
   plt.show_figure()
   ~~~
-
   </details>
-
 - **collision**
 
   *You can see collision defined in collision/geometry tags in urdf.*
 
-  |               baxter                |               sawyer                |
-  | :---------------------------------: | :---------------------------------: |
-  | ![baxter](img/baxter_collision.png) | ![baxter](img/sawyer_collision.png) |
+
+|               baxter               |               sawyer               |
+| :-----------------------------------: | :-----------------------------------: |
+| ![baxter](img/baxter_collision.png) | ![baxter](img/sawyer_collision.png) |
 
   <details>
-    <summary>Code</summary> 
+    <summary>Code</summary>
 
   ~~~python
   import sys
-  
+
   from pykin.robot import Robot
   from pykin.utils import plot_utils as plt
-  
+
   file_path = '../../asset/urdf/baxter/baxter.urdf'
-  
+
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
   robot = Robot(file_path)
-  
+
   fig, ax = plt.init_3d_figure("URDF")
-  
+
   """
   Only baxter and sawyer robots can see collisions.
   It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
@@ -354,35 +349,34 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   ax.legend()
   plt.show_figure()
   ~~~
-
   </details>
-
 - **mesh**
 
   *You can see  mesh defined in visual/geometry tags in urdf.*
 
-  |               baxter                |               sawyer                |               iiwa14                |               panda               |
-  | :---------------------------------: | :---------------------------------: | :---------------------------------: | :-------------------------------: |
-  | ![baxter_mesh](img/baxter_mesh.png) | ![sawyer_mesh](img/sawyer_mesh.png) | ![iiwa14_mesh](img/iiwa14_mesh.png) | ![panda_mesh](img/panda_mesh.png) |
+
+|               baxter               |               sawyer               |               iiwa14               |               panda               |
+| :-----------------------------------: | :-----------------------------------: | :-----------------------------------: | :---------------------------------: |
+| ![baxter_mesh](img/baxter_mesh.png) | ![sawyer_mesh](img/sawyer_mesh.png) | ![iiwa14_mesh](img/iiwa14_mesh.png) | ![panda_mesh](img/panda_mesh.png) |
 
   <details>
-    <summary>Code</summary> 
+    <summary>Code</summary>
 
   ~~~python
   import sys
-  
+
   from pykin.robot import Robot
   from pykin.utils import plot_utils as plt
-  
+
   file_path = '../../asset/urdf/baxter/baxter.urdf'
-  
+
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
   robot = Robot(file_path)
-  
+
   fig, ax = plt.init_3d_figure("URDF")
-  
+
   """
   Only baxter and sawyer robots can see collisions.
   It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
@@ -403,12 +397,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # ax.legend()
   # plt.show_figure()
   ~~~
-
   </details>
-
 - Animation
 
   *You can see an animation that visualizes trajectory*
 
   *Please refer to [this](example/visualization/robot_animation_test.py)*
-

@@ -3,6 +3,9 @@ import math
 from collections import Iterable
 
 def vector_norm(data, axis=None, out=None):
+    """
+    Returns length, i.e. Euclidean norm, of ndarray along axis.
+    """
     data = np.array(data, dtype=np.float64, copy=True)
     if out is None:
         if data.ndim == 1:
@@ -14,18 +17,26 @@ def vector_norm(data, axis=None, out=None):
     data *= data
     np.sum(data, axis=axis, out=out)
     np.sqrt(out, out)
-    return None
-
+    
 
 def get_rot_mat_from_homogeneous(homogeneous_matrix):
+    """
+    Returns rotation matrix from homogeneous matrix
+    """
     return homogeneous_matrix[:-1, :-1]
 
 
 def get_pos_mat_from_homogeneous(homogeneous_matrix):
+    """
+    Returns position matrix from homogeneous matrix
+    """
     return homogeneous_matrix[:-1,-1]
 
 
 def get_pose_from_homogeneous(homogeneous_matrix):
+    """
+    Returns (7,1) pose from homogeneous matrix
+    """
     position = get_pos_mat_from_homogeneous(homogeneous_matrix)
     orientation = get_quaternion_from_matrix(
         get_rot_mat_from_homogeneous(homogeneous_matrix))
@@ -33,6 +44,9 @@ def get_pose_from_homogeneous(homogeneous_matrix):
 
 
 def get_rpy_from_matrix(R):
+    """
+    Returns roll pitch, yaw from Rotation matrix
+    """
     r = np.arctan2(R[2, 1], R[2, 2])
     p = np.arctan2(-R[2, 0], np.sqrt(R[0, 0] ** 2 + R[1, 0] ** 2))
     y = np.arctan2(R[1, 0], R[0, 0])
@@ -41,6 +55,9 @@ def get_rpy_from_matrix(R):
 
 
 def get_rpy_from_quaternion(q, convention='wxyz'):
+    """
+    Returns roll pitch, yaw from quaternion
+    """
     if convention == 'xyzw':
         x, y, z, w = q[0], q[1], q[2], q[3]  # (N,)
     elif convention == 'wxyz':
@@ -52,6 +69,9 @@ def get_rpy_from_quaternion(q, convention='wxyz'):
     return rpy
 
 def get_matrix_from_rpy(rpy):
+    """
+    Returns rotation matrix from rpy
+    """
     cr, cp, cy = [np.cos(i) for i in rpy]
     sr, sp, sy = [np.sin(i) for i in rpy]
     R = np.array([[cy*cp, cy*sp*sr - sy*cr, cy*sp*cr + sy*sr],
@@ -61,6 +81,9 @@ def get_matrix_from_rpy(rpy):
 
 
 def get_matrix_from_axis_angle(axis, angle):
+    """
+    Returns rotation matrix from axis angle
+    """
     x, y, z = axis
     theta = angle
     c, s = np.cos(theta), np.sin(theta)
@@ -72,6 +95,9 @@ def get_matrix_from_axis_angle(axis, angle):
 
 
 def get_matrix_from_quaternion(q, convention='wxyz'):
+    """
+    Returns rotation matrix from quaternion
+    """
     if isinstance(q, Iterable):
         if convention == 'xyzw':
             x, y, z, w = q
@@ -86,6 +112,9 @@ def get_matrix_from_quaternion(q, convention='wxyz'):
 
 
 def get_quaternion_from_rpy(rpy, convention='wxyz'):
+    """
+    Returns quaternion from rpy
+    """
     rpy = np.asarray(rpy)
     multiple_rpy = True
     if len(rpy.shape) < 2:
@@ -116,6 +145,9 @@ def get_quaternion_from_rpy(rpy, convention='wxyz'):
 
 
 def get_quaternion_from_matrix(R, convention='wxyz'):
+    """
+    Returns quaternion from rotation matrix
+    """
     w = 1./2 * np.sqrt(R[0, 0] + R[1, 1] + R[2, 2] + 1)
     x, y, z = 1./2 * np.array([np.sign(R[2, 1] - R[1, 2]) * np.sqrt(R[0, 0] - R[1, 1] - R[2, 2] + 1),
                                np.sign(R[0, 2] - R[2, 0]) *
@@ -132,6 +164,9 @@ def get_quaternion_from_matrix(R, convention='wxyz'):
 
 
 def get_quaternion_from_axis_angle(axis, angle, convention='wxyz'):
+    """
+    Returns quaternion from axis angle
+    """
     w = np.cos(angle / 2.)
     x, y , z = np.sin(angle / 2.) * axis
     if convention == 'xyzw':
@@ -143,12 +178,18 @@ def get_quaternion_from_axis_angle(axis, angle, convention='wxyz'):
 
 
 def get_quaternion_inverse(quaternion):
+    """
+    Returns quaternion inverse
+    """
     q = np.array(quaternion, dtype=np.float64, copy=True)
     np.negative(q[1:], q[1:])
     return q / np.dot(q, q)
 
 
-def quaternion_matrix(quaternion):
+def get_homogeneous_matrix_from_quaternion(quaternion):
+    """
+    Returns homogeneous rotation matrix from quaternion.
+    """
     q = np.array(quaternion, dtype=np.float64, copy=True)
     n = np.dot(q, q)
     if n < _EPS:
@@ -163,6 +204,9 @@ def quaternion_matrix(quaternion):
 
 
 def quaternion_multiply(quaternion1, quaternion0):
+    """
+    Returns multiplication of two quaternions.
+    """
     w0, x0, y0, z0 = quaternion0
     w1, x1, y1, z1 = quaternion1
     return np.array(
@@ -179,12 +223,8 @@ def quaternion_multiply(quaternion1, quaternion0):
 _EPS = np.finfo(float).eps * 4.0
 
 def get_quaternion_about_axis(angle, axis):
-    """Return quaternion for rotation about axis.
-
-    >>> q = quaternion_about_axis(0.123, [1, 0, 0])
-    >>> numpy.allclose(q, [0.99810947, 0.06146124, 0, 0])
-    True
-
+    """
+    Returns quaternion for rotation about axis.
     """
     q = np.array([0.0, axis[0], axis[1], axis[2]])
     qlen = vector_norm(q)
@@ -195,6 +235,9 @@ def get_quaternion_about_axis(angle, axis):
 
 
 def get_homogeneous_matrix(position, orientation):
+    """
+    Returns homogeneous matrix from position and orientation
+    """
     position = np.asarray(position)
     orientation = np.asarray(orientation)
     if orientation.shape == (3,):  # RPY Euler angles
@@ -210,6 +253,9 @@ def get_homogeneous_matrix(position, orientation):
 
 
 def get_inverse_homogeneous(matrix):
+    """
+    Returns homogeneous inverse
+    """
     R = matrix[:3, :3].T
     p = -R.dot(matrix[:3, 3].reshape(-1,1))
     return np.vstack((np.hstack((R,p)),
@@ -217,22 +263,34 @@ def get_inverse_homogeneous(matrix):
 
 
 def get_identity_homogeneous_matrix():
+    """
+    Returns identity matrix
+    """
     return np.identity(4)
 
 
 def homogeneous_to_pose(matrix):
+    """
+    Returns pose from homogeneous_matrix
+    """
     position = matrix[:3, -1]
     quaternion = get_quaternion_from_matrix(matrix[:3, :3])
     return np.concatenate((position, quaternion))
 
 
 def pose_to_homogeneous(pose):
+    """
+    Returns homogeneous_matrix from pose
+    """
     pose = np.array(pose).flatten()
     position, orientation = pose[:3], pose[3:]
     return get_homogeneous_matrix(position=position, orientation=orientation)
 
 
 def get_quaternion(orientation, convention='wxyz'):
+    """
+    Returns quaternion from orientation
+    """
     if isinstance(orientation, tuple) and len(orientation) == 2:
         angle, axis = orientation
         if isinstance(axis, (float, int)) and isinstance(angle, np.ndarray):
@@ -258,6 +316,9 @@ def get_quaternion(orientation, convention='wxyz'):
 
 
 def get_rotation_matrix(orientation):
+    """
+    Returns rotation matrix from orientation
+    """
     if isinstance(orientation, tuple) and len(orientation) == 2:
         angle, axis = orientation
         if isinstance(axis, (float, int)) and isinstance(angle, np.ndarray):

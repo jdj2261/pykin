@@ -9,6 +9,10 @@ except BaseException:
 class ContactData:
     """
     Data structure for holding information about a collision contact.
+
+    Args:
+        names (str): The names of the two objects in order.
+        contact (fcl.Contact): The contact in question.
     """
 
     def __init__(self, names, contact):
@@ -20,19 +24,47 @@ class ContactData:
         self._point = contact.pos
         self._depth = contact.penetration_depth
 
+    def __repr__(self):
+        return 'pykin.utils.fcl_utils.{}()'.format(type(self).__name__)
+
     @property
     def point(self):
+        """
+        The 3D point of intersection for this contact.
+        
+        Returns:
+            (3,) float: The intersection point.
+        """
         return self._point
 
     @property
     def depth(self):
+        """
+        The penetration depth of the 3D point of intersection for this contact.
+        
+        Returns:
+            float: The penetration depth.
+        """
         return self._depth
 
     def index(self, name):
+        """
+        Returns the index of the face in contact for the mesh with
+        the given name.
+
+        Args:
+            name (str): The name of the target object.
+
+        Returns:
+            int: The index of the face in collision
+        """
         return self._inds[name]
 
 
 class FclManager:
+    """
+    A rigid body collision manager.
+    """
 
     def __init__(self):
         self._objs = {}
@@ -40,12 +72,24 @@ class FclManager:
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
 
+    def __repr__(self):
+        return 'pykin.utils.fcl_utils.{}()'.format(type(self).__name__)
+
     def add_object(self, 
                    name, 
                    gtype=None,
                    gparam=None,
                    transform=None):
-        
+        """
+        Add an object to the collision manager.
+        If an object with the given name is already in the manager, replace it.
+
+        Args:
+            name (str): An identifier for the object
+            gtype (str): object type (cylinder, sphere, box)
+            gparam (float or tuple): object parameter (radius, length, size)
+            transform (np.array): Homogeneous transform matrix for the object
+        """
         if gtype is None:
             return
 
@@ -74,12 +118,10 @@ class FclManager:
         """
         Set the transform for one of the manager's objects.
         This replaces the prior transform.
-        Parameters
-        ----------
-        name : str
-          An identifier for the object already in the manager
-        transform : (4,4) float
-          A new homogeneous transform matrix for the object
+        
+        Args:
+            name (str): An identifier for the object already in the manager
+            transform (np.array): A new homogeneous transform matrix for the object
         """
         if name is None:
             return
@@ -93,6 +135,12 @@ class FclManager:
             raise ValueError('{} not in collision manager!'.format(name))
 
     def remove_object(self, name):
+        """
+        Delete an object from the collision manager.
+        
+        Args:
+            name (str): The identifier for the object
+        """
         if name in self._objs:
             self._manager.unregisterObject(self._objs[name]['obj'])
             self._manager.update(self._objs[name]['obj'])
@@ -104,13 +152,28 @@ class FclManager:
         else:
             raise ValueError('{} not in collision manager!'.format(name))
 
-    def remove_all_object(self):
+    def reset_all_object(self):
+        """
+        Reset all object from the collision manager.
+        """
         self._objs = {}
         self._names = collections.defaultdict(lambda: None)
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
 
     def collision_check(self, return_names=False, return_data=False):
+        """
+        Check if any pair of objects in the manager collide with one another.
+        
+        Args:
+            return_names (bool): If true, a set is returned containing the names of all pairs of objects in collision.
+            return_data (bool): If true, a list of ContactData is returned as well
+        
+        Returns:
+            is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
+            names (set of 2-tup): The set of pairwise collisions. 
+            contacts (list of ContactData): All contacts detected
+        """
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
@@ -187,6 +250,15 @@ class FclManager:
             return result
 
     def _get_geom(self, gtype, gparam):
+        """
+        Get fcl geometry from robot's geometry type or params
+        
+        Args:
+            geom (CollisionObject): Input model
+        
+        Returns:
+            names (hashable): Name of input geometry
+        """
         geom = None
         if gtype == "cylinder":
             radius = gparam[0]
@@ -201,6 +273,16 @@ class FclManager:
         return geom
 
     def _extract_name(self, geom):
+        """
+        Retrieve the name of an object from the manager by its
+        CollisionObject, or return None if not found.
+        
+        Args:
+            geom (CollisionObject): Input model
+        
+        Returns:
+            names (hashable): Name of input geometry
+        """
         return self._names[id(geom)]
 
 

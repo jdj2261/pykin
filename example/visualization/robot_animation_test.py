@@ -59,4 +59,4 @@ for i, (left_joint, right_joint) in enumerate(trajectory_joints):
     transformations = robot.kin.forward_kinematics(current_joint)
     trajectory_pos.append(transformations)
 
-plt.plot_anmation(robot, trajectory_pos, interval=100, repeat=False)
+plt.plot_animation(robot, trajectory_pos, interval=100, repeat=False)

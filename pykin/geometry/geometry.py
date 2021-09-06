@@ -21,10 +21,13 @@ class Visual:
         self.gtype = geom_type
         self.gparam = geom_param
 
-    def __repr__(self):
+    def __str__(self):
         return f"""Visual(offset={self.offset},
                            geom_type={self.gtype}, 
                            geom_param={self.gparam})"""
+
+    def __repr__(self):
+        return 'pykin.geometry.geometry.{}()'.format(type(self).__name__)
 
     @property
     def offset(self):
@@ -55,10 +58,13 @@ class Collision:
         self.gtype = geom_type
         self.gparam = geom_param
 
-    def __repr__(self):
+    def __str__(self):
         return f"""Collision(offset={self.offset},
                               geom_type={self.gtype}, 
                               geom_param={self.gparam})"""
+
+    def __repr__(self):
+        return 'pykin.geometry.geometry.{}()'.format(type(self).__name__)
 
     @property
     def offset(self):

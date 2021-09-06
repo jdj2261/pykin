@@ -5,3 +5,4 @@ robosuite
 build
 dist
 *.egg-info
+docs/build

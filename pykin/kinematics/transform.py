@@ -19,12 +19,24 @@ class Transform:
         self.rot = self._to_quaternion(rot)
         self.pos = self._to_pos(pos)
 
-    def __repr__(self):
+    def __str__(self):
         return "Transform(rot={0}, pos={1})".format(self.rot, self.pos)
+
+    def __repr__(self):
+        return 'pykin.kinematics.transform.{}()'.format(type(self).__name__)
 
     def __mul__(self, other):
         rot = tf.quaternion_multiply(self.rot, other.rot)
         pos = self._to_rotation_vec(self.rot, other.pos) + self.pos
+        return Transform(rot, pos)
+
+    def inverse(self):
+        """
+        Returns:
+            Transform : inverse transform
+        """
+        rot = tf.get_quaternion_inverse(self.rot)
+        pos = -self._to_rotation_vec(rot, self.pos)
         return Transform(rot, pos)
 
     @property
@@ -73,18 +85,9 @@ class Transform:
         Returns:
             np.array: homogeneous matrix
         """
-        mat = tf.quaternion_matrix(self.rot)
+        mat = tf.get_homogeneous_matrix_from_quaternion(self.rot)
         mat[:3, 3] = self.pos
         return mat
-
-    def inverse(self):
-        """
-        Returns:
-            Transform: inverse transform
-        """
-        rot = tf.get_quaternion_inverse(self.rot)
-        pos = -self._to_rotation_vec(rot, self.pos)
-        return Transform(rot, pos)
 
     @staticmethod
     def _to_rotation_vec(rot, vec):

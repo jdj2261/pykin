@@ -1,6 +1,6 @@
 class NotFoundError(Exception):
     """
-    class of Custom Exception
+    Class of custom Exception
 
     Args:
         data (all types): input data

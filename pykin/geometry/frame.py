@@ -7,8 +7,7 @@ from pykin.utils.kin_utils import ShellColors as scolors
 
 
 class Link:
-    """
-    class of Link
+    """class of Link
 
     Args:
         name (str): link name
@@ -28,14 +27,16 @@ class Link:
         self.visual = visual
         self.collision = collision
 
-    def __repr__(self):
+    def __str__(self):
         return f"""
         {scolors.OKBLUE}Link{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC}
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
             visual= {scolors.HEADER}{self.visual}{scolors.ENDC} 
             collision= {scolors.HEADER}{self.collision}{scolors.ENDC}"""
-
-
+    
+    def __repr__(self):
+        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
+        
 class Joint:
     """
     class of Joint
@@ -70,13 +71,16 @@ class Joint:
         self.parent = parent
         self.child = child
 
-    def __repr__(self):
+    def __str__(self):
         return f"""
         {scolors.OKGREEN}Joint{scolors.ENDC}( name= {scolors.HEADER}{self.name}{scolors.ENDC} 
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
             dtype= {scolors.HEADER}'{self.dtype}'{scolors.ENDC}
             axis= {scolors.HEADER}{self.axis}{scolors.ENDC}
             limit= {scolors.HEADER}{self.limit}{scolors.ENDC}"""
+
+    def __repr__(self):
+        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
 
     @property
     def dtype(self):
@@ -110,8 +114,7 @@ class Joint:
 
 
 class Frame:
-    """
-    class of Frame
+    """class of Frame
 
     Args:
         name (str): frame name
@@ -131,11 +134,14 @@ class Frame:
         self.joint = joint
         self.children = children
 
-    def __repr__(self, level=0):
+    def __str__(self, level=0):
         ret = "  " * level + self.name + "\n"
         for child in self.children:
-            ret += child.__repr__(level + 1)
+            ret += child.__str__(level + 1)
         return ret
+
+    def __repr__(self):
+        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
 
     def get_transform(self, theta):
         """

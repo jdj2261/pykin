@@ -3,14 +3,14 @@ import time
 
 from pykin.kinematics.transform import Transform
 
-JOINT_TYPE_MAP = {'revolute': 'revolute',
-                  'fixed': 'fixed',
-                  'prismatic': 'prismatic'}
+JOINT_TYPE_MAP = {'revolute'  : 'revolute',
+                  'fixed'     : 'fixed',
+                  'prismatic' : 'prismatic'}
 
-LINK_TYPE_MAP = { 'cylinder' : 'cylinder',
-                  'sphere'   : 'sphere',
-                  'box'      : 'box',
-                  'mesh'     : 'mesh'}
+LINK_TYPE_MAP = {'cylinder' : 'cylinder',
+                 'sphere'   : 'sphere',
+                 'box'      : 'box',
+                 'mesh'     : 'mesh'}
 
 LINK_TYPES = ['box', 'cylinder', 'sphere', 'capsule', 'mesh']
 
@@ -49,6 +49,16 @@ class Baxter:
 
 
 def convert_thetas_to_dict(active_joint_names, thetas):
+    """
+    Check if any pair of objects in the manager collide with one another.
+    
+    Args:
+        active_joint_names (list): actuated joint names
+        thetas (sequence of float): If not dict, convert to dict ex. {joint names : thetas}
+    
+    Returns:
+        thetas (dict): Dictionary of actuated joint angles
+    """
     if not isinstance(thetas, dict):
         assert len(active_joint_names) == len(thetas
         ), f"""the number of joints is {len(active_joint_names)}, 
@@ -58,17 +68,26 @@ def convert_thetas_to_dict(active_joint_names, thetas):
 
 
 def logging_time(original_fn):
+    """
+    Decorator to check time of function
+    """
     def wrapper_fn(*args, **kwargs):
         start_time = time.time()
         result = original_fn(*args, **kwargs)
         end_time = time.time()
-        print(
-            f"WorkingTime[{original_fn.__name__}]: {end_time-start_time:.4f} sec\n")
+        print(f"WorkingTime[{original_fn.__name__}]: {end_time-start_time:.4f} sec\n")
         return result
     return wrapper_fn
 
 
 def convert_transform(origin):
+    """
+    Args:
+        origin (None or Transform): offset of object
+
+    Returns:
+        Transform: Returns Transform if origin is None
+    """
     if origin is None:
         return Transform()
     else:
@@ -76,16 +95,31 @@ def convert_transform(origin):
 
 
 def convert_string_to_narray(str_input):
+    """
+    Args:
+        str_input (str): string
+
+    Returns:
+        np.array: Returns string to np.array
+    """
     if str_input is not None:
         return np.array([float(data) for data in str_input.split()])
 
 
-def calc_pose_error(T_ref, T_cur, EPS):
+def calc_pose_error(tar_pose, cur_pose, EPS):
+    """
+    Args:
+        tar_pos (np.array): target pose
+        cur_pos (np.array): current pose
+        EPS (float): epsilon
 
+    Returns:
+        np.array: Returns pose error
+    """
     def rot_to_omega(R):
         # referred p36
         el = np.array(
-            [[R[2, 1] - R[1, 2]],
+                [[R[2, 1] - R[1, 2]],
                 [R[0, 2] - R[2, 0]],
                 [R[1, 0] - R[0, 1]]]
         )
@@ -95,28 +129,62 @@ def calc_pose_error(T_ref, T_cur, EPS):
         elif (R[0, 0] > 0 and R[1, 1] > 0 and R[2, 2] > 0):
             w = np.zeros((3, 1))
         else:
-            w = np.dot(
-                np.pi/2, np.array([[R[0, 0] + 1], [R[1, 1] + 1], [R[2, 2] + 1]]))
+            w = np.dot(np.pi/2, np.array([[R[0, 0] + 1], [R[1, 1] + 1], [R[2, 2] + 1]]))
         return w
 
-    pos_err = np.array([T_ref[:3, -1] - T_cur[:3, -1]])
-    rot_err = np.dot(T_cur[:3, :3].T, T_ref[:3, :3])
-    w_err = np.dot(T_cur[:3, :3], rot_to_omega(rot_err))
+    pos_err = np.array([tar_pose[:3, -1] - cur_pose[:3, -1]])
+    rot_err = np.dot(cur_pose[:3, :3].T, tar_pose[:3, :3])
+    w_err = np.dot(cur_pose[:3, :3], rot_to_omega(rot_err))
 
     return np.vstack((pos_err.T, w_err))
 
 
-def limit_joints(cur_jnt, lower, upper):
+def limit_joints(joint_angles, lower, upper):
+    """
+    Set joint angle limit
+
+    Args:
+        joint_angles (sequence of float): joint angles
+        lower (sequence of float): lower limit
+        upper (sequence of float): upper limit
+
+    Returns:
+        joint_angles (sequence of float): Returns limited joint angle 
+    """
     if lower is not None and upper is not None:
-        for i in range(len(cur_jnt)):
-            if cur_jnt[i] < lower[i]:
-                cur_jnt[i] = lower[i]
-            if cur_jnt[i] > upper[i]:
-                cur_jnt[i] = upper[i]
-    return cur_jnt
+        for i in range(len(joint_angles)):
+            if joint_angles[i] < lower[i]:
+                joint_angles[i] = lower[i]
+            if joint_angles[i] > upper[i]:
+                joint_angles[i] = upper[i]
+    return joint_angles
 
 
 def get_robot_geom(link):
+    """
+    Get robot geometry from link
+
+    Args:
+        link (Link): robot's link
+
+    Returns:
+        name (str): geom's name
+        gtype: geom's type
+        gparam: geom's param
+    """
+    def get_cylinder_param(link):
+        radius = float(link.collision.gparam.get('radius'))
+        length = float(link.collision.gparam.get('length'))
+        return (radius, length)
+
+    def get_spehre_param(link):
+        radius = float(link.collision.gparam.get('radius'))
+        return radius
+
+    def get_box_param(link):
+        size = list(link.collision.gparam.get('size'))
+        return size
+
     name = None
     gtype = None
     gparam = None
@@ -137,17 +205,3 @@ def get_robot_geom(link):
     return name, gtype, gparam
 
 
-def get_cylinder_param(link):
-    radius = float(link.collision.gparam.get('radius'))
-    length = float(link.collision.gparam.get('length'))
-    return (radius, length)
-
-
-def get_spehre_param(link):
-    radius = float(link.collision.gparam.get('radius'))
-    return radius
-
-
-def get_box_param(link):
-    size = list(link.collision.gparam.get('size'))
-    return size
