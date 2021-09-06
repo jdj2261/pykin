@@ -51,7 +51,13 @@ class Robot(URDFModel):
         Shows robot's info 
         """
         print("*" * 100)
-        print(f"Robot Information: \n{self}")
+        print(f"Robot Information:")
+
+        for link in self.links.values():
+            print(link)
+        for joint in self.joints.values():
+            print(joint)
+            
         print(f"robot's dof : {self.dof}")
         print(f"active joint names: \n{self.get_actuated_joint_names()}")
         print("*" * 100)
