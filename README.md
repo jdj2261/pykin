@@ -400,8 +400,10 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # plt.show_figure()
   ~~~
 </details>
+
 - Animation
 
   *You can see an animation that visualizes trajectory*
 
   *Please refer to [this](example/visualization/robot_animation_test.py)*
+
