@@ -350,7 +350,8 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   ax.legend()
   plt.show_figure()
   ~~~
- </details>
+</details>
+
 - mesh
 
   *You can see  mesh defined in visual/geometry tags in urdf.*
@@ -398,7 +399,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   # ax.legend()
   # plt.show_figure()
   ~~~
- </details>
+</details>
 - Animation
 
   *You can see an animation that visualizes trajectory*
