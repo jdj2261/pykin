@@ -268,7 +268,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
 ## Visualization
 
-- **urdf**
+- urdf
 
   *You can see visualization using matplotlib.*
 
@@ -307,9 +307,9 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   plt.show_figure()
   ~~~
   </details>
-- **collision**
+- collision
 
-*You can see collision defined in collision/geometry tags in urdf.*
+  *You can see collision defined in collision/geometry tags in urdf.*
 
 
 |               baxter               |               sawyer               |
@@ -350,7 +350,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   plt.show_figure()
   ~~~
   </details>
-- **mesh**
+- mesh
 
   *You can see  mesh defined in visual/geometry tags in urdf.*
 
