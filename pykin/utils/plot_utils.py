@@ -79,14 +79,14 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, ax=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
     """
     Plot robot
     """
-    
-    if transformations is None:
-        transformations = robot.transformations
 
+    transformations = robot.transformations
+    name = robot.robot_name
+    
     plot_basis(robot, ax)
     links = []
     nodes = []
@@ -119,6 +119,8 @@ def plot_robot(robot, transformations=None, ax=None, name=None, visible_visual=F
 
     if visible_collision:
         plot_collision(robot, transformations, ax)
+
+    ax.legend()
 
 def plot_animation(robot, trajectory, interval=100, repeat=False, results=None):
     """
@@ -340,6 +342,28 @@ def convert_trimesh_scene(scene, filename=None, A2B=np.eye(4), color="k"):
     scene.add_geometry(mesh, transform=A2B)
 
     return scene
+
+
+def plot_rrt_vertices(vertices, ax):
+    """
+    Plot rrt* trees
+    """
+    for vertex in vertices:
+        ax.plot([x for (x, y, z) in vertex],[y for (x, y, z) in vertex], [z for (x, y, z) in vertex],'k', linewidth=0.1,)
+
+
+def plot_path_planner(path, ax):
+    """
+    Plot rrt* path planner
+    """
+    if path is None:
+        print("cannot create path")
+        return
+
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
+    ax.plot([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], '-b', linewidth=0.5,)
+    ax.text(path[0][0], path[0][1], path[0][2], 'Start', verticalalignment='bottom', horizontalalignment='center', size="20")
+    ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
 
 
 def init_3d_figure(name=None):

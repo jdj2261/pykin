@@ -234,7 +234,7 @@ def get_quaternion_about_axis(angle, axis):
     return q
 
 
-def get_homogeneous_matrix(position, orientation):
+def get_homogeneous_matrix(position=np.zeros(3), orientation=np.array([1.0, 0.0, 0.0, 0.0])):
     """
     Returns homogeneous matrix from position and orientation
     """

@@ -61,8 +61,8 @@ def convert_thetas_to_dict(active_joint_names, thetas):
     """
     if not isinstance(thetas, dict):
         assert len(active_joint_names) == len(thetas
-        ), f"""the number of joints is {len(active_joint_names)}, 
-                but the number of joint's angle is {len(thetas)}"""
+        ), f"""the number of input joint's angle is {len(active_joint_names)}, 
+                but the number of real joint's angle is {len(thetas)}"""
         thetas = dict((j, thetas[i]) for i, j in enumerate(active_joint_names))        
     return thetas
 
