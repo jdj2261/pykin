@@ -15,7 +15,6 @@ class Kinematics:
         active_joint_names (list): robot's actuated joints
         base_name (str): reference link's name
         eef_name (str): end effector's name
-        frames (list): robot's frames
     """
     def __init__(self, 
                 robot_name, 
@@ -23,7 +22,6 @@ class Kinematics:
                 active_joint_names=[],
                 base_name="base", 
                 eef_name=None, 
-                frames=None,
                 ):
         self.robot_name = robot_name
         self.offset = offset
@@ -32,7 +30,7 @@ class Kinematics:
         self.eef_name = eef_name
         self._transformations = None
 
-    def forward_kinematics(self, frame, thetas):
+    def forward_kinematics(self, frames, thetas):
         """
         Returns transformations obtained by computing fk
 
@@ -42,13 +40,13 @@ class Kinematics:
         Returns:
             OrderedDict: transformations
         """
-        if not isinstance(frame, (list, dict)) :
+        if not isinstance(frames, (list, dict)) :
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
-        self._transformations = self._compute_FK(frame, self.offset, thetas)
+        self._transformations = self._compute_FK(frames, self.offset, thetas)
         return self._transformations
     
     @logging_time
-    def inverse_kinematics(self, frame, current_joints, target_pose, method="LM", maxIter=1000):
+    def inverse_kinematics(self, frames, current_joints, target_pose, method="LM", maxIter=1000):
         """
         Returns transformations obtained by computing fk
         
@@ -64,14 +62,14 @@ class Kinematics:
         """
         if method == "NR":
             joints = self._compute_IK_NR(
-                frame,
+                frames,
                 current_joints, 
                 target_pose, 
                 maxIter=maxIter
             )
         if method == "LM":
             joints = self._compute_IK_LM(
-                frame,
+                frames,
                 current_joints, 
                 target_pose, 
                 maxIter=maxIter
@@ -97,6 +95,7 @@ class Kinematics:
             for child in frames.children:
                 transformations.update(self._compute_FK(child, trans, thetas))
         else:
+            # To compute IK
             cnt = 0
             trans = offset
             for frame in frames:
@@ -111,7 +110,7 @@ class Kinematics:
 
         return transformations
 
-    def _compute_IK_NR(self, frame, current_joints, target_pose, maxIter):
+    def _compute_IK_NR(self, frames, current_joints, target_pose, maxIter):
         """
         Computes inverse kinematics using NR
 
@@ -132,7 +131,7 @@ class Kinematics:
         target_pose = tf.get_homogeneous_matrix(target_pose[:3], target_pose[3:])
 
         # Step 2. Use forward kinematics to calculate the position and attitude of the target link
-        cur_fk = self.forward_kinematics(frame, current_joints)
+        cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
         # Step 3. Calculate the difference in position and attitude
@@ -148,12 +147,12 @@ class Kinematics:
             
             # Step 5. If error is not small enough, calculate dq which would reduce the error 
             # Get jacobian to calculate dq 
-            J = jac.calc_jacobian(frame, cur_fk, len(current_joints))
+            J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
             dq = lamb * np.dot(np.linalg.pinv(J), err_pose)
 
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
-            cur_fk = self.forward_kinematics(frame, current_joints)
+            cur_fk = self.forward_kinematics(frames, current_joints)
 
             cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
             err_pose = calc_pose_error(target_pose, cur_pose, EPS)
@@ -163,7 +162,7 @@ class Kinematics:
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
 
-    def _compute_IK_LM(self, frame, current_joints, target, maxIter):
+    def _compute_IK_LM(self, frames, current_joints, target, maxIter):
         """
         Computes inverse kinematics using LM
 
@@ -187,7 +186,7 @@ class Kinematics:
         target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
 
         # Step 2. Use forward kinematics to calculate the position and attitude of the target link
-        cur_fk = self.forward_kinematics(frame, current_joints)
+        cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
         # # Step 3. Calculate the difference in position and attitude
@@ -205,7 +204,7 @@ class Kinematics:
 
             # Step 5. If error is not small enough, calculate dq which would reduce the error
             # Get jacobian to calculate dq
-            J = jac.calc_jacobian(frame, cur_fk, len(current_joints))
+            J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
             Jh = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
             
             gerr = np.dot(np.dot(J.T, We), err)
@@ -214,7 +213,7 @@ class Kinematics:
             # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
            
-            cur_fk = self.forward_kinematics(frame, current_joints)
+            cur_fk = self.forward_kinematics(frames, current_joints)
             cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
             err = calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
@@ -223,7 +222,7 @@ class Kinematics:
                 Ek = Ek2
             else:
                 current_joints = [current_joints[i] - dq[i] for i in range(dof)]
-                cur_fk = self.forward_kinematics(frame, current_joints)
+                cur_fk = self.forward_kinematics(frames, current_joints)
                 break
             
         print(f"Iterators : {iterator-1}")

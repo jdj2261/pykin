@@ -1,132 +1,88 @@
+import os, sys
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+sys.path.append(pykin_path)
+
 import numpy as np
 
-from pykin.robot import Robot
+from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
-from pykin.utils.kin_utils import ShellColors as scolors
+
 
 file_path = '../../asset/urdf/baxter/baxter.urdf'
 
-robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 visible_collision = True
-visible_visual = True
+visible_visual = False
 
 # set target joints angle
 head_thetas =  np.zeros(1)
 right_arm_thetas = np.random.randn(7)
 left_arm_thetas = np.random.randn(7)
 
-print(f"{scolors.OKBLUE}Target Right arm Angle{scolors.ENDC}: \n{right_arm_thetas}")
-print(f"{scolors.OKBLUE}Target Left arm Angle{scolors.ENDC}: \n{left_arm_thetas}")
-print()
-#################################################################################
-#                                Forward Kinematics                             #
-#################################################################################
 thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
 
-# caculuate FK
-fk = robot.kin.forward_kinematics(thetas)
+robot.setup_link_name("base", "right_wrist")
+robot.setup_link_name("base", "left_wrist")
 
-# show FK graph
-_, ax = plt.init_3d_figure("FK Result")
-plt.plot_robot(robot, fk, ax, "baxter", 
-                visible_visual=visible_visual, 
-                visible_collision=visible_collision,
-                mesh_path='../../asset/urdf/baxter/')
-ax.legend()
-# plt.show_figure()
+#################################################################################
+#                                Set target pose                                #
+#################################################################################
+target_transformations = robot.forward_kin(thetas)
+_, ax = plt.init_3d_figure("Target Pose")
+plt.plot_robot(robot, ax,
+               visible_visual=visible_visual, 
+               visible_collision=visible_collision,
+               mesh_path='../../asset/urdf/baxter/')
 
 #################################################################################
 #                                Inverse Kinematics                             #
 #################################################################################
-init_right_thetas = np.random.randn(7)
-init_left_thetas = np.random.randn(7)
-
-# Set desired frame (root, end)
-robot.set_desired_frame("base", "right_wrist")
-right_arm_fk = robot.kin.forward_kinematics(right_arm_thetas)
-target_r_pose = np.concatenate((right_arm_fk["right_wrist"].pos, right_arm_fk["right_wrist"].rot))
+init_thetas = np.random.randn(7)
+target_pose = { "right": robot.eef_pose["right"], 
+                "left" : robot.eef_pose["left"]}
 
 # Right's arm IK solution by LM
-ik_right_LM_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM", maxIter=100)
+ik_LM_result = robot.inverse_kin(
+    init_thetas, 
+    target_pose, 
+    method="LM", 
+    maxIter=100)
 
-# Right's arm IK solution by NR
-ik_right_NR_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="NR", maxIter=100)
+# # Right's arm IK solution by NR
+ik_NR_result = robot.inverse_kin(
+    init_thetas, 
+    target_pose, 
+    method="NR", 
+    maxIter=100)
 
-# Set desired link (root, end)
-robot.set_desired_frame("base", "left_wrist")
-left_arm_fk = robot.kin.forward_kinematics(left_arm_thetas)
-target_l_pose = np.concatenate((left_arm_fk["left_wrist"].pos, left_arm_fk["left_wrist"].rot))
-
-# Left's arm IK solution by LM
-ik_left_LM_result, _= robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="LM", maxIter=100)
-
-# Left's arm IK solution by NR
-ik_left_NR_result, _ = robot.kin.inverse_kinematics(init_left_thetas, target_l_pose, method="NR", maxIter=100)
-
-print(f"\n{scolors.HEADER}LM Method: Current Right arm Angles{scolors.ENDC}: \n{ik_right_LM_result}")
-print(f"{scolors.HEADER}LM Method: Current Left arm Angles{scolors.ENDC}: \n{ik_left_LM_result}")
-
-print(f"\n{scolors.HEADER}NR Method: Current Right arm Angles{scolors.ENDC}: \n{ik_right_NR_result}")
-print(f"{scolors.HEADER}NR Method: Current Left arm Angles{scolors.ENDC}: \n{ik_left_NR_result}")
-
-
-thetas_LM = np.concatenate((head_thetas, ik_right_LM_result, ik_left_LM_result))
-robot.reset_desired_frames()
-result_fk_LM = robot.kin.forward_kinematics(thetas_LM)
-
+thetas_LM = np.concatenate((head_thetas, ik_LM_result["right"], ik_LM_result["left"]))
+result_fk_LM = robot.forward_kin(thetas_LM)
 _, ax = plt.init_3d_figure("LM IK Result")
-plt.plot_robot(robot, result_fk_LM, ax,
-               "baxter",
+plt.plot_robot(robot, ax,
                visible_visual=visible_visual, 
                visible_collision=visible_collision,
                mesh_path='../../asset/urdf/baxter/')
-ax.legend()
 
-
-goal_r_pose_LM = np.concatenate((result_fk_LM["right_wrist"].pos, result_fk_LM["right_wrist"].rot))
-goal_l_pose_LM = np.concatenate((result_fk_LM["left_wrist"].pos, result_fk_LM["left_wrist"].rot))
-
-r_pose = right_arm_fk["right_wrist"].homogeneous_matrix
-l_pose = left_arm_fk["left_wrist"].homogeneous_matrix
-
-r_pose_new_LM = result_fk_LM["right_wrist"].homogeneous_matrix
-l_pose_new_LM = result_fk_LM["left_wrist"].homogeneous_matrix
-
-thetas_NR = np.concatenate((head_thetas, ik_right_NR_result, ik_left_NR_result))
-robot.reset_desired_frames()
-result_fk_NR = robot.kin.forward_kinematics(thetas_NR)
-
+thetas_NR = np.concatenate((head_thetas, ik_NR_result["right"], ik_NR_result["left"]))
+result_fk_NR = robot.forward_kin(thetas_NR)
 _, ax = plt.init_3d_figure("NR IK Result")
-plt.plot_robot(robot, result_fk_NR, ax,
-               "baxter",
+plt.plot_robot(robot, ax,
                visible_visual=visible_visual, 
                visible_collision=visible_collision,
                mesh_path='../../asset/urdf/baxter/')
-ax.legend()
 
-goal_r_pose_NR = np.concatenate((result_fk_NR["right_wrist"].pos, result_fk_NR["right_wrist"].rot))
-goal_l_pose_NR = np.concatenate((result_fk_NR["left_wrist"].pos, result_fk_NR["left_wrist"].rot))
+err = {}
+for arm in robot.arms:
+    err[arm+"_NR_error"] = robot.compute_pose_error(
+        target_transformations[robot.eef_name[arm]].homogeneous_matrix,
+        result_fk_NR[robot.eef_name[arm]].homogeneous_matrix)
 
-r_pose_new_NR = result_fk_NR["right_wrist"].homogeneous_matrix
-l_pose_new_NR = result_fk_NR["left_wrist"].homogeneous_matrix
+    err[arm+"_LM_error"] = robot.compute_pose_error(
+        target_transformations[robot.eef_name[arm]].homogeneous_matrix,
+        result_fk_LM[robot.eef_name[arm]].homogeneous_matrix)
 
-
-print(f"\n{scolors.OKGREEN}Target Right wrist Pose{scolors.ENDC}: \n{r_pose}")
-print(f"{scolors.OKGREEN}LM Method: Current Right wrist Pose{scolors.ENDC}: \n{r_pose_new_LM}")
-print(f"{scolors.OKGREEN}NR Method: Current Right wrist Pose{scolors.ENDC}: \n{r_pose_new_NR}")
-print(f"\n{scolors.OKCYAN}Target Left wrist Pose{scolors.ENDC}: \n{l_pose}")
-print(f"{scolors.OKCYAN}LM Method: Current Left wrist Pose{scolors.ENDC}: \n{l_pose_new_LM}")
-print(f"{scolors.OKCYAN}NR Method: Current Left wrist Pose{scolors.ENDC}: \n{l_pose_new_NR}")
-
-right_error_LM = np.linalg.norm(np.dot(r_pose_new_LM, np.linalg.inv(r_pose)) - np.mat(np.eye(4)))
-left_error_LM = np.linalg.norm(np.dot(l_pose_new_LM, np.linalg.inv(l_pose)) - np.mat(np.eye(4)))
-
-right_error_NR = np.linalg.norm(np.dot(r_pose_new_NR, np.linalg.inv(r_pose)) - np.mat(np.eye(4)))
-left_error_NR = np.linalg.norm(np.dot(l_pose_new_NR, np.linalg.inv(l_pose)) - np.mat(np.eye(4)))
-
-print(f"\n{scolors.WARNING}LM Method Error: {scolors.ENDC}: {right_error_LM}, {left_error_LM}")
-print(f"{scolors.WARNING}NR Method Error: {scolors.ENDC}: {right_error_NR}, {left_error_NR}")
+print(err)
 
 plt.show_figure()

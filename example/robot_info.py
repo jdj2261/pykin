@@ -1,6 +1,8 @@
-import sys
+import os, sys
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
+sys.path.append(pykin_path)
 
-from pykin.robot import Robot
+import sys
 
 file_path = '../asset/urdf/baxter/baxter.urdf'
 
@@ -8,5 +10,11 @@ if len(sys.argv) > 1:
     robot_name = sys.argv[1]
     file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
 
-robot = Robot(file_path)
+if "baxter" in file_path:
+    from pykin.robots.bimanual import Bimanual
+    robot = Bimanual(file_path)
+else:
+    from pykin.robots.single_arm import SingleArm
+    robot = SingleArm(file_path)
+
 robot.show_robot_info()

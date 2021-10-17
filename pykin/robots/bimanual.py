@@ -1,6 +1,4 @@
 import numpy as np
-
-
 from pykin.robots.robot import Robot
 
 class Bimanual(Robot):
@@ -10,7 +8,9 @@ class Bimanual(Robot):
         offset=None
     ):
         super(Bimanual, self).__init__(fname, offset)
+
         self.setup_input2dict()
+        
     def setup_link_name(self, base_name="", eef_name=None):
         """
         Sets robot's desired frame
@@ -19,8 +19,6 @@ class Bimanual(Robot):
             base_name (str): reference link name
             eef_name (str): end effector name
         """
-        
-
         if "right" in eef_name:
             self._base_name["right"] = base_name
             self._eef_name["right"] = eef_name
@@ -76,13 +74,12 @@ class Bimanual(Robot):
             if self.eef_name[arm]:
                 self._set_desired_frame(arm)
                 self._target_pose[arm] = target_pose[arm].flatten()
-                print(target_pose[arm].flatten())
                 joints[arm] = self.kin.inverse_kinematics(
                     self._frames[arm],
                     current_joints,
                     self._target_pose[arm],
                     method,
-                    maxIter=1000)
+                    maxIter)
         return joints
 
     def _input2dict(self, inp):

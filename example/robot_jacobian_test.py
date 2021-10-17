@@ -1,18 +1,26 @@
+import os, sys
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
+sys.path.append(pykin_path)
+
+import numpy as np
+
 from pykin.kinematics import transform as tf
-from pykin.robot import Robot
+from pykin.robots.bimanual import Bimanual
 from pykin.kinematics import jacobian as jac
 
+
 file_path = '../asset/urdf/baxter/baxter.urdf'
-robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+robot = Bimanual(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
-left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
-robot.set_desired_frame("base", "left_wrist")
-fk = robot.kin.forward_kinematics(left_arm_thetas)
-J = jac.calc_jacobian(robot.desired_frames, fk, len(left_arm_thetas))
-print(J)
+left_arm_thetas = np.zeros(15)
+robot.setup_link_name("base", "right_wrist")
+robot.setup_link_name("base", "left_wrist")
 
-right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
-robot.set_desired_frame("base", "right_wrist")
-fk = robot.kin.forward_kinematics(right_arm_thetas)
-J = jac.calc_jacobian(robot.desired_frames, fk, len(right_arm_thetas))
+fk = robot.forward_kin(left_arm_thetas)
+
+J = {}
+for arm in robot.arms:
+    if robot.eef_name[arm]:
+        J[arm] = jac.calc_jacobian(robot.desired_frames[arm], fk, len(np.zeros(7)))
+
 print(J)

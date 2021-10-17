@@ -90,6 +90,12 @@ class URDFModel(RobotModel):
         """
         if desired_frames is None:
             joint_names = self._get_actuated_joint_names(root_frame=self.root)
+
+            for i, joint in enumerate(joint_names):
+                if "head" in joint:
+                    head_joint = joint_names.pop(i)
+                    joint_names.insert(0, head_joint)
+
         else:
             joint_names = self._get_actuated_joint_names(desired_frames=desired_frames)
         return joint_names

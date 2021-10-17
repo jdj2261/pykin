@@ -17,12 +17,14 @@ class Robot(URDFModel):
     def __init__(
         self, 
         fname=None, 
-        offset=Transform(), 
+        offset=None, 
     ):
         if fname is None:
             fname = pykin_path + "/asset/urdf/baxter/baxter.urdf"
         self._offset = offset
-
+        if offset is None:
+            self._offset = Transform()
+            
         super(Robot, self).__init__(fname)
 
         self._setup_kinematics()
@@ -63,16 +65,17 @@ class Robot(URDFModel):
         Returns:
             error (np.array)
         """
-        error = np.linalg.norm(np.dot(result_HT, np.linalg.inv(target_HT)) - np.mat(np.eye(4)))
+        error = np.round(np.linalg.norm(
+            np.dot(result_HT, np.linalg.inv(target_HT)) - np.mat(np.eye(4))), 6)
         return error
+        
 
     def _setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
                               active_joint_names=self.get_actuated_joint_names(),
                               base_name="", 
-                              eef_name=None,
-                              frames=self.root
+                              eef_name=None
                               )
     
     def _init_transform(self):
@@ -82,7 +85,7 @@ class Robot(URDFModel):
         thetas = np.zeros(self.dof)
         self.kin.forward_kinematics(self.root, thetas)
 
-    def setup_link_name(self, base_name="", eef_name=None):
+    def setup_link_name(self, base_name, eef_name):
         """
         Sets robot's desired frame
 
@@ -96,7 +99,7 @@ class Robot(URDFModel):
     def forward_kin(self, thetas):
         raise NotImplementedError
 
-    def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
+    def inverse_kin(self, current_joints, target_pose, method, maxIter):
         raise NotImplementedError
 
     @property

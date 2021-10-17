@@ -1,17 +1,20 @@
 import numpy as np
 
 from pykin.robots.robot import Robot
+from pykin.utils.error_utils import NotFoundError
 
 class SingleArm(Robot):
     def __init__(
         self,
-        fname=None,
+        fname:str,
         offset=None
     ):
         super(SingleArm, self).__init__(fname, offset)
         self._base_name = ""
         self._eef_name  = ""
         self.desired_base_frame = ""
+        self._active_joint_names = self.get_actuated_joint_names()
+
 
     def setup_link_name(self, base_name="", eef_name=None):
         """
@@ -21,9 +24,19 @@ class SingleArm(Robot):
             base_name (str): reference link name
             eef_name (str): end effector name
         """
+        self._check_link_name(base_name, eef_name)
         self.base_name = base_name
         self.eef_name = eef_name
         self._set_desired_frame()
+
+    def _check_link_name(self, base_name, eef_pose):
+        if base_name and not base_name in self.links.keys():
+            print(self.links.keys())
+            raise NotFoundError(base_name)
+
+        if eef_pose is not None and eef_pose not in self.links.keys():
+            print(self.links.keys())
+            raise NotFoundError(eef_pose)
 
     def _set_desired_base_frame(self):
         if self.base_name == "":
@@ -34,7 +47,7 @@ class SingleArm(Robot):
     def _set_desired_frame(self):
         self._set_desired_base_frame()
         self.frames = self.generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
-        self._active_joint_names = self.get_actuated_joint_names(self.frames)
+        self._active_joint_names = sorted(self.get_actuated_joint_names(self.frames))
 
     def _remove_desired_frames(self):
         """
@@ -44,14 +57,12 @@ class SingleArm(Robot):
         self._active_joint_names = self.get_actuated_joint_names()
 
     def forward_kin(self, thetas):
-        if isinstance(self.frames, list):
-            self._remove_desired_frames()
+        self._remove_desired_frames()
         transformation = self.kin.forward_kinematics(self.frames, thetas)
         return transformation
 
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
         self._set_desired_frame()
-        print(target_pose)
         joints = self.kin.inverse_kinematics(
             self.frames,
             current_joints,
