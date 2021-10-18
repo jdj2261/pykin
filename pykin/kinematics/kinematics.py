@@ -40,6 +40,7 @@ class Kinematics:
         Returns:
             OrderedDict: transformations
         """
+
         if not isinstance(frames, (list, dict)) :
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
         self._transformations = self._compute_FK(frames, self.offset, thetas)

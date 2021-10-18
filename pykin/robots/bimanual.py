@@ -10,7 +10,8 @@ class Bimanual(Robot):
         super(Bimanual, self).__init__(fname, offset)
 
         self.setup_input2dict()
-        
+        self._set_joint_limits_upper_and_lower()
+
     def setup_link_name(self, base_name="", eef_name=None):
         """
         Sets robot's desired frame
@@ -35,14 +36,33 @@ class Bimanual(Robot):
         self.desired_base_frame = self._input2dict(None)
         self.desired_frames = self._input2dict(None)
         self._frames = self._input2dict(None)
-        self._active_joint_names = self._input2dict(None)
+        self._actuated_joint_names = self._input2dict(None)
         self._target_pose = self._input2dict(None)
+        self.joint_limits_lower = self._input2dict(None)
+        self.joint_limits_upper = self._input2dict(None)
 
-    def _set_desired_base_frame(self, arm):
-        if self.base_name[arm] == "":
-            self.desired_base_frame[arm] = self.root
-        else:
-            self.desired_base_frame[arm] = self.find_frame(self.base_name[arm] + "_frame")
+    def _set_joint_limits_upper_and_lower(self):
+        limits_lower = []
+        limits_upper = []
+
+        for joint, (limit_lower, limit_upper) in self.joint_limits.items():
+            limits_lower.append((joint, limit_lower))
+            limits_upper.append((joint, limit_upper))
+
+        for arm in self.arms:
+            self.joint_limits_lower[arm] = [limit_lower for joint, limit_lower in limits_lower if arm in joint]
+            self.joint_limits_upper[arm] = [limit_upper for joint, limit_upper in limits_upper if arm in joint]
+            
+    def joints_in_limits(self, q, arm):
+        lower_lim = self._input2dict(None)
+        upper_lim = self._input2dict(None)
+        result = self._input2dict(None)
+        
+        lower_lim[arm] = self.joint_limits_lower[arm]
+        upper_lim[arm] = self.joint_limits_upper[arm]
+        result[arm] = np.all([q >= lower_lim[arm], q <= upper_lim[arm]], 0)
+        
+        return result
 
     def _set_desired_frame(self, arm):
         self._set_desired_base_frame(arm)
@@ -51,25 +71,39 @@ class Bimanual(Robot):
             self.eef_name[arm])
         
         self._frames[arm] = self.desired_frames[arm]
-        self._active_joint_names[arm] = self.get_actuated_joint_names(self._frames[arm])
-        self._target_pose[arm] = np.zeros(len(self._active_joint_names[arm]))
+        self._actuated_joint_names[arm] = self.get_actuated_joint_names(self._frames[arm])
+        self._target_pose[arm] = np.zeros(len(self._actuated_joint_names[arm]))
 
-    def _remove_desired_frames(self):
+    def _set_desired_base_frame(self, arm):
+        if self.base_name[arm] == "":
+            self.desired_base_frame[arm] = self.root
+        else:
+            self.desired_base_frame[arm] = self.find_frame(self.base_name[arm] + "_frame")
+
+    def remove_desired_frames(self):
         """
         Resets robot's desired frame
         """
         self._frames = self.root
-        self._active_joint_names = self.get_actuated_joint_names()
+        self._actuated_joint_names = self.get_actuated_joint_names()
 
-    def forward_kin(self, thetas):  
-        self._remove_desired_frames()
+    def forward_kin(self, thetas, desired_frames=None): 
+
+        if desired_frames is not None:
+            self._frames = desired_frames
+        else:
+            self.remove_desired_frames()
+
         transformation = self.kin.forward_kinematics(self._frames, thetas)
         return transformation
 
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
+        if not isinstance(target_pose, dict):
+            raise TypeError("Be sure to input the target pose in dictionary form.")
+
         joints = {}
         self._frames = self._input2dict(None)
-        self._active_joint_names = self._input2dict(None)
+        self._actuated_joint_names = self._input2dict(None)
         for arm in self.arms:
             if self.eef_name[arm]:
                 self._set_desired_frame(arm)
@@ -149,5 +183,5 @@ class Bimanual(Robot):
 
     @property
     def active_joint_names(self):
-        return self._active_joint_names
+        return self._actuated_joint_names
         

@@ -13,8 +13,17 @@ class SingleArm(Robot):
         self._base_name = ""
         self._eef_name  = ""
         self.desired_base_frame = ""
-        self._active_joint_names = self.get_actuated_joint_names()
+        self._set_joint_limits_upper_and_lower()
 
+    def _set_joint_limits_upper_and_lower(self):
+        for limit_lower, limit_upper in self.joint_limits.values():
+            self.joint_limits_lower.append(limit_lower)
+            self.joint_limits_upper.append(limit_upper)
+
+    def joints_in_limits(self, q):
+        lower_lim = self.joint_limits_lower
+        upper_lim = self.joint_limits_upper
+        return np.all([q >= lower_lim, q <= upper_lim], 0)
 
     def setup_link_name(self, base_name="", eef_name=None):
         """
@@ -47,16 +56,16 @@ class SingleArm(Robot):
     def _set_desired_frame(self):
         self._set_desired_base_frame()
         self.frames = self.generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
-        self._active_joint_names = sorted(self.get_actuated_joint_names(self.frames))
+        self._actuated_joint_names = sorted(self.get_actuated_joint_names(self.frames))
 
     def _remove_desired_frames(self):
         """
         Resets robot's desired frame
         """
         self.frames = self.root
-        self._active_joint_names = self.get_actuated_joint_names()
+        self._actuated_joint_names = self.get_actuated_joint_names()
 
-    def forward_kin(self, thetas):
+    def forward_kin(self, thetas, frames=None):
         self._remove_desired_frames()
         transformation = self.kin.forward_kinematics(self.frames, thetas)
         return transformation
@@ -101,4 +110,4 @@ class SingleArm(Robot):
 
     @property
     def active_joint_names(self):
-        return self._active_joint_names
+        return self._actuated_joint_names

@@ -27,8 +27,13 @@ class Robot(URDFModel):
             
         super(Robot, self).__init__(fname)
 
+        self.joint_limits_lower = []
+        self.joint_limits_upper = []
+
         self._setup_kinematics()
-        self._init_transform()
+        self._setup_init_transform()
+
+        self.joint_limits = self._get_limited_joint_names()
 
     def __str__(self):
         return f"""ROBOT : {self.robot_name} 
@@ -69,7 +74,6 @@ class Robot(URDFModel):
             np.dot(result_HT, np.linalg.inv(target_HT)) - np.mat(np.eye(4))), 6)
         return error
         
-
     def _setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
@@ -78,12 +82,21 @@ class Robot(URDFModel):
                               eef_name=None
                               )
     
-    def _init_transform(self):
+    def _setup_init_transform(self):
         """
         Initializes robot's transformation
         """
         thetas = np.zeros(self.dof)
-        self.kin.forward_kinematics(self.root, thetas)
+        transformations = self.kin.forward_kinematics(self.root, thetas)
+        self.init_transformations = transformations
+
+    def _get_limited_joint_names(self):
+        result = {}
+        for joint, value in self.joints.items():
+            for active_joint in self.get_actuated_joint_names():
+                if joint == active_joint:
+                    result.update({joint : (value.limit[0], value.limit[1])})
+        return result
 
     def setup_link_name(self, base_name, eef_name):
         """
@@ -95,8 +108,7 @@ class Robot(URDFModel):
         """
         raise NotImplementedError
 
-
-    def forward_kin(self, thetas):
+    def forward_kin(self, thetas, frames=None):
         raise NotImplementedError
 
     def inverse_kin(self, current_joints, target_pose, method, maxIter):
@@ -145,4 +157,11 @@ class Robot(URDFModel):
     @property
     def active_joint_names(self):
         raise NotImplementedError
+
+    def _set_joint_limits_upper_and_lower(self):
+        raise NotImplementedError
+
+    def joints_in_limits(self, q):
+        raise NotImplementedError
+
 

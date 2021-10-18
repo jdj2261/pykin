@@ -79,12 +79,18 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, ax=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(robot, ax=None, transformations=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
     """
     Plot robot
     """
 
-    transformations = robot.transformations
+    transformations = transformations
+
+    if transformations is None:
+        transformations = robot.transformations
+    
+
+
     name = robot.robot_name
     
     plot_basis(robot, ax)
@@ -139,7 +145,7 @@ def plot_animation(robot, trajectory, interval=100, repeat=False, results=None):
             print(f"{i/(len(trajectory)-1) * 100:.1f} %")
             print("Animation Finished..")
         ax.clear()
-        plot_robot(robot, trajectory[i], ax, name="baxter", visible_collision=True)
+        plot_robot(robot, transformations=trajectory[i], ax=ax, visible_collision=True)
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 

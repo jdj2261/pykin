@@ -18,8 +18,8 @@ visible_visual = False
 
 # set target joints angle
 head_thetas =  np.zeros(1)
-right_arm_thetas = np.random.randn(7)
-left_arm_thetas = np.random.randn(7)
+right_arm_thetas = np.array([-np.pi/4 , 0, 0, 0, 0 , 0 ,0])
+left_arm_thetas = np.array([np.pi/4 , 0, 0, 0, 0 , 0 ,0])
 
 thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
 
@@ -43,14 +43,13 @@ init_thetas = np.random.randn(7)
 target_pose = { "right": robot.eef_pose["right"], 
                 "left" : robot.eef_pose["left"]}
 
-# Right's arm IK solution by LM
 ik_LM_result = robot.inverse_kin(
     init_thetas, 
     target_pose, 
     method="LM", 
     maxIter=100)
 
-# # Right's arm IK solution by NR
+
 ik_NR_result = robot.inverse_kin(
     init_thetas, 
     target_pose, 

@@ -1,11 +1,13 @@
+#TODO
+
 from itertools import zip_longest
 import numpy as np
 
-from pykin.robot import Robot
+from pykin.robots.bimanual import Bimanual
 from pykin.utils import plot_utils as plt
 
 file_path = '../../asset/urdf/baxter/baxter.urdf'
-robot = Robot(file_path)
+robot = Bimanual(file_path)
 
 head_thetas = [0]
 left_thetas = np.array([0, -np.pi/2, 0, -np.pi/2, 0, 0, 0])
@@ -59,4 +61,4 @@ for i, (left_joint, right_joint) in enumerate(trajectory_joints):
     transformations = robot.kin.forward_kinematics(current_joint)
     trajectory_pos.append(transformations)
 
-plt.plot_animation(robot, trajectory_pos, interval=100, repeat=False)
+plt.plot_animation(robot, trajectory_pos, interval=10, repeat=False)
