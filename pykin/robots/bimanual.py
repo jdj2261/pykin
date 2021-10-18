@@ -36,7 +36,7 @@ class Bimanual(Robot):
         self.desired_base_frame = self._input2dict(None)
         self.desired_frames = self._input2dict(None)
         self._frames = self._input2dict(None)
-        self._actuated_joint_names = self._input2dict(None)
+        self._revolute_joint_names = self._input2dict(None)
         self._target_pose = self._input2dict(None)
         self.joint_limits_lower = self._input2dict(None)
         self.joint_limits_upper = self._input2dict(None)
@@ -71,8 +71,8 @@ class Bimanual(Robot):
             self.eef_name[arm])
         
         self._frames[arm] = self.desired_frames[arm]
-        self._actuated_joint_names[arm] = self.get_actuated_joint_names(self._frames[arm])
-        self._target_pose[arm] = np.zeros(len(self._actuated_joint_names[arm]))
+        self._revolute_joint_names[arm] = self.get_revolute_joint_names(self._frames[arm])
+        self._target_pose[arm] = np.zeros(len(self._revolute_joint_names[arm]))
 
     def _set_desired_base_frame(self, arm):
         if self.base_name[arm] == "":
@@ -80,19 +80,19 @@ class Bimanual(Robot):
         else:
             self.desired_base_frame[arm] = self.find_frame(self.base_name[arm] + "_frame")
 
-    def remove_desired_frames(self):
+    def _remove_desired_frames(self):
         """
         Resets robot's desired frame
         """
         self._frames = self.root
-        self._actuated_joint_names = self.get_actuated_joint_names()
+        self._revolute_joint_names = self.get_revolute_joint_names()
 
     def forward_kin(self, thetas, desired_frames=None): 
 
         if desired_frames is not None:
             self._frames = desired_frames
         else:
-            self.remove_desired_frames()
+            self._remove_desired_frames()
 
         transformation = self.kin.forward_kinematics(self._frames, thetas)
         return transformation
@@ -103,7 +103,7 @@ class Bimanual(Robot):
 
         joints = {}
         self._frames = self._input2dict(None)
-        self._actuated_joint_names = self._input2dict(None)
+        self._revolute_joint_names = self._input2dict(None)
         for arm in self.arms:
             if self.eef_name[arm]:
                 self._set_desired_frame(arm)
@@ -183,5 +183,5 @@ class Bimanual(Robot):
 
     @property
     def active_joint_names(self):
-        return self._actuated_joint_names
+        return self._revolute_joint_names
         

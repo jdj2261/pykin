@@ -57,6 +57,7 @@ class Robot(URDFModel):
             
         print(f"robot's dof : {self.dof}")
         print(f"active joint names: \n{self.get_actuated_joint_names()}")
+        print(f"revolute joint names: \n{self.get_revolute_joint_names()}")
         print("*" * 100)
 
     def compute_pose_error(self, target_HT=np.eye(4), result_HT=np.eye(4)):
@@ -77,7 +78,7 @@ class Robot(URDFModel):
     def _setup_kinematics(self):
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
-                              active_joint_names=self.get_actuated_joint_names(),
+                              active_joint_names=self.get_revolute_joint_names(),
                               base_name="", 
                               eef_name=None
                               )
@@ -86,14 +87,14 @@ class Robot(URDFModel):
         """
         Initializes robot's transformation
         """
-        thetas = np.zeros(self.dof)
+        thetas = np.zeros(len(self.get_revolute_joint_names()))
         transformations = self.kin.forward_kinematics(self.root, thetas)
         self.init_transformations = transformations
 
     def _get_limited_joint_names(self):
         result = {}
         for joint, value in self.joints.items():
-            for active_joint in self.get_actuated_joint_names():
+            for active_joint in self.get_revolute_joint_names():
                 if joint == active_joint:
                     result.update({joint : (value.limit[0], value.limit[1])})
         return result

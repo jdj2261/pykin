@@ -14,7 +14,7 @@ robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("panda_link0", "panda_hand")
 
 # panda_example
-target_thetas = [0, np.pi/2, 0, 0, 0, 0, 0, 0, 0]
+target_thetas = [0, np.pi/5, 0, 0, 0, 0, 0, 0, 0]
 init_thetas = np.random.randn(7)
 
 fk = robot.forward_kin(target_thetas)
@@ -29,6 +29,6 @@ result_fk = robot.forward_kin(theta)
 
 _, ax = plt.init_3d_figure("IK Result")
 plt.plot_robot(robot, ax,
-               visible_visual=False,
+               visible_visual=True,
                mesh_path='../../asset/urdf/panda/')
 plt.show_figure()

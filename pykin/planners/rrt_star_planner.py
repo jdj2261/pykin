@@ -1,60 +1,12 @@
-import sys
 import math
 import numpy as np
 
-import os
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
-
-from pykin.robots.bimanual import Bimanual
-from pykin.robots.single_arm import SingleArm
-
 from pykin.planners.planner import Planner
-from pykin.kinematics.transform import Transform
+from pykin.planners.tree import Tree
+from pykin.planners.environment import Environment
 from pykin.utils.fcl_utils import FclManager
-from pykin.utils import plot_utils as plt
-from pykin.utils.kin_utils import get_robot_geom, limit_joints
-from pykin.utils.transform_utils import get_homogeneous_matrix
+from pykin.utils.kin_utils import get_robot_geom
 from pykin.utils.error_utils import NotFoundError
-
-class Tree:
-    """
-    Tree
-    """
-    def __init__(self):
-        self.vertices = []
-        self.edges = []
-
-    def add_vertex(self, q_joints):
-        self.vertices.append(q_joints)
-
-    def add_edge(self, q_joints_idx):
-        self.edges.append(q_joints_idx)
-
-
-class Environment:
-    """
-    Environment (Map, Obstacles)
-    """
-    def __init__(
-        self, 
-        x_min, 
-        y_min, 
-        z_min,
-        x_max, 
-        y_max,
-        z_max
-    ):
-        self.x_min = x_min
-        self.y_min = y_min
-        self.z_min = z_min
-        self.x_max = x_max
-        self.y_max = y_max
-        self.z_max = z_max
-        self.obstacles = []
-
-    def add_obstacle(self, obj):
-        self.obstacles.extend(obj)
 
 
 class RRTStarPlanner(Planner):
@@ -71,7 +23,6 @@ class RRTStarPlanner(Planner):
         epsilon=0.1,
         max_iter=3000,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
-        fcl_manager=None
     ):
         self.robot = robot
         self.obstacles = obstacles
@@ -81,14 +32,11 @@ class RRTStarPlanner(Planner):
         self.epsilon = epsilon
         self.max_iter = max_iter
         self.gamma_RRTs = gamma_RRT_star
-        self.fcl_manager = fcl_manager
+        self.fcl_manager = FclManager()
 
         self.arm = None
         self.dimension = self.robot.dof
         self.eef_name = self.robot.eef_name
-
-        self.T = Tree()
-        self.cost = {}
 
         self._setup_fcl_manager()
 
@@ -97,6 +45,7 @@ class RRTStarPlanner(Planner):
             name, gtype, gparam = get_robot_geom(self.robot.links[link])
             transform = transformation.homogeneous_matrix
             self.fcl_manager.add_object(name, gtype, gparam, transform)
+
     def setup_start_goal_joint(self, current_q, goal_q, arm=None):
         self.cur_q = current_q
         self.goal_q  = goal_q
@@ -113,18 +62,17 @@ class RRTStarPlanner(Planner):
         path = None
         self.T = Tree()
         self.cost = {}
+
         self.T.add_vertex(self.cur_q)
         self.cost[0] = 0
-
-
 
         for k in range(self.max_iter):
             rand_q = self.random_state()
             nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
             new_q = self.new_state(nearest_q, rand_q)
    
-            # if k % 500 == 0:
-            #     print(f"iter : {k}")
+            if k % 500 == 0:
+                print(f"iter : {k}")
 
             if self.collision_free(new_q) and self.q_in_limits(new_q):
                 neighbor_indexes = self.find_near_neighbor(new_q)                
@@ -185,7 +133,7 @@ class RRTStarPlanner(Planner):
         if self.arm is not None:
             transformations = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
         else:
-            transformations = self.robot.forward_kin(q_in)
+            transformations = self.robot.forward_kin(q_in, self.robot.desired_frames)
         return transformations
 
     def nearest_neighbor(self, random_q, tree):
@@ -280,83 +228,3 @@ class RRTStarPlanner(Planner):
             goal_node = self.T.vertices[edge[1]]
             vertices.append((from_node, goal_node))
         return vertices
-
-
-if __name__ == "__main__":
-
-
-    file_path = '../../asset/urdf/baxter/baxter.urdf'
-    if len(sys.argv) > 1:
-        robot_name = sys.argv[1]
-        file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-
-    robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-
-    robot.setup_link_name("base", "right_wrist")
-    robot.setup_link_name("base", "left_wrist")
-
-    # set target joints angle
-    head_thetas =  np.zeros(1)
-    right_arm_thetas = np.array([-np.pi/4 , 0, 0, -np.pi/4, 0 , 0 ,0])
-    left_arm_thetas = np.array([np.pi/4 , 0, -np.pi/4, 0, 0 , 0 ,0])
-
-    thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
-    target_transformations = robot.forward_kin(thetas)
-
-    init_q_space = { "right": np.zeros(7), 
-                    "left" : np.zeros(7)}
-
-    target_pose = { "right": robot.eef_pose["right"], 
-                    "left" : robot.eef_pose["left"]}
-
-    target_q_space = robot.inverse_kin(
-        np.random.randn(7), 
-        target_pose, 
-        method="LM", 
-        maxIter=100)
-
-    # robot.remove_desired_frames()
-    planner = RRTStarPlanner(
-        robot=robot,
-        obstacles=[],
-        delta_distance=1,
-        gamma_RRT_star=10,
-        epsilon=0.2, 
-        max_iter=100,
-        fcl_manager=FclManager()
-    )
-
-
-    trajectory_pos = []
-    path = {}
-    trajectories = []
-    for arm in robot.arms:
-        planner.setup_start_goal_joint(init_q_space[arm], target_q_space[arm], arm)
-        path[arm] = planner.generate_path()
-
-    from itertools import zip_longest
-
-    if any(value is None for value in path.values()):
-        print("Not created trajectories..")
-    else:
-
-        current_q_space = { "right": path["right"][-1], "left" : path["left"][-1]}
-        trajectory_joints = list(zip_longest(np.array(path["right"]), np.array(path["left"])))
-        print(f"target : {target_q_space}")
-        print(f"path: {current_q_space}")
-
-        for i, (right_joint, left_joint) in enumerate(trajectory_joints):
-
-            if right_joint is None:
-                right_joint = last_right_joint
-            if left_joint is None:
-                left_joint = last_left_joint
-
-            last_right_joint = right_joint
-            last_left_joint = left_joint
-
-            current_joint = np.concatenate((head_thetas, left_joint, right_joint)) 
-            transformations = robot.forward_kin(current_joint)
-            trajectory_pos.append(transformations)
-    
-        plt.plot_animation(robot, trajectory_pos, interval=100, repeat=False)
