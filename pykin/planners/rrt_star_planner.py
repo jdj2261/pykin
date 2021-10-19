@@ -3,11 +3,10 @@ import numpy as np
 
 from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
-from pykin.planners.environment import Environment
 from pykin.utils.fcl_utils import FclManager
 from pykin.utils.kin_utils import get_robot_geom
-from pykin.utils.error_utils import NotFoundError
-
+from pykin.utils.error_utils import NotFoundError, CollisionError
+from pykin.utils.transform_utils import get_homogeneous_matrix
 
 class RRTStarPlanner(Planner):
     """
@@ -32,21 +31,27 @@ class RRTStarPlanner(Planner):
         self.epsilon = epsilon
         self.max_iter = max_iter
         self.gamma_RRTs = gamma_RRT_star
-        self.fcl_manager = FclManager()
+        
+        self.T = None
+        self.cost = None
 
         self.arm = None
         self.dimension = self.robot.dof
         self.eef_name = self.robot.eef_name
 
-        self._setup_fcl_manager()
+    def setup_start_goal_joint(self, current_q, goal_q, arm=None, transformation=None):
+        if transformation is None:
+            transformation = self.robot.init_transformations
 
-    def _setup_fcl_manager(self):
-        for link, transformation in self.robot.init_transformations.items():
-            name, gtype, gparam = get_robot_geom(self.robot.links[link])
-            transform = transformation.homogeneous_matrix
-            self.fcl_manager.add_object(name, gtype, gparam, transform)
+        if not isinstance(current_q, (np.ndarray)):
+            current_q = np.array(current_q)
+        
+        if not isinstance(goal_q, (np.ndarray)):
+            current_q = np.array(goal_q)
 
-    def setup_start_goal_joint(self, current_q, goal_q, arm=None):
+        self.fcl_manager = FclManager()
+        self._setup_fcl_manager(transformation)
+        
         self.cur_q = current_q
         self.goal_q  = goal_q
         self.arm = arm
@@ -55,6 +60,24 @@ class RRTStarPlanner(Planner):
         self._get_q_limits()
         self._get_eef_name()
 
+    def _setup_fcl_manager(self, transformatios):
+        for link, transformation in transformatios.items():
+            name, gtype, gparam = get_robot_geom(self.robot.links[link])
+            transform = transformation.homogeneous_matrix
+            self.fcl_manager.add_object(name, gtype, gparam, transform)
+
+        if self.obstacles:
+            for name, (ob_x, ob_y, ob_z, ob_r) in self.obstacles.items():
+                ob_transform = get_homogeneous_matrix(position=np.array([ob_x, ob_y, ob_z]))
+                self.fcl_manager.add_object(name, "sphere", ob_r, ob_transform)
+
+        is_collision, obj_names = self.fcl_manager.collision_check(return_names=True)
+
+        if is_collision:
+            for name1, name2 in obj_names:
+                if not ("obstacle" in name1 and "obstacle" in name2):
+                    raise CollisionError((name1, name2))
+
     def generate_path(self):
         if self.cur_q.all() or self.goal_q.all() is None:
             raise NotFoundError("Make sure set current or goal joints..")
@@ -62,7 +85,6 @@ class RRTStarPlanner(Planner):
         path = None
         self.T = Tree()
         self.cost = {}
-
         self.T.add_vertex(self.cur_q)
         self.cost[0] = 0
 
@@ -71,11 +93,11 @@ class RRTStarPlanner(Planner):
             nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
             new_q = self.new_state(nearest_q, rand_q)
    
-            if k % 500 == 0:
+            if k % 300 == 0 and k !=0:
                 print(f"iter : {k}")
 
             if self.collision_free(new_q) and self.q_in_limits(new_q):
-                neighbor_indexes = self.find_near_neighbor(new_q)                
+                neighbor_indexes = self.find_near_neighbor(new_q)               
                 min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
                 min_cost, nearest_idx = self.get_minimum_cost(neighbor_indexes, new_q, min_cost, nearest_idx)
  
@@ -164,8 +186,10 @@ class RRTStarPlanner(Planner):
                 transform = transformations.homogeneous_matrix
                 self.fcl_manager.set_transform(name=link, transform=transform)
 
-        is_collision = self.fcl_manager.collision_check(return_names=False, return_data=False)
-        return False if is_collision else True
+        is_collision , name = self.fcl_manager.collision_check(return_names=True, return_data=False)
+        if not is_collision:
+            return True
+        return False
 
     def find_near_neighbor(self, q):
         card_V = len(self.T.vertices) + 1
@@ -205,7 +229,7 @@ class RRTStarPlanner(Planner):
 
     def reach_to_goal(self, point):
         dist = self.distance(point, self.goal_q)
-        if dist <= 0.02:
+        if dist <= 0.2:
             return True
         return False
 

@@ -20,7 +20,7 @@ if "baxter" in file_path:
 else:
     from pykin.robots.single_arm import SingleArm
     robot = SingleArm(file_path)
-from pykin.utils import plot_utils as plt
+
 fig, ax = plt.init_3d_figure("URDF")
 
 """

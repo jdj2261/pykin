@@ -18,46 +18,68 @@ robot.setup_link_name("base", "right_l6")
 
 # set target joints angle
 target_thetas = [0, np.pi/2, 0, 0, 0, 0, 0, 0]
-init_thetas = np.random.randn(7)
-robot.forward_kin(target_thetas)
+target_transformations = robot.forward_kin(target_thetas)
 
 init_q_space = np.array([0,0,0,0,0,0,0])
-target_pose = robot.eef_pose
+target_pose = robot.compute_eef_pose(target_transformations)
 
-target_q_space = robot.inverse_kin(
-    init_thetas, 
-    target_pose, 
-    method="LM", 
-    maxIter=100)
+fig, ax = plt.init_3d_figure()
+
+spheres = {}
+radius = 0.1
+for i in range(5):
+    x = np.random.uniform(0.0, 1.0)
+    y = np.random.uniform(0.3, 1.0)
+    z = np.random.uniform(0.0, 0.5)
+    obstacle_name = "obstacle_sphere_" + str(i)
+    spheres.update({obstacle_name : (x, y, z, radius)})
 
 planner = RRTStarPlanner(
     robot=robot,
-    obstacles=[],
+    obstacles=spheres,
     delta_distance=0.1,
     epsilon=0.2, 
     max_iter=300,
-    gamma_RRT_star=20,
+    gamma_RRT_star=10,
 )
 
-cnt = 1
+cnt = 0
 done = True
+
 while cnt <= 20 and done:
+
+    target_q_space = robot.inverse_kin(
+        np.random.randn(7), 
+        target_pose, 
+        method="LM", 
+        maxIter=100)
+
     path = {}
     planner.setup_start_goal_joint(init_q_space, target_q_space)
     path = planner.generate_path()
 
     trajectories = []
-    trajectory_pos = []
     if path is None:
         done = True
-        print(f"{cnt}th try to find path..")
         cnt += 1
+        print(f"{cnt}th try to find path..")
     else:
         done = False
         trajectory_joints = np.array(path)
 
         for i, current_joint in enumerate(trajectory_joints):
-            transformations = robot.forward_kin(np.concatenate((np.zeros(1),current_joint)))
-            trajectory_pos.append(transformations)
 
-        plt.plot_animation(robot, trajectory_pos, interval=1, repeat=False)
+            transformations = robot.forward_kin(np.concatenate((np.zeros(1), current_joint)))
+            trajectories.append(transformations)
+
+        plt.plot_animation(
+            robot,
+            trajectories, 
+            fig, 
+            ax,
+            obstacels=spheres,
+            visible_obstacles=True,
+            visible_collision=False, 
+            interval=100, 
+            repeat=False,
+            result=None)

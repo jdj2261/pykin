@@ -191,6 +191,9 @@ class FclManager:
                 coll_names = (self._extract_name(contact.o1),self._extract_name(contact.o2))
                 coll_names = tuple(sorted(coll_names))
 
+                if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
+                    continue
+
                 # Baxter
                 if 'lower_forearm' in coll_names[0] and 'wrist' in coll_names[1]:
                     continue
@@ -230,6 +233,27 @@ class FclManager:
                     continue
                 if 'display' in coll_names[0] and 'screen' in coll_names[1]:
                     continue
+
+                # sawyer
+                if 'right_l1' in coll_names[0] and 'right_l1_2' in coll_names[1]:
+                    continue
+                if 'right_l4' in coll_names[0] and 'right_l4_2' in coll_names[1]:
+                    continue
+                if 'head' in coll_names[0] and 'right_l1' in coll_names[1]:
+                    continue
+                if 'right_l2' in coll_names[0] and 'right_l2_2' in coll_names[1]:
+                    continue
+                if 'right_arm_base_link' in coll_names[0] and 'right_l0' in coll_names[1]:
+                    continue
+                if 'head' in coll_names[0] and 'right_l1_2' in coll_names[1]:
+                    continue
+                if 'head' in coll_names[0] and 'right_l2' in coll_names[1]:
+                    continue
+                if 'head' in coll_names[0] and 'screen' in coll_names[1]:
+                    continue
+                if 'right_hand' in coll_names[0] and 'right_l6' in coll_names[1]:
+                    continue
+
                 
                 if return_names:
                     objs_in_collision.add(coll_names)

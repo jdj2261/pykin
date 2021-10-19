@@ -123,13 +123,13 @@ class Robot(URDFModel):
     def offset(self, offset):
         self._offset = offset
 
-    @property
-    def transformations(self):
-        return self.kin._transformations
+    # @property
+    # def transformations(self):
+    #     return self.kin._transformations
 
-    @transformations.setter
-    def transformations(self, transformations):
-        self.transformations = transformations
+    # @transformations.setter
+    # def transformations(self, transformations):
+    #     self.transformations = transformations
 
     @property
     def base_name(self):
@@ -137,18 +137,6 @@ class Robot(URDFModel):
     
     @property
     def eef_name(self):
-        raise NotImplementedError
-
-    @property
-    def eef_pos(self):
-        raise NotImplementedError
-
-    @property
-    def eef_rot(self):
-        raise NotImplementedError
-
-    @property
-    def eef_pose(self):
         raise NotImplementedError
 
     @property

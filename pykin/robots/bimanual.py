@@ -104,10 +104,11 @@ class Bimanual(Robot):
         joints = {}
         self._frames = self._input2dict(None)
         self._revolute_joint_names = self._input2dict(None)
-        for arm in self.arms:
+        for arm in target_pose.keys():
             if self.eef_name[arm]:
                 self._set_desired_frame(arm)
-                self._target_pose[arm] = target_pose[arm].flatten()
+                self._target_pose[arm] = self._convert_target_pose_type_to_npy(target_pose[arm])
+
                 joints[arm] = self.kin.inverse_kinematics(
                     self._frames[arm],
                     current_joints,
@@ -135,6 +136,32 @@ class Bimanual(Robot):
         # Now, convert list to dict and return
         return {key: value for key, value in zip(self.arms, inp)}
 
+    def _convert_target_pose_type_to_npy(self, value):
+        if isinstance(value, (list, tuple)):
+            value = np.array(value)
+        return value.flatten()
+
+    def compute_eef_pos(self, transformations):
+        vals = {}
+        for arm in self.arms:
+            if self.eef_name[arm]:
+                vals[arm] = transformations[self.eef_name[arm]].pos
+        return vals
+
+    def compute_eef_rot(self, transformations):
+        vals = {}
+        for arm in self.arms:
+            if self.eef_name[arm]:
+                vals[arm] = transformations[self.eef_name[arm]].rot
+        return vals
+
+    def compute_eef_pose(self, transformations):
+        vals = {}
+        for arm in self.arms:
+            if self.eef_name[arm]:
+                vals[arm] = np.concatenate((transformations[self.eef_name[arm]].pos, transformations[self.eef_name[arm]].rot))
+        return vals
+
     @property
     def arms(self):
         """
@@ -153,29 +180,6 @@ class Bimanual(Robot):
     def eef_name(self):
         return self._eef_name
 
-    @property
-    def eef_pos(self):
-        vals = {}
-        for arm in self.arms:
-            if self.eef_name[arm]:
-                vals[arm] = self.kin._transformations[self.eef_name[arm]].pos
-        return vals
-
-    @property
-    def eef_rot(self):
-        vals = {}
-        for arm in self.arms:
-            if self.eef_name[arm]:
-                vals[arm] = self.kin._transformations[self.eef_name[arm]].rot
-        return vals
-
-    @property
-    def eef_pose(self):
-        vals = {}
-        for arm in self.arms:
-            if self.eef_name[arm]:
-                vals[arm] = np.concatenate((self.eef_pos[arm], self.eef_rot[arm]))
-        return vals
 
     @property
     def frame(self):

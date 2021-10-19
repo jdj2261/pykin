@@ -1,4 +1,3 @@
-from . import environment
 from . import tree
 from . import planner
 from . import rrt_planner

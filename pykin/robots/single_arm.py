@@ -91,6 +91,15 @@ class SingleArm(Robot):
             maxIter=1000)
         return joints
 
+    def compute_eef_pos(self, transformations):
+        return transformations[self.eef_name].pos
+
+    def compute_eef_rot(self, transformations):
+        return transformations[self.eef_name].rot
+
+    def compute_eef_pose(self, transformations):
+        return np.concatenate((transformations[self.eef_name].pos, transformations[self.eef_name].rot))
+
     @property
     def base_name(self):
         return self._base_name
@@ -107,17 +116,6 @@ class SingleArm(Robot):
     def eef_name(self, name):
         self._eef_name = name
 
-    @property
-    def eef_pos(self):
-        return self.kin._transformations[self.eef_name].pos
-
-    @property
-    def eef_rot(self):
-        return self.kin._transformations[self.eef_name].rot
-
-    @property
-    def eef_pose(self):
-        return np.concatenate((self.eef_pos, self.eef_rot))
 
     @property
     def active_joint_names(self):

@@ -19,10 +19,10 @@ init_thetas = np.random.randn(robot.dof)
 
 robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
 fk = robot.forward_kin(target_thetas)
-target_pose = robot.eef_pose
+target_pose = robot.compute_eef_pose(fk)
 
 _, ax = plt.init_3d_figure("FK")
-plt.plot_robot(robot, ax)
+plt.plot_robot(robot, ax, fk)
 
 joints = robot.inverse_kin(init_thetas, target_pose, method="LM")
 result_fk = robot.forward_kin(joints)
@@ -30,7 +30,8 @@ result_fk = robot.forward_kin(joints)
 _, ax = plt.init_3d_figure("IK")
 plt.plot_robot(
     robot, 
-    ax, 
+    ax=ax,
+    transformations=result_fk,
     visible_visual=False,
     mesh_path='../../asset/urdf/iiwa14/')
 plt.show_figure()

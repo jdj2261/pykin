@@ -31,7 +31,9 @@ robot.setup_link_name("base", "left_wrist")
 #################################################################################
 target_transformations = robot.forward_kin(thetas)
 _, ax = plt.init_3d_figure("Target Pose")
-plt.plot_robot(robot, ax,
+plt.plot_robot(robot, 
+               ax=ax,
+               transformations=target_transformations,
                visible_visual=visible_visual, 
                visible_collision=visible_collision,
                mesh_path='../../asset/urdf/baxter/')
@@ -40,15 +42,14 @@ plt.plot_robot(robot, ax,
 #                                Inverse Kinematics                             #
 #################################################################################
 init_thetas = np.random.randn(7)
-target_pose = { "right": robot.eef_pose["right"], 
-                "left" : robot.eef_pose["left"]}
+target_pose = { "right": robot.compute_eef_pose(target_transformations)["right"], 
+                "left" : robot.compute_eef_pose(target_transformations)["left"]}
 
 ik_LM_result = robot.inverse_kin(
     init_thetas, 
     target_pose, 
     method="LM", 
     maxIter=100)
-
 
 ik_NR_result = robot.inverse_kin(
     init_thetas, 
@@ -59,7 +60,7 @@ ik_NR_result = robot.inverse_kin(
 thetas_LM = np.concatenate((head_thetas, ik_LM_result["right"], ik_LM_result["left"]))
 result_fk_LM = robot.forward_kin(thetas_LM)
 _, ax = plt.init_3d_figure("LM IK Result")
-plt.plot_robot(robot, ax,
+plt.plot_robot(robot, ax, result_fk_LM,
                visible_visual=visible_visual, 
                visible_collision=visible_collision,
                mesh_path='../../asset/urdf/baxter/')
@@ -67,7 +68,7 @@ plt.plot_robot(robot, ax,
 thetas_NR = np.concatenate((head_thetas, ik_NR_result["right"], ik_NR_result["left"]))
 result_fk_NR = robot.forward_kin(thetas_NR)
 _, ax = plt.init_3d_figure("NR IK Result")
-plt.plot_robot(robot, ax,
+plt.plot_robot(robot, ax, result_fk_NR,
                visible_visual=visible_visual, 
                visible_collision=visible_collision,
                mesh_path='../../asset/urdf/baxter/')

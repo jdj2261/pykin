@@ -31,7 +31,7 @@ result, objs_in_collision, contact_data = fcl_manager.collision_check(return_nam
 print(result, objs_in_collision, contact_data)
 
 fig, ax = plt.init_3d_figure()
-plt.plot_robot(robot, ax, visible_collision=True)
+plt.plot_robot(robot, ax, transformations, visible_collision=True)
 
 left_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
 thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
@@ -46,5 +46,5 @@ result, objs_in_collision, contact_data = fcl_manager.collision_check(return_nam
 print(result, objs_in_collision, contact_data)
 
 fig, ax = plt.init_3d_figure()
-plt.plot_robot(robot, ax, visible_collision=True)
+plt.plot_robot(robot, ax, transformations, visible_collision=True)
 plt.show_figure()

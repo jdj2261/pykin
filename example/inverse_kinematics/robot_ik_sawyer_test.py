@@ -19,16 +19,16 @@ init_thetas = np.random.randn(7)
 
 fk = robot.forward_kin(target_thetas)
 _, ax = plt.init_3d_figure("Target Pose")
-plt.plot_robot(robot, ax)
+plt.plot_robot(robot, ax, fk)
 
-target_pose = robot.eef_pose
+target_pose = robot.compute_eef_pose(fk)
 ik_result = robot.inverse_kin(init_thetas, target_pose, method="LM")
 
 theta = np.concatenate((np.zeros(1), ik_result))
 result_fk = robot.forward_kin(theta)
 
 _, ax = plt.init_3d_figure("IK Result")
-plt.plot_robot(robot, ax,
+plt.plot_robot(robot, ax,result_fk,
                visible_visual=False,
                mesh_path='../../asset/urdf/sawyer/')
 

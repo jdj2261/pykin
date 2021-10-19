@@ -79,21 +79,24 @@ def plot_basis(robot=None, ax=None):
             c=directions_colors[2], label="Z")
 
 
-def plot_robot(robot, ax=None, transformations=None, visible_visual=False, visible_collision=False, mesh_path='../asset/urdf/baxter/'):
+def plot_robot(
+    robot, 
+    ax=None, 
+    transformations=None, 
+    visible_visual=False,
+    visible_collision=False, 
+    mesh_path='../asset/urdf/baxter/'):
+
     """
     Plot robot
     """
 
-    transformations = transformations
-
     if transformations is None:
-        transformations = robot.transformations
-    
-
+        transformations = robot.init_transformations
 
     name = robot.robot_name
-    
     plot_basis(robot, ax)
+    
     links = []
     nodes = []
     transformation_matrix = []
@@ -128,24 +131,44 @@ def plot_robot(robot, ax=None, transformations=None, visible_visual=False, visib
 
     ax.legend()
 
-def plot_animation(robot, trajectory, interval=100, repeat=False, results=None):
+def plot_animation(
+    robot, 
+    trajectory,
+    fig=None,
+    ax=None,
+    obstacels=None,
+    visible_obstacles=False,
+    visible_collision=False,
+    interval=100, 
+    repeat=False,
+    result=None):
+
     """
     Plot animation
     """
-    fig = plt.figure(figsize = (12, 6), dpi = 100)
-    ax = fig.add_subplot(111, projection='3d')
 
     def update(i):
         print(f"{i/len(trajectory) * 100:.1f} %")
-        
-        if results is not None:
-            print(results[i])
-
+    
         if i == len(trajectory)-1:
             print(f"{i/(len(trajectory)-1) * 100:.1f} %")
             print("Animation Finished..")
         ax.clear()
-        plot_robot(robot, transformations=trajectory[i], ax=ax, visible_collision=True)
+
+        if visible_obstacles and obstacels:
+            if not isinstance(obstacels, dict):
+                raise TypeError("Make sure obstacles type.. ")
+
+            for sp_x, sp_y, sp_z, sp_r in obstacels.values():
+                sp_radius = sp_r
+                sp_pos = np.array([sp_x, sp_y, sp_z])
+                plot_sphere(ax, radius=sp_radius, p=sp_pos, alpha=1.0, color="g")
+
+        if result is not None:
+            print(result[i])
+            print()
+
+        plot_robot(robot, transformations=trajectory[i], ax=ax, visible_collision=visible_collision)
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
@@ -197,7 +220,7 @@ def plot_baxter(nodes, ax):
         [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
 
 
-def plot_collision(robot, transformations, ax, alpha=0.5):
+def plot_collision(robot, transformations, ax, alpha=0.8):
     """
     Plot robot's collision
     """
@@ -372,11 +395,11 @@ def plot_path_planner(path, ax):
     ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
 
 
-def init_3d_figure(name=None):
+def init_3d_figure(name=None, figsize=(15,7.5), dpi= 80):
     """
     Initializes 3d figure
     """
-    fig = plt.figure(name)
+    fig = plt.figure(name, figsize=figsize, dpi= dpi)
     ax = fig.add_subplot(111, projection='3d')
     return fig, ax
 

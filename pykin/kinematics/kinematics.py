@@ -28,7 +28,6 @@ class Kinematics:
         self.active_joint_names = active_joint_names
         self.base_name = base_name
         self.eef_name = eef_name
-        self._transformations = None
 
     def forward_kinematics(self, frames, thetas):
         """
@@ -43,8 +42,8 @@ class Kinematics:
 
         if not isinstance(frames, (list, dict)) :
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
-        self._transformations = self._compute_FK(frames, self.offset, thetas)
-        return self._transformations
+        transformations = self._compute_FK(frames, self.offset, thetas)
+        return transformations
     
     @logging_time
     def inverse_kinematics(self, frames, current_joints, target_pose, method="LM", maxIter=1000):
