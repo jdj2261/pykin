@@ -7,7 +7,6 @@ class Transform:
 
     Args:
         rot (sequence of float) : The rotation parameter. Give in quaternions or roll pitch yaw.
-
         pos (sequence of float) : The translation parameter.
     """
     def __init__(

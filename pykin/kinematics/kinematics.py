@@ -34,10 +34,11 @@ class Kinematics:
         Returns transformations obtained by computing fk
 
         Args:
+            frames (list or Frame()): robot's frame for forward kinematics
             thetas (sequence of float): input joint angles
 
         Returns:
-            OrderedDict: transformations
+            transformations (OrderedDict): transformations
         """
 
         if not isinstance(frames, (list, dict)) :
@@ -51,14 +52,14 @@ class Kinematics:
         Returns transformations obtained by computing fk
         
         Args:
+            frames (Frame()): robot's frame for invers kinematics
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
             maxIter (int): Maximum number of calculation iterations
 
         Returns:
-            np.array: target joint angles
-            list: all joint angles(trajectory) obtained while calculating
+            joints (np.array): target joint angles
         """
         if method == "NR":
             joints = self._compute_IK_NR(
@@ -81,12 +82,12 @@ class Kinematics:
         Computes forward kinematics
 
         Args:
-            frames (Frame or list): frames type is Frame If frames is all robot's frame else list
+            frames (list or Frame()): robot's frame for forward kinematics
             offset (Transform): robot's offset
             thetas (sequence of float): input joint angles
 
         Returns:
-            OrderedDict: transformations
+            transformations (OrderedDict): transformations
         """
         transformations = OrderedDict()
         if not isinstance(frames, (list, dict)):
@@ -112,45 +113,40 @@ class Kinematics:
 
     def _compute_IK_NR(self, frames, current_joints, target_pose, maxIter):
         """
-        Computes inverse kinematics using NR
+        Computes inverse kinematics using newton raphson method
 
         Args:
+            frames (list or Frame()): robot's frame for inverse kinematics
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             maxIter (int): Maximum number of calculation iterations
 
         Returns:
-            np.array: target joint angles
+            joints (np.array): target joint angles
         """
         lamb = 0.5
         iterator = 0
         EPS = float(1e-6)
         dof = len(current_joints)
 
-        # Step 1. Prepare the position and attitude of the target link
         target_pose = tf.get_homogeneous_matrix(target_pose[:3], target_pose[3:])
 
-        # Step 2. Use forward kinematics to calculate the position and attitude of the target link
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
-        # Step 3. Calculate the difference in position and attitude
         err_pose = calc_pose_error(target_pose, cur_pose, EPS)
         err = np.linalg.norm(err_pose)
 
-        # Step 4. If error is small enough, stop the calculation
         while err > EPS:
-            # Avoid infinite calculation
+
             iterator += 1
             if iterator > maxIter:
                 break
             
-            # Step 5. If error is not small enough, calculate dq which would reduce the error 
-            # Get jacobian to calculate dq 
             J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
             dq = lamb * np.dot(np.linalg.pinv(J), err_pose)
 
-            # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
+
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
             cur_fk = self.forward_kinematics(frames, current_joints)
 
@@ -164,15 +160,16 @@ class Kinematics:
 
     def _compute_IK_LM(self, frames, current_joints, target, maxIter):
         """
-        Computes inverse kinematics using LM
+        Computes inverse kinematics using Levenberg-Marquatdt method
 
         Args:
+            frames (list or Frame()): robot's frame for inverse kinematics
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             maxIter (int): Maximum number of calculation iterations
 
         Returns:
-            np.array: target joint angles
+            joints (np.array): target joint angles
         """
         iterator = 0
         EPS = float(1E-12)
@@ -182,35 +179,27 @@ class Kinematics:
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
         Wn = np.eye(dof)
 
-        # Step 1. Prepare the position and attitude of the target link
         target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
 
-        # Step 2. Use forward kinematics to calculate the position and attitude of the target link
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
 
-        # # Step 3. Calculate the difference in position and attitude
         err = calc_pose_error(target_pose, cur_pose, EPS)
         Ek = float(np.dot(np.dot(err.T, We), err)[0])
 
-        # # Step 4. If error is small enough, stop the calculation
         while Ek > EPS:
-            # Avoid infinite calculation
             iterator += 1
             if iterator > maxIter:
                 break
             
             lamb = Ek + 0.002
 
-            # Step 5. If error is not small enough, calculate dq which would reduce the error
-            # Get jacobian to calculate dq
             J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
             Jh = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
             
             gerr = np.dot(np.dot(J.T, We), err)
             dq = np.dot(np.linalg.pinv(Jh), gerr)
 
-            # Step 6. Update joint angles by q = q + dq and calculate forward Kinematics
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
            
             cur_fk = self.forward_kinematics(frames, current_joints)

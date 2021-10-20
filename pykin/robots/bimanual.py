@@ -9,7 +9,7 @@ class Bimanual(Robot):
     ):
         super(Bimanual, self).__init__(fname, offset)
 
-        self.setup_input2dict()
+        self._setup_input2dict()
         self._set_joint_limits_upper_and_lower()
 
     def setup_link_name(self, base_name="", eef_name=None):
@@ -30,7 +30,7 @@ class Bimanual(Robot):
             self._eef_name["left"] = eef_name
             self._set_desired_frame("left")
 
-    def setup_input2dict(self):
+    def _setup_input2dict(self):
         self._base_name = self._input2dict("")
         self._eef_name  = self._input2dict("")
         self.desired_base_frame = self._input2dict(None)
@@ -53,17 +53,6 @@ class Bimanual(Robot):
             self.joint_limits_lower[arm] = [limit_lower for joint, limit_lower in limits_lower if arm in joint]
             self.joint_limits_upper[arm] = [limit_upper for joint, limit_upper in limits_upper if arm in joint]
             
-    def joints_in_limits(self, q, arm):
-        lower_lim = self._input2dict(None)
-        upper_lim = self._input2dict(None)
-        result = self._input2dict(None)
-        
-        lower_lim[arm] = self.joint_limits_lower[arm]
-        upper_lim[arm] = self.joint_limits_upper[arm]
-        result[arm] = np.all([q >= lower_lim[arm], q <= upper_lim[arm]], 0)
-        
-        return result
-
     def _set_desired_frame(self, arm):
         self._set_desired_base_frame(arm)
         self.desired_frames[arm] = self.generate_desired_frame_recursive(
@@ -79,23 +68,6 @@ class Bimanual(Robot):
             self.desired_base_frame[arm] = self.root
         else:
             self.desired_base_frame[arm] = self.find_frame(self.base_name[arm] + "_frame")
-
-    def _remove_desired_frames(self):
-        """
-        Resets robot's desired frame
-        """
-        self._frames = self.root
-        self._revolute_joint_names = self.get_revolute_joint_names()
-
-    def forward_kin(self, thetas, desired_frames=None): 
-
-        if desired_frames is not None:
-            self._frames = desired_frames
-        else:
-            self._remove_desired_frames()
-
-        transformation = self.kin.forward_kinematics(self._frames, thetas)
-        return transformation
 
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
         if not isinstance(target_pose, dict):
@@ -124,7 +96,6 @@ class Bimanual(Robot):
 
         Args:
             inp (str or list or None): Input value to be converted to dict
-
             :Note: If inp is a list, then assumes format is [right, left]
 
         Returns:
@@ -140,20 +111,6 @@ class Bimanual(Robot):
         if isinstance(value, (list, tuple)):
             value = np.array(value)
         return value.flatten()
-
-    def compute_eef_pos(self, transformations):
-        vals = {}
-        for arm in self.arms:
-            if self.eef_name[arm]:
-                vals[arm] = transformations[self.eef_name[arm]].pos
-        return vals
-
-    def compute_eef_rot(self, transformations):
-        vals = {}
-        for arm in self.arms:
-            if self.eef_name[arm]:
-                vals[arm] = transformations[self.eef_name[arm]].rot
-        return vals
 
     def compute_eef_pose(self, transformations):
         vals = {}
@@ -179,11 +136,6 @@ class Bimanual(Robot):
     @property
     def eef_name(self):
         return self._eef_name
-
-
-    @property
-    def frame(self):
-        return self._frames
 
     @property
     def active_joint_names(self):
