@@ -24,18 +24,9 @@ target_pose = robot.compute_eef_pose(target_transformations)
 
 fig, ax = plt.init_3d_figure()
 
-spheres = {}
-radius = 0.1
-for i in range(5):
-    x = np.random.uniform(-0.9, -0.1)
-    y = np.random.uniform(-0.5, 0.5)
-    z = np.random.uniform(0.0, 1.0)
-    obstacle_name = "obstacle_sphere_" + str(i)
-    spheres.update({obstacle_name : (x, y, z, radius)})
-
 planner = RRTStarPlanner(
     robot=robot,
-    obstacles=spheres,
+    obstacles=[],
     delta_distance=0.1,
     epsilon=0.2, 
     max_iter=500,
@@ -76,8 +67,8 @@ while cnt <= 20 and done:
             trajectories, 
             fig, 
             ax,
-            obstacels=spheres,
-            visible_obstacles=True,
+            obstacles=[],
+            visible_obstacles=False,
             visible_collision=True, 
             interval=1, 
             repeat=False,

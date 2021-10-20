@@ -56,7 +56,8 @@ class RRTStarPlanner(Planner):
         self.arm = arm
         self.dimension = len(current_q)
 
-        self._setup_collision_and_q_limit(transformation)
+        self._setup_q_limit()
+        self._setup_fcl_manager(transformation)
 
     @staticmethod
     def _check_q_data(current_q, goal_q):
@@ -64,13 +65,12 @@ class RRTStarPlanner(Planner):
             raise NotFoundError("Make sure set current or goal joints..")
         return True
 
-    def _setup_collision_and_q_limit(self, transformation):
-        self.fcl_manager = FclManager()
-        self._setup_fcl_manager(transformation)
+    def _setup_q_limit(self):
         self._set_q_limits()
         self._set_eef_name()
 
     def _setup_fcl_manager(self, transformatios):
+        self.fcl_manager = FclManager()
         self._apply_fcl_to_robot(transformatios)
         self._apply_fcl_to_obstacles()
         self._check_init_collision()
@@ -83,16 +83,26 @@ class RRTStarPlanner(Planner):
     
     def _apply_fcl_to_obstacles(self):
         if self.obstacles:
-            for name, (ob_x, ob_y, ob_z, ob_r) in self.obstacles.items():
-                ob_transform = get_homogeneous_matrix(position=np.array([ob_x, ob_y, ob_z]))
-                self.fcl_manager.add_object(name, "sphere", ob_r, ob_transform)
+            for key, vals in self.obstacles:
+                obs_type = vals[0]
+                obs_param = vals[1]
+                obs_pos = vals[2]
+                ob_transform = get_homogeneous_matrix(position=np.array(obs_pos))
+                self.fcl_manager.add_object(key, obs_type, obs_param, ob_transform)
 
     def _check_init_collision(self):
         is_collision, obj_names = self.fcl_manager.collision_check(return_names=True)
         if is_collision:
             for name1, name2 in obj_names:
                 if not ("obstacle" in name1 and "obstacle" in name2):
-                    raise CollisionError((name1, name2))
+                    raise CollisionError(obj_names)
+
+        goal_collision_free, collision_names = self.collision_free(self.goal_q, visible_name=True)
+        if not goal_collision_free:
+            for name1, name2 in collision_names:
+                if ("obstacle" in name1 and "obstacle" not in name2) or \
+                   ("obstacle" not in name1 and "obstacle" in name2):
+                   raise CollisionError(collision_names)
 
     def generate_path(self):
         path = None
@@ -133,6 +143,7 @@ class RRTStarPlanner(Planner):
                 q_outs[i] = np.random.uniform(q_min, q_max)
         else:
             q_outs = self.goal_q
+
         return q_outs
 
     def _set_q_limits(self):
@@ -207,17 +218,23 @@ class RRTStarPlanner(Planner):
                 self.cost[i] = new_cost
                 self.T.edges[i-1][0] = new_idx
 
-    def collision_free(self, new_q):
+    def collision_free(self, new_q, visible_name=False):
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
             if link in self.fcl_manager._objs:
                 transform = transformations.homogeneous_matrix
                 self.fcl_manager.set_transform(name=link, transform=transform)
 
-        is_collision , name = self.fcl_manager.collision_check(return_names=True, return_data=False)
-        if not is_collision:
-            return True
-        return False
+        is_collision, name = self.fcl_manager.collision_check(return_names=True, return_data=False)
+        
+        if visible_name:
+            if is_collision:
+                return False, name
+            return True, name
+
+        if is_collision:
+            return False
+        return True
 
     def _get_transformations(self, q_in):
         if self.arm is not None:

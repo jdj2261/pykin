@@ -80,7 +80,7 @@ while done:
             trajectories, 
             fig, 
             ax,
-            obstacels=[],
+            obstacles=[],
             visible_obstacles=True,
             visible_collision=True, 
             interval=1, 

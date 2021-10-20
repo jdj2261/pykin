@@ -10,7 +10,7 @@ from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.utils import plot_utils as plt   
-
+from pykin.utils.obstacle_utils import Obstacle
 
 fig, ax = plt.init_3d_figure(figsize=(18,9), dpi= 100)
 
@@ -20,19 +20,28 @@ robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_wrist")
 robot.setup_link_name("base", "left_wrist")
 
-spheres = {}
-radius = 0.1
-obstacle_name = "obstacle_sphere_1"
-spheres[obstacle_name] = ((0.3, -0.65, 0.3, radius))
+obs = Obstacle()
 
-obstacle_name = "obstacle_sphere_2"
-spheres[obstacle_name] = ((0.4, 0.8, 0.3, 0.08))
+# obs(name="sphere_1", 
+#     gtype="sphere",
+#     gparam=0.1,
+#     gpose=(0.3, -0.65, 0.3))
+
+obs(name="box_1", 
+    gtype="box",
+    gparam=(0.1, 0.1, 0.1),
+    gpose=(0.5, -0.65, 0.3))
+
+obs(name="box_2", 
+    gtype="box",
+    gparam=(0.1, 0.1, 0.1),
+    gpose=(0.4, 0.65, 0.3))
 
 planner = RRTStarPlanner(
     robot=robot,
-    obstacles=spheres,
-    delta_distance=0.5,
-    epsilon=0.1, 
+    obstacles=obs,
+    delta_distance=0.1,
+    epsilon=0.2, 
     max_iter=600,
     gamma_RRT_star=10,
 )
@@ -40,7 +49,7 @@ planner = RRTStarPlanner(
 head_thetas =  np.zeros(1)
 
 current_right_joints = np.array([-np.pi/4, 0, 0, 0, 0, 0, 0])
-current_left_joints = np.zeros(7)
+current_left_joints = np.array([-np.pi/4, 0, 0, 0, 0, 0, 0])
 
 target_right_joints = np.array([np.pi/3, np.pi/5, np.pi/2, np.pi/7, 0, 0 ,0])
 target_left_joints = np.array([np.pi/4 , 0, 0, 0, 0 , 0 ,0])
@@ -105,9 +114,11 @@ while cnt <= 20 and not done.all():
             trajectories, 
             fig, 
             ax,
-            obstacels=spheres,
+            obstacles=obs,
             visible_obstacles=True,
             visible_collision=True, 
-            interval=100, 
-            repeat=False,
+            visible_text=True,
+            visible_scatter=False,
+            interval=1, 
+            repeat=True,
             result=None)

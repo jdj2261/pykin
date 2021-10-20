@@ -15,7 +15,7 @@ file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 head_thetas = [0.0]
-right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
+right_arm_thetas = [np.pi/3, np.pi/5, np.pi/2, np.pi/7, 0, 0 ,0]
 left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
 
 thetas = head_thetas + right_arm_thetas + left_arm_thetas

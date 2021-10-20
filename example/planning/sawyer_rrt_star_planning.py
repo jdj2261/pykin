@@ -77,7 +77,7 @@ while cnt <= 20 and done:
             trajectories, 
             fig, 
             ax,
-            obstacels=spheres,
+            obstacles=spheres,
             visible_obstacles=True,
             visible_collision=False, 
             interval=100, 

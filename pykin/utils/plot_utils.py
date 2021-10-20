@@ -85,7 +85,9 @@ def plot_robot(
     transformations=None, 
     visible_visual=False,
     visible_collision=False, 
-    mesh_path='../asset/urdf/baxter/'):
+    mesh_path='../asset/urdf/baxter/',
+    visible_text=True,
+    visible_scatter=True):
 
     """
     Plot robot
@@ -109,19 +111,21 @@ def plot_robot(
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
 
     if name == "baxter":
-        plot_baxter(nodes, ax)
+        plot_baxter(nodes, ax, visible_text, visible_scatter)
     else:
         lines = ax.plot([x[0] for x in nodes], [x[1] for x in nodes], [
             x[2] for x in nodes], linewidth=5, label=name)
 
-        label = '(%0.4f, %0.4f, %0.4f)' % (
-            nodes[-1][0], nodes[-1][1], nodes[-1][2])
+        if visible_text:
+            label = '(%0.4f, %0.4f, %0.4f)' % (
+                nodes[-1][0], nodes[-1][1], nodes[-1][2])
 
-        ax.text(nodes[-1][0], nodes[-1][1],
-                nodes[-1][2], label, size="8")
+            ax.text(nodes[-1][0], nodes[-1][1],
+                    nodes[-1][2], label, size="8")
         
-        ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
-            [x[2] for x in nodes], s=55, c=lines[0].get_color())
+        if visible_scatter:
+            ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
+                [x[2] for x in nodes], s=55, c=lines[0].get_color())
     
     if visible_visual:
         plot_mesh(robot, transformations, mesh_path)
@@ -136,9 +140,11 @@ def plot_animation(
     trajectory,
     fig=None,
     ax=None,
-    obstacels=None,
+    obstacles=None,
     visible_obstacles=False,
     visible_collision=False,
+    visible_text=True,
+    visible_scatter=True,
     interval=100, 
     repeat=False,
     result=None):
@@ -155,25 +161,39 @@ def plot_animation(
             print("Animation Finished..")
         ax.clear()
 
-        if visible_obstacles and obstacels:
-            if not isinstance(obstacels, dict):
-                raise TypeError("Make sure obstacles type.. ")
-
-            for sp_x, sp_y, sp_z, sp_r in obstacels.values():
-                sp_radius = sp_r
-                sp_pos = np.array([sp_x, sp_y, sp_z])
-                plot_sphere(ax, radius=sp_radius, p=sp_pos, alpha=1.0, color="g")
-
+        if visible_obstacles and obstacles:
+            plot_obstacles(obstacles, ax)
+          
         if result is not None:
             print(result[i])
             print()
 
-        plot_robot(robot, transformations=trajectory[i], ax=ax, visible_collision=visible_collision)
+        plot_robot(
+            robot, 
+            transformations=trajectory[i], 
+            ax=ax, 
+            visible_collision=visible_collision,
+            visible_text=visible_text,
+            visible_scatter=visible_scatter)
+
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
+def plot_obstacles(obstacles, ax):    
+    for _, value in obstacles:
+        o_type = value[0]
+        o_param = value[1]
+        o_pose = np.array(value[2])
+        if o_type == "sphere":
+            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
+        if o_type == "box":
+            A2B = tf.get_homogeneous_matrix(o_pose)
+            plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
+        if o_type == "cylinder":
+            A2B = tf.get_homogeneous_matrix(o_pose)
+            plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
-def plot_baxter(nodes, ax):
+def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
     """
     Plot baxter robot
     """
@@ -192,32 +212,34 @@ def plot_baxter(nodes, ax):
     left_lines = ax.plot([x[0] for x in left_nodes], [x[1] for x in left_nodes], [
         x[2] for x in left_nodes], linewidth=5, label="left arm")
 
-    head_label = '(%0.4f, %0.4f, %0.4f)' % (
-        head_nodes[-1][0], head_nodes[-1][1], head_nodes[-1][2])
-    pedestal_label = '(%0.4f, %0.4f, %0.4f)' % (
-        pedestal_nodes[-1][0], pedestal_nodes[-1][1], pedestal_nodes[-1][2])
-    right_label = '(%0.4f, %0.4f, %0.4f)' % (
-        right_nodes[8][0], right_nodes[8][1], right_nodes[8][2])
-    left_label = '(%0.4f, %0.4f, %0.4f)' % (
-        left_nodes[8][0], left_nodes[8][1], left_nodes[8][2])
+    if visible_text:
+        head_label = '(%0.4f, %0.4f, %0.4f)' % (
+            head_nodes[-1][0], head_nodes[-1][1], head_nodes[-1][2])
+        pedestal_label = '(%0.4f, %0.4f, %0.4f)' % (
+            pedestal_nodes[-1][0], pedestal_nodes[-1][1], pedestal_nodes[-1][2])
+        right_label = '(%0.4f, %0.4f, %0.4f)' % (
+            right_nodes[8][0], right_nodes[8][1], right_nodes[8][2])
+        left_label = '(%0.4f, %0.4f, %0.4f)' % (
+            left_nodes[8][0], left_nodes[8][1], left_nodes[8][2])
 
-    ax.text(head_nodes[-1][0], head_nodes[-1][1],
-            head_nodes[-1][2], head_label, size="8")
-    ax.text(pedestal_nodes[-1][0], pedestal_nodes[-1][1],
-        pedestal_nodes[-1][2], pedestal_label, size="8")
-    ax.text(right_nodes[-1][0], right_nodes[-1][1],
-            right_nodes[-1][2], right_label, size="8")
-    ax.text(left_nodes[-1][0], left_nodes[-1][1],
-            left_nodes[-1][2], left_label, size="8")
+        ax.text(head_nodes[-1][0], head_nodes[-1][1],
+                head_nodes[-1][2], head_label, size="8")
+        ax.text(pedestal_nodes[-1][0], pedestal_nodes[-1][1],
+            pedestal_nodes[-1][2], pedestal_label, size="8")
+        ax.text(right_nodes[-1][0], right_nodes[-1][1],
+                right_nodes[-1][2], right_label, size="8")
+        ax.text(left_nodes[-1][0], left_nodes[-1][1],
+                left_nodes[-1][2], left_label, size="8")
 
-    ax.scatter([x[0] for x in head_nodes], [x[1] for x in head_nodes], 
-        [x[2] for x in head_nodes], s=55, c=head_lines[0].get_color())
-    ax.scatter([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], 
-        [x[2] for x in pedestal_nodes], s=55, c=pedestal_lines[0].get_color())
-    ax.scatter([x[0] for x in right_nodes], [x[1] for x in right_nodes], 
-        [x[2] for x in right_nodes], s=55, c=right_lines[0].get_color())
-    ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
-        [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
+    if visible_scatter:
+        ax.scatter([x[0] for x in head_nodes], [x[1] for x in head_nodes], 
+            [x[2] for x in head_nodes], s=55, c=head_lines[0].get_color())
+        ax.scatter([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], 
+            [x[2] for x in pedestal_nodes], s=55, c=pedestal_lines[0].get_color())
+        ax.scatter([x[0] for x in right_nodes], [x[1] for x in right_nodes], 
+            [x[2] for x in right_nodes], s=55, c=right_lines[0].get_color())
+        ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
+            [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
 
 
 def plot_collision(robot, transformations, ax, alpha=0.8):
@@ -301,6 +323,9 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
     Plot box
     """
     color = _check_color_type(color)
+    
+    if not isinstance(size, np.ndarray):
+        size = np.array(size)
 
     corners = np.array([
         [0, 0, 0],

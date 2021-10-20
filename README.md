@@ -401,9 +401,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   ~~~
 </details>
 
-- Animation
+- Planning
 
-  *You can see an animation that visualizes trajectory*
 
-  *Please refer to [this](example/visualization/robot_animation_test.py)*
-
+<img src="img/pykin_animation.gif" weight="600" height="300"/>
