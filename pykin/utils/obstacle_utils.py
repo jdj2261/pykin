@@ -5,6 +5,7 @@ from collections import defaultdict
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
 sys.path.append(pykin_path)
 from pykin.kinematics.transform import Transform
+
 from pykin.utils.error_utils import NotFoundError
 
 class Obstacle():

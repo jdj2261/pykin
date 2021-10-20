@@ -78,7 +78,6 @@ def plot_basis(robot=None, ax=None):
     ax.plot([0, 0], [0, 0], [0, offset * 1.5],
             c=directions_colors[2], label="Z")
 
-
 def plot_robot(
     robot, 
     ax=None, 
@@ -107,8 +106,12 @@ def plot_robot(
         links.append(link)
         transformation_matrix.append(transformation.homogeneous_matrix)
 
-    for link, matrix in zip(links, transformation_matrix):
+    eef_idx = 0
+
+    for i, (link, matrix) in enumerate(zip(links, transformation_matrix)):
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
+        if link == robot.eef_name:
+            eef_idx=i
 
     if name == "baxter":
         plot_baxter(nodes, ax, visible_text, visible_scatter)
@@ -118,10 +121,10 @@ def plot_robot(
 
         if visible_text:
             label = '(%0.4f, %0.4f, %0.4f)' % (
-                nodes[-1][0], nodes[-1][1], nodes[-1][2])
+                nodes[eef_idx][0], nodes[eef_idx][1], nodes[eef_idx][2])
 
-            ax.text(nodes[-1][0], nodes[-1][1],
-                    nodes[-1][2], label, size="8")
+            ax.text(nodes[eef_idx][0], nodes[-1][1],
+                    nodes[eef_idx][2], label, size="8")
         
         if visible_scatter:
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
@@ -135,63 +138,7 @@ def plot_robot(
 
     ax.legend()
 
-def plot_animation(
-    robot, 
-    trajectory,
-    fig=None,
-    ax=None,
-    obstacles=None,
-    visible_obstacles=False,
-    visible_collision=False,
-    visible_text=True,
-    visible_scatter=True,
-    interval=100, 
-    repeat=False,
-    result=None):
 
-    """
-    Plot animation
-    """
-
-    def update(i):
-        print(f"{i/len(trajectory) * 100:.1f} %")
-    
-        if i == len(trajectory)-1:
-            print(f"{i/(len(trajectory)-1) * 100:.1f} %")
-            print("Animation Finished..")
-        ax.clear()
-
-        if visible_obstacles and obstacles:
-            plot_obstacles(obstacles, ax)
-          
-        if result is not None:
-            print(result[i])
-            print()
-
-        plot_robot(
-            robot, 
-            transformations=trajectory[i], 
-            ax=ax, 
-            visible_collision=visible_collision,
-            visible_text=visible_text,
-            visible_scatter=visible_scatter)
-
-    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
-    plt.show()
-
-def plot_obstacles(obstacles, ax):    
-    for _, value in obstacles:
-        o_type = value[0]
-        o_param = value[1]
-        o_pose = np.array(value[2])
-        if o_type == "sphere":
-            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
-        if o_type == "box":
-            A2B = tf.get_homogeneous_matrix(o_pose)
-            plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
-        if o_type == "cylinder":
-            A2B = tf.get_homogeneous_matrix(o_pose)
-            plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
 def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
     """
@@ -241,6 +188,72 @@ def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
         ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
             [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
 
+
+def plot_trajectories(ax, path):
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
+
+
+def plot_animation(
+    robot, 
+    trajectory,
+    fig=None,
+    ax=None,
+    eef_poses=None,
+    obstacles=None,
+    visible_obstacles=False,
+    visible_collision=False,
+    visible_text=True,
+    visible_scatter=True,
+    interval=100, 
+    repeat=False,
+    result=None):
+
+    """
+    Plot animation
+    """
+
+    def update(i):
+        print(f"{i/len(trajectory) * 100:.1f} %")
+    
+        if i == len(trajectory)-1:
+            print(f"{i/(len(trajectory)-1) * 100:.1f} %")
+            print("Animation Finished..")
+        ax.clear()
+
+        if visible_obstacles and obstacles:
+            plot_obstacles(obstacles, ax)
+        
+        if eef_poses is not None:
+            plot_trajectories(ax, eef_poses)
+          
+        if result is not None:
+            print(result[i])
+            print()
+
+        plot_robot(
+            robot, 
+            transformations=trajectory[i], 
+            ax=ax, 
+            visible_collision=visible_collision,
+            visible_text=visible_text,
+            visible_scatter=visible_scatter)
+
+    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
+    plt.show()
+
+def plot_obstacles(obstacles, ax):    
+    for _, value in obstacles:
+        o_type = value[0]
+        o_param = value[1]
+        o_pose = np.array(value[2])
+        if o_type == "sphere":
+            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
+        if o_type == "box":
+            A2B = tf.get_homogeneous_matrix(o_pose)
+            plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
+        if o_type == "cylinder":
+            A2B = tf.get_homogeneous_matrix(o_pose)
+            plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
 def plot_collision(robot, transformations, ax, alpha=0.8):
     """

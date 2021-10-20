@@ -91,6 +91,7 @@ while cnt <= 20 and not done.all():
                 print(f"{arm} path success")
 
     trajectories = []
+    eef_poses = []
     if all(value is not None for value in result.values()):
         done[:] = True
         trajectory_joints = list(zip_longest(np.array(result["right"]), np.array(result["left"])))
@@ -109,9 +110,13 @@ while cnt <= 20 and not done.all():
             transformations = robot.forward_kin(current_joint)
             trajectories.append(transformations)
 
+            for arm in robot.arms:
+                eef_poses.append(transformations[robot.eef_name[arm]].pos)
+
         plt.plot_animation(
             robot,
-            trajectories, 
+            trajectories,
+            eef_poses,
             fig, 
             ax,
             obstacles=obs,
