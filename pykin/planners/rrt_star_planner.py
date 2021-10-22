@@ -47,7 +47,7 @@ class RRTStarPlanner(Planner):
             current_q = np.array(current_q)
         
         if not isinstance(goal_q, (np.ndarray)):
-            current_q = np.array(goal_q)
+            goal_q = np.array(goal_q)
         
         if self._check_q_data(current_q, goal_q):
             self.cur_q = current_q
@@ -61,7 +61,7 @@ class RRTStarPlanner(Planner):
 
     @staticmethod
     def _check_q_data(current_q, goal_q):
-        if current_q.all() or goal_q.all() is None:
+        if current_q.size == 0 or goal_q.size == 0:
             raise NotFoundError("Make sure set current or goal joints..")
         return True
 
@@ -112,13 +112,15 @@ class RRTStarPlanner(Planner):
         self.cost[0] = 0
 
         for k in range(self.max_iter):
+            if k % 300 == 0 and k !=0:
+                print(f"iter : {k}")
             rand_q = self.random_state()
+            if not self.collision_free(rand_q):
+                continue
+
             nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
             new_q = self.new_state(nearest_q, rand_q)
    
-            if k % 300 == 0 and k !=0:
-                print(f"iter : {k}")
-
             if self.collision_free(new_q) and self._q_in_limits(new_q):
                 neighbor_indexes = self.find_near_neighbor(new_q)               
                 min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
@@ -130,10 +132,8 @@ class RRTStarPlanner(Planner):
                 self.T.add_edge([nearest_idx, new_idx])
 
                 self.rewire(neighbor_indexes, new_q, new_idx)
-
-                if self.reach_to_goal(new_q):
+                if self.reach_to_goal(new_q):                    
                     path = self.find_path(self.T)
-
         return path
 
     def random_state(self):
@@ -185,12 +185,13 @@ class RRTStarPlanner(Planner):
     def find_near_neighbor(self, q):
         card_V = len(self.T.vertices) + 1
         r = self.gamma_RRTs * ((math.log(card_V) / card_V) ** (1/self.dimension))
+
         search_radius = min(r, self.delta_dis)
         dist_list = [self.distance(vertex, q) for vertex in self.T.vertices]
                                                    
         near_indexes = []
         for idx, dist in enumerate(dist_list):
-            if dist <= search_radius and self.collision_free(q):
+            if dist <= search_radius:
                 near_indexes.append(idx)
 
         return near_indexes
@@ -203,7 +204,7 @@ class RRTStarPlanner(Planner):
         for i in neighbor_indexes:
             new_cost = self.get_new_cost(i, new_q, self.T.vertices[i])
 
-            if new_cost < min_cost and self.collision_free(new_q):
+            if new_cost < min_cost:
                 min_cost = new_cost
                 nearest_idx = i
 
@@ -211,10 +212,9 @@ class RRTStarPlanner(Planner):
 
     def rewire(self, neighbor_indexes, new_q, new_idx):
         for i in neighbor_indexes:
-            no_collision = self.collision_free(self.T.vertices[i])
             new_cost = self.get_new_cost(new_idx, new_q, self.T.vertices[i])
 
-            if no_collision and new_cost < self.cost[i]:
+            if new_cost < self.cost[i]:
                 self.cost[i] = new_cost
                 self.T.edges[i-1][0] = new_idx
 
@@ -226,7 +226,6 @@ class RRTStarPlanner(Planner):
                 self.fcl_manager.set_transform(name=link, transform=transform)
 
         is_collision, name = self.fcl_manager.collision_check(return_names=True, return_data=False)
-        
         if visible_name:
             if is_collision:
                 return False, name
@@ -245,7 +244,7 @@ class RRTStarPlanner(Planner):
 
     def reach_to_goal(self, point):
         dist = self.distance(point, self.goal_q)
-        if dist <= 0.2:
+        if dist <= 0.5:
             return True
         return False
 
@@ -254,7 +253,8 @@ class RRTStarPlanner(Planner):
         goal_idx = tree.edges[-1][1]
  
         while goal_idx != 0:
-            path.append(tree.vertices[goal_idx])
+            if not np.allclose(path[0], tree.vertices[goal_idx]):
+                path.append(tree.vertices[goal_idx])
             parent_idx = tree.edges[goal_idx-1][0]
             goal_idx = parent_idx
         path.append(self.cur_q)

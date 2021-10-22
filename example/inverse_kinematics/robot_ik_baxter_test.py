@@ -74,7 +74,7 @@ plt.plot_robot(robot, ax, result_fk_NR,
                mesh_path='../../asset/urdf/baxter/')
 
 err = {}
-for arm in robot.arms:
+for arm in robot.arm_type:
     err[arm+"_NR_error"] = robot.compute_pose_error(
         target_transformations[robot.eef_name[arm]].homogeneous_matrix,
         result_fk_NR[robot.eef_name[arm]].homogeneous_matrix)

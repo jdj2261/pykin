@@ -49,6 +49,7 @@ while cnt <= 20 and done:
 
     result = []
     trajectories = []
+    eef_poses = []
     if path is None:
         done = True
         cnt += 1
@@ -61,12 +62,14 @@ while cnt <= 20 and done:
 
             transformations = robot.forward_kin(current_joint)
             trajectories.append(transformations)
+            eef_poses.append(transformations[robot.eef_name].pos)
 
         plt.plot_animation(
             robot,
             trajectories, 
             fig, 
             ax,
+            eef_poses=eef_poses,
             obstacles=[],
             visible_obstacles=False,
             visible_collision=True, 

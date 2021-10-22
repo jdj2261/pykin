@@ -11,6 +11,7 @@ from pykin.kinematics.transform import Transform
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.utils import plot_utils as plt   
 from pykin.utils.obstacle_utils import Obstacle
+from pykin.utils.kin_utils import ShellColors as scolors
 
 fig, ax = plt.init_3d_figure(figsize=(18,9), dpi= 100)
 
@@ -29,7 +30,7 @@ obs = Obstacle()
 
 obs(name="box_1", 
     gtype="box",
-    gparam=(0.1, 0.1, 0.1),
+    gparam=(0.1, 0.1, 0.3),
     gpose=(0.5, -0.65, 0.3))
 
 obs(name="box_2", 
@@ -42,8 +43,8 @@ planner = RRTStarPlanner(
     obstacles=obs,
     delta_distance=0.1,
     epsilon=0.2, 
-    max_iter=600,
-    gamma_RRT_star=10,
+    max_iter=500,
+    gamma_RRT_star=1.0,
 )
 
 head_thetas =  np.zeros(1)
@@ -51,8 +52,8 @@ head_thetas =  np.zeros(1)
 current_right_joints = np.array([-np.pi/4, 0, 0, 0, 0, 0, 0])
 current_left_joints = np.array([-np.pi/4, 0, 0, 0, 0, 0, 0])
 
-target_right_joints = np.array([np.pi/3, np.pi/5, np.pi/2, np.pi/7, 0, 0 ,0])
-target_left_joints = np.array([np.pi/4 , 0, 0, 0, 0 , 0 ,0])
+target_right_joints = np.array([np.pi/2, -np.pi/2, -np.pi/2, np.pi/7, 0, np.pi/7 ,0])
+target_left_joints = np.array([np.pi/2 , 0, 0, 0, 0 , 0 ,0])
 
 currrent_joints = np.concatenate((head_thetas, current_right_joints, current_left_joints))
 target_joints = np.concatenate((head_thetas ,target_right_joints ,target_left_joints))
@@ -71,7 +72,7 @@ while cnt <= 20 and not done.all():
 
     cnt += 1
     path = {}
-    for i, arm in enumerate(robot.arms):
+    for i, arm in enumerate(robot.arm_type):
         if not done[i]:
             target_pose = { arm: robot.compute_eef_pose(target_transformations)[arm]}
             target_q_space = robot.inverse_kin(
@@ -88,7 +89,7 @@ while cnt <= 20 and not done.all():
             if path[arm] is not None:
                 done[i] = True
                 result[arm] = path[arm]
-                print(f"{arm} path success")
+                print(f"{scolors.OKGREEN}{arm} path was created successfully\n{scolors.ENDC}")
 
     trajectories = []
     eef_poses = []
@@ -110,19 +111,19 @@ while cnt <= 20 and not done.all():
             transformations = robot.forward_kin(current_joint)
             trajectories.append(transformations)
 
-            for arm in robot.arms:
+            for arm in robot.arm_type:
                 eef_poses.append(transformations[robot.eef_name[arm]].pos)
 
         plt.plot_animation(
             robot,
             trajectories,
-            eef_poses,
-            fig, 
-            ax,
+            fig=fig, 
+            ax=ax,
+            eef_poses=eef_poses,
             obstacles=obs,
             visible_obstacles=True,
-            visible_collision=True, 
-            visible_text=True,
+            visible_collision=False, 
+            visible_text=False,
             visible_scatter=False,
             interval=1, 
             repeat=True,

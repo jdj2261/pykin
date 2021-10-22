@@ -1,5 +1,6 @@
 import numpy as np
 from pykin.robots.robot import Robot
+from pykin.utils.error_utils import NotFoundError
 
 class Bimanual(Robot):
     def __init__(
@@ -32,7 +33,7 @@ class Bimanual(Robot):
 
     def _setup_input2dict(self):
         self._base_name = self._input2dict("")
-        self._eef_name  = self._input2dict("")
+        self._eef_name  = {}
         self.desired_base_frame = self._input2dict(None)
         self.desired_frames = self._input2dict(None)
         self._frames = self._input2dict(None)
@@ -49,7 +50,7 @@ class Bimanual(Robot):
             limits_lower.append((joint, limit_lower))
             limits_upper.append((joint, limit_upper))
 
-        for arm in self.arms:
+        for arm in self._arms:
             self.joint_limits_lower[arm] = [limit_lower for joint, limit_lower in limits_lower if arm in joint]
             self.joint_limits_upper[arm] = [limit_upper for joint, limit_upper in limits_upper if arm in joint]
             
@@ -105,7 +106,7 @@ class Bimanual(Robot):
         if not isinstance(inp, list):
             inp = [inp for _ in range(2)]
         # Now, convert list to dict and return
-        return {key: value for key, value in zip(self.arms, inp)}
+        return {key: value for key, value in zip(self._arms, inp)}
 
     def _convert_target_pose_type_to_npy(self, value):
         if isinstance(value, (list, tuple)):
@@ -114,20 +115,32 @@ class Bimanual(Robot):
 
     def compute_eef_pose(self, transformations):
         vals = {}
-        for arm in self.arms:
+        for arm in self.arm_type:
             if self.eef_name[arm]:
                 vals[arm] = np.concatenate((transformations[self.eef_name[arm]].pos, transformations[self.eef_name[arm]].rot))
         return vals
 
     @property
-    def arms(self):
+    def _arms(self):
         """
         Returns name of arms used as naming convention throughout this module
 
         Returns:
             2-tuple: ('right', 'left')
         """
-        return "right", "left"
+        return ("right", "left")
+
+    @property
+    def arm_type(self):
+        if len(self._eef_name.keys()) == 2:
+            return self._arms
+        elif "right" in self.eef_name.keys():
+            return ["right"]
+        elif "left" in self.eef_name.keys():
+            return ["left"]
+        else:
+            raise NotFoundError("Can not find robot's arm type")
+        
 
     @property
     def base_name(self):

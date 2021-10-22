@@ -64,41 +64,4 @@ class Obstacle():
     @property
     def obstacles(self):
         return self._obstacles
-
-if __name__ == "__main__":
-    obs = Obstacle()
-    obs(
-        name="sphere_1", 
-        gtype="sphere",
-        gparam=0.3,
-        gpose=(0.3,0.7,0.2))
-
-    obs(
-        name="sphere_2", 
-        gtype="sphere",
-        gparam=0.3,
-        gpose=(0.3,0.7,0.2))
-
-    obs(
-        name="box_1", 
-        gtype="box",
-        gparam=(0.2, 0.2, 0.2),
-        gpose=(0.3,0.7,0.2))
-
-    obs(
-        name="box_2", 
-        gtype="box",
-        gparam=(0.2, 0.2, 0.2),
-        gpose=(0.3,0.7,0.2))
-
-    obs(
-        name="box_2", 
-        gtype="box",
-        gparam=(0.2, 0.2, 0.2),
-        gpose=(0.3,0.7,0.2))
-
-
-    for key,values in obs:
-        print(key)
-
     

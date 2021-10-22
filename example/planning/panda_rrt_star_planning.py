@@ -21,7 +21,6 @@ robot.setup_link_name("panda_link0", "panda_link7")
 
 # set target joints angle
 target_thetas = np.array([0, np.pi/5, 0, 0, 0, 0, 0])
-init_thetas = np.random.randn(7)
 target_transformations = robot.forward_kin(target_thetas)
 
 init_q_space = np.array([0,0,0,0,0,0,0])
@@ -43,7 +42,7 @@ planner = RRTStarPlanner(
     delta_distance=0.1,
     epsilon=0.2, 
     max_iter=100,
-    gamma_RRT_star=10,
+    gamma_RRT_star=1,
 )
 
 
@@ -51,7 +50,7 @@ cnt = 0
 done = True
 while done:
     target_q_space = robot.inverse_kin(
-        init_thetas, 
+        np.random.randn(7), 
         target_pose, 
         method="LM", 
         maxIter=100)
