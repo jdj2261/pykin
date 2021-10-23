@@ -8,7 +8,7 @@ from pykin.utils import plot_utils as plt
 from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils.kin_utils import ShellColors as scolors
 
-fig, ax = plt.init_3d_figure(figsize=(18,9), dpi= 100)
+fig, ax = plt.init_3d_figure(figsize=(12,6), dpi= 100)
 
 file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
@@ -112,7 +112,7 @@ while cnt <= 20 and not done.all():
             eef_poses=eef_poses,
             obstacles=obs,
             visible_obstacles=True,
-            visible_collision=False, 
+            visible_collision=True, 
             visible_text=False,
             visible_scatter=False,
             interval=1, 

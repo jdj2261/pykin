@@ -35,11 +35,9 @@ planner = RRTStarPlanner(
     obstacles=obs,
     delta_distance=0.1,
     epsilon=0.2, 
-    max_iter=300,
+    max_iter=1000,
     gamma_RRT_star=10,
 )
-
-
 
 
 target_pose = np.array([-1.60300000e-01, 4.81000000e-01, -1.93000000e-01,  2.36109170e-06,
@@ -93,7 +91,7 @@ while True:
                 visible_obstacles=True,
                 visible_collision=True, 
                 interval=100, 
-                repeat=False,
+                repeat=True,
                 result=None)
             break
             

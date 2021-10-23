@@ -70,5 +70,5 @@ while done:
             visible_obstacles=True,
             visible_collision=True, 
             interval=1, 
-            repeat=False,
+            repeat=True,
             result=None)

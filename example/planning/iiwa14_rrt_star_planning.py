@@ -70,5 +70,5 @@ while cnt <= 20 and done:
             visible_obstacles=False,
             visible_collision=True, 
             interval=1, 
-            repeat=False,
+            repeat=True,
             result=None)

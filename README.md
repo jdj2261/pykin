@@ -4,6 +4,8 @@
 
 Python Interface for the Robot Kinematics Library [pykin](https://jdj2261.github.io/pykin/)
 
+Even motion planning is supported.
+
 This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git).
 
 ## Features
@@ -13,6 +15,7 @@ This library has been created simply by referring to [ikpy](https://github.com/P
 - Compute Forward, Inverse Kinematics and Jacobian
 - There are two ways to find the IK solution, referring to the [Introduction to Humanoid Robotics book](https://link.springer.com/book/10.1007/978-3-642-54536-8).
 - Compute Collision checkinkg
+- Planning (RRT Star motion planning)
 - Plot Robot Kinematic Chain and Robot Mesh (STL file)
 
 ## Installation
@@ -76,6 +79,13 @@ The download may take a long time due to the large urdf file size.
 git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 ~~~
 
+If you hadn't done this
+
+~~~
+$ git clone https://github.com/jdj2261/pykin.git
+$ git submodule update
+~~~
+
 ## Quick Start
 
 - Robot Info
@@ -89,17 +99,23 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   ~~~python
   import sys
-  from pykin.robot import Robot
   
   file_path = '../asset/urdf/baxter/baxter.urdf'
+  
   if len(sys.argv) > 1:
       robot_name = sys.argv[1]
       file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
   
-  robot = Robot(file_path)
+  if "baxter" in file_path:
+      from pykin.robots.bimanual import Bimanual
+      robot = Bimanual(file_path)
+  else:
+      from pykin.robots.single_arm import SingleArm
+      robot = SingleArm(file_path)
+  
   robot.show_robot_info()
   ~~~
-
+  
   </details>
 - Forward Kinematics
 
@@ -107,26 +123,28 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
     <summary>Code</summary>
 
   ~~~python
-  from pykin.robot import Robot
+  import numpy as np
+  
+  from pykin.robots.bimanual import Bimanual
   from pykin.kinematics.transform import Transform
+  from pykin.utils import plot_utils as plt
   from pykin.utils.kin_utils import ShellColors as sc
   
   # baxter_example
-  file_path = '../asset/urdf/baxter/baxter.urdf'
-  robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+  file_path = '../../asset/urdf/baxter/baxter.urdf'
+  robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
   
-  # set input joints 
   head_thetas = [0.0]
-  right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
+  right_arm_thetas = [np.pi/3, -np.pi/5, -np.pi/2, np.pi/7, 0, np.pi/7 ,0]
   left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
-  thetas = head_thetas + right_arm_thetas + left_arm_thetas
   
-  # compute FK
-  fk = robot.kin.forward_kinematics(thetas)
+  thetas = head_thetas + right_arm_thetas + left_arm_thetas
+  fk = robot.forward_kin(thetas)
+  
   for link, transform in fk.items():
       print(f"{sc.HEADER}{link}{sc.ENDC}, {transform.rot}, {transform.pos}")
   ~~~
-
+  
   </details>
 - Jacobian
 
@@ -134,32 +152,29 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
     <summary>Code</summary>
 
   ~~~python
-  from pykin.kinematics import transform as tf
-  from pykin.robot import Robot
+  import numpy as np
   
-  # import jacobian
+  from pykin.kinematics import transform as tf
+  from pykin.robots.bimanual import Bimanual
   from pykin.kinematics import jacobian as jac
   
   file_path = '../asset/urdf/baxter/baxter.urdf'
-  robot = Robot(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+  robot = Bimanual(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
   
-  left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
+  left_arm_thetas = np.zeros(15)
+  robot.setup_link_name("base", "right_wrist")
+  robot.setup_link_name("base", "left_wrist")
   
-  # Before compute Jacobian, you must set from start link to end link
-  robot.set_desired_frame("base", "left_wrist")
-  fk = robot.kin.forward_kinematics(left_arm_thetas)
+  fk = robot.forward_kin(left_arm_thetas)
   
-  # If you want to get Jacobian, use calc_jacobian function
-  J = jac.calc_jacobian(robot.desired_frames, fk, len(left_arm_thetas))
-  print(J)
+  J = {}
+  for arm in robot.arm_type:
+      if robot.eef_name[arm]:
+          J[arm] = jac.calc_jacobian(robot.desired_frames[arm], fk, len(np.zeros(7)))
   
-  right_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
-  robot.set_desired_frame("base", "right_wrist")
-  fk = robot.kin.forward_kinematics(right_arm_thetas)
-  J = jac.calc_jacobian(robot.desired_frames, fk, len(right_arm_thetas))
   print(J)
   ~~~
-
+  
   </details>
 - Inverse Kinematics
 
@@ -168,39 +183,62 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
 
   ~~~python
   import numpy as np
-  from pykin.robot import Robot
+  
+  from pykin.robots.bimanual import Bimanual
   from pykin.kinematics.transform import Transform
+  from pykin.utils import plot_utils as plt
   
-  # baxter_example
-  file_path = '../asset/urdf/baxter/baxter.urdf'
-  robot = Robot(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+  file_path = '../../asset/urdf/baxter/baxter.urdf'
   
-  # set joints for targe pose
-  right_arm_thetas = np.random.randn(7)
+  robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
   
-  # set init joints
-  init_right_thetas = np.random.randn(7)
+  visible_collision = True
+  visible_visual = False
   
-  # Before compute IK, you must set from start link to end link
-  robot.set_desired_frame("base", "right_wrist")
+  # set target joints angle
+  head_thetas =  np.zeros(1)
+  right_arm_thetas = np.array([-np.pi/4 , 0, 0, 0, 0 , 0 ,0])
+  left_arm_thetas = np.array([np.pi/4 , 0, 0, 0, 0 , 0 ,0])
   
-  # Compute FK for target pose
-  target_fk = robot.kin.forward_kinematics(right_arm_thetas)
+  thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
   
-  # get target pose
-  target_r_pose = np.hstack((target_fk["right_wrist"].pos, target_fk["right_wrist"].rot))
+  robot.setup_link_name("base", "right_wrist")
+  robot.setup_link_name("base", "left_wrist")
   
-  # Compute IK Solution using LM(Levenberg-Marquardt) or NR(Newton-Raphson) method
-  ik_right_result, _ = robot.kin.inverse_kinematics(init_right_thetas, target_r_pose, method="LM")
+  #################################################################################
+  #                                Set target pose                                #
+  #################################################################################
+  target_transformations = robot.forward_kin(thetas)
+  _, ax = plt.init_3d_figure("Target Pose")
+  plt.plot_robot(robot, 
+                 ax=ax,
+                 transformations=target_transformations,
+                 visible_visual=visible_visual, 
+                 visible_collision=visible_collision,
+                 mesh_path='../../asset/urdf/baxter/')
   
-  # Compare error btween Target pose and IK pose
-  result_fk = robot.kin.forward_kinematics(ik_right_result)
-  error = robot.compute_pose_error(
-      target_fk["right_wrist"].homogeneous_matrix,
-      result_fk["right_wrist"].homogeneous_matrix)
-  print(error)
+  #################################################################################
+  #                                Inverse Kinematics                             #
+  #################################################################################
+  init_thetas = np.random.randn(7)
+  target_pose = { "right": robot.compute_eef_pose(target_transformations)["right"], 
+                  "left" : robot.compute_eef_pose(target_transformations)["left"]}
+  
+  ik_LM_result = robot.inverse_kin(
+      init_thetas, 
+      target_pose, 
+      method="LM", 
+      maxIter=100)
+  
+  ik_NR_result = robot.inverse_kin(
+      init_thetas, 
+      target_pose, 
+      method="NR", 
+      maxIter=100)
+  
+  print(ik_LM_result, ik_NR_result)
   ~~~
-
+  
   </details>
 - Self-Collision Check
 
@@ -230,7 +268,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   left_arm_thetas = np.array([-np.pi, 0, 0, 0, 0, 0, 0])
   
   thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
-  transformations = robot.kin.forward_kinematics(thetas)
+  transformations = robot.forward_kin(thetas)
   
   # call FclManager class
   fcl_manager = FclManager()
@@ -253,7 +291,7 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
   """
   left_arm_thetas = np.array([0, 0, 0, 0, 0, 0, 0])
   thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
-  transformations = robot.kin.forward_kinematics(thetas)
+  transformations = robot.forward_kin(thetas)
   
   for link, transformation in transformations.items():
       name, _, _ = get_robot_geom(robot.links[link])
@@ -281,30 +319,30 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
     <summary>Code</summary>
 
   ~~~python
-  import sys
+import sys
+file_path = '../../asset/urdf/baxter/baxter.urdf'
+if len(sys.argv) > 1:
+    robot_name = sys.argv[1]
+    file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
 
-  from pykin.robot import Robot
-  from pykin.utils import plot_utils as plt
+if "baxter" in file_path:
+    from pykin.robots.bimanual import Bimanual
+    robot = Bimanual(file_path)
+else:
+    from pykin.robots.single_arm import SingleArm
+    robot = SingleArm(file_path)
+from pykin.utils import plot_utils as plt
 
-  file_path = '../../asset/urdf/sawyer/sawyer.urdf'
 
-  if len(sys.argv) > 1:
-      robot_name = sys.argv[1]
-      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-  robot = Robot(file_path)
+fig, ax = plt.init_3d_figure("URDF")
 
-  fig, ax = plt.init_3d_figure("URDF")
-
-  # For Baxter robots, the name argument to the plot_robot function must be baxter.
-  plt.plot_robot(robot, 
-                 transformations=robot.transformations,
-                 ax=ax, 
-                 name=robot.robot_name,
-                 visible_visual=False, 
-                 visible_collision=False, 
-                 mesh_path='../../asset/urdf/baxter/')
-  ax.legend()
-  plt.show_figure()
+# For Baxter robots, the name argument to the plot_robot function must be baxter.
+plt.plot_robot(robot, 
+               ax=ax, 
+               visible_visual=False, 
+               visible_collision=False, 
+               mesh_path='../../asset/urdf/baxter/')
+plt.show_figure()
   ~~~
  </details>
 
@@ -321,34 +359,39 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
     <summary>Code</summary>
 
   ~~~python
-  import sys
+import sys
 
-  from pykin.robot import Robot
-  from pykin.utils import plot_utils as plt
+from pykin.robots.bimanual import Bimanual
+from pykin.utils import plot_utils as plt
 
-  file_path = '../../asset/urdf/baxter/baxter.urdf'
+file_path = '../../asset/urdf/baxter/baxter.urdf'
 
-  if len(sys.argv) > 1:
-      robot_name = sys.argv[1]
-      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-  robot = Robot(file_path)
+if len(sys.argv) > 1:
+    robot_name = sys.argv[1]
+    file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+robot = Bimanual(file_path)
 
-  fig, ax = plt.init_3d_figure("URDF")
+if "baxter" in file_path:
+    from pykin.robots.bimanual import Bimanual
+    robot = Bimanual(file_path)
+else:
+    from pykin.robots.single_arm import SingleArm
+    robot = SingleArm(file_path)
 
-  """
-  Only baxter and sawyer robots can see collisions.
-  It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
-  """
-  # If visible_collision is True, visualize collision
-  plt.plot_robot(robot, 
-                 transformations=robot.transformations,
-                 ax=ax, 
-                 name=robot.robot_name,
-                 visible_visual=False, 
-                 visible_collision=True, 
-                 mesh_path='../../asset/urdf/baxter/')
-  ax.legend()
-  plt.show_figure()
+fig, ax = plt.init_3d_figure("URDF")
+
+"""
+Only baxter and sawyer robots can see collisions.
+It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
+"""
+# If visible_collision is True, visualize collision
+plt.plot_robot(robot, 
+               ax=ax, 
+               visible_visual=False, 
+               visible_collision=True, 
+               mesh_path='../../asset/urdf/baxter/')
+ax.legend()
+plt.show_figure()
   ~~~
 </details>
 
@@ -365,43 +408,53 @@ git clone --recurse-submodules https://github.com/jdj2261/pykin.git
     <summary>Code</summary>
 
   ~~~python
-  import sys
+import sys
 
-  from pykin.robot import Robot
-  from pykin.utils import plot_utils as plt
+file_path = '../../asset/urdf/baxter/baxter.urdf'
 
-  file_path = '../../asset/urdf/baxter/baxter.urdf'
+if len(sys.argv) > 1:
+    robot_name = sys.argv[1]
+    file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
 
-  if len(sys.argv) > 1:
-      robot_name = sys.argv[1]
-      file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-  robot = Robot(file_path)
+if "baxter" in file_path:
+    from pykin.robots.bimanual import Bimanual
+    robot = Bimanual(file_path)
+else:
+    from pykin.robots.single_arm import SingleArm
+    robot = SingleArm(file_path)
+from pykin.utils import plot_utils as plt
+fig, ax = plt.init_3d_figure("URDF")
 
-  fig, ax = plt.init_3d_figure("URDF")
-
-  """
-  Only baxter and sawyer robots can see collisions.
-  It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
-  """
-  # If visible_visual is True, visualize mesh
-  # and you have to input mesh_path
-  plt.plot_robot(robot, 
-                 transformations=robot.transformations,
-                 ax=ax, 
-                 name=robot.robot_name,
-                 visible_visual=True, 
-                 visible_collision=False, 
-                 mesh_path='../../asset/urdf/'+robot.robot_name+'/')
-  """
-  The mesh file doesn't use matplotlib, 
-  so it's okay to comment out the line below.
-  """
-  # ax.legend()
-  # plt.show_figure()
+"""
+Only baxter and sawyer robots can see collisions.
+It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
+"""
+# If visible_visual is True, visualize mesh
+# and you have to input mesh_path
+plt.plot_robot(robot, 
+               ax=ax, 
+               visible_visual=True, 
+               visible_collision=False, 
+               mesh_path='../../asset/urdf/'+robot.robot_name+'/')
+"""
+The mesh file doesn't use matplotlib, 
+so it's okay to comment out the line below.
+"""
+plt.show_figure()
   ~~~
 </details>
 
 - Planning
 
+  *You can see an planning animation that visualizes trajectory*
 
-<img src="img/pykin_animation.gif" weight="600" height="300"/>
+  |                         baxter urdf                          |                       baxter collision                       |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/pykin_animation.gif" weight="600" height="300"/> | <img src="img/pykin_animation-2.gif" weight="600" height="300"/> |
+
+  |                       Sawyer collision                       |                         iiwa14 urdf                          |                          panda urdf                          |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/pykin_animation-3.gif" weight="600" height="300"/> | <img src="img/pykin_animation-4.gif" weight="600" height="300"/> | <img src="img/pykin_animation-5.gif" weight="600" height="300"/> |
+
+  
+
