@@ -123,7 +123,7 @@ def plot_robot(
             label = '(%0.4f, %0.4f, %0.4f)' % (
                 nodes[eef_idx][0], nodes[eef_idx][1], nodes[eef_idx][2])
 
-            ax.text(nodes[eef_idx][0], nodes[-1][1],
+            ax.text(nodes[eef_idx][0], nodes[eef_idx][1],
                     nodes[eef_idx][2], label, size="8")
         
         if visible_scatter:
@@ -190,6 +190,9 @@ def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
 
 
 def plot_trajectories(ax, path):
+    """
+    Plot plot_trajectories
+    """
     ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
 
 
@@ -242,6 +245,9 @@ def plot_animation(
     plt.show()
 
 def plot_obstacles(obstacles, ax):    
+    """
+    Plot obstacles
+    """
     for _, value in obstacles:
         o_type = value[0]
         o_param = value[1]

@@ -1,10 +1,5 @@
-from itertools import zip_longest
-
-import sys, os
 import numpy as np
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
+from itertools import zip_longest
 
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
@@ -20,32 +15,6 @@ robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 robot.setup_link_name("base", "right_wrist")
 robot.setup_link_name("base", "left_wrist")
-
-obs = Obstacle()
-
-# obs(name="sphere_1", 
-#     gtype="sphere",
-#     gparam=0.1,
-#     gpose=(0.3, -0.65, 0.3))
-
-obs(name="box_1", 
-    gtype="box",
-    gparam=(0.1, 0.1, 0.3),
-    gpose=(0.5, -0.65, 0.3))
-
-obs(name="box_2", 
-    gtype="box",
-    gparam=(0.1, 0.1, 0.1),
-    gpose=(0.4, 0.65, 0.3))
-
-planner = RRTStarPlanner(
-    robot=robot,
-    obstacles=obs,
-    delta_distance=0.1,
-    epsilon=0.2, 
-    max_iter=500,
-    gamma_RRT_star=1.0,
-)
 
 head_thetas =  np.zeros(1)
 
@@ -63,6 +32,27 @@ target_transformations = robot.forward_kin(target_joints)
 
 init_q_space = { "right": current_right_joints, 
                  "left" : current_left_joints}
+
+obs = Obstacle()
+
+obs(name="box_1",
+    gtype="box",
+    gparam=(0.1, 0.1, 0.3),
+    gpose=(0.5, -0.65, 0.3))
+
+obs(name="box_2",
+    gtype="box",
+    gparam=(0.1, 0.1, 0.1),
+    gpose=(0.4, 0.65, 0.3))
+
+planner = RRTStarPlanner(
+    robot=robot,
+    obstacles=obs,
+    delta_distance=0.1,
+    epsilon=0.2,
+    max_iter=500,
+    gamma_RRT_star=1.0,
+)
 
 cnt = 0
 done = np.array([False, False])

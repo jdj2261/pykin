@@ -1,9 +1,5 @@
-import sys, os
 import numpy as np
 from itertools import zip_longest
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
@@ -12,7 +8,6 @@ from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
 
 file_path = '../../asset/urdf/panda/panda.urdf'
-
 
 fig, ax = plt.init_3d_figure()
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
@@ -26,25 +21,14 @@ target_transformations = robot.forward_kin(target_thetas)
 init_q_space = np.array([0,0,0,0,0,0,0])
 target_pose = robot.compute_eef_pose(target_transformations)
 
-spheres = {}
-# radius = 0.1
-# for i in range(5):
-#     x = np.random.uniform(0.0, 1.0)
-#     y = np.random.uniform(0.3, 1.0)
-#     z = np.random.uniform(0.0, 0.5)
-#     obstacle_name = "sphere_" + str(i)
-#     spheres.update({obstacle_name : (x, y, z, radius)})
-
-
 planner = RRTStarPlanner(
     robot=robot,
-    obstacles=spheres,
+    obstacles=[],
     delta_distance=0.1,
     epsilon=0.2, 
     max_iter=100,
     gamma_RRT_star=1,
 )
-
 
 cnt = 0
 done = True
@@ -61,6 +45,7 @@ while done:
 
     result = []
     trajectories = []
+    eef_poses = []
     if path is None:
         done = True
         cnt += 1
@@ -73,12 +58,14 @@ while done:
 
             transformations = robot.forward_kin(current_joint)
             trajectories.append(transformations)
+            eef_poses.append(transformations[robot.eef_name].pos)
 
         plt.plot_animation(
             robot,
             trajectories, 
             fig, 
             ax,
+            eef_poses=eef_poses,
             obstacles=[],
             visible_obstacles=True,
             visible_collision=True, 

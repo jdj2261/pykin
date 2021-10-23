@@ -1,7 +1,3 @@
-import os, sys
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
-
 import numpy as np
 
 from pykin.kinematics import transform as tf
@@ -36,5 +32,7 @@ err = robot.compute_pose_error(
     fk[robot.eef_name].homogeneous_matrix,
     result_fk[robot.eef_name].homogeneous_matrix)
 print(err)
+
+print(result_fk[robot.eef_name].pose)
 
 plt.show_figure()

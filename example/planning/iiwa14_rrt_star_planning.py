@@ -1,8 +1,4 @@
-import sys, os
 import numpy as np
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner

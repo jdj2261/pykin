@@ -1,7 +1,3 @@
-import os, sys
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
-
 import sys
 file_path = '../../asset/urdf/baxter/baxter.urdf'
 if len(sys.argv) > 1:

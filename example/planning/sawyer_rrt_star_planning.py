@@ -18,10 +18,10 @@ robot.setup_link_name("base", "right_l6")
 
 obs = Obstacle()
 
-# obs(name="box_2", 
-#     gtype="box",
-#     gparam=(0.2, 0.2, 0.2),
-#     gpose=(0.4, 0.65, 0.3))
+obs(name="box_2", 
+    gtype="box",
+    gparam=(0.2, 0.2, 0.2),
+    gpose=(0.4, 0.65, 0.3))
 
 # set target joints angle
 target_thetas = [0, np.pi/2, 0, 0, np.pi/2, 0, 0, 0]

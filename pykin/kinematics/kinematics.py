@@ -49,7 +49,7 @@ class Kinematics:
     @logging_time
     def inverse_kinematics(self, frames, current_joints, target_pose, method="LM", maxIter=1000):
         """
-        Returns transformations obtained by computing fk
+        Returns joint angles obtained by computing IK
         
         Args:
             frames (Frame()): robot's frame for invers kinematics

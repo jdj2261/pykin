@@ -1,7 +1,3 @@
-import os, sys
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
-sys.path.append(pykin_path)
-
 import numpy as np
 
 from pykin.kinematics import transform as tf
@@ -19,7 +15,7 @@ robot.setup_link_name("base", "left_wrist")
 fk = robot.forward_kin(left_arm_thetas)
 
 J = {}
-for arm in robot.arms:
+for arm in robot.arm_type:
     if robot.eef_name[arm]:
         J[arm] = jac.calc_jacobian(robot.desired_frames[arm], fk, len(np.zeros(7)))
 

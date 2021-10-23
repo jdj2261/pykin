@@ -4,6 +4,13 @@ from pykin.robots.robot import Robot
 from pykin.utils.error_utils import NotFoundError
 
 class SingleArm(Robot):
+    """
+    Initializes a single-armed robot simulation object.
+
+    Args:
+        fname (str): path to the urdf file.
+        offset (Transform): robot init offset
+    """
     def __init__(
         self,
         fname:str,
@@ -16,6 +23,9 @@ class SingleArm(Robot):
         self._set_joint_limits_upper_and_lower()
 
     def _set_joint_limits_upper_and_lower(self):
+        """
+        Set joint limits upper and lower
+        """
         for joint, (limit_lower, limit_upper) in self.joint_limits.items():
             if "head" in joint:
                 continue
@@ -37,31 +47,61 @@ class SingleArm(Robot):
         self._check_link_name(base_name, eef_name)
         self._base_name = base_name
         self._eef_name = eef_name
+        self._set_desired_base_frame()
         self._set_desired_frame()
 
-    def _check_link_name(self, base_name, eef_pose):
+    def _check_link_name(self, base_name, eef_name):
+        """
+        Check link name
+
+        Args:
+            base_name (str): reference link name
+            eef_name (str): end effector name
+        """
         if base_name and not base_name in self.links.keys():
-            print(self.links.keys())
             raise NotFoundError(base_name)
 
-        if eef_pose is not None and eef_pose not in self.links.keys():
-            print(self.links.keys())
-            raise NotFoundError(eef_pose)
+        if eef_name is not None and eef_name not in self.links.keys():
+            raise NotFoundError(eef_name)
+
+    def _set_desired_base_frame(self):
+        """
+        Sets robot's desired base frame
+
+        Args:
+            arm (str): robot arm (right or left)
+        """
+        if self.base_name == "":
+            self.desired_base_frame = self.root
+        else:
+            self.desired_base_frame = self.find_frame(
+                self.base_name + "_frame")
 
     def _set_desired_frame(self):
-        self._set_desired_base_frame()
+        """
+        Sets robot's desired frame
+
+        Args:
+            arm (str): robot arm (right or left)
+        """
         self.desired_frames = self.generate_desired_frame_recursive(
             self.desired_base_frame, self.eef_name)
         self.frames = self.generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
         self._revolute_joint_names = sorted(self.get_revolute_joint_names(self.frames))
 
-    def _set_desired_base_frame(self):
-        if self.base_name == "":
-            self.desired_base_frame = self.root
-        else:
-            self.desired_base_frame = self.find_frame(self.base_name + "_frame")
-
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
+        """
+        Returns joint angles obtained by computing IK
+        
+        Args:
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
+            maxIter (int): Maximum number of calculation iterations
+
+        Returns:
+            joints (np.array): target joint angles
+        """
         self._set_desired_frame()
         joints = self.kin.inverse_kinematics(
             self.frames,
@@ -72,6 +112,15 @@ class SingleArm(Robot):
         return joints
 
     def compute_eef_pose(self, transformations):
+        """
+        Compute end effector's pose
+
+        Args:
+            transformations(OrderedDict)
+        
+        Returns:
+            vals(dict)
+        """
         return np.concatenate((transformations[self.eef_name].pos, transformations[self.eef_name].rot))
 
     @property

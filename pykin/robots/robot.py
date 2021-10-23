@@ -13,6 +13,7 @@ class Robot(URDFModel):
 
     Args:
         fname (str): path to the urdf file.
+        offset (Transform): robot init offset
     """
     def __init__(
         self, 
@@ -104,7 +105,7 @@ class Robot(URDFModel):
 
     def setup_link_name(self, base_name, eef_name):
         """
-        Sets robot's desired frame
+        Sets robot's link name
 
         Args:
             base_name (str): reference link name
