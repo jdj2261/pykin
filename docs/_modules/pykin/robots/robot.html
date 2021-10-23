@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.robots.robot &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pykin.robots.robot</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pykin.robots.robot</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">pykin_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;../&quot;</span> <span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pykin_path</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span>
+<span class="kn">from</span> <span class="nn">pykin.kinematics.kinematics</span> <span class="kn">import</span> <span class="n">Kinematics</span>
+<span class="kn">from</span> <span class="nn">pykin.models.urdf_model</span> <span class="kn">import</span> <span class="n">URDFModel</span>
+
+<div class="viewcode-block" id="Robot"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot">[docs]</a><span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="n">URDFModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes a robot object, as defined by a single corresponding robot URDF</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname (str): path to the urdf file.</span>
+<span class="sd">        offset (Transform): robot init offset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">pykin_path</span> <span class="o">+</span> <span class="s2">&quot;/asset/urdf/baxter/baxter.urdf&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">()</span>
+            
+        <span class="nb">super</span><span class="p">(</span><span class="n">Robot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_lower</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_upper</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_kinematics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_init_transform</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_limited_joint_names</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;ROBOT : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span><span class="si">}</span><span class="s2"> </span>
+<span class="s2">        </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="si">}</span><span class="s2"> </span>
+<span class="s2">        </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;pykin.robot.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Robot.show_robot_info"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot.show_robot_info">[docs]</a>    <span class="k">def</span> <span class="nf">show_robot_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shows robot&#39;s info </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*&quot;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Robot Information:&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">joint</span><span class="p">)</span>
+            
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;robot&#39;s dof : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;active joint names: </span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_actuated_joint_names</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;revolute joint names: </span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*&quot;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Robot.compute_pose_error"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot.compute_pose_error">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pose_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_HT</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">result_HT</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes pose(homogeneous transform) error </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_HT (np.array): target homogeneous transform</span>
+<span class="sd">            result_HT (np.array): result homogeneous transform </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            error (np.array)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">result_HT</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">target_HT</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">))),</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">error</span></div>
+        
+    <span class="k">def</span> <span class="nf">_setup_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup Kinematics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kin</span> <span class="o">=</span> <span class="n">Kinematics</span><span class="p">(</span><span class="n">robot_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span><span class="p">,</span>
+                              <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
+                              <span class="n">active_joint_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">(),</span>
+                              <span class="n">base_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> 
+                              <span class="n">eef_name</span><span class="o">=</span><span class="kc">None</span>
+                              <span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_setup_init_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes robot&#39;s transformation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">()))</span>
+        <span class="n">transformations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_transformations</span> <span class="o">=</span> <span class="n">transformations</span>
+
+    <span class="k">def</span> <span class="nf">_get_limited_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">joint</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">active_joint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">joint</span> <span class="o">==</span> <span class="n">active_joint</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">joint</span> <span class="p">:</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="o">.</span><span class="n">limit</span><span class="p">[</span><span class="mi">1</span><span class="p">])})</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="Robot.setup_link_name"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot.setup_link_name">[docs]</a>    <span class="k">def</span> <span class="nf">setup_link_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">eef_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets robot&#39;s link name</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_name (str): reference link name</span>
+<span class="sd">            eef_name (str): end effector name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Robot.forward_kin"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot.forward_kin">[docs]</a>    <span class="k">def</span> <span class="nf">forward_kin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">desired_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">desired_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="n">desired_frames</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_convert_desired_frames_to_all_frames</span><span class="p">()</span>
+        <span class="n">transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_frames</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transformation</span></div>
+
+    <span class="k">def</span> <span class="nf">_convert_desired_frames_to_all_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets robot&#39;s desired frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Robot.inverse_kin"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.robot.Robot.inverse_kin">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_kin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_joint_limits_upper_and_lower</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>
+
+    <span class="nd">@offset</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eef_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">active_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

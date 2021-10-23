@@ -1,0 +1,37 @@
+pykin.robots package
+====================
+
+Submodules
+----------
+
+pykin.robots.bimanual module
+----------------------------
+
+.. automodule:: pykin.robots.bimanual
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pykin.robots.robot module
+-------------------------
+
+.. automodule:: pykin.robots.robot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pykin.robots.single\_arm module
+-------------------------------
+
+.. automodule:: pykin.robots.single_arm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pykin.robots
+   :members:
+   :undoc-members:
+   :show-inheritance:

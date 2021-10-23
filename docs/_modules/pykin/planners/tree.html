@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pykin.utils.error_utils &mdash; pykin 2.0 documentation</title>
+  <title>pykin.planners.tree &mdash; pykin 2.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -51,7 +51,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>pykin.utils.error_utils</li>
+      <li>pykin.planners.tree</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -60,33 +60,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for pykin.utils.error_utils</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="NotFoundError"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.error_utils.NotFoundError">[docs]</a><span></span><span class="k">class</span> <span class="nc">NotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+  <h1>Source code for pykin.planners.tree</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../../pykin.planners.html#pykin.planners.tree.Tree">[docs]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class of custom Exception</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data (all types): input data</span>
+<span class="sd">    Tree class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-    
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Not Found </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, please check the name again&quot;</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
 
-
-<div class="viewcode-block" id="CollisionError"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.error_utils.CollisionError">[docs]</a><span class="k">class</span> <span class="nc">CollisionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class of custom Exception</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data (all types): input data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-    
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Check the collision.. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s2">, please check the obastacle setting again&quot;</span></div>
+<div class="viewcode-block" id="Tree.add_vertex"><a class="viewcode-back" href="../../../pykin.planners.html#pykin.planners.tree.Tree.add_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_joints</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add q_joints in vertices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_joints</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Tree.add_edge"><a class="viewcode-back" href="../../../pykin.planners.html#pykin.planners.tree.Tree.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q_joints_idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add vertex indexes(parent, child) in edges</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_joints_idx</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

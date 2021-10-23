@@ -1,6 +1,9 @@
 pykin.kinematics package
 ========================
 
+Submodules
+----------
+
 pykin.kinematics.jacobian module
 --------------------------------
 
@@ -21,6 +24,14 @@ pykin.kinematics.transform module
 ---------------------------------
 
 .. automodule:: pykin.kinematics.transform
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pykin.kinematics
    :members:
    :undoc-members:
    :show-inheritance:

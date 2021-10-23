@@ -1,71 +1,31 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>pykin.kinematics.kinematics &mdash; pykin 1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>pykin.kinematics.kinematics &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../../index.html" class="icon icon-home"> pykin
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,88 +33,33 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
         </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <ul>
-<li class="toctree-l1"><a class="reference external" href="http://github.com/jdj2261/pykin">Pykin On Github</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../pykin.html">API Reference</a></li>
-</ul>
-
-            
-          
-        </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">pykin</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
       <li>pykin.kinematics.kinematics</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for pykin.kinematics.kinematics</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
@@ -173,7 +78,6 @@
 <span class="sd">        active_joint_names (list): robot&#39;s actuated joints</span>
 <span class="sd">        base_name (str): reference link&#39;s name</span>
 <span class="sd">        eef_name (str): end effector&#39;s name</span>
-<span class="sd">        frames (list): robot&#39;s frames</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                 <span class="n">robot_name</span><span class="p">,</span> 
@@ -181,119 +85,81 @@
                 <span class="n">active_joint_names</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">base_name</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> 
                 <span class="n">eef_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-                <span class="n">frames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span> <span class="o">=</span> <span class="n">robot_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">active_joint_names</span> <span class="o">=</span> <span class="n">active_joint_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_name</span> <span class="o">=</span> <span class="n">base_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span> <span class="o">=</span> <span class="n">eef_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="n">frames</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_transformations</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span>
-    
-    <span class="nd">@offset</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">active_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active_joint_names</span>
-    
-    <span class="nd">@active_joint_names</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">active_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_joint_names</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_active_joint_names</span> <span class="o">=</span> <span class="n">active_joint_names</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">base_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span>
-    
-    <span class="nd">@base_name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">base_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span> <span class="o">=</span> <span class="n">base_name</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">eef_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span>
-    
-    <span class="nd">@eef_name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">eef_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eef_name</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span> <span class="o">=</span> <span class="n">eef_name</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span>
-    
-    <span class="nd">@frames</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="n">frames</span>
-
-<div class="viewcode-block" id="Kinematics.forward_kinematics"><a class="viewcode-back" href="../../../pykin.kinematics.html#pykin.kinematics.kinematics.Kinematics.forward_kinematics">[docs]</a>    <span class="k">def</span> <span class="nf">forward_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
+<div class="viewcode-block" id="Kinematics.forward_kinematics"><a class="viewcode-back" href="../../../pykin.kinematics.html#pykin.kinematics.kinematics.Kinematics.forward_kinematics">[docs]</a>    <span class="k">def</span> <span class="nf">forward_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns transformations obtained by computing fk</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            frames (list or Frame()): robot&#39;s frame for forward kinematics</span>
 <span class="sd">            thetas (sequence of float): input joint angles</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            OrderedDict: transformations</span>
+<span class="sd">            transformations (OrderedDict): transformations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">))</span> <span class="p">:</span>
             <span class="n">thetas</span> <span class="o">=</span> <span class="n">convert_thetas_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_joint_names</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_transformations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_FK</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transformations</span></div>
+        <span class="n">transformations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_FK</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">transformations</span></div>
     
     <span class="nd">@logging_time</span>
-    <span class="k">def</span> <span class="nf">inverse_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">inverse_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns transformations obtained by computing fk</span>
+<span class="sd">        Returns joint angles obtained by computing IK</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
+<span class="sd">            frames (Frame()): robot&#39;s frame for invers kinematics</span>
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
 <span class="sd">            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</span>
 <span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            np.array: target joint angles</span>
-<span class="sd">            list: all joint angles(trajectory) obtained while calculating</span>
+<span class="sd">            joints (np.array): target joint angles</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;NR&quot;</span><span class="p">:</span>
-            <span class="n">joints</span><span class="p">,</span> <span class="n">trajectory_joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_IK_NR</span><span class="p">(</span>
+            <span class="n">joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_IK_NR</span><span class="p">(</span>
+                <span class="n">frames</span><span class="p">,</span>
                 <span class="n">current_joints</span><span class="p">,</span> 
                 <span class="n">target_pose</span><span class="p">,</span> 
                 <span class="n">maxIter</span><span class="o">=</span><span class="n">maxIter</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;LM&quot;</span><span class="p">:</span>
-            <span class="n">joints</span><span class="p">,</span> <span class="n">trajectory_joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_IK_LM</span><span class="p">(</span>
+            <span class="n">joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_IK_LM</span><span class="p">(</span>
+                <span class="n">frames</span><span class="p">,</span>
                 <span class="n">current_joints</span><span class="p">,</span> 
                 <span class="n">target_pose</span><span class="p">,</span> 
                 <span class="n">maxIter</span><span class="o">=</span><span class="n">maxIter</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">joints</span><span class="p">,</span> <span class="n">trajectory_joints</span>
+        <span class="k">return</span> <span class="n">joints</span>
 
     <span class="k">def</span> <span class="nf">_compute_FK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes forward kinematics</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            frames (Frame or list): frames type is Frame If frames is all robot&#39;s frame else list</span>
+<span class="sd">            frames (list or Frame()): robot&#39;s frame for forward kinematics</span>
 <span class="sd">            offset (Transform): robot&#39;s offset</span>
 <span class="sd">            thetas (sequence of float): input joint angles</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            OrderedDict: transformations</span>
+<span class="sd">            transformations (OrderedDict): transformations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transformations</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
             <span class="n">trans</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">*</span> <span class="n">frames</span><span class="o">.</span><span class="n">get_transform</span><span class="p">(</span><span class="n">thetas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">frames</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
             <span class="n">transformations</span><span class="p">[</span><span class="n">frames</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">trans</span> <span class="o">*</span> <span class="n">frames</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">offset</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">frames</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="n">transformations</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_compute_FK</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">thetas</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># To compute IK</span>
             <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">trans</span> <span class="o">=</span> <span class="n">offset</span>
             <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
@@ -308,52 +174,44 @@
 
         <span class="k">return</span> <span class="n">transformations</span>
 
-    <span class="k">def</span> <span class="nf">_compute_IK_NR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_IK_NR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes inverse kinematics using NR</span>
+<span class="sd">        Computes inverse kinematics using newton raphson method</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            frames (list or Frame()): robot&#39;s frame for inverse kinematics</span>
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
 <span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            np.array: target joint angles</span>
-<span class="sd">            list: all joint angles(trajectory) obtained while calculating</span>
+<span class="sd">            joints (np.array): target joint angles</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lamb</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="n">iterator</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">EPS</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
         <span class="n">dof</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
 
-        <span class="c1"># Step 1. Prepare the position and attitude of the target link</span>
         <span class="n">target_pose</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_homogeneous_matrix</span><span class="p">(</span><span class="n">target_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">target_pose</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
 
-        <span class="c1"># Step 2. Use forward kinematics to calculate the position and attitude of the target link</span>
-        <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
+        <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">)</span>
         <span class="n">cur_pose</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_fk</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous_matrix</span>
 
-        <span class="c1"># Step 3. Calculate the difference in position and attitude</span>
         <span class="n">err_pose</span> <span class="o">=</span> <span class="n">calc_pose_error</span><span class="p">(</span><span class="n">target_pose</span><span class="p">,</span> <span class="n">cur_pose</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
         <span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">err_pose</span><span class="p">)</span>
 
-        <span class="c1"># Step 4. If error is small enough, stop the calculation</span>
-        <span class="n">trajectory_joints</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">while</span> <span class="n">err</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
-            <span class="c1"># Avoid infinite calculation</span>
+
             <span class="n">iterator</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">maxIter</span><span class="p">:</span>
                 <span class="k">break</span>
             
-            <span class="c1"># Step 5. If error is not small enough, calculate dq which would reduce the error </span>
-            <span class="c1"># Get jacobian to calculate dq </span>
-            <span class="n">J</span> <span class="o">=</span> <span class="n">jac</span><span class="o">.</span><span class="n">calc_jacobian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">,</span> <span class="n">cur_fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">))</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">jac</span><span class="o">.</span><span class="n">calc_jacobian</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">cur_fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">))</span>
             <span class="n">dq</span> <span class="o">=</span> <span class="n">lamb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">J</span><span class="p">),</span> <span class="n">err_pose</span><span class="p">)</span>
 
-            <span class="c1"># Step 6. Update joint angles by q = q + dq and calculate forward Kinematics</span>
+
             <span class="n">current_joints</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_joints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">dq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dof</span><span class="p">)]</span>
-            <span class="n">trajectory_joints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">current_joint</span><span class="p">)</span> <span class="k">for</span> <span class="n">current_joint</span> <span class="ow">in</span> <span class="n">current_joints</span><span class="p">]))</span>
-            <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
+            <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">)</span>
 
             <span class="n">cur_pose</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_fk</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous_matrix</span>
             <span class="n">err_pose</span> <span class="o">=</span> <span class="n">calc_pose_error</span><span class="p">(</span><span class="n">target_pose</span><span class="p">,</span> <span class="n">cur_pose</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
@@ -361,20 +219,20 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iterators : </span><span class="si">{</span><span class="n">iterator</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">current_joints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">current_joint</span><span class="p">)</span> <span class="k">for</span> <span class="n">current_joint</span> <span class="ow">in</span> <span class="n">current_joints</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">trajectory_joints</span>
+        <span class="k">return</span> <span class="n">current_joints</span>
 
-    <span class="k">def</span> <span class="nf">_compute_IK_LM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_IK_LM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Computes inverse kinematics using LM</span>
+<span class="sd">        Computes inverse kinematics using Levenberg-Marquatdt method</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            frames (list or Frame()): robot&#39;s frame for inverse kinematics</span>
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
 <span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            np.array: target joint angles</span>
-<span class="sd">            list: all joint angles(trajectory) obtained while calculating</span>
+<span class="sd">            joints (np.array): target joint angles</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">iterator</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">EPS</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1E-12</span><span class="p">)</span>
@@ -384,40 +242,30 @@
         <span class="n">We</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">([</span><span class="n">wn_pos</span><span class="p">,</span> <span class="n">wn_pos</span><span class="p">,</span> <span class="n">wn_pos</span><span class="p">,</span> <span class="n">wn_ang</span><span class="p">,</span> <span class="n">wn_ang</span><span class="p">,</span> <span class="n">wn_ang</span><span class="p">])</span>
         <span class="n">Wn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">dof</span><span class="p">)</span>
 
-        <span class="c1"># Step 1. Prepare the position and attitude of the target link</span>
         <span class="n">target_pose</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_homogeneous_matrix</span><span class="p">(</span><span class="n">target</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
 
-        <span class="c1"># Step 2. Use forward kinematics to calculate the position and attitude of the target link</span>
-        <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
+        <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">)</span>
         <span class="n">cur_pose</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_fk</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous_matrix</span>
 
-        <span class="c1"># # Step 3. Calculate the difference in position and attitude</span>
         <span class="n">err</span> <span class="o">=</span> <span class="n">calc_pose_error</span><span class="p">(</span><span class="n">target_pose</span><span class="p">,</span> <span class="n">cur_pose</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
         <span class="n">Ek</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">We</span><span class="p">),</span> <span class="n">err</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="n">trajectory_joints</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1"># # Step 4. If error is small enough, stop the calculation</span>
         <span class="k">while</span> <span class="n">Ek</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
-            <span class="c1"># Avoid infinite calculation</span>
             <span class="n">iterator</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">maxIter</span><span class="p">:</span>
                 <span class="k">break</span>
             
             <span class="n">lamb</span> <span class="o">=</span> <span class="n">Ek</span> <span class="o">+</span> <span class="mf">0.002</span>
 
-            <span class="c1"># Step 5. If error is not small enough, calculate dq which would reduce the error</span>
-            <span class="c1"># Get jacobian to calculate dq</span>
-            <span class="n">J</span> <span class="o">=</span> <span class="n">jac</span><span class="o">.</span><span class="n">calc_jacobian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">,</span> <span class="n">cur_fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">))</span>
+            <span class="n">J</span> <span class="o">=</span> <span class="n">jac</span><span class="o">.</span><span class="n">calc_jacobian</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">cur_fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">))</span>
             <span class="n">Jh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">J</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">We</span><span class="p">),</span> <span class="n">J</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Wn</span><span class="p">,</span> <span class="n">lamb</span><span class="p">)</span>
             
             <span class="n">gerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">J</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">We</span><span class="p">),</span> <span class="n">err</span><span class="p">)</span>
             <span class="n">dq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">Jh</span><span class="p">),</span> <span class="n">gerr</span><span class="p">)</span>
 
-            <span class="c1"># Step 6. Update joint angles by q = q + dq and calculate forward Kinematics</span>
             <span class="n">current_joints</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_joints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">dq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dof</span><span class="p">)]</span>
-            <span class="n">trajectory_joints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">current_joint</span><span class="p">)</span> <span class="k">for</span> <span class="n">current_joint</span> <span class="ow">in</span> <span class="n">current_joints</span><span class="p">]))</span>
-            
-            <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
+           
+            <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">)</span>
             <span class="n">cur_pose</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cur_fk</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous_matrix</span>
             <span class="n">err</span> <span class="o">=</span> <span class="n">calc_pose_error</span><span class="p">(</span><span class="n">target_pose</span><span class="p">,</span> <span class="n">cur_pose</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
             <span class="n">Ek2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">We</span><span class="p">),</span> <span class="n">err</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -426,55 +274,39 @@
                 <span class="n">Ek</span> <span class="o">=</span> <span class="n">Ek2</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">current_joints</span> <span class="o">=</span> <span class="p">[</span><span class="n">current_joints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">dq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dof</span><span class="p">)]</span>
-                <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">current_joints</span><span class="p">)</span>
+                <span class="n">cur_fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_kinematics</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">)</span>
                 <span class="k">break</span>
             
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iterators : </span><span class="si">{</span><span class="n">iterator</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">current_joints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">current_joint</span><span class="p">)</span> <span class="k">for</span> <span class="n">current_joint</span> <span class="ow">in</span> <span class="n">current_joints</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">trajectory_joints</span></div>
+        <span class="k">return</span> <span class="n">current_joints</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, DaeJong Jin.
-
-    </p>
+    <p>&#169; Copyright 2021, daejong jin.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

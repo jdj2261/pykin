@@ -1,6 +1,9 @@
 pykin.geometry package
 ======================
 
+Submodules
+----------
+
 pykin.geometry.frame module
 ---------------------------
 
@@ -13,6 +16,14 @@ pykin.geometry.geometry module
 ------------------------------
 
 .. automodule:: pykin.geometry.geometry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pykin.geometry
    :members:
    :undoc-members:
    :show-inheritance:
