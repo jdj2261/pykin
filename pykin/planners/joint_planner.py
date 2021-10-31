@@ -1,8 +1,8 @@
 from abc import ABC, abstractclassmethod
 
-class Planner(ABC):
+class JointPlanner(ABC):
     """
-    Base Planner class 
+    Base Joint space Planner class 
 
     Args:
         robot (SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual

@@ -186,6 +186,28 @@ def get_quaternion_inverse(quaternion):
     return q / np.dot(q, q)
 
 
+def get_quaternion_slerp(qA, qB, t):
+    """
+    referred https://en.wikipedia.org/wiki/Slerp#Quaternion_Slerp
+    """
+    if isinstance(qA, (np.ndarray, list)) and isinstance(qB, (np.ndarray, list)):
+        qA = np.asarray(qA)
+        qB = np.asarray(qB)
+
+        if qA.shape != (4,) or qB.shape != (4,):  # quaternion
+            raise ValueError("Expecting the shape of the orientation to be (4,)")
+        
+        a = qB * get_quaternion_inverse(qA)
+        result = np.sign(a) * (np.abs(a)) ** t * qA
+        return result
+
+
+def get_linear_interpoation(postionA, postionB, step):
+    postionA = np.asarray(postionA)
+    postionB = np.asarray(postionB)
+    return postionB * step + postionA * (1 - step)
+    
+
 def get_homogeneous_matrix_from_quaternion(quaternion):
     """
     Returns homogeneous rotation matrix from quaternion.

@@ -1,16 +1,16 @@
 import math
 import numpy as np
 
-from pykin.planners.planner import Planner
+from pykin.planners.joint_planner import JointPlanner
 from pykin.planners.tree import Tree
 from pykin.utils.fcl_utils import FclManager
 from pykin.utils.kin_utils import get_robot_geom
 from pykin.utils.error_utils import NotFoundError, CollisionError
 from pykin.utils.transform_utils import get_homogeneous_matrix
 
-class RRTStarPlanner(Planner):
+class RRTStarPlanner(JointPlanner):
     """
-    RRT star spath planning
+    RRT star path planner
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
@@ -49,6 +49,9 @@ class RRTStarPlanner(Planner):
         self.dimension = self.robot.dof
         self.eef_name = self.robot.eef_name
 
+    def __repr__(self):
+        return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
+        
     def setup_start_goal_joint(
         self, 
         current_q, 

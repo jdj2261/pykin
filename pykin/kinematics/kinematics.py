@@ -145,8 +145,6 @@ class Kinematics:
             
             J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
             dq = lamb * np.dot(np.linalg.pinv(J), err_pose)
-
-
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
             cur_fk = self.forward_kinematics(frames, current_joints)
 
@@ -199,7 +197,6 @@ class Kinematics:
             
             gerr = np.dot(np.dot(J.T, We), err)
             dq = np.dot(np.linalg.pinv(Jh), gerr)
-
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
            
             cur_fk = self.forward_kinematics(frames, current_joints)

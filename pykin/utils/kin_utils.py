@@ -116,27 +116,29 @@ def calc_pose_error(tar_pose, cur_pose, EPS):
     Returns:
         np.array: Returns pose error
     """
-    def rot_to_omega(R):
-        # referred p36
-        el = np.array(
-                [[R[2, 1] - R[1, 2]],
-                [R[0, 2] - R[2, 0]],
-                [R[1, 0] - R[0, 1]]]
-        )
-        norm_el = np.linalg.norm(el)
-        if norm_el > EPS:
-            w = np.dot(np.arctan2(norm_el, np.trace(R) - 1) / norm_el, el)
-        elif (R[0, 0] > 0 and R[1, 1] > 0 and R[2, 2] > 0):
-            w = np.zeros((3, 1))
-        else:
-            w = np.dot(np.pi/2, np.array([[R[0, 0] + 1], [R[1, 1] + 1], [R[2, 2] + 1]]))
-        return w
 
     pos_err = np.array([tar_pose[:3, -1] - cur_pose[:3, -1]])
     rot_err = np.dot(cur_pose[:3, :3].T, tar_pose[:3, :3])
-    w_err = np.dot(cur_pose[:3, :3], rot_to_omega(rot_err))
+    w_err = np.dot(cur_pose[:3, :3], rot_to_omega(rot_err, EPS))
 
     return np.vstack((pos_err.T, w_err))
+
+
+def rot_to_omega(R, EPS):
+    # referred p36
+    el = np.array(
+            [[R[2, 1] - R[1, 2]],
+            [R[0, 2] - R[2, 0]],
+            [R[1, 0] - R[0, 1]]]
+    )
+    norm_el = np.linalg.norm(el)
+    if norm_el > EPS:
+        w = np.dot(np.arctan2(norm_el, np.trace(R) - 1) / norm_el, el)
+    elif (R[0, 0] > 0 and R[1, 1] > 0 and R[2, 2] > 0):
+        w = np.zeros((3, 1))
+    else:
+        w = np.dot(np.pi/2, np.array([[R[0, 0] + 1], [R[1, 1] + 1], [R[2, 2] + 1]]))
+    return w
 
 
 def limit_joints(joint_angles, lower, upper):
