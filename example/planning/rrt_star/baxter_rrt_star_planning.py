@@ -10,7 +10,7 @@ from pykin.utils.kin_utils import ShellColors as scolors
 
 fig, ax = plt.init_3d_figure(figsize=(12,6), dpi= 100)
 
-file_path = '../../asset/urdf/baxter/baxter.urdf'
+file_path = '../../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 robot.setup_link_name("base", "right_wrist")
@@ -75,7 +75,7 @@ while cnt <= 20 and not done.all():
             print(f"{cnt} {arm} try to get path")
             
             planner.setup_start_goal_joint(init_q_space[arm], target_q_space[arm], arm, init_transformations)
-            path[arm] = planner.generate_path()
+            path[arm] = planner.get_path_in_joinst_space()
             if path[arm] is not None:
                 done[i] = True
                 result[arm] = path[arm]

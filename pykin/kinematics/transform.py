@@ -6,20 +6,20 @@ class Transform:
     This class calculates the rotation and translation of a 3D rigid body.
 
     Args:
-        rot (sequence of float) : The rotation parameter. Give in quaternions or roll pitch yaw.
         pos (sequence of float) : The translation parameter.
+        rot (sequence of float) : The rotation parameter. Give in quaternions or roll pitch yaw.
     """
     def __init__(
         self, 
-        rot=np.array([1.0, 0.0, 0.0, 0.0]), 
-        pos=np.zeros(3)
+        pos=np.zeros(3),
+        rot=np.array([1.0, 0.0, 0.0, 0.0]) 
     ):
         # Set rotation, position
-        self.rot = self._to_quaternion(rot)
         self.pos = self._to_pos(pos)
+        self.rot = self._to_quaternion(rot)
 
     def __str__(self):
-        return "Transform(rot={0}, pos={1})".format(self.rot, self.pos)
+        return "Transform(pos={0}, rot={1})".format(self.pos, self.rot)
 
     def __repr__(self):
         return 'pykin.kinematics.transform.{}()'.format(type(self).__name__)
@@ -27,7 +27,7 @@ class Transform:
     def __mul__(self, other):
         rot = tf.quaternion_multiply(self.rot, other.rot)
         pos = self._to_rotation_vec(self.rot, other.pos) + self.pos
-        return Transform(rot, pos)
+        return Transform(pos, rot)
 
     def inverse(self):
         """
@@ -36,19 +36,7 @@ class Transform:
         """
         rot = tf.get_quaternion_inverse(self.rot)
         pos = -self._to_rotation_vec(rot, self.pos)
-        return Transform(rot, pos)
-
-    @property
-    def rot(self):
-        """
-        Returns:
-            np.array: rotation (quaternion)
-        """
-        return self._rot
-    
-    @rot.setter
-    def rot(self, rot):
-        self._rot = self._to_quaternion(rot)
+        return Transform(pos, rot)
 
     @property
     def pos(self):
@@ -62,6 +50,18 @@ class Transform:
     def pos(self, pos):
         self._pos = self._to_pos(pos)
         
+    @property
+    def rot(self):
+        """
+        Returns:
+            np.array: rotation (quaternion)
+        """
+        return self._rot
+    
+    @rot.setter
+    def rot(self, rot):
+        self._rot = self._to_quaternion(rot)
+
     @property
     def pose(self):
         """

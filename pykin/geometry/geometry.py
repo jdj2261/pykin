@@ -35,7 +35,7 @@ class Visual:
 
     @offset.setter
     def offset(self, offset):
-        self._offset = Transform(offset.rot, offset.pos)
+        self._offset = Transform(offset.pos, offset.rot)
 
 
 class Collision:
@@ -72,4 +72,4 @@ class Collision:
 
     @offset.setter
     def offset(self, offset):
-        self._offset = Transform(offset.rot, offset.pos)
+        self._offset = Transform(offset.pos, offset.rot)

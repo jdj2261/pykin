@@ -152,7 +152,7 @@ class Frame:
             Transform: Compute transform by multiplying current joint offset and transfrom obtained from input angle
         """
         if self.joint.dtype == 'revolute':
-            t = Transform(tf.get_quaternion_about_axis(theta, self.joint.axis))
+            t = Transform(rot=tf.get_quaternion_about_axis(theta, self.joint.axis))
         elif self.joint.dtype == 'prismatic':
             t = Transform(pos=theta * self.joint.axis)
         elif self.joint.dtype == 'fixed':

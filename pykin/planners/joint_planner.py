@@ -1,6 +1,6 @@
-from abc import ABC, abstractclassmethod
+from pykin.planners.planner import Planner
 
-class JointPlanner(ABC):
+class JointPlanner(Planner):
     """
     Base Joint space Planner class 
 
@@ -13,10 +13,11 @@ class JointPlanner(ABC):
         robot,
         obstacles
     ):
-        self.robot = robot
-        self.obstacles = obstacles
-    
-    @abstractclassmethod
+        super(JointPlanner, self).__init__(robot, obstacles)
+
+    def __repr__(self):
+        return 'pykin.planners.joint_planner.{}()'.format(type(self).__name__)
+        
     def setup_start_goal_joint(
         self,
         current_q,
@@ -35,8 +36,7 @@ class JointPlanner(ABC):
         """
         raise NotImplementedError
 
-    @abstractclassmethod
-    def generate_path(self):
+    def get_path_in_joinst_space(self):
         """
         write planner algorithm you want 
         """

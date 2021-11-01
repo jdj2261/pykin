@@ -2,7 +2,7 @@ import sys, os
 import numpy as np
 from itertools import zip_longest
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -11,7 +11,7 @@ from pykin.kinematics.transform import Transform
 from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils import plot_utils as plt
 
-file_path = '../../asset/urdf/sawyer/sawyer.urdf'
+file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_l6")
@@ -61,7 +61,7 @@ while True:
 
         path = {}
         planner.setup_start_goal_joint(init_q_space, target_q_space)
-        path = planner.generate_path()
+        path = planner.get_path_in_joinst_space()
 
         trajectories = []
         eef_poses = []

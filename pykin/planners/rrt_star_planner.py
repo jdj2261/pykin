@@ -182,9 +182,9 @@ class RRTStarPlanner(JointPlanner):
                    ("obstacle" not in name1 and "obstacle" in name2):
                    raise CollisionError(collision_names)
 
-    def generate_path(self):
+    def get_path_in_joinst_space(self):
         """
-        Generate planner path 
+        Get path in joint space
 
         Returns:
             path(list) : result path (from start joints to goal joints)

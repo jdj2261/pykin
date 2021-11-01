@@ -1,4 +1,7 @@
 import numpy as np
+import sys, os
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+sys.path.append(pykin_path)
 
 from pykin.kinematics import transform as tf
 from pykin.robots.single_arm import SingleArm
@@ -10,7 +13,7 @@ robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_l6")
 
 # panda_example
-target_thetas = [0, np.pi/2, 0, 0, 0, 0, 0, 0]
+target_thetas = [0, np.pi/6, 0, 0, 0, 0, 0, 0]
 init_thetas = np.random.randn(7)
 
 fk = robot.forward_kin(target_thetas)

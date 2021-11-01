@@ -5,7 +5,7 @@ from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
 
-file_path = '../../asset/urdf/iiwa14/iiwa14.urdf'
+file_path = '../../../asset/urdf/iiwa14/iiwa14.urdf'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
@@ -41,7 +41,7 @@ while cnt <= 20 and done:
 
     path = {}
     planner.setup_start_goal_joint(init_q_space, target_q_space)
-    path = planner.generate_path()
+    path = planner.get_path_in_joinst_space()
 
     result = []
     trajectories = []

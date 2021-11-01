@@ -7,7 +7,7 @@ from pykin.kinematics.transform import Transform
 
 from pykin.utils import plot_utils as plt
 
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = '../../../asset/urdf/panda/panda.urdf'
 
 fig, ax = plt.init_3d_figure()
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
@@ -41,7 +41,7 @@ while done:
 
     path = {}
     planner.setup_start_goal_joint(init_q_space, target_q_space)
-    path = planner.generate_path()
+    path = planner.get_path_in_joinst_space()
 
     result = []
     trajectories = []
