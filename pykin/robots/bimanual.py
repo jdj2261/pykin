@@ -162,7 +162,7 @@ class Bimanual(Robot):
             value = np.array(value)
         return value.flatten()
 
-    def compute_eef_pose(self, transformations):
+    def get_eef_pose(self, transformations):
         """
         Compute end effector's pose
 

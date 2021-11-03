@@ -16,7 +16,7 @@ target_thetas = np.array([np.pi/4 , -np.pi/2, -np.pi/2, -np.pi/4, -np.pi/4 , -np
 target_transformations = robot.forward_kin(target_thetas)
 
 init_q_space = np.zeros(robot.dof)
-target_pose = robot.compute_eef_pose(target_transformations)
+target_pose = robot.get_eef_pose(target_transformations)
 
 fig, ax = plt.init_3d_figure()
 

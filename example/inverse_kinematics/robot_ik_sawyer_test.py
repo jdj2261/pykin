@@ -13,14 +13,14 @@ robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_l6")
 
 # panda_example
-target_thetas = [0, np.pi/6, 0, 0, 0, 0, 0, 0]
+target_thetas = [0, np.pi/3, 0, 0, 0, 0, 0, 0]
 init_thetas = np.random.randn(7)
 
 fk = robot.forward_kin(target_thetas)
 _, ax = plt.init_3d_figure("Target Pose")
 plt.plot_robot(robot, ax, fk)
 
-target_pose = robot.compute_eef_pose(fk)
+target_pose = robot.get_eef_pose(fk)
 ik_result = robot.inverse_kin(init_thetas, target_pose, method="LM")
 
 theta = np.concatenate((np.zeros(1), ik_result))

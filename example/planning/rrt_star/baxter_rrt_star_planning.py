@@ -64,7 +64,7 @@ while cnt <= 20 and not done.all():
     path = {}
     for i, arm in enumerate(robot.arm_type):
         if not done[i]:
-            target_pose = { arm: robot.compute_eef_pose(target_transformations)[arm]}
+            target_pose = { arm: robot.get_eef_pose(target_transformations)[arm]}
             target_q_space = robot.inverse_kin(
             np.random.randn(7), 
             target_pose, 

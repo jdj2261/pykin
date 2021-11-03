@@ -14,7 +14,7 @@ init_thetas = np.random.randn(robot.dof)
 
 robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
 fk = robot.forward_kin(target_thetas)
-target_pose = robot.compute_eef_pose(fk)
+target_pose = robot.get_eef_pose(fk)
 
 _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(robot, ax, fk)

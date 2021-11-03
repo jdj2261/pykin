@@ -111,9 +111,9 @@ class SingleArm(Robot):
             maxIter=1000)
         return joints
 
-    def compute_eef_pose(self, transformations):
+    def get_eef_pose(self, transformations):
         """
-        Compute end effector's pose
+        Get end effector's pose
 
         Args:
             transformations(OrderedDict)

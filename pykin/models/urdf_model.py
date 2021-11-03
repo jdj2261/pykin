@@ -100,7 +100,7 @@ class URDFModel(RobotModel):
             joint_names = self._get_actuated_joint_names(desired_frames=desired_frames)
         return joint_names
 
-    def get_revolute_joint_names(self, desired_frames=None):
+    def get_revolute_joint_names(self, desired_frames=None, arm_type=None):
         """
         Returns revolute joint names
 
@@ -120,6 +120,14 @@ class URDFModel(RobotModel):
 
         else:
             joint_names = self._get_revolute_joint_names(desired_frames=desired_frames)
+
+        if arm_type is not None:
+            arm_names = []
+            for joint_name in joint_names:
+                if arm_type in joint_name:
+                    arm_names.append(joint_name)
+            return arm_names
+
         return joint_names
 
     def _set_links(self):

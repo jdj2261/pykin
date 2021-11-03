@@ -38,8 +38,8 @@ plt.plot_robot(robot,
 #                                Inverse Kinematics                             #
 #################################################################################
 init_thetas = np.random.randn(7)
-target_pose = { "right": robot.compute_eef_pose(target_transformations)["right"], 
-                "left" : robot.compute_eef_pose(target_transformations)["left"]}
+target_pose = { "right": robot.get_eef_pose(target_transformations)["right"], 
+                "left" : robot.get_eef_pose(target_transformations)["left"]}
 
 ik_LM_result = robot.inverse_kin(
     init_thetas, 

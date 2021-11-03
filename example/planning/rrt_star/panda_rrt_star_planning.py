@@ -19,7 +19,7 @@ target_thetas = np.array([0, np.pi/5, 0, 0, 0, 0, 0])
 target_transformations = robot.forward_kin(target_thetas)
 
 init_q_space = np.array([0,0,0,0,0,0,0])
-target_pose = robot.compute_eef_pose(target_transformations)
+target_pose = robot.get_eef_pose(target_transformations)
 
 planner = RRTStarPlanner(
     robot=robot,

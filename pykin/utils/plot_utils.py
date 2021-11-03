@@ -91,7 +91,6 @@ def plot_robot(
     """
     Plot robot
     """
-
     if transformations is None:
         transformations = robot.init_transformations
 
@@ -117,7 +116,7 @@ def plot_robot(
         plot_baxter(nodes, ax, visible_text, visible_scatter)
     else:
         lines = ax.plot([x[0] for x in nodes], [x[1] for x in nodes], [
-            x[2] for x in nodes], linewidth=5, label=name)
+            x[2] for x in nodes], linewidth=2, label=name)
 
         if visible_text:
             label = '(%0.4f, %0.4f, %0.4f)' % (
@@ -128,7 +127,7 @@ def plot_robot(
         
         if visible_scatter:
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
-                [x[2] for x in nodes], s=55, c=lines[0].get_color())
+                [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
     if visible_visual:
         plot_mesh(robot, transformations, mesh_path)
@@ -180,21 +179,19 @@ def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
 
     if visible_scatter:
         ax.scatter([x[0] for x in head_nodes], [x[1] for x in head_nodes], 
-            [x[2] for x in head_nodes], s=55, c=head_lines[0].get_color())
+            [x[2] for x in head_nodes], s=30, c=head_lines[0].get_color())
         ax.scatter([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], 
-            [x[2] for x in pedestal_nodes], s=55, c=pedestal_lines[0].get_color())
+            [x[2] for x in pedestal_nodes], s=30, c=pedestal_lines[0].get_color())
         ax.scatter([x[0] for x in right_nodes], [x[1] for x in right_nodes], 
-            [x[2] for x in right_nodes], s=55, c=right_lines[0].get_color())
+            [x[2] for x in right_nodes], s=30, c=right_lines[0].get_color())
         ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
-            [x[2] for x in left_nodes], s=55, c=left_lines[0].get_color())
-
+            [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
 
 def plot_trajectories(ax, path):
     """
     Plot plot_trajectories
     """
-    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
-
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=70, c='r')
 
 def plot_animation(
     robot, 

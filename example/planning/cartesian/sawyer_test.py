@@ -25,8 +25,8 @@ cur_fk = robot.forward_kin(init_joints)
 target_joints = [0, -np.pi/4, np.pi/4, np.pi/4, 0, 0, 0, 0]
 goal_transformations = robot.forward_kin(target_joints)
 
-init_eef_pose = robot.compute_eef_pose(cur_fk)
-goal_eef_pose = robot.compute_eef_pose(goal_transformations)
+init_eef_pose = robot.get_eef_pose(cur_fk)
+goal_eef_pose = robot.get_eef_pose(goal_transformations)
 
 print(type(init_eef_pose), init_eef_pose.shape)
 
@@ -42,13 +42,13 @@ cur_T = init_T
 current_joints = ik_init
 # current_joints = np.random.randn(7)
 
-n_step = 500
+n_step = 100
 lamb = 0.5
 dof = len(current_joints)
 joints = []
 cur_fk = robot.forward_kin(np.hstack((np.zeros(1),current_joints)))
 # goal_fk = robot.forward_kin(np.hstack((np.zeros(1),ik_goal)))
-# goal_eef_pose = robot.compute_eef_pose(goal_fk)
+# goal_eef_pose = robot.get_eef_pose(goal_fk)
 
 joints.append(np.hstack((np.zeros(1),current_joints)))
 
@@ -89,20 +89,20 @@ for joint in joints:
     transformations = robot.forward_kin([0]+joint)
     joint_trajectory.append(transformations)
 
-# fig, ax = plt.init_3d_figure(figsize=(12,6), dpi= 100)
+fig, ax = plt.init_3d_figure(figsize=(12,6), dpi= 100)
 
-# plt.plot_animation(
-#     robot,
-#     joint_trajectory,
-#     fig=fig, 
-#     ax=ax,
-#     eef_poses=trajectory,
-#     obstacles=[],
-#     visible_obstacles=False,
-#     visible_collision=True, 
-#     visible_text=True,
-#     visible_scatter=False,
-#     interval=1, 
-#     repeat=False,
-#     result=None)
+plt.plot_animation(
+    robot,
+    joint_trajectory,
+    fig=fig, 
+    ax=ax,
+    eef_poses=trajectory,
+    obstacles=[],
+    visible_obstacles=False,
+    visible_collision=True, 
+    visible_text=True,
+    visible_scatter=False,
+    interval=1, 
+    repeat=False,
+    result=None)
 

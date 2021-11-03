@@ -17,7 +17,7 @@ fk = robot.forward_kin(target_thetas)
 _, ax = plt.init_3d_figure("Target Pose")
 plt.plot_robot(robot, ax, fk)
 
-target_pose = robot.compute_eef_pose(fk)
+target_pose = robot.get_eef_pose(fk)
 ik_result = robot.inverse_kin(init_thetas, target_pose, method="LM")
 print(ik_result)
 result_fk = robot.forward_kin(ik_result)

@@ -25,6 +25,18 @@ class CollisionError(Exception):
     def __str__(self):
         return f"Check the collision.. {self.data}, please check the obastacle setting again"
 
+class LimitJointError(Exception):
+    """
+    Class of custom Exception about Collision
+
+    Args:
+        data (all types): input data
+    """
+    def __init__(self, data):
+        self.data = data
+    
+    def __str__(self):
+        return f"Check the joints.. {self.data}, please check current joints setting again"
 
 class OriValueError(Exception):
     """
