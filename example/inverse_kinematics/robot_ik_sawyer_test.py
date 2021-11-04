@@ -6,6 +6,7 @@ sys.path.append(pykin_path)
 from pykin.kinematics import transform as tf
 from pykin.robots.single_arm import SingleArm
 from pykin.utils import plot_utils as plt
+from pykin.utils.transform_utils import compute_pose_error
 
 file_path = '../../asset/urdf/sawyer/sawyer.urdf'
 
@@ -13,7 +14,7 @@ robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_l6")
 
 # panda_example
-target_thetas = [0, np.pi/3, 0, 0, 0, 0, 0, 0]
+target_thetas = [0, np.pi/3, np.pi/2, np.pi/2, 0, np.pi/3, 0, 0]
 init_thetas = np.random.randn(7)
 
 fk = robot.forward_kin(target_thetas)
@@ -31,7 +32,7 @@ plt.plot_robot(robot, ax,result_fk,
                visible_visual=False,
                mesh_path='../../asset/urdf/sawyer/')
 
-err = robot.compute_pose_error(
+err = compute_pose_error(
     fk[robot.eef_name].homogeneous_matrix,
     result_fk[robot.eef_name].homogeneous_matrix)
 print(err)

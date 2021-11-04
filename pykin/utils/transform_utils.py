@@ -360,3 +360,24 @@ def get_rotation_matrix(orientation):
     else:
         raise TypeError("Expecting the given orientation to be a np.ndarray, quaternion, tuple or list, instead got: "
                     "{}".format(type(orientation)))
+
+
+def compute_pose_error(target=np.eye(4), result=np.eye(4)):
+    """
+    Computes pose(homogeneous transform) error 
+
+    Args:
+        target_HT (np.array): target homogeneous transform
+        result_HT (np.array): result homogeneous transform 
+
+    Returns:
+        error (np.array)
+    """
+    if  target.shape == (3,) and result.shape == (3,):
+        error = np.linalg.norm(target - result)
+        # target = get_homogeneous_matrix(position = target)
+        # result = get_homogeneous_matrix(position = result)
+        return error
+    error = np.linalg.norm(
+        np.dot(result, np.linalg.inv(target)) - np.mat(np.eye(4)))
+    return error

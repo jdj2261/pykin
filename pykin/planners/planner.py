@@ -21,6 +21,7 @@ class Planner(ABC):
     ):
         self.robot = robot
         self.obstacles = obstacles
+        self.fcl_manager = FclManager()
 
     @staticmethod
     def _change_types(datas):
@@ -65,7 +66,6 @@ class Planner(ABC):
         """
         Setup fcl manager for collision checking
         """
-        self.fcl_manager = FclManager()
         self._apply_fcl_to_robot(transformatios)
         self._apply_fcl_to_obstacles()
 
@@ -90,7 +90,7 @@ class Planner(ABC):
                 ob_transform = get_homogeneous_matrix(position=np.array(obs_pos))
                 self.fcl_manager.add_object(key, obs_type, obs_param, ob_transform)
 
-    def _check_init_collision(self, current_joints=None):
+    def _check_init_collision(self, goal_q=None):
         """
         Check collision between robot and obstacles
         """
@@ -100,8 +100,8 @@ class Planner(ABC):
                 if not ("obstacle" in name1 and "obstacle" in name2):
                     raise CollisionError(obj_names)
 
-        if current_joints is not None:
-            goal_collision_free, collision_names = self.collision_free(current_joints, visible_name=True)
+        if goal_q is not None:
+            goal_collision_free, collision_names = self.collision_free(goal_q, visible_name=True)
             if not goal_collision_free:
                 for name1, name2 in collision_names:
                     if ("obstacle" in name1 and "obstacle" not in name2) or \

@@ -32,7 +32,7 @@ class LimitJointError(Exception):
     Args:
         data (all types): input data
     """
-    def __init__(self, data):
+    def __init__(self, *data):
         self.data = data
     
     def __str__(self):

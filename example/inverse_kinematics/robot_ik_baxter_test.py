@@ -3,6 +3,7 @@ import numpy as np
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
+from pykin.utils.transform_utils import compute_pose_error
 
 
 file_path = '../../asset/urdf/baxter/baxter.urdf'
@@ -71,11 +72,11 @@ plt.plot_robot(robot, ax, result_fk_NR,
 
 err = {}
 for arm in robot.arm_type:
-    err[arm+"_NR_error"] = robot.compute_pose_error(
+    err[arm+"_NR_error"] = compute_pose_error(
         target_transformations[robot.eef_name[arm]].homogeneous_matrix,
         result_fk_NR[robot.eef_name[arm]].homogeneous_matrix)
 
-    err[arm+"_LM_error"] = robot.compute_pose_error(
+    err[arm+"_LM_error"] = compute_pose_error(
         target_transformations[robot.eef_name[arm]].homogeneous_matrix,
         result_fk_LM[robot.eef_name[arm]].homogeneous_matrix)
 

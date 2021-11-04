@@ -98,7 +98,7 @@ class Bimanual(Robot):
         if self.base_name[arm] == "":
             self.desired_base_frame[arm] = self.root
         else:
-            self.desired_base_frame[arm] = self.find_frame(self.base_name[arm] + "_frame")
+            self.desired_base_frame[arm] = super().find_frame(self.base_name[arm] + "_frame")
 
     def _set_desired_frame(self, arm):
         """
@@ -107,13 +107,12 @@ class Bimanual(Robot):
         Args:
             arm (str): robot arm (right or left)
         """
-        self.desired_frames[arm] = self.generate_desired_frame_recursive(
+        self.desired_frames[arm] = super().generate_desired_frame_recursive(
             self.desired_base_frame[arm],
             self.eef_name[arm])
 
         self._frames[arm] = self.desired_frames[arm]
-        self._revolute_joint_names[arm] = self.get_revolute_joint_names(
-            self._frames[arm])
+        self._revolute_joint_names[arm] = super().get_revolute_joint_names(self._frames[arm])
         self._target_pose[arm] = np.zeros(len(self._revolute_joint_names[arm]))
 
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):

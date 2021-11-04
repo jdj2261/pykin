@@ -90,7 +90,7 @@ class Kinematics:
             transformations (OrderedDict): transformations
         """
         transformations = OrderedDict()
-        if not isinstance(frames, (list, dict)):
+        if not isinstance(frames, list):
             trans = offset * frames.get_transform(thetas.get(frames.joint.name, 0.0))
             transformations[frames.link.name] = trans * frames.link.offset
             for child in frames.children:

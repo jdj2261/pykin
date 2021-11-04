@@ -1,7 +1,8 @@
 import numpy as np
 
 from pykin.planners.planner import Planner
-from pykin.utils.error_utils import OriValueError, CollisionError, LimitJointError
+from pykin.utils.error_utils import OriValueError, CollisionError
+from pykin.utils.kin_utils import ShellColors as sc
 import pykin.utils.transform_utils as t_utils
 import pykin.utils.kin_utils as k_utils
 import pykin.kinematics.jacobian as jac
@@ -21,7 +22,7 @@ class CartesianPlanner(Planner):
         current_pose,
         goal_pose,
         n_step=500,
-        arm_type=None,
+        dimension=7,
         waypoint_type="Linear"
     ):
         super(CartesianPlanner, self).__init__(robot, obstacles)
@@ -31,9 +32,7 @@ class CartesianPlanner(Planner):
         self.waypoint_type = waypoint_type
         self.eef_name = self.robot.eef_name
         self.arm = None
-
-        # [TODO]
-        self.dof = len(self.robot.get_revolute_joint_names(arm_type=arm_type))
+        self._dimension = dimension
 
         super()._setup_q_limits()
         super()._setup_eef_name()
@@ -49,11 +48,11 @@ class CartesianPlanner(Planner):
         resolution=1, 
         damping=0.5,
         epsilon=1e-12,
-
+        pos_thresh = 0.03
     ):
         if waypoints is None:
             waypoints = self.waypoints
-        paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon)
+        paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_thresh)
 
         # TODO
         # paths = paths + [self.goal_q]
@@ -65,52 +64,68 @@ class CartesianPlanner(Planner):
         waypoints, 
         resolution, 
         damping, 
-        epsilon
+        epsilon,
+        pos_thresh
     ):
-        current_joints = self.robot.inverse_kin(np.random.randn(self.dof), self.cur_pose)
-        print(current_joints)
-        if not self._check_q_in_limits(current_joints):
-            raise LimitJointError(current_joints, self.q_limits_lower, self.q_limits_upper)
-
-        cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
-
-        super()._setup_fcl_manager(cur_fk)
-        super()._check_init_collision()
-
-        current_transform = cur_fk[self.eef_name].homogeneous_matrix
-        eef_position = cur_fk[self.eef_name].pos
-
-        paths = [current_joints]
-        target_posistions = [eef_position]
-
-        for step, (pos, ori) in enumerate(waypoints):
-
-            target_transform = t_utils.get_homogeneous_matrix(pos, ori)
-            err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
-            J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self.dof)
-            Jh = np.dot(np.linalg.pinv(np.dot(J.T, J) + damping * np.identity(self.dof)), J.T)
-
-            dq = damping * np.dot(Jh, err_pose)
-            current_joints = np.array([(current_joints[i] + dq[i]) for i in range(self.dof)]).reshape(self.dof,)
-
-            # # is_collision, name = self.collision_free(current_joints, visible_name=True)
-            # # if is_collision:
-            # #     print(name)
-            
-            # if not self._check_q_in_limits(current_joints):
-            #     print("Can not move robot's arm")
-            #     current_joints = [current_joints[i] - dq[i] for i in range(dof)]
-            #     cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
-            #     cur_pose = cur_fk[self.robot.eef_name].homogeneous_matrix
-            #     continue
-
-            cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
-            current_transform = cur_fk[self.robot.eef_name].homogeneous_matrix
-
-            if step % (1/resolution) == 0 or step == len(waypoints)-1:
-                paths.append(current_joints)
-                target_posistions.append(pos)
+        cnt = 0
+        total_cnt = 10
+        while True:
+            cnt += 1
+            for _ in range(total_cnt):
+                current_joints = self.robot.inverse_kin(np.random.randn(self._dimension), self.cur_pose)
+                if self._check_q_in_limits(current_joints):
+                    break
+                print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
                 
+            cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
+
+            super()._setup_fcl_manager(cur_fk)
+            super()._check_init_collision()
+
+            current_transform = cur_fk[self.eef_name].homogeneous_matrix
+            eef_position = cur_fk[self.eef_name].pos
+
+            paths = [current_joints]
+            target_posistions = [eef_position]
+
+            for step, (pos, ori) in enumerate(waypoints):
+                target_transform = t_utils.get_homogeneous_matrix(pos, ori)
+                err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
+                J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
+                Jh = np.dot(np.linalg.pinv(np.dot(J.T, J) + damping**2 * np.identity(self._dimension)), J.T)
+
+                dq = damping * np.dot(Jh, err_pose)
+                current_joints = np.array([(current_joints[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
+
+                collision_free, name = self.collision_free(current_joints, visible_name=True)
+                if not collision_free :
+                    continue
+
+                if not self._check_q_in_limits(current_joints):
+                    continue
+
+                cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
+                current_transform = cur_fk[self.robot.eef_name].homogeneous_matrix
+
+                if step % (1/resolution) == 0 or step == len(waypoints)-1:
+                    paths.append(current_joints)
+                    target_posistions.append(pos)
+
+            err = t_utils.compute_pose_error(self.goal_pose[:3], cur_fk[self.eef_name].pos)
+
+            if err < pos_thresh:
+                print(f"{sc.OKGREEN}Generate Path Sucessfully!! Position Error is {err}{sc.ENDC}\n")
+                break
+
+            if cnt > total_cnt:
+                print(f"{sc.FAIL}Failed Generate Path.. The number of retries of {cnt} exceeded {total_cnt}. {err}{sc.ENDC}")
+                paths, target_posistions = None, None
+                break
+
+            print(f"{sc.FAIL}Failed Generate Path.. Position Error is {err}{sc.ENDC}")
+            print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
+            self.fcl_manager.reset_all_object()
+
         return paths, target_posistions
 
     def genearte_waypoints(self):
@@ -157,3 +172,10 @@ class CartesianPlanner(Planner):
     def _get_cicular_path(self):
         pass
 
+    @property
+    def dimension(self):
+        return self._dimension
+
+    @dimension.setter
+    def dimension(self, dimesion):
+        self._dimension = dimesion

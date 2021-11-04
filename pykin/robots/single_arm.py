@@ -67,7 +67,7 @@ class SingleArm(Robot):
     def _set_desired_base_frame(self):
         """
         Sets robot's desired base frame
-
+q
         Args:
             arm (str): robot arm (right or left)
         """
@@ -84,10 +84,8 @@ class SingleArm(Robot):
         Args:
             arm (str): robot arm (right or left)
         """
-        self.desired_frames = self.generate_desired_frame_recursive(
-            self.desired_base_frame, self.eef_name)
-        self.frames = self.generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
-        self._revolute_joint_names = sorted(self.get_revolute_joint_names(self.frames))
+        self.desired_frames = super().generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
+        self._revolute_joint_names = sorted(self.get_revolute_joint_names(self.desired_frames))
 
     def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
         """
@@ -104,7 +102,7 @@ class SingleArm(Robot):
         """
         self._set_desired_frame()
         joints = self.kin.inverse_kinematics(
-            self.frames,
+            self.desired_frames,
             current_joints,
             target_pose,
             method,

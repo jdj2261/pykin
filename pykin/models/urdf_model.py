@@ -78,7 +78,7 @@ class URDFModel(RobotModel):
             return self.root.joint
         return self._find_name_recursive(joint_name, self.root, frame_type="joint")
 
-    def get_actuated_joint_names(self, desired_frames=None):
+    def get_all_active_joint_names(self):
         """
         Returns actuated(revolute, prismatic) joint names
 
@@ -88,19 +88,36 @@ class URDFModel(RobotModel):
         Returns:
             list: actuated joint names
         """
-        if desired_frames is None:
-            joint_names = self._get_actuated_joint_names(root_frame=self.root)
 
-            for i, joint in enumerate(joint_names):
-                if "head" in joint:
-                    head_joint = joint_names.pop(i)
-                    joint_names.insert(0, head_joint)
+        joint_names = []
+        if self.root is not None:
+            joint_names = self._get_all_active_joint_names_recursive(joint_names)
 
-        else:
-            joint_names = self._get_actuated_joint_names(desired_frames=desired_frames)
+        for i, joint in enumerate(joint_names):
+            if "head" in joint:
+                head_joint = joint_names.pop(i)
+                joint_names.insert(0, head_joint)
+
         return joint_names
 
-    def get_revolute_joint_names(self, desired_frames=None, arm_type=None):
+    def _get_all_active_joint_names_recursive(self, joint_names):
+        """
+        Return the name of all actuated joint(revolute, prismatic)
+
+        Args:
+            joint_names (list): all actuated joint names
+            root_frame (Frame): root frame
+
+        Returns:
+            list: Append joint if joint's dof is not zero
+        """
+        if self.root.joint.num_dof != 0:
+            joint_names.append(self.root.joint.name)
+        for child in self.root.children:
+            URDFModel._get_all_active_joint_names_recursive(joint_names, child)
+        return joint_names
+
+    def get_revolute_joint_names(self, desired_frames=None, included_name=None):
         """
         Returns revolute joint names
 
@@ -111,22 +128,21 @@ class URDFModel(RobotModel):
             list: revolute joint names
         """
         if desired_frames is None:
-            joint_names = self._get_revolute_joint_names(root_frame=self.root)
-
-            for i, joint in enumerate(joint_names):
-                if "head" in joint:
-                    head_joint = joint_names.pop(i)
-                    joint_names.insert(0, head_joint)
-
+            joint_names = self._get_revolute_joint_names(self.root)
         else:
-            joint_names = self._get_revolute_joint_names(desired_frames=desired_frames)
+            joint_names = self._get_revolute_joint_names(desired_frames)
 
-        if arm_type is not None:
-            arm_names = []
+        for i, joint in enumerate(joint_names):
+            if "head" in joint:
+                head_joint = joint_names.pop(i)
+                joint_names.insert(0, head_joint)
+
+        if included_name is not None:
+            only_include_names = []
             for joint_name in joint_names:
-                if arm_type in joint_name:
-                    arm_names.append(joint_name)
-            return arm_names
+                if included_name in joint_name:
+                    only_include_names.append(joint_name)
+            return only_include_names
 
         return joint_names
 
@@ -288,62 +304,37 @@ class URDFModel(RobotModel):
             assert (ret != None), f"Not Found {name}, please check the name again"
             return ret
 
-    def _get_actuated_joint_names(self, root_frame=None, desired_frames=None):
+    def _get_actuated_joint_names(self):
         """
         Return the name of the actuated joint(revolute, prismatic)
 
-        Args:
-            root_frame (str): root frame
-            desired_frames (Frame): frames from root until it finds the desired name
-
         Returns:
             list: Append joint if joint's dof is not zero
         """
-        if root_frame is not None:
+        if self.root is not None:
             joint_names = []
-            joint_names =  self._get_all_actuated_joint_names_recursive(joint_names, root_frame)
-
-        if desired_frames is not None:
-            joint_names = self._get_desired_actuated_joint_names(desired_frames)
-
+            joint_names =  self._get_all_actuated_joint_names_recursive(joint_names, self.root)
         return joint_names
 
-    @staticmethod
-    def _get_all_actuated_joint_names_recursive(joint_names, root_frame):
-        """
-        Return the name of all actuated joint(revolute, prismatic)
 
-        Args:
-            joint_names (list): all actuated joint names
-            root_frame (Frame): root frame
+    # @staticmethod
+    # def _get_desired_actuated_joint_names(desired_frames):
+    #     """
+    #     Return the name of desired actuated joint(revolute, prismatic)
 
-        Returns:
-            list: Append joint if joint's dof is not zero
-        """
-        if root_frame.joint.num_dof != 0:
-            joint_names.append(root_frame.joint.name)
-        for child in root_frame.children:
-            URDFModel._get_all_actuated_joint_names_recursive(joint_names, child)
-        return joint_names
+    #     Args:
+    #         desired_frames (list): desired actuated joint names
 
-    @staticmethod
-    def _get_desired_actuated_joint_names(desired_frames):
-        """
-        Return the name of desired actuated joint(revolute, prismatic)
-
-        Args:
-            desired_frames (list): desired actuated joint names
-
-        Returns:
-            list: Append joint if joint's dof is not zero
-        """
-        joint_names = []
-        for f in desired_frames:
-            if f.joint.num_dof != 0:
-                joint_names.append(f.joint.name)
-        return joint_names
+    #     Returns:
+    #         list: Append joint if joint's dof is not zero
+    #     """
+    #     joint_names = []
+    #     for f in desired_frames:
+    #         if f.joint.num_dof != 0:
+    #             joint_names.append(f.joint.name)
+    #     return joint_names
     
-    def _get_revolute_joint_names(self, root_frame=None, desired_frames=None):
+    def _get_revolute_joint_names(self, frame):
         """
         Return the name of the actuated joint(revolute, prismatic)
 
@@ -354,12 +345,11 @@ class URDFModel(RobotModel):
         Returns:
             list: Append joint if joint's dof is not zero
         """
-        if root_frame is not None:
+        if not isinstance(frame, list):
             joint_names = []
-            joint_names =  self._get_all_revolute_joint_names_recursive(joint_names, root_frame)
-
-        if desired_frames is not None:
-            joint_names = self._get_desired_actuated_joint_names(desired_frames)
+            joint_names =  self._get_all_revolute_joint_names_recursive(joint_names, frame)
+        else:
+            joint_names = self._get_desired_revolute_joint_names(frame)
 
         return joint_names
 
@@ -382,7 +372,7 @@ class URDFModel(RobotModel):
         return joint_names
 
     @staticmethod
-    def _get_desired_actuated_joint_names(desired_frames):
+    def _get_desired_revolute_joint_names(desired_frames):
         """
         Return the name of desired actuated joint(revolute, prismatic)
 

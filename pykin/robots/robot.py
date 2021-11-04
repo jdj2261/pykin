@@ -57,32 +57,17 @@ class Robot(URDFModel):
             print(joint)
             
         print(f"robot's dof : {self.dof}")
-        print(f"active joint names: \n{self.get_actuated_joint_names()}")
+        print(f"active joint names: \n{self.get_active_joint_names()}")
         print(f"revolute joint names: \n{self.get_revolute_joint_names()}")
         print("*" * 100)
 
-    def compute_pose_error(self, target_HT=np.eye(4), result_HT=np.eye(4)):
-        """
-        Computes pose(homogeneous transform) error 
-
-        Args:
-            target_HT (np.array): target homogeneous transform
-            result_HT (np.array): result homogeneous transform 
-
-        Returns:
-            error (np.array)
-        """
-        error = np.round(np.linalg.norm(
-            np.dot(result_HT, np.linalg.inv(target_HT)) - np.mat(np.eye(4))), 6)
-        return error
-        
     def _setup_kinematics(self):
         """
         Setup Kinematics
         """
         self.kin = Kinematics(robot_name=self.robot_name,
                               offset=self.offset,
-                              active_joint_names=self.get_revolute_joint_names(),
+                              active_joint_names=super().get_revolute_joint_names(),
                               base_name="", 
                               eef_name=None
                               )
@@ -91,14 +76,14 @@ class Robot(URDFModel):
         """
         Initializes robot's transformation
         """
-        thetas = np.zeros(len(self.get_revolute_joint_names()))
+        thetas = np.zeros(len(super().get_revolute_joint_names()))
         transformations = self.kin.forward_kinematics(self.root, thetas)
         self.init_transformations = transformations
 
     def _get_limited_joint_names(self):
         result = {}
         for joint, value in self.joints.items():
-            for active_joint in self.get_revolute_joint_names():
+            for active_joint in super().get_revolute_joint_names():
                 if joint == active_joint:
                     result.update({joint : (value.limit[0], value.limit[1])})
         return result
@@ -126,7 +111,7 @@ class Robot(URDFModel):
         Resets robot's desired frame
         """
         self._frames = self.root
-        self._revolute_joint_names = self.get_revolute_joint_names()
+        self._revolute_joint_names = super().get_revolute_joint_names()
 
     def inverse_kin(self, current_joints, target_pose, method, maxIter):
         raise NotImplementedError
