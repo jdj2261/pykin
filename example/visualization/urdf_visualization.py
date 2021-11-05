@@ -18,7 +18,5 @@ fig, ax = plt.init_3d_figure("URDF")
 # For Baxter robots, the name argument to the plot_robot function must be baxter.
 plt.plot_robot(robot, 
                ax=ax, 
-               visible_visual=False, 
-               visible_collision=False, 
-               mesh_path='../../asset/urdf/baxter/')
+               visible_collision=False)
 plt.show_figure()

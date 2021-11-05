@@ -1,0 +1,24 @@
+<mujoco model="custom_table">
+  <worldbody>
+    <body name="custom_table">
+      <body name="collision">
+        <geom pos="0 0 0" mesh="custom_table_0" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="custom_table_1" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="custom_table_2" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="custom_table_0" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="custom_table_1" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="custom_table_2" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+      </body>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.06" name="bottom_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 0.04" name="top_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0.025 0.025 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="meshes/custom_table_0.stl" name="custom_table_0" scale="0.01 0.01 0.01"/>
+    <mesh file="meshes/custom_table_1.stl" name="custom_table_1" scale="0.01 0.01 0.01"/>
+    <mesh file="meshes/custom_table_2.stl" name="custom_table_2" scale="0.01 0.01 0.01"/>
+  </asset>
+</mujoco>

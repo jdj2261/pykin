@@ -12,7 +12,7 @@ pykin.utils.error\_utils module
 pykin.utils.fcl\_utils module
 -----------------------------
 
-.. automodule:: pykin.utils.collision_utils
+.. automodule:: pykin.collision.collision_manager
    :members:
    :undoc-members:
    :show-inheritance:

@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pykin.models.html">pykin.models package</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pykin.utils package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.error_utils">pykin.utils.error_utils module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.collision_utils">pykin.utils.collision_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pykin.collision.collision_manager">pykin.collision.collision_manager module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.kin_utils">pykin.utils.kin_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.plot_utils">pykin.utils.plot_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pykin.utils.transform_utils">pykin.utils.transform_utils module</a></li>
@@ -192,11 +192,11 @@
 </dd></dl>
 
 </div>
-<div class="section" id="module-pykin.utils.collision_utils">
-<span id="pykin-utils-fcl-utils-module"></span><h2>pykin.utils.collision_utils module<a class="headerlink" href="#module-pykin.utils.collision_utils" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pykin.collision.collision_manager">
+<span id="pykin-utils-fcl-utils-module"></span><h2>pykin.collision.collision_manager module<a class="headerlink" href="#module-pykin.collision.collision_manager" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.ContactData">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.collision_utils.</span></span><span class="sig-name descname"><span class="pre">ContactData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#ContactData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.ContactData" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.ContactData">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.collision.collision_manager.</span></span><span class="sig-name descname"><span class="pre">ContactData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contact</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#ContactData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.ContactData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Data structure for holding information about a collision contact.</p>
 <dl class="field-list simple">
@@ -208,8 +208,8 @@
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.ContactData.depth">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">depth</span></span><a class="headerlink" href="#pykin.utils.collision_utils.ContactData.depth" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.ContactData.depth">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">depth</span></span><a class="headerlink" href="#pykin.collision.collision_manager.ContactData.depth" title="Permalink to this definition">¶</a></dt>
 <dd><p>The penetration depth of the 3D point of intersection for this contact.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -222,8 +222,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.ContactData.index">
-<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#ContactData.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.ContactData.index" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.ContactData.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#ContactData.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.ContactData.index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the face in contact for the mesh with
 the given name.</p>
 <dl class="field-list simple">
@@ -240,8 +240,8 @@ the given name.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.ContactData.point">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">point</span></span><a class="headerlink" href="#pykin.utils.collision_utils.ContactData.point" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.ContactData.point">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">point</span></span><a class="headerlink" href="#pykin.collision.collision_manager.ContactData.point" title="Permalink to this definition">¶</a></dt>
 <dd><p>The 3D point of intersection for this contact.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -256,13 +256,13 @@ the given name.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.collision_utils.</span></span><span class="sig-name descname"><span class="pre">CollisionManager</span></span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.collision.collision_manager.</span></span><span class="sig-name descname"><span class="pre">CollisionManager</span></span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A rigid body collision manager.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager.add_object">
-<span class="sig-name descname"><span class="pre">add_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gparam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.add_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager.add_object" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager.add_object">
+<span class="sig-name descname"><span class="pre">add_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gparam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.add_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager.add_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an object to the collision manager.
 If an object with the given name is already in the manager, replace it.</p>
 <dl class="field-list simple">
@@ -278,8 +278,8 @@ If an object with the given name is already in the manager, replace it.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager.collision_check">
-<span class="sig-name descname"><span class="pre">collision_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.collision_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager.collision_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager.collision_check">
+<span class="sig-name descname"><span class="pre">collision_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.collision_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager.collision_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if any pair of objects in the manager collide with one another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -300,8 +300,8 @@ contacts (list of ContactData): All contacts detected</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager.remove_object">
-<span class="sig-name descname"><span class="pre">remove_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.remove_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager.remove_object" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager.remove_object">
+<span class="sig-name descname"><span class="pre">remove_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.remove_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager.remove_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete an object from the collision manager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -311,14 +311,14 @@ contacts (list of ContactData): All contacts detected</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager.reset_all_object">
-<span class="sig-name descname"><span class="pre">reset_all_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.reset_all_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager.reset_all_object" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager.reset_all_object">
+<span class="sig-name descname"><span class="pre">reset_all_object</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.reset_all_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager.reset_all_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset all object from the collision manager.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.collision_utils.CollisionManager.set_transform">
-<span class="sig-name descname"><span class="pre">set_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.set_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.collision_utils.CollisionManager.set_transform" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pykin.collision.collision_manager.CollisionManager.set_transform">
+<span class="sig-name descname"><span class="pre">set_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([[1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0,</span> <span class="pre">0.0],</span> <span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">1.0]])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/collision_utils.html#CollisionManager.set_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.collision.collision_manager.CollisionManager.set_transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the transform for one of the manager’s objects.
 This replaces the prior transform.</p>
 <dl class="field-list simple">

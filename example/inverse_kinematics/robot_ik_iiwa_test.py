@@ -26,7 +26,5 @@ _, ax = plt.init_3d_figure("IK")
 plt.plot_robot(
     robot, 
     ax=ax,
-    transformations=result_fk,
-    visible_visual=False,
-    mesh_path='../../asset/urdf/iiwa14/')
+    transformations=result_fk)
 plt.show_figure()

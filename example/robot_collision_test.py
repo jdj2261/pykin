@@ -2,7 +2,7 @@ import numpy as np
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.bimanual import Bimanual
-from pykin.utils.collision_utils import CollisionManager
+from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import get_robot_collision_geom
 from pykin.utils import plot_utils as plt
 
@@ -34,7 +34,7 @@ thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
 transformations = robot.forward_kin(thetas)
 
 for link, transformation in transformations.items():
-    name, _, _ = get_mesh_param(robot.links[link])
+    name, _, _ = get_robot_collision_geom(robot.links[link])
     transform = transformation.h_mat
     collision_manager.set_transform(name=name, transform=transform)
 

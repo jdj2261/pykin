@@ -1,0 +1,15 @@
+<mujoco model="box_goal">
+  <worldbody>
+    <body name="box_goal">
+<!--      <body name="collision">-->
+<!--        <geom pos="0 0 0" mesh="box_goal" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--      </body>-->
+      <body name="box_goal_visual">
+        <geom pos="0 0 0" mesh="box_goal" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+      </body>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="meshes/box_goal.stl" name="box_goal" scale="0.001 0.001 0.001"/>
+  </asset>
+</mujoco>

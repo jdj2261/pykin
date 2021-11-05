@@ -3,37 +3,37 @@ import sys, os
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
 
-import trimesh
-
 from pykin.robots.single_arm import SingleArm
+from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
-from pykin.utils.collision_utils import CollisionManager
-from pykin.utils.mesh_utils import get_mesh_path
-from pykin.utils.transform_utils import get_transform_to_visual
+from pykin.collision.collision_manager import CollisionManager
+from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
+
+import trimesh
 
 file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
 
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-# robot.setup_link_name("base", "right_l6")
+robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, -1]))
 
-fk = robot.forward_kin(np.zeros(8))
+mesh_path = pykin_path+"/asset/urdf/sawyer/"
 
-collision_manager = CollisionManager()
-for link, transformation in fk.items():
-    if robot.links[link].visual.gtype != "mesh":
-        continue
+collision_manager = CollisionManager(mesh_path)
+c_manager = apply_robot_to_collision_manager(collision_manager, robot)
 
-    mesh_name = robot.links[link].visual.gparam.get('filename')
-    file_name = get_mesh_path(mesh_name, robot.robot_name)
-    mesh = trimesh.load(file_name)
-    A2B = get_transform_to_visual(
-        transformation.h_mat, robot.visual_offset(link).h_mat)
-    collision_manager.add_object(name=robot.links[link].name, gtype="mesh", gparam=mesh, transform=A2B)
+result, objs_in_collision, contact_data = c_manager.collision_check(return_names=True, return_data=True)
+print(result, objs_in_collision, len(contact_data))
 
-    # tri_manager.add_object(name=robot.links[link].name, mesh=mesh, transform=A2B)
-    visual_color = robot.links[link].visual.gparam.get('color')
-    color = np.array([0.2, 0.2, 0.2, 1.])
-    if visual_color is not None:
-        color = np.array([color for color in visual_color.values()]).flatten()
+scene = trimesh.Scene()
+scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot)
+scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 
-result, objs_in_collision, contact_data = collision_manager.collision_check(return_names=True, return_data=True)
+milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
+test_mesh = trimesh.load_mesh(milk_path)
+scene.add_geometry(test_mesh, transform=Transform(pos=[1, 0, 0]).h_mat)
+
+table_path = pykin_path+"/asset/objects/meshes/twin_tower_goal.stl"
+table_mesh = trimesh.load_mesh(table_path)
+table_mesh.apply_scale(0.001)
+scene.add_geometry(table_mesh, transform=Transform(pos=[-1, 0, 0]).h_mat)
+
+scene.show()

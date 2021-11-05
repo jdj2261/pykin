@@ -16,7 +16,5 @@ _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(robot,
                ax=ax, 
                transformations=robot_transformations,
-               visible_visual=False,
-               visible_collision=True,
-               mesh_path='../asset/urdf/sawyer/')
+               visible_collision=True)
 plt.show_figure()

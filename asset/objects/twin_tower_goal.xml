@@ -1,0 +1,21 @@
+<mujoco model="twin_tower_goal">
+  <worldbody>
+    <body name="twin_tower_goal">
+<!--      <body name="collision">-->
+<!--        <geom pos="0 0 0" mesh="twin_tower_goal_0" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--        <geom pos="0 0 0" mesh="twin_tower_goal_1" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--        <geom pos="0 0 0" mesh="twin_tower_goal_2" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--      </body>-->
+      <body name="twin_tower_goal_visual">
+        <geom pos="0 0 0" mesh="twin_tower_goal_0" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="twin_tower_goal_1" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="twin_tower_goal_2" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+      </body>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="meshes/twin_tower_goal_0.stl" name="twin_tower_goal_0" scale="0.0011 0.0011 0.0011"/>
+    <mesh file="meshes/twin_tower_goal_1.stl" name="twin_tower_goal_1" scale="0.0011 0.0011 0.0011"/>
+    <mesh file="meshes/twin_tower_goal_2.stl" name="twin_tower_goal_2" scale="0.0011 0.0011 0.0011"/>
+  </asset>
+</mujoco>

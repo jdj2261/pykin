@@ -28,9 +28,7 @@ theta = np.concatenate((np.zeros(1), ik_result))
 result_fk = robot.forward_kin(theta)
 
 _, ax = plt.init_3d_figure("IK Result")
-plt.plot_robot(robot, ax,result_fk,
-               visible_visual=False,
-               mesh_path='../../asset/urdf/sawyer/')
+plt.plot_robot(robot, ax,result_fk)
 
 err = compute_pose_error(
     fk[robot.eef_name].h_mat,

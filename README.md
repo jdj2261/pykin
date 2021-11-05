@@ -255,7 +255,7 @@ $ git submodule update
   If you want to check robot's collision, install python-fcl 
   And then, import CollisionManager in collision_utils package
   """
-  from pykin.utils.collision_utils import CollisionManager
+  from pykin.collision.collision_manager import CollisionManager
   from pykin.utils.kin_utils import get_robot_collision_geom
   from pykin.utils import plot_utils as plt
   

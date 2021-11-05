@@ -11,7 +11,6 @@ file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 visible_collision = True
-visible_visual = False
 
 # set target joints angle
 head_thetas =  np.zeros(1)
@@ -30,10 +29,8 @@ target_transformations = robot.forward_kin(thetas)
 _, ax = plt.init_3d_figure("Target Pose")
 plt.plot_robot(robot, 
                ax=ax,
-               transformations=target_transformations,
-               visible_visual=visible_visual, 
-               visible_collision=visible_collision,
-               mesh_path='../../asset/urdf/baxter/')
+               transformations=target_transformations, 
+               visible_collision=visible_collision)
 
 #################################################################################
 #                                Inverse Kinematics                             #
@@ -57,18 +54,14 @@ ik_NR_result = robot.inverse_kin(
 thetas_LM = np.concatenate((head_thetas, ik_LM_result["right"], ik_LM_result["left"]))
 result_fk_LM = robot.forward_kin(thetas_LM)
 _, ax = plt.init_3d_figure("LM IK Result")
-plt.plot_robot(robot, ax, result_fk_LM,
-               visible_visual=visible_visual, 
-               visible_collision=visible_collision,
-               mesh_path='../../asset/urdf/baxter/')
+plt.plot_robot(robot, ax, result_fk_LM, 
+               visible_collision=visible_collision)
 
 thetas_NR = np.concatenate((head_thetas, ik_NR_result["right"], ik_NR_result["left"]))
 result_fk_NR = robot.forward_kin(thetas_NR)
 _, ax = plt.init_3d_figure("NR IK Result")
 plt.plot_robot(robot, ax, result_fk_NR,
-               visible_visual=visible_visual, 
-               visible_collision=visible_collision,
-               mesh_path='../../asset/urdf/baxter/')
+               visible_collision=visible_collision)
 
 err = {}
 for arm in robot.arm_type:

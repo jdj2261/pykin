@@ -1,9 +1,10 @@
 import numpy as np
 from abc import ABC, abstractclassmethod
 
-from pykin.utils.collision_utils import CollisionManager
-from pykin.utils.kin_utils import get_robot_collision_geom
-from pykin.utils.kin_utils import get_robot_visual_geom
+from pykin.collision.collision_manager import CollisionManager
+from pykin.utils.kin_utils import get_robot_collision_geom, get_robot_visual_geom
+
+
 from pykin.utils.error_utils import CollisionError, NotFoundError
 from pykin.utils.transform_utils import get_h_mat, get_transform_to_visual
 
@@ -18,11 +19,20 @@ class Planner(ABC):
     def __init__(
         self,
         robot,
-        obstacles
+        obstacles,
+        collision_manager=None
     ):
         self.robot = robot
         self.obstacles = obstacles
-        self.collision_manager = CollisionManager()
+
+        if collision_manager is None:
+            print("Warning: {self} -- This Planner does not do collision checking")
+            
+        self.collision_manager = collision_manager
+
+    def __repr__(self) -> str:
+        return 'pykin.planners.planner.{}()'.format(type(self).__name__)
+
 
     @staticmethod
     def _change_types(datas):

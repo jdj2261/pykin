@@ -26,8 +26,6 @@ It is not visible unless sphere, cylinder, and box are defined in collision/geom
 # If visible_collision is True, visualize collision
 plt.plot_robot(robot, 
                ax=ax, 
-               visible_visual=False, 
-               visible_collision=True, 
-               mesh_path='../../asset/urdf/baxter/')
+               visible_collision=True)
 ax.legend()
 plt.show_figure()

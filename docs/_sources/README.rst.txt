@@ -118,9 +118,7 @@ You can see 4 example robot information.
                     transformations=robot.transformations,
                     ax=ax, 
                     name=robot.robot_name,
-                    visible_visual=False, 
-                    visible_collision=True, 
-                    mesh_path='../../asset/urdf/baxter/')
+                    visible_collision=True)
     ax.legend()
     plt.show_figure()
 

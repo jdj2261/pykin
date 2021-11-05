@@ -23,7 +23,5 @@ print(ik_result)
 result_fk = robot.forward_kin(ik_result)
 
 _, ax = plt.init_3d_figure("IK Result")
-plt.plot_robot(robot, ax, fk,
-               visible_visual=False,
-               mesh_path='../../asset/urdf/panda/')
+plt.plot_robot(robot, ax, fk)
 plt.show_figure()

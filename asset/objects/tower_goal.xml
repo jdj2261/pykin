@@ -1,0 +1,18 @@
+<mujoco model="tower_goal">
+  <worldbody>
+    <body name="tower_goal">
+<!--      <body name="collision">-->
+<!--        <geom pos="0 0 0" mesh="tower_goal_0" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--        <geom pos="0 0 0" mesh="tower_goal_1" type="mesh" density="5000" rgba="0 1 0 1" group="1" condim="6"/>-->
+<!--      </body>-->
+      <body name="tower_goal_visual">
+        <geom pos="0 0 0" mesh="tower_goal_0" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="tower_goal_1" type="mesh" rgba="1 0 0 0.3" conaffinity="0" contype="0" group="0" mass="0.0001"/>
+      </body>
+    </body>
+  </worldbody>
+  <asset>
+    <mesh file="meshes/tower_goal_0.stl" name="tower_goal_0" scale="0.001 0.001 0.001"/>
+    <mesh file="meshes/tower_goal_1.stl" name="tower_goal_1" scale="0.001 0.001 0.001"/>
+  </asset>
+</mujoco>

@@ -76,9 +76,7 @@ def plot_robot(
     robot, 
     ax=None, 
     transformations=None, 
-    visible_visual=False,
     visible_collision=False, 
-    mesh_path='../asset/urdf/baxter/',
     visible_text=True,
     visible_scatter=True):
 
@@ -123,8 +121,6 @@ def plot_robot(
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
-    if visible_visual:
-        plot_mesh(robot, transformations, mesh_path)
 
     if visible_collision:
         plot_collision(robot, transformations, ax)
@@ -376,45 +372,12 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
     p3c.set_facecolor(color)
     ax.add_collection3d(p3c)
 
-
-def plot_mesh(robot, transformations, mesh_path):
-    """
-    Plot mesh
-    """
-    scene = trimesh.Scene()
-    for link, transformation in transformations.items():
-        if robot.links[link].visual.gtype == "mesh":
-            mesh_name = robot.links[link].visual.gparam.get('filename')
-            filename = mesh_path + mesh_name
-            A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
-            visual_color = robot.links[link].visual.gparam.get('color')
-            color = np.array([0.2, 0.2, 0.2, 1.])
-            if visual_color is not None:
-                color = np.array([color for color in visual_color.values()]).flatten()
-            scene = convert_trimesh_scene(scene, filename, A2B, color)
-            scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5)
-    scene.show()
-
-
-def convert_trimesh_scene(scene, filename=None, A2B=np.eye(4), color="k"):
-    """
-    Convert scene from mesh to trimesh
-    """
-    mesh = trimesh.load(filename)
-    color = _check_color_type(color)
-    mesh.visual.face_colors = color
-    scene.add_geometry(mesh, transform=A2B)
-
-    return scene
-
-
 def plot_rrt_vertices(vertices, ax):
     """
     Plot rrt* trees
     """
     for vertex in vertices:
         ax.plot([x for (x, y, z) in vertex],[y for (x, y, z) in vertex], [z for (x, y, z) in vertex],'k', linewidth=0.1,)
-
 
 def plot_path_planner(path, ax):
     """
