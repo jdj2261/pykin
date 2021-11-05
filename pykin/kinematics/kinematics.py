@@ -129,10 +129,10 @@ class Kinematics:
         EPS = float(1e-6)
         dof = len(current_joints)
 
-        target_pose = tf.get_homogeneous_matrix(target_pose[:3], target_pose[3:])
+        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
-        cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
+        cur_pose = list(cur_fk.values())[-1].h_mat
 
         err_pose = calc_pose_error(target_pose, cur_pose, EPS)
         err = np.linalg.norm(err_pose)
@@ -148,7 +148,7 @@ class Kinematics:
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
             cur_fk = self.forward_kinematics(frames, current_joints)
 
-            cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
+            cur_pose = list(cur_fk.values())[-1].h_mat
             err_pose = calc_pose_error(target_pose, cur_pose, EPS)
             err = np.linalg.norm(err_pose)
 
@@ -177,10 +177,10 @@ class Kinematics:
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
         Wn = np.eye(dof)
 
-        target_pose = tf.get_homogeneous_matrix(target[:3], target[3:])
+        target_pose = tf.get_h_mat(target[:3], target[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
-        cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
+        cur_pose = list(cur_fk.values())[-1].h_mat
 
         err = calc_pose_error(target_pose, cur_pose, EPS)
         Ek = float(np.dot(np.dot(err.T, We), err)[0])
@@ -200,7 +200,7 @@ class Kinematics:
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
            
             cur_fk = self.forward_kinematics(frames, current_joints)
-            cur_pose = list(cur_fk.values())[-1].homogeneous_matrix
+            cur_pose = list(cur_fk.values())[-1].h_mat
             err = calc_pose_error(target_pose, cur_pose, EPS)
             Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
             

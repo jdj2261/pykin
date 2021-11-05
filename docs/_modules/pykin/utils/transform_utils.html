@@ -177,27 +177,27 @@
     <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span></div>
     
 
-<div class="viewcode-block" id="get_rot_mat_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_rot_mat_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_rot_mat_from_homogeneous</span><span class="p">(</span><span class="n">homogeneous_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_rot_mat_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_rot_mat_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_rot_mat_from_homogeneous</span><span class="p">(</span><span class="n">h_mat</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns rotation matrix from homogeneous matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">homogeneous_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">h_mat</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="get_pos_mat_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_pos_mat_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_pos_mat_from_homogeneous</span><span class="p">(</span><span class="n">homogeneous_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_pos_mat_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_pos_mat_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_pos_mat_from_homogeneous</span><span class="p">(</span><span class="n">h_mat</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns position matrix from homogeneous matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">homogeneous_matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="n">h_mat</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="get_pose_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_pose_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_pose_from_homogeneous</span><span class="p">(</span><span class="n">homogeneous_matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="get_pose_from_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_pose_from_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">get_pose_from_homogeneous</span><span class="p">(</span><span class="n">h_mat</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns (7,1) pose from homogeneous matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="n">get_pos_mat_from_homogeneous</span><span class="p">(</span><span class="n">homogeneous_matrix</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">get_pos_mat_from_homogeneous</span><span class="p">(</span><span class="n">h_mat</span><span class="p">)</span>
     <span class="n">orientation</span> <span class="o">=</span> <span class="n">get_quaternion_from_matrix</span><span class="p">(</span>
-        <span class="n">get_rot_mat_from_homogeneous</span><span class="p">(</span><span class="n">homogeneous_matrix</span><span class="p">))</span>
+        <span class="n">get_rot_mat_from_homogeneous</span><span class="p">(</span><span class="n">h_mat</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">))</span></div>
 
 
@@ -344,7 +344,7 @@
     <span class="k">return</span> <span class="n">q</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_homogeneous_matrix_from_quaternion"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_homogeneous_matrix_from_quaternion">[docs]</a><span class="k">def</span> <span class="nf">get_homogeneous_matrix_from_quaternion</span><span class="p">(</span><span class="n">quaternion</span><span class="p">):</span>
+<div class="viewcode-block" id="get_h_mat_from_quaternion"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_h_mat_from_quaternion">[docs]</a><span class="k">def</span> <span class="nf">get_h_mat_from_quaternion</span><span class="p">(</span><span class="n">quaternion</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns homogeneous rotation matrix from quaternion.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -392,7 +392,7 @@
     <span class="k">return</span> <span class="n">q</span></div>
 
 
-<div class="viewcode-block" id="get_homogeneous_matrix"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_homogeneous_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_homogeneous_matrix</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
+<div class="viewcode-block" id="get_h_mat"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_h_mat">[docs]</a><span class="k">def</span> <span class="nf">get_h_mat</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns homogeneous matrix from position and orientation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -420,7 +420,7 @@
                       <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])))</span></div>
 
 
-<div class="viewcode-block" id="get_identity_homogeneous_matrix"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_identity_homogeneous_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_identity_homogeneous_matrix</span><span class="p">():</span>
+<div class="viewcode-block" id="get_identity_h_mat"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_identity_h_mat">[docs]</a><span class="k">def</span> <span class="nf">get_identity_h_mat</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns identity matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -429,7 +429,7 @@
 
 <div class="viewcode-block" id="homogeneous_to_pose"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.homogeneous_to_pose">[docs]</a><span class="k">def</span> <span class="nf">homogeneous_to_pose</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns pose from homogeneous_matrix</span>
+<span class="sd">    Returns pose from h_mat</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">position</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">quaternion</span> <span class="o">=</span> <span class="n">get_quaternion_from_matrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
@@ -438,11 +438,11 @@
 
 <div class="viewcode-block" id="pose_to_homogeneous"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.pose_to_homogeneous">[docs]</a><span class="k">def</span> <span class="nf">pose_to_homogeneous</span><span class="p">(</span><span class="n">pose</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns homogeneous_matrix from pose</span>
+<span class="sd">    Returns h_mat from pose</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pose</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pose</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
     <span class="n">position</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="n">pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">pose</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
-    <span class="k">return</span> <span class="n">get_homogeneous_matrix</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">get_h_mat</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="get_quaternion"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.transform_utils.get_quaternion">[docs]</a><span class="k">def</span> <span class="nf">get_quaternion</span><span class="p">(</span><span class="n">orientation</span><span class="p">,</span> <span class="n">convention</span><span class="o">=</span><span class="s1">&#39;wxyz&#39;</span><span class="p">):</span>

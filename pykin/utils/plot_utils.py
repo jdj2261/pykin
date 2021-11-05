@@ -7,12 +7,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
 try:
-    import fcl
-except ImportError:
-    warnings.warn(
-        "Cannot display mesh. Library 'fcl' not installed.")
-
-try:
     import trimesh
 except ImportError:
     warnings.warn(
@@ -103,7 +97,7 @@ def plot_robot(
 
     for i, (link, transformation) in enumerate(transformations.items()):
         links.append(link)
-        transformation_matrix.append(transformation.homogeneous_matrix)
+        transformation_matrix.append(transformation.h_mat)
 
     eef_idx = 0
 
@@ -252,10 +246,10 @@ def plot_obstacles(obstacles, ax):
         if o_type == "sphere":
             plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
         if o_type == "box":
-            A2B = tf.get_homogeneous_matrix(o_pose)
+            A2B = tf.get_h_mat(o_pose)
             plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
         if o_type == "cylinder":
-            A2B = tf.get_homogeneous_matrix(o_pose)
+            A2B = tf.get_h_mat(o_pose)
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
 def plot_collision(robot, transformations, ax, alpha=0.8):
@@ -271,7 +265,7 @@ def plot_collision(robot, transformations, ax, alpha=0.8):
         return color
 
     for link, transformation in transformations.items():
-        A2B = np.dot(transformation.homogeneous_matrix, robot.links[link].collision.offset.homogeneous_matrix)
+        A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
         color = _get_color(robot.links[link].visual.gparam)
 
         if robot.links[link].collision.gtype == 'cylinder':
@@ -392,7 +386,7 @@ def plot_mesh(robot, transformations, mesh_path):
         if robot.links[link].visual.gtype == "mesh":
             mesh_name = robot.links[link].visual.gparam.get('filename')
             filename = mesh_path + mesh_name
-            A2B = np.dot(transformation.homogeneous_matrix, robot.links[link].visual.offset.homogeneous_matrix)
+            A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
             visual_color = robot.links[link].visual.gparam.get('color')
             color = np.array([0.2, 0.2, 0.2, 1.])
             if visual_color is not None:

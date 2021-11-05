@@ -13,7 +13,7 @@ class URDF_Link:
         for elem_visual in elem_link.findall('visual'):
             URDF_Link.set_visual_origin(elem_visual, link_frame)
             URDF_Link.set_visual_geometry(elem_visual, link_frame)
-            URDF_Link.set_visual_color(elem_visual, link_frame)
+            URDF_Link.set_color(elem_visual, link_frame)
 
     @staticmethod
     def set_collision(elem_link, link_frame):
@@ -23,7 +23,8 @@ class URDF_Link:
         for elem_collision in elem_link.findall('collision'):
             URDF_Link.set_collision_origin(elem_collision, link_frame)
             URDF_Link.set_collision_geometry(elem_collision, link_frame)
-
+            URDF_Link.set_color(elem_collision, link_frame)
+            
     @staticmethod
     def set_visual_origin(elem_visual, frame):
         """
@@ -66,7 +67,7 @@ class URDF_Link:
                     _set_link_visual_geom(shapes, frame)
 
     @staticmethod
-    def set_visual_color(elem_visual, frame):
+    def set_color(elem_visual, frame):
         """
         Set link visual's color
         """ 

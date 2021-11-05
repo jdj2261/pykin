@@ -73,12 +73,12 @@ plt.plot_robot(robot, ax, result_fk_NR,
 err = {}
 for arm in robot.arm_type:
     err[arm+"_NR_error"] = compute_pose_error(
-        target_transformations[robot.eef_name[arm]].homogeneous_matrix,
-        result_fk_NR[robot.eef_name[arm]].homogeneous_matrix)
+        target_transformations[robot.eef_name[arm]].h_mat,
+        result_fk_NR[robot.eef_name[arm]].h_mat)
 
     err[arm+"_LM_error"] = compute_pose_error(
-        target_transformations[robot.eef_name[arm]].homogeneous_matrix,
-        result_fk_LM[robot.eef_name[arm]].homogeneous_matrix)
+        target_transformations[robot.eef_name[arm]].h_mat,
+        result_fk_LM[robot.eef_name[arm]].h_mat)
 
 print(err)
 

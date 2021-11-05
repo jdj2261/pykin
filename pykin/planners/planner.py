@@ -1,10 +1,11 @@
 import numpy as np
 from abc import ABC, abstractclassmethod
 
-from pykin.utils.fcl_utils import FclManager
-from pykin.utils.kin_utils import get_robot_geom
+from pykin.utils.collision_utils import CollisionManager
+from pykin.utils.kin_utils import get_robot_collision_geom
+from pykin.utils.kin_utils import get_robot_visual_geom
 from pykin.utils.error_utils import CollisionError, NotFoundError
-from pykin.utils.transform_utils import get_homogeneous_matrix
+from pykin.utils.transform_utils import get_h_mat, get_transform_to_visual
 
 class Planner(ABC):
     """
@@ -21,7 +22,7 @@ class Planner(ABC):
     ):
         self.robot = robot
         self.obstacles = obstacles
-        self.fcl_manager = FclManager()
+        self.collision_manager = CollisionManager()
 
     @staticmethod
     def _change_types(datas):
@@ -62,7 +63,7 @@ class Planner(ABC):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
-    def _setup_fcl_manager(self, transformatios):
+    def _setup_collision_manager(self, transformatios):
         """
         Setup fcl manager for collision checking
         """
@@ -74,9 +75,11 @@ class Planner(ABC):
         Apply fcl to robot 
         """
         for link, transformation in transformatios.items():
-            name, gtype, gparam = get_robot_geom(self.robot.links[link])
-            transform = transformation.homogeneous_matrix
-            self.fcl_manager.add_object(name, gtype, gparam, transform)
+            name, gtype, gparam = get_robot_collision_geom(self.robot.links[link])
+            transform = get_transform_to_visual(
+                transformation.h_mat, 
+                self.robot.visual_offset(link).h_mat)
+            self.collision_manager.add_object(name, gtype, gparam, transform)
     
     def _apply_fcl_to_obstacles(self):
         """
@@ -87,14 +90,15 @@ class Planner(ABC):
                 obs_type = vals[0]
                 obs_param = vals[1]
                 obs_pos = vals[2]
-                ob_transform = get_homogeneous_matrix(position=np.array(obs_pos))
-                self.fcl_manager.add_object(key, obs_type, obs_param, ob_transform)
+                ob_transform = get_h_mat(position=np.array(obs_pos))
+                self.collision_manager.add_object(key, obs_type, obs_param, ob_transform)
 
     def _check_init_collision(self, goal_q=None):
         """
         Check collision between robot and obstacles
         """
-        is_collision, obj_names = self.fcl_manager.collision_check(return_names=True)
+        is_collision, obj_names = self.collision_manager.collision_check(return_names=True)
+        print(obj_names)
         if is_collision:
             for name1, name2 in obj_names:
                 if not ("obstacle" in name1 and "obstacle" in name2):
@@ -124,11 +128,11 @@ class Planner(ABC):
         """
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
-            if link in self.fcl_manager._objs:
-                transform = transformations.homogeneous_matrix
-                self.fcl_manager.set_transform(name=link, transform=transform)
+            if link in self.collision_manager._objs:
+                transform = transformations.h_mat
+                self.collision_manager.set_transform(name=link, transform=transform)
 
-        is_collision, name = self.fcl_manager.collision_check(return_names=True, return_data=False)
+        is_collision, name = self.collision_manager.collision_check(return_names=True, return_data=False)
         if visible_name:
             if is_collision:
                 return False, name

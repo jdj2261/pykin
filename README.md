@@ -253,10 +253,10 @@ $ git submodule update
   
   """
   If you want to check robot's collision, install python-fcl 
-  And then, import FclManager in fcl_utils package
+  And then, import CollisionManager in collision_utils package
   """
-  from pykin.utils.fcl_utils import FclManager
-  from pykin.utils.kin_utils import get_robot_geom
+  from pykin.utils.collision_utils import CollisionManager
+  from pykin.utils.kin_utils import get_robot_collision_geom
   from pykin.utils import plot_utils as plt
   
   file_path = '../asset/urdf/baxter/baxter.urdf'
@@ -270,18 +270,18 @@ $ git submodule update
   thetas = np.hstack((head_thetas, right_arm_thetas, left_arm_thetas))
   transformations = robot.forward_kin(thetas)
   
-  # call FclManager class
-  fcl_manager = FclManager()
+  # call CollisionManager class
+  collision_manager = CollisionManager()
   for link, transformation in transformations.items():
       # get robot link's name and geometry info 
-      name, gtype, gparam = get_robot_geom(robot.links[link])
+      name, gtype, gparam = get_robot_collision_geom(robot.links[link])
       # get 4x4 size homogeneous transform matrix
-      transform = transformation.homogeneous_matrix
-      # add link name, geometry info, transform matrix to fcl_manager 
-      fcl_manager.add_object(name, gtype, gparam, transform)
+      transform = transformation.h_mat
+      # add link name, geometry info, transform matrix to collision_manager 
+      collision_manager.add_object(name, gtype, gparam, transform)
   
   # you can get collision result, contacted object name, fcl contatct_data
-  result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+  result, objs_in_collision, contact_data = collision_manager.collision_check(return_names=True, return_data=True)
   
   print(result, objs_in_collision, contact_data)
   
@@ -294,11 +294,11 @@ $ git submodule update
   transformations = robot.forward_kin(thetas)
   
   for link, transformation in transformations.items():
-      name, _, _ = get_robot_geom(robot.links[link])
-      transform = transformation.homogeneous_matrix
-      fcl_manager.set_transform(name=name, transform=transform)
+      name, _, _ = get_robot_collision_geom(robot.links[link])
+      transform = transformation.h_mat
+      collision_manager.set_transform(name=name, transform=transform)
   
-  result, objs_in_collision, contact_data = fcl_manager.collision_check(return_names=True, return_data=True)
+  result, objs_in_collision, contact_data = collision_manager.collision_check(return_names=True, return_data=True)
   print(result, objs_in_collision, contact_data)
   ~~~
 

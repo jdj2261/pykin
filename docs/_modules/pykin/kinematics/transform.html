@@ -238,12 +238,12 @@
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_rotation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">homogeneous_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">h_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            np.array: homogeneous matrix</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_homogeneous_matrix_from_quaternion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">)</span>
+        <span class="n">mat</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_h_mat_from_quaternion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot</span><span class="p">)</span>
         <span class="n">mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
         <span class="k">return</span> <span class="n">mat</span>
 

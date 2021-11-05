@@ -79,12 +79,12 @@ class Transform:
         return tf.get_rotation_matrix(self.rot)
 
     @property
-    def homogeneous_matrix(self):
+    def h_mat(self):
         """
         Returns:
             np.array: homogeneous matrix
         """
-        mat = tf.get_homogeneous_matrix_from_quaternion(self.rot)
+        mat = tf.get_h_mat_from_quaternion(self.rot)
         mat[:3, 3] = self.pos
         return mat
 

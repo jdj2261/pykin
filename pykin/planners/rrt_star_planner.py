@@ -75,7 +75,7 @@ class RRTStarPlanner(JointPlanner):
 
         super()._setup_q_limits()
         super()._setup_eef_name()
-        super()._setup_fcl_manager(init_transformation)
+        super()._setup_collision_manager(init_transformation)
         super()._check_init_collision(self.goal_q)
 
     def get_path_in_joinst_space(self):

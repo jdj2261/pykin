@@ -48,11 +48,11 @@ class CartesianPlanner(Planner):
         resolution=1, 
         damping=0.5,
         epsilon=1e-12,
-        pos_thresh = 0.03
+        pos_sensitivity = 0.03
     ):
         if waypoints is None:
             waypoints = self.waypoints
-        paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_thresh)
+        paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
 
         # TODO
         # paths = paths + [self.goal_q]
@@ -65,7 +65,7 @@ class CartesianPlanner(Planner):
         resolution, 
         damping, 
         epsilon,
-        pos_thresh
+        pos_sensitivity
     ):
         cnt = 0
         total_cnt = 10
@@ -79,17 +79,17 @@ class CartesianPlanner(Planner):
                 
             cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
 
-            super()._setup_fcl_manager(cur_fk)
+            super()._setup_collision_manager(cur_fk)
             super()._check_init_collision()
 
-            current_transform = cur_fk[self.eef_name].homogeneous_matrix
+            current_transform = cur_fk[self.eef_name].h_mat
             eef_position = cur_fk[self.eef_name].pos
 
             paths = [current_joints]
             target_posistions = [eef_position]
 
             for step, (pos, ori) in enumerate(waypoints):
-                target_transform = t_utils.get_homogeneous_matrix(pos, ori)
+                target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
                 Jh = np.dot(np.linalg.pinv(np.dot(J.T, J) + damping**2 * np.identity(self._dimension)), J.T)
@@ -105,7 +105,7 @@ class CartesianPlanner(Planner):
                     continue
 
                 cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
-                current_transform = cur_fk[self.robot.eef_name].homogeneous_matrix
+                current_transform = cur_fk[self.robot.eef_name].h_mat
 
                 if step % (1/resolution) == 0 or step == len(waypoints)-1:
                     paths.append(current_joints)
@@ -113,7 +113,7 @@ class CartesianPlanner(Planner):
 
             err = t_utils.compute_pose_error(self.goal_pose[:3], cur_fk[self.eef_name].pos)
 
-            if err < pos_thresh:
+            if err < pos_sensitivity:
                 print(f"{sc.OKGREEN}Generate Path Sucessfully!! Position Error is {err}{sc.ENDC}\n")
                 break
 
@@ -124,7 +124,7 @@ class CartesianPlanner(Planner):
 
             print(f"{sc.FAIL}Failed Generate Path.. Position Error is {err}{sc.ENDC}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
-            self.fcl_manager.reset_all_object()
+            self.collision_manager.reset_all_object()
 
         return paths, target_posistions
 

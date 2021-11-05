@@ -6,6 +6,8 @@ try:
 except BaseException:
     fcl = None
 
+from pykin.utils.plot_utils import plot_mesh
+
 class ContactData:
     """
     Data structure for holding information about a collision contact.
@@ -25,7 +27,7 @@ class ContactData:
         self._depth = contact.penetration_depth
 
     def __repr__(self):
-        return 'pykin.utils.fcl_utils.{}()'.format(type(self).__name__)
+        return 'pykin.utils.collision_utils.{}()'.format(type(self).__name__)
 
     @property
     def point(self):
@@ -60,8 +62,80 @@ class ContactData:
         """
         return self._inds[name]
 
+class DistanceData:
+    """
+    Data structure for holding information about a distance query.
+    """
 
-class FclManager:
+    def __init__(self, names, result):
+        """
+        Initialize a DistanceData.
+
+        Parameters
+        ----------
+        names : list of str
+          The names of the two objects in order.
+        contact : fcl.DistanceResult
+          The distance query result.
+        """
+        self.names = set(names)
+        self._inds = {
+            names[0]: result.b1,
+            names[1]: result.b2
+        }
+        self._points = {
+            names[0]: result.nearest_points[0],
+            names[1]: result.nearest_points[1]
+        }
+        self._distance = result.min_distance
+
+    @property
+    def distance(self):
+        """
+        Returns the distance between the two objects.
+
+        Returns
+        -------
+        distance : float
+          The euclidean distance between the objects.
+        """
+        return self._distance
+
+    def index(self, name):
+        """
+        Returns the index of the closest face for the mesh with
+        the given name.
+
+        Parameters
+        ----------
+        name : str
+          The name of the target object.
+
+        Returns
+        -------
+        index : int
+          The index of the face in collisoin.
+        """
+        return self._inds[name]
+
+    def point(self, name):
+        """
+        The 3D point of closest distance on the mesh with the given name.
+
+        Parameters
+        ----------
+        name : str
+          The name of the target object.
+
+        Returns
+        -------
+        point : (3,) float
+          The closest point.
+        """
+        return self._points[name]
+
+
+class CollisionManager:
     """
     A rigid body collision manager.
     """
@@ -73,7 +147,7 @@ class FclManager:
         self._manager.setup()
 
     def __repr__(self):
-        return 'pykin.utils.fcl_utils.{}()'.format(type(self).__name__)
+        return 'pykin.utils.collision_utils.{}()'.format(type(self).__name__)
 
     def add_object(self, 
                    name, 
@@ -99,7 +173,11 @@ class FclManager:
         if transform.shape != (4, 4):
             raise ValueError('transform must be (4,4)!')
 
-        geom = self._get_geom(gtype, gparam)
+        if gtype == "mesh":
+            geom = self._get_BVH(gparam)
+        else:
+            geom = self._get_geom(gtype, gparam)
+            
         t = fcl.Transform(transform[:3, :3], transform[:3, 3])
         o = fcl.CollisionObject(geom, t)
 
@@ -194,67 +272,6 @@ class FclManager:
                 if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
                     continue
 
-                # Baxter
-                if 'lower_forearm' in coll_names[0] and 'wrist' in coll_names[1]:
-                    continue
-                if 'upper_forearm' in coll_names[0] and 'upper_forearm_visual' in coll_names[1]:
-                    continue
-                if 'lower_forearm' in coll_names[0] and 'upper_forearm_visual' in coll_names[1]:
-                    continue
-                if 'lower_elbow' in coll_names[0] and 'upper_elbow_visual' in coll_names[1]:
-                    continue
-                if 'lower_shoulder' in coll_names[0] and 'upper_elbow' in coll_names[1]:
-                    continue
-                if 'lower_shoulder' in coll_names[0] and 'upper_shoulder' in coll_names[1]:
-                    continue
-                if 'upper_elbow' in coll_names[0] and 'upper_elbow_visual' in coll_names[1]:
-                    continue
-                if 'lower_shoulder' in coll_names[0] and 'upper_elbow_visual' in coll_names[1]:
-                    continue
-                if 'lower_elbow' in coll_names[0] and 'upper_forearm' in coll_names[1]:
-                    continue
-                if 'gripper_base' in coll_names[0] and 'hand_accelerometer' in coll_names[1]:
-                    continue
-                if 'head_link' in coll_names[0] and 'sonar_ring' in coll_names[1]:
-                    continue
-                if 'head_link' in coll_names[0] and 'head' in coll_names[1]:
-                    continue
-                if 'head_link' in coll_names[0] and 'screen' in coll_names[1]:
-                    continue
-                if 'head_link' in coll_names[0] and 'display' in coll_names[1]:
-                    continue
-                if 'gripper_base' in coll_names[0] and 'hand_accelerometer' in coll_names[1]:
-                    continue
-                if 'hand' in coll_names[0] and 'hand_accelerometer' in coll_names[1]:
-                    continue
-                if 'hand' in coll_names[0] and 'wrist' in coll_names[1]:
-                    continue
-                if 'gripper_base' in coll_names[0] and 'hand' in coll_names[1]:
-                    continue
-                if 'display' in coll_names[0] and 'screen' in coll_names[1]:
-                    continue
-
-                # sawyer
-                if 'right_l1' in coll_names[0] and 'right_l1_2' in coll_names[1]:
-                    continue
-                if 'right_l4' in coll_names[0] and 'right_l4_2' in coll_names[1]:
-                    continue
-                if 'head' in coll_names[0] and 'right_l1' in coll_names[1]:
-                    continue
-                if 'right_l2' in coll_names[0] and 'right_l2_2' in coll_names[1]:
-                    continue
-                if 'right_arm_base_link' in coll_names[0] and 'right_l0' in coll_names[1]:
-                    continue
-                if 'head' in coll_names[0] and 'right_l1_2' in coll_names[1]:
-                    continue
-                if 'head' in coll_names[0] and 'right_l2' in coll_names[1]:
-                    continue
-                if 'head' in coll_names[0] and 'screen' in coll_names[1]:
-                    continue
-                if 'right_hand' in coll_names[0] and 'right_l6' in coll_names[1]:
-                    continue
-
-                
                 if return_names:
                     objs_in_collision.add(coll_names)
                 if return_data:
@@ -273,7 +290,82 @@ class FclManager:
         else:
             return result
 
-    def _get_geom(self, gtype, gparam):
+    def get_min_distance(self, return_names=False, return_data=False):
+        ddata = fcl.DistanceData()
+        if return_data:
+            ddata = fcl.DistanceData(
+                fcl.DistanceRequest(enable_nearest_points=True),
+                fcl.DistanceResult()
+            )
+
+        self._manager.distance(ddata, fcl.defaultDistanceCallback)
+
+        distance = ddata.result.min_distance
+
+        names, data = None, None
+        if return_names or return_data:
+            names = (self._extract_name(ddata.result.o1),
+                     self._extract_name(ddata.result.o2))
+            data = DistanceData(names, ddata.result)
+            names = tuple(sorted(names))
+
+        if return_names and return_data:
+            return distance, names, data
+        elif return_names:
+            return distance, names
+        elif return_data:
+            return distance, data
+        else:
+            return distance
+
+    def get_distance(self):
+        pass
+
+    def show(robot, transformations, mesh_path):
+        plot_mesh(robot, transformations, mesh_path)
+
+    def _get_BVH(self, mesh):
+        """
+        Get a BVH for a mesh.
+
+        Parameters
+        -------------
+        mesh : Trimesh
+          Mesh to create BVH for
+
+        Returns
+        --------------
+        bvh : fcl.BVHModel
+          BVH object of source mesh
+        """
+        bvh = self.mesh_to_BVH(mesh)
+        return bvh
+
+    @staticmethod
+    def mesh_to_BVH(mesh):
+        """
+        Create a BVHModel object from a Trimesh object
+
+        Parameters
+        -----------
+        mesh : Trimesh
+        Input geometry
+
+        Returns
+        ------------
+        bvh : fcl.BVHModel
+        BVH of input geometry
+        """
+        bvh = fcl.BVHModel()
+        bvh.beginModel(num_tris_=len(mesh.faces),
+                    num_vertices_=len(mesh.vertices))
+        bvh.addSubModel(verts=mesh.vertices,
+                        triangles=mesh.faces)
+        bvh.endModel()
+        return bvh
+
+    @staticmethod
+    def _get_geom(gtype, gparam):
         """
         Get fcl geometry from robot's geometry type or params
         
@@ -294,6 +386,8 @@ class FclManager:
         elif gtype == "box":
             size = gparam
             geom = fcl.Box(*size)
+        elif gtype == "mesh":
+            pass
         return geom
 
     def _extract_name(self, geom):

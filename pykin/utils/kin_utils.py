@@ -161,10 +161,28 @@ def limit_joints(joint_angles, lower, upper):
                 joint_angles[i] = upper[i]
     return joint_angles
 
+def get_mesh_param(link_type):
+    file_name = str(link_type.gparam.get('filename'))
+    color = link_type.gparam.get('color')
+    color = np.array([color for color in color.values()]).flatten()
+    return (file_name, color)
 
-def get_robot_geom(link):
+def get_cylinder_param(link_type):
+    radius = float(link_type.gparam.get('radius'))
+    length = float(link_type.gparam.get('length'))
+    return (radius, length)
+
+def get_spehre_param(link_type):
+    radius = float(link_type.gparam.get('radius'))
+    return radius
+
+def get_box_param(link_type):
+    size = list(link_type.gparam.get('size'))
+    return size
+
+def get_robot_collision_geom(link):
     """
-    Get robot geometry from link
+    Get robot collision geometry from link
 
     Args:
         link (Link): robot's link
@@ -174,19 +192,6 @@ def get_robot_geom(link):
         gtype: geom's type
         gparam: geom's param
     """
-    def get_cylinder_param(link):
-        radius = float(link.collision.gparam.get('radius'))
-        length = float(link.collision.gparam.get('length'))
-        return (radius, length)
-
-    def get_spehre_param(link):
-        radius = float(link.collision.gparam.get('radius'))
-        return radius
-
-    def get_box_param(link):
-        size = list(link.collision.gparam.get('size'))
-        return size
-
     name = None
     gtype = None
     gparam = None
@@ -194,16 +199,53 @@ def get_robot_geom(link):
     if link.collision.gtype == "cylinder":
         name = link.name
         gtype = link.collision.gtype
-        gparam = get_cylinder_param(link)
+        gparam = get_cylinder_param(link.collision)
     elif link.collision.gtype == "sphere":
         name = link.name
         gtype = link.collision.gtype
-        gparam = get_spehre_param(link)
+        gparam = get_spehre_param(link.collision)
     elif link.collision.gtype == "box":
         name = link.name
         gtype = link.collision.gtype
-        gparam = get_box_param(link)
+        gparam = get_box_param(link.collision)
 
     return name, gtype, gparam
+
+def get_robot_visual_geom(link):
+    """
+    Get robot visual geometry from link
+
+    Args:
+        link (Link): robot's link
+
+    Returns:
+        name (str): geom's name
+        gtype: geom's type
+        gparam: geom's param
+    """
+
+    name = None
+    gtype = None
+    gparam = None
+
+    if link.visual.gtype == "mesh":
+        name = link.name
+        gtype = link.visual.gtype
+        gparam = get_cylinder_param(link.visual)
+    if link.visual.gtype == "cylinder":
+        name = link.name
+        gtype = link.visual.gtype
+        gparam = get_cylinder_param(link.visual)
+    elif link.visual.gtype == "sphere":
+        name = link.name
+        gtype = link.visual.gtype
+        gparam = get_spehre_param(link.visual)
+    elif link.visual.gtype == "box":
+        name = link.name
+        gtype = link.visual.gtype
+        gparam = get_box_param(link.visual)
+
+    return name, gtype, gparam
+
 
 

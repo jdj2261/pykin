@@ -33,8 +33,8 @@ plt.plot_robot(robot, ax,result_fk,
                mesh_path='../../asset/urdf/sawyer/')
 
 err = compute_pose_error(
-    fk[robot.eef_name].homogeneous_matrix,
-    result_fk[robot.eef_name].homogeneous_matrix)
+    fk[robot.eef_name].h_mat,
+    result_fk[robot.eef_name].h_mat)
 print(err)
 
 print(result_fk[robot.eef_name].pose)

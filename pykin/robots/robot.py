@@ -57,7 +57,7 @@ class Robot(URDFModel):
             print(joint)
             
         print(f"robot's dof : {self.dof}")
-        print(f"active joint names: \n{self.get_active_joint_names()}")
+        print(f"active joint names: \n{self.get_all_active_joint_names()}")
         print(f"revolute joint names: \n{self.get_revolute_joint_names()}")
         print("*" * 100)
 
@@ -126,6 +126,9 @@ class Robot(URDFModel):
     @offset.setter
     def offset(self, offset):
         self._offset = offset
+
+    def visual_offset(self, link):
+        return self.links[link].visual.offset
 
     @property
     def base_name(self):

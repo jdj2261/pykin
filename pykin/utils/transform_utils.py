@@ -19,27 +19,27 @@ def vector_norm(data, axis=None, out=None):
     np.sqrt(out, out)
     
 
-def get_rot_mat_from_homogeneous(homogeneous_matrix):
+def get_rot_mat_from_homogeneous(h_mat):
     """
     Returns rotation matrix from homogeneous matrix
     """
-    return homogeneous_matrix[:-1, :-1]
+    return h_mat[:-1, :-1]
 
 
-def get_pos_mat_from_homogeneous(homogeneous_matrix):
+def get_pos_mat_from_homogeneous(h_mat):
     """
     Returns position matrix from homogeneous matrix
     """
-    return homogeneous_matrix[:-1,-1]
+    return h_mat[:-1,-1]
 
 
-def get_pose_from_homogeneous(homogeneous_matrix):
+def get_pose_from_homogeneous(h_mat):
     """
     Returns (7,1) pose from homogeneous matrix
     """
-    position = get_pos_mat_from_homogeneous(homogeneous_matrix)
+    position = get_pos_mat_from_homogeneous(h_mat)
     orientation = get_quaternion_from_matrix(
-        get_rot_mat_from_homogeneous(homogeneous_matrix))
+        get_rot_mat_from_homogeneous(h_mat))
     return np.hstack((position, orientation))
 
 
@@ -208,7 +208,7 @@ def get_linear_interpoation(postionA, postionB, step):
     return postionB * step + postionA * (1 - step)
     
 
-def get_homogeneous_matrix_from_quaternion(quaternion):
+def get_h_mat_from_quaternion(quaternion):
     """
     Returns homogeneous rotation matrix from quaternion.
     """
@@ -256,7 +256,7 @@ def get_quaternion_about_axis(angle, axis):
     return q
 
 
-def get_homogeneous_matrix(position=np.zeros(3), orientation=np.array([1.0, 0.0, 0.0, 0.0])):
+def get_h_mat(position=np.zeros(3), orientation=np.array([1.0, 0.0, 0.0, 0.0])):
     """
     Returns homogeneous matrix from position and orientation
     """
@@ -284,7 +284,7 @@ def get_inverse_homogeneous(matrix):
                       np.array([[0, 0, 0, 1]])))
 
 
-def get_identity_homogeneous_matrix():
+def get_identity_h_mat():
     """
     Returns identity matrix
     """
@@ -293,7 +293,7 @@ def get_identity_homogeneous_matrix():
 
 def homogeneous_to_pose(matrix):
     """
-    Returns pose from homogeneous_matrix
+    Returns pose from h_mat
     """
     position = matrix[:3, -1]
     quaternion = get_quaternion_from_matrix(matrix[:3, :3])
@@ -302,11 +302,11 @@ def homogeneous_to_pose(matrix):
 
 def pose_to_homogeneous(pose):
     """
-    Returns homogeneous_matrix from pose
+    Returns h_mat from pose
     """
     pose = np.array(pose).flatten()
     position, orientation = pose[:3], pose[3:]
-    return get_homogeneous_matrix(position=position, orientation=orientation)
+    return get_h_mat(position=position, orientation=orientation)
 
 
 def get_quaternion(orientation, convention='wxyz'):
@@ -375,9 +375,13 @@ def compute_pose_error(target=np.eye(4), result=np.eye(4)):
     """
     if  target.shape == (3,) and result.shape == (3,):
         error = np.linalg.norm(target - result)
-        # target = get_homogeneous_matrix(position = target)
-        # result = get_homogeneous_matrix(position = result)
+        # target = get_h_mat(position = target)
+        # result = get_h_mat(position = result)
         return error
     error = np.linalg.norm(
         np.dot(result, np.linalg.inv(target)) - np.mat(np.eye(4)))
     return error
+
+
+def get_transform_to_visual(transform, visual_transform):
+    return np.dot(transform, visual_transform)

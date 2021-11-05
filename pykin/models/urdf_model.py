@@ -91,7 +91,7 @@ class URDFModel(RobotModel):
 
         joint_names = []
         if self.root is not None:
-            joint_names = self._get_all_active_joint_names_recursive(joint_names)
+            joint_names = self._get_all_active_joint_names_recursive(joint_names, self.root)
 
         for i, joint in enumerate(joint_names):
             if "head" in joint:
@@ -100,7 +100,8 @@ class URDFModel(RobotModel):
 
         return joint_names
 
-    def _get_all_active_joint_names_recursive(self, joint_names):
+    @staticmethod
+    def _get_all_active_joint_names_recursive(joint_names, frame):
         """
         Return the name of all actuated joint(revolute, prismatic)
 
@@ -111,9 +112,9 @@ class URDFModel(RobotModel):
         Returns:
             list: Append joint if joint's dof is not zero
         """
-        if self.root.joint.num_dof != 0:
-            joint_names.append(self.root.joint.name)
-        for child in self.root.children:
+        if frame.joint.num_dof != 0:
+            joint_names.append(frame.joint.name)
+        for child in frame.children:
             URDFModel._get_all_active_joint_names_recursive(joint_names, child)
         return joint_names
 

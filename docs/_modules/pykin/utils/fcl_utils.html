@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pykin.utils.fcl_utils &mdash; pykin 1.0 documentation</title>
+  <title>pykin.utils.collision_utils &mdash; pykin 1.0 documentation</title>
   
 
   
@@ -140,7 +140,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>pykin.utils.fcl_utils</li>
+      <li>pykin.utils.collision_utils</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,7 +155,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for pykin.utils.fcl_utils</h1><div class="highlight"><pre>
+  <h1>Source code for pykin.utils.collision_utils</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 
@@ -164,7 +164,7 @@
 <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
     <span class="n">fcl</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ContactData"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.ContactData">[docs]</a><span class="k">class</span> <span class="nc">ContactData</span><span class="p">:</span>
+<div class="viewcode-block" id="ContactData"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.ContactData">[docs]</a><span class="k">class</span> <span class="nc">ContactData</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Data structure for holding information about a collision contact.</span>
 
@@ -183,7 +183,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">penetration_depth</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;pykin.utils.fcl_utils.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;pykin.utils.collision_utils.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -205,7 +205,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span>
 
-<div class="viewcode-block" id="ContactData.index"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.ContactData.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="ContactData.index"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.ContactData.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the index of the face in contact for the mesh with</span>
 <span class="sd">        the given name.</span>
@@ -219,7 +219,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div></div>
 
 
-<div class="viewcode-block" id="FclManager"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager">[docs]</a><span class="k">class</span> <span class="nc">FclManager</span><span class="p">:</span>
+<div class="viewcode-block" id="CollisionManager"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager">[docs]</a><span class="k">class</span> <span class="nc">CollisionManager</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A rigid body collision manager.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -231,9 +231,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;pykin.utils.fcl_utils.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;pykin.utils.collision_utils.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FclManager.add_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager.add_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+<div class="viewcode-block" id="CollisionManager.add_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager.add_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
                    <span class="n">name</span><span class="p">,</span> 
                    <span class="n">gtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">gparam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -272,7 +272,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">registerObject</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="FclManager.set_transform"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager.set_transform">[docs]</a>    <span class="k">def</span> <span class="nf">set_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)):</span>
+<div class="viewcode-block" id="CollisionManager.set_transform"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager.set_transform">[docs]</a>    <span class="k">def</span> <span class="nf">set_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the transform for one of the manager&#39;s objects.</span>
 <span class="sd">        This replaces the prior transform.</span>
@@ -292,7 +292,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> not in collision manager!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="FclManager.remove_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager.remove_object">[docs]</a>    <span class="k">def</span> <span class="nf">remove_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="CollisionManager.remove_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager.remove_object">[docs]</a>    <span class="k">def</span> <span class="nf">remove_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete an object from the collision manager.</span>
 <span class="sd">        </span>
@@ -310,7 +310,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> not in collision manager!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="FclManager.reset_all_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager.reset_all_object">[docs]</a>    <span class="k">def</span> <span class="nf">reset_all_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CollisionManager.reset_all_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager.reset_all_object">[docs]</a>    <span class="k">def</span> <span class="nf">reset_all_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reset all object from the collision manager.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -319,7 +319,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">DynamicAABBTreeCollisionManager</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="FclManager.collision_check"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.fcl_utils.FclManager.collision_check">[docs]</a>    <span class="k">def</span> <span class="nf">collision_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="CollisionManager.collision_check"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.collision_utils.CollisionManager.collision_check">[docs]</a>    <span class="k">def</span> <span class="nf">collision_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if any pair of objects in the manager collide with one another.</span>
 <span class="sd">        </span>
