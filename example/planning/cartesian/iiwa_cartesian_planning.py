@@ -1,7 +1,8 @@
 import numpy as np
 import argparse
 import sys, os
-import trimesh
+import json
+
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
 
@@ -17,41 +18,41 @@ help_str = "python iiwa14_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
-parser.add_argument("--timesteps", type=int, default=1000)
+parser.add_argument("--timesteps", type=int, default=500)
 parser.add_argument("--damping", type=float, default=0.03)
-parser.add_argument("--resolution", type=float, default=0.1)
+parser.add_argument("--resolution", type=float, default=0.2)
 parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
 file_path = '../../../asset/urdf/iiwa14/iiwa14.urdf'
 mesh_path = pykin_path+"/asset/urdf/iiwa14/"
+json_path = '../../../asset/config/iiwa14_init_params.json'
 
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+with open(json_path) as f:
+            controller_config = json.load(f)
+init_qpos = controller_config["init_qpos"]
+
+robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
 
 ##################################################################
-init_joints = [0, 0, 0, 0, np.pi/5, 0, 0]
-init_fk = robot.forward_kin(init_joints)
+init_fk = robot.forward_kin(init_qpos)
 
-target_joints = [0, np.pi/2, 0, 0, 0, 0, 0]
-goal_transformations = robot.forward_kin(target_joints)
+# target_joints = [0.0, 1.2, 0.0, -1.89, 0.0, 0.6, 0.0]
+# robot.offset.pos = [1, 0, 0]
+# goal_transformations = robot.forward_kin(target_joints)
 
 # scene = trimesh.Scene()
 # scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=init_fk)
+# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=goal_transformations)
 # scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 
 # scene.show()
 
-# _, ax = plt.init_3d_figure("IK")
-# plt.plot_robot(
-#     robot, 
-#     ax=ax,
-#     transformations=goal_transformations)
-# plt.show_figure()
-
 
 init_eef_pose = robot.get_eef_pose(init_fk)
-goal_eef_pose = robot.get_eef_pose(goal_transformations)
+# goal_eef_pose = robot.get_eef_pose(goal_transformations)
+goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)

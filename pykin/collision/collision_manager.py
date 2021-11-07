@@ -48,6 +48,8 @@ class CollisionManager:
                     for joint in robot.joints.values():
                         if name1 == joint.parent:
                             if joint.dtype == "revolute":
+                                print(name1, name2)
+                                print(index_name1, index_name2)
                                 is_collision = True
                                 result.append((name1, name2))
             return result
@@ -62,6 +64,9 @@ class CollisionManager:
 
         _, names = self.collision_check(return_names=True)
         self._filter_names = copy.deepcopy(names)
+
+        if robot.robot_name == "ur5":
+            return
 
         collision_datas = _check_init_collision()
         if is_collision:
