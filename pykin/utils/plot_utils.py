@@ -203,7 +203,7 @@ def plot_animation(
     """
 
     def update(i):
-        print(f"{i/len(trajectory) * 100:.1f} %")
+        # print(f"{i/len(trajectory) * 100:.1f} %")
     
         if i == len(trajectory)-1:
             print(f"{i/(len(trajectory)-1) * 100:.1f} %")

@@ -16,7 +16,8 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;21m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = '[%(levelname)s|%(name)s|%(filename)s:%(lineno)s] %(asctime)s >> %(message)s'
+    format = '[%(levelname)s] [%(name)s]: %(message)s'
+    # format = '[%(levelname)s|%(name)s|%(filename)s:%(lineno)s] %(asctime)s >> %(message)s'
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,
@@ -31,10 +32,11 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt,"%Y-%m-%d %H:%M:%S")
         return formatter.format(record)
 
-def create_logger(logger_name, logging_level="debug", file_name="test.log", is_save=True):
+def create_logger(logger_name, logging_level="debug", file_name="test.log", is_save=False):
     # Create Logger
 
-    format = '[%(levelname)s|%(name)s|%(filename)s:%(lineno)s] %(asctime)s >> %(message)s'
+    format = '[%(levelname)s] [%(name)s]: %(message)s'
+    # |%(filename)s:%(lineno)s] %(asctime)s 
 
     if logging_level.upper() in LOG_LEVEL.keys():
         level = LOG_LEVEL.get(logging_level.upper())

@@ -3,7 +3,7 @@ import numpy as np
 from pykin.kinematics.transform import Transform
 from pykin.robots.bimanual import Bimanual
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.kin_utils import get_robot_collision_geom
+from pykin.utils.collision_utils import get_robot_collision_geom
 from pykin.utils import plot_utils as plt
 
 file_path = '../asset/urdf/baxter/baxter.urdf'

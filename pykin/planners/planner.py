@@ -1,12 +1,13 @@
 import numpy as np
 from abc import ABC, abstractclassmethod
 
-from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.kin_utils import get_robot_collision_geom, get_robot_visual_geom
+from pykin.utils.collision_utils import get_robot_collision_geom, get_robot_visual_geom
 
-
+from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
 from pykin.utils.transform_utils import get_h_mat, get_transform_to_visual
+
+logger = create_logger('Cartesian Planner', "debug",)
 
 class Planner(ABC):
     """
@@ -20,19 +21,23 @@ class Planner(ABC):
         self,
         robot,
         obstacles,
-        collision_manager=None
+        collision_manager
     ):
         self.robot = robot
         self.obstacles = obstacles
 
+        # TODO
         if collision_manager is None:
-            print("Warning: {self} -- This Planner does not do collision checking")
-            
-        self.collision_manager = collision_manager
+            logger.warning(f"This Planner does not do collision checking")
+        else:
+            self.collision_manager = collision_manager
+
+            check_collision = self.collision_manager.collision_check()
+            if check_collision:
+                raise CollisionError("Conflict confirmed. Check the joint settings again")
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
-
 
     @staticmethod
     def _change_types(datas):
@@ -73,55 +78,6 @@ class Planner(ABC):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
-    def _setup_collision_manager(self, transformatios):
-        """
-        Setup fcl manager for collision checking
-        """
-        self._apply_fcl_to_robot(transformatios)
-        self._apply_fcl_to_obstacles()
-
-    def _apply_fcl_to_robot(self, transformatios):
-        """
-        Apply fcl to robot 
-        """
-        for link, transformation in transformatios.items():
-            name, gtype, gparam = get_robot_collision_geom(self.robot.links[link])
-            transform = get_transform_to_visual(
-                transformation.h_mat, 
-                self.robot.visual_offset(link).h_mat)
-            self.collision_manager.add_object(name, gtype, gparam, transform)
-    
-    def _apply_fcl_to_obstacles(self):
-        """
-        Apply fcl to obstacles 
-        """
-        if self.obstacles:
-            for key, vals in self.obstacles:
-                obs_type = vals[0]
-                obs_param = vals[1]
-                obs_pos = vals[2]
-                ob_transform = get_h_mat(position=np.array(obs_pos))
-                self.collision_manager.add_object(key, obs_type, obs_param, ob_transform)
-
-    def _check_init_collision(self, goal_q=None):
-        """
-        Check collision between robot and obstacles
-        """
-        is_collision, obj_names = self.collision_manager.collision_check(return_names=True)
-        print(obj_names)
-        if is_collision:
-            for name1, name2 in obj_names:
-                if not ("obstacle" in name1 and "obstacle" in name2):
-                    raise CollisionError(obj_names)
-
-        if goal_q is not None:
-            goal_collision_free, collision_names = self.collision_free(goal_q, visible_name=True)
-            if not goal_collision_free:
-                for name1, name2 in collision_names:
-                    if ("obstacle" in name1 and "obstacle" not in name2) or \
-                    ("obstacle" not in name1 and "obstacle" in name2):
-                        raise CollisionError(collision_names)
-
     def collision_free(self, new_q, visible_name=False):
         """
         Check collision free between robot and obstacles
@@ -141,8 +97,9 @@ class Planner(ABC):
             if link in self.collision_manager._objs:
                 transform = transformations.h_mat
                 self.collision_manager.set_transform(name=link, transform=transform)
+        is_collision = self.collision_manager.collision_check(return_names=False, return_data=False)
 
-        is_collision, name = self.collision_manager.collision_check(return_names=True, return_data=False)
+        name = None
         if visible_name:
             if is_collision:
                 return False, name

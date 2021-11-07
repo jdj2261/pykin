@@ -1,8 +1,7 @@
 import numpy as np
 import argparse
 import sys, os
-
-
+import trimesh
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
 
@@ -14,28 +13,42 @@ from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
 
-help_str = "python sawyer_cartesian_planning.py"\
+help_str = "python iiwa14_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
 parser.add_argument("--timesteps", type=int, default=1000)
 parser.add_argument("--damping", type=float, default=0.03)
-parser.add_argument("--resolution", type=float, default=0.05)
-parser.add_argument("--pos-sensitivity", type=float, default=0.03)
+parser.add_argument("--resolution", type=float, default=0.1)
+parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
-file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
-mesh_path = pykin_path+"/asset/urdf/sawyer/"
+file_path = '../../../asset/urdf/iiwa14/iiwa14.urdf'
+mesh_path = pykin_path+"/asset/urdf/iiwa14/"
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-robot.setup_link_name("base", "right_l6")
+robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
 
 ##################################################################
-init_joints = [0, 0, 0, 0, 0, 0, 0, 0]
+init_joints = [0, 0, 0, 0, np.pi/5, 0, 0]
 init_fk = robot.forward_kin(init_joints)
 
-target_joints = [0, np.pi/4, 0, 0, 0, 0, 0, 0]
+target_joints = [0, np.pi/2, 0, 0, 0, 0, 0]
 goal_transformations = robot.forward_kin(target_joints)
+
+# scene = trimesh.Scene()
+# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=init_fk)
+# scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
+
+# scene.show()
+
+# _, ax = plt.init_3d_figure("IK")
+# plt.plot_robot(
+#     robot, 
+#     ax=ax,
+#     transformations=goal_transformations)
+# plt.show_figure()
+
 
 init_eef_pose = robot.get_eef_pose(init_fk)
 goal_eef_pose = robot.get_eef_pose(goal_transformations)
@@ -66,7 +79,7 @@ if joint_path is None and target_poses is None:
 
 joint_trajectory = []
 for joint in joint_path:
-    transformations = robot.forward_kin(np.concatenate((np.zeros(1),joint)))
+    transformations = robot.forward_kin(joint)
     joint_trajectory.append(transformations)
 
 print(f"Computed Goal Position : {joint_trajectory[-1][robot.eef_name].pose}")

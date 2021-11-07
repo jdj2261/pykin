@@ -256,7 +256,7 @@ $ git submodule update
   And then, import CollisionManager in collision_utils package
   """
   from pykin.collision.collision_manager import CollisionManager
-  from pykin.utils.kin_utils import get_robot_collision_geom
+  from pykin.utils.collision_utils import get_robot_collision_geom
   from pykin.utils import plot_utils as plt
   
   file_path = '../asset/urdf/baxter/baxter.urdf'

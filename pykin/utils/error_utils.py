@@ -23,7 +23,7 @@ class CollisionError(Exception):
         self.data = data
     
     def __str__(self):
-        return f"Check the collision.. {self.data}, please check the obastacle setting again"
+        return f"Check the collision.. {self.data}, please check the joints setting again"
 
 class LimitJointError(Exception):
     """

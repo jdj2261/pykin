@@ -1,27 +1,31 @@
 import numpy as np
 import sys, os
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+import trimesh
+import json
+
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
-from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
-import trimesh
 
-file_path = '../../../asset/urdf/iiwa14/iiwa14.urdf'
 
+file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, -1]))
 
-mesh_path = pykin_path+"/asset/urdf/iiwa14/"
-fk = robot.forward_kin(np.zeros(7))
+custom_fpath = '../../asset/config/panda_init_params.json'
+with open(custom_fpath) as f:
+            controller_config = json.load(f)
+init_qpos = controller_config["init_qpos"]
+fk = robot.forward_kin(np.array(init_qpos))
 
-collision_manager = CollisionManager(mesh_path)
-c_manager = apply_robot_to_collision_manager(collision_manager, robot, fk)
-
-print(c_manager._objs["iiwa_link_0"]['geom'])
+mesh_path = pykin_path+"/asset/urdf/panda/"
+c_manager = CollisionManager(mesh_path)
+c_manager.filter_contact_names(robot, fk)
+c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
 
 result, objs_in_collision, contact_data = c_manager.collision_check(return_names=True, return_data=True)
 print(result, objs_in_collision, len(contact_data))
@@ -40,14 +44,3 @@ table_mesh.apply_scale(0.01)
 scene.add_geometry(table_mesh, transform=Transform(pos=[-1, 0, 0]).h_mat)
 
 scene.show()
-
-
-# distance, names, data = tri_manager.min_distance_internal(return_names=True, return_data=True)
-# ddata = fcl.DistanceData()
-# collision_manager._manager.distance(ddata, fcl.defaultDistanceCallback)
-# print('Closest distance within manager 1?: {}'.format(ddata.result.min_distance))
-
-# print('')
-# print(distance, objs_in_collision, names, data)
-# print(result, objs_in_collision, len(contact_data))
-

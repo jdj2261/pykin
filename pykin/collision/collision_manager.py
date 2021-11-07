@@ -1,29 +1,74 @@
 import numpy as np
-import collections
+import collections 
+import itertools
+import copy
 
 try:
     import fcl
+    import trimesh
 except BaseException:
     fcl = None
 
+from pykin.utils.error_utils import CollisionError
+from pykin.utils.log_utils import create_logger
 from pykin.collision.contact_data import ContactData
-from pykin.collision.distance_data import DistanceData
+logger = create_logger('Collision Manager', "debug",)
 
 class CollisionManager:
     """
     A rigid body collision manager.
     """
 
-    def __init__(self, mesh_path):
+    def __init__(self, mesh_path=None):
         self.mesh_path = mesh_path
         self._objs = {}
         self._names = collections.defaultdict(lambda: None)
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
+        self._filter_names = set()
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
 
+    def filter_contact_names(self, robot, fk=None):
+
+        if fk is None:
+            fk = robot.init_transformations
+            
+        is_collision = False
+
+        def _check_init_collision():
+            nonlocal is_collision
+            result = []
+            for (name1, name2) in self._filter_names:
+                index_name1 = list(self._objs.keys()).index(name1)
+                index_name2 = list(self._objs.keys()).index(name2)
+
+                if abs(index_name1-index_name2) > 1:
+                    for joint in robot.joints.values():
+                        if name1 == joint.parent:
+                            if joint.dtype == "revolute":
+                                is_collision = True
+                                result.append((name1, name2))
+            return result
+
+        for link, transformation in fk.items():
+            if robot.links[link].visual.gtype == "mesh":
+                mesh_name = robot.links[link].visual.gparam.get('filename')
+                file_name = self.mesh_path + mesh_name
+                mesh = trimesh.load_mesh(file_name)
+                A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                self.add_object(robot.links[link].name, "mesh", mesh, A2B)
+
+        _, names = self.collision_check(return_names=True)
+        self._filter_names = copy.deepcopy(names)
+
+        collision_datas = _check_init_collision()
+        if is_collision:
+            for name1, name2 in collision_datas:
+                logger.error(f"{name1} and {name2} is Collision..")
+            raise CollisionError(f"Collision..") 
+    
     def add_object(self, 
                    name, 
                    gtype=None,
@@ -114,7 +159,7 @@ class CollisionManager:
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
 
-    def collision_check(self, return_names=False, return_data=False):
+    def collision_check(self, other_manager=None, return_names=False, return_data=False):
         """
         Check if any pair of objects in the manager collide with one another.
         
@@ -127,10 +172,17 @@ class CollisionManager:
             names (set of 2-tup): The set of pairwise collisions. 
             contacts (list of ContactData): All contacts detected
         """
+
+        if other_manager is None:
+            return self.in_collision_internal(return_names, return_data)
+        else:
+            return self.in_collision_other(other_manager, return_names, return_data)
+
+    def in_collision_internal(self, return_names, return_data):
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
-                num_max_contacts=100000, enable_contact=True))
+                num_max_contacts=100000, enable_contact=False))
 
         self._manager.collide(cdata, fcl.defaultCollisionCallback)
 
@@ -138,11 +190,14 @@ class CollisionManager:
 
         objs_in_collision = set()
         contact_data = []
-        
+
         if return_names or return_data:
             for contact in cdata.result.contacts:
                 coll_names = (self._extract_name(contact.o1),self._extract_name(contact.o2))
                 coll_names = tuple(sorted(coll_names))
+
+                if (coll_names[0], coll_names[1]) in self._filter_names:
+                    continue
 
                 if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
                     continue
@@ -156,45 +211,89 @@ class CollisionManager:
             result = False
             objs_in_collision = "No object collided.."
 
-        if return_names and return_data:
-            return result, objs_in_collision, contact_data
-        elif return_names:
-            return result, objs_in_collision
-        elif return_data:
-            return result, contact_data
-        else:
-            return result
+        return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
 
-    def get_min_distance(self, return_names=False, return_data=False):
-        ddata = fcl.DistanceData()
-        if return_data:
-            ddata = fcl.DistanceData(
-                fcl.DistanceRequest(enable_nearest_points=True),
-                fcl.DistanceResult()
-            )
-
-        self._manager.distance(ddata, fcl.defaultDistanceCallback)
-
-        distance = ddata.result.min_distance
-
-        names, data = None, None
+    def in_collision_other(self, other_manager, return_names, return_data):
+        cdata = fcl.CollisionData()
         if return_names or return_data:
-            names = (self._extract_name(ddata.result.o1),
-                     self._extract_name(ddata.result.o2))
-            data = DistanceData(names, ddata.result)
-            names = tuple(sorted(names))
+            cdata = fcl.CollisionData(request=fcl.CollisionRequest(
+                num_max_contacts=100000, enable_contact=False))
 
+        self._manager.collide(other_manager._manager, cdata, fcl.defaultCollisionCallback)
+
+        result = cdata.result.is_collision
+
+        objs_in_collision = set()
+        contact_data = []
+
+        if return_names or return_data:
+            for contact in cdata.result.contacts:
+                reverse = False
+                coll_names = (self._extract_name(contact.o1), other_manager._extract_name(contact.o2))
+
+                if (coll_names[0], coll_names[1]) in self._filter_names:
+                    continue
+
+                if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
+                    continue
+
+                if coll_names[0] is None:
+                    coll_names = (self._extract_name(contact.o2),
+                             other_manager._extract_name(contact.o1))
+                    reverse = True
+
+                if return_names:
+                    objs_in_collision.add(coll_names)
+                if return_data:
+                    if reverse:
+                        coll_names = reversed(coll_names)
+                    contact_data.append(ContactData(coll_names, contact))
+
+        if not objs_in_collision:
+            result = False
+            objs_in_collision = "No object collided.."
+
+        return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
+
+    def get_distances_internal(self):
+        req = fcl.DistanceRequest()
+        res = fcl.DistanceResult()
+
+        result = collections.defaultdict(float)
+        for (o1, o2) in list(itertools.combinations(self._objs, 2)):
+            if (o1, o2) in self._filter_names:
+                continue
+            distance = np.round(fcl.distance(self._objs[o1]['obj'],self._objs[o2]['obj'], req, res), 6)
+            result[(o1, o2)] = distance
+        
+        return result
+
+    def get_distances_other(self, other_manager):
+        def _mix_objects():
+            for o1 in self._objs:
+                for o2 in other_manager._objs:
+                    yield (o1, o2)
+
+        req = fcl.DistanceRequest()
+        res = fcl.DistanceResult()
+        
+        result = collections.defaultdict(float)
+        for (o1, o2) in _mix_objects():
+            distance = np.round(fcl.distance(self._objs[o1]['obj'], other_manager._objs[o2]['obj'], req, res), 6)
+            result[(o1, o2)] = distance
+        
+        return result
+
+    @staticmethod
+    def _get_returns(return_names, return_data, *args):
         if return_names and return_data:
-            return distance, names, data
+            return args[0], args[1], args[2]
         elif return_names:
-            return distance, names
+            return args[0], args[1]
         elif return_data:
-            return distance, data
+            return args[0], args[2]
         else:
-            return distance
-
-    def get_distance(self):
-        pass
+            return args[0]
 
     def _get_BVH(self, mesh):
         """

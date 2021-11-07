@@ -1,11 +1,20 @@
 import numpy as np
+import signal
+
+def handler(signum, frame):
+    exit()
+# Set the signal handler
+signal.signal(signal.SIGINT, handler)
 
 from pykin.planners.planner import Planner
 from pykin.utils.error_utils import OriValueError, CollisionError
 from pykin.utils.kin_utils import ShellColors as sc
+from pykin.utils.log_utils import create_logger
 import pykin.utils.transform_utils as t_utils
 import pykin.utils.kin_utils as k_utils
 import pykin.kinematics.jacobian as jac
+
+logger = create_logger('Cartesian Planner', "debug",)
 
 class CartesianPlanner(Planner):
     """
@@ -19,13 +28,14 @@ class CartesianPlanner(Planner):
         self,
         robot,
         obstacles,
-        current_pose,
-        goal_pose,
+        collision_manager=None,
+        current_pose=None,
+        goal_pose=None,
         n_step=500,
         dimension=7,
         waypoint_type="Linear"
     ):
-        super(CartesianPlanner, self).__init__(robot, obstacles)
+        super(CartesianPlanner, self).__init__(robot, obstacles, collision_manager)
         self.cur_pose = super()._change_types(current_pose)
         self.goal_pose = super()._change_types(goal_pose)
         self.n_step = n_step
@@ -53,10 +63,6 @@ class CartesianPlanner(Planner):
         if waypoints is None:
             waypoints = self.waypoints
         paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
-
-        # TODO
-        # paths = paths + [self.goal_q]
-
         return paths, target_posistions
 
     def _compute_path_and_target_pose(
@@ -79,8 +85,8 @@ class CartesianPlanner(Planner):
                 
             cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
 
-            super()._setup_collision_manager(cur_fk)
-            super()._check_init_collision()
+            # super()._setup_collision_manager(cur_fk)
+            # super()._check_init_collision()
 
             current_transform = cur_fk[self.eef_name].h_mat
             eef_position = cur_fk[self.eef_name].pos
@@ -97,7 +103,8 @@ class CartesianPlanner(Planner):
                 dq = damping * np.dot(Jh, err_pose)
                 current_joints = np.array([(current_joints[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                collision_free, name = self.collision_free(current_joints, visible_name=True)
+                collision_free = self.collision_free(current_joints, visible_name=False)
+
                 if not collision_free :
                     continue
 
@@ -114,17 +121,20 @@ class CartesianPlanner(Planner):
             err = t_utils.compute_pose_error(self.goal_pose[:3], cur_fk[self.eef_name].pos)
 
             if err < pos_sensitivity:
-                print(f"{sc.OKGREEN}Generate Path Sucessfully!! Position Error is {err}{sc.ENDC}\n")
+                logger.info(f"Generate Path Sucessfully!! Error is {err:6f}")
+                # print(f"{sc.OKGREEN}Generate Path Sucessfully!! Position Error is {err}{sc.ENDC}\n")
                 break
 
             if cnt > total_cnt:
-                print(f"{sc.FAIL}Failed Generate Path.. The number of retries of {cnt} exceeded {total_cnt}. {err}{sc.ENDC}")
+                logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
+                # print(f"{sc.FAIL}Failed Generate Path.. The number of retries of {cnt} exceeded {total_cnt}. {err}{sc.ENDC}")
                 paths, target_posistions = None, None
                 break
 
-            print(f"{sc.FAIL}Failed Generate Path.. Position Error is {err}{sc.ENDC}")
+            logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
-            self.collision_manager.reset_all_object()
+            
+            # self.collision_manager.reset_all_object()
 
         return paths, target_posistions
 
