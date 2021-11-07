@@ -398,11 +398,8 @@ plt.show_figure()
 - mesh
 
   *You can see  mesh defined in visual/geometry tags in urdf.*
-
-
-|               baxter               |               sawyer               |               iiwa14               |               panda               |
-| :-----------------------------------: | :-----------------------------------: | :-----------------------------------: | :---------------------------------: |
-| ![baxter_mesh](img/baxter_mesh.png) | ![sawyer_mesh](img/sawyer_mesh.png) | ![iiwa14_mesh](img/iiwa14_mesh.png) | ![panda_mesh](img/panda_mesh.png) |
+  
+  ![baxter](img/all_robot.png)
 
   <details>
     <summary>Code</summary>
