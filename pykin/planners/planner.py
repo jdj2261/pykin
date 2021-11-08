@@ -1,11 +1,8 @@
 import numpy as np
 from abc import ABC, abstractclassmethod
 
-from pykin.utils.collision_utils import get_robot_collision_geom, get_robot_visual_geom
-
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
-from pykin.utils.transform_utils import get_h_mat, get_transform_to_visual
 
 logger = create_logger('Cartesian Planner', "debug",)
 
@@ -20,19 +17,17 @@ class Planner(ABC):
     def __init__(
         self,
         robot,
-        obstacles,
-        collision_manager
+        self_collision_manager,
+        dimension
     ):
         self.robot = robot
-        self.obstacles = obstacles
-
-        # TODO
-        if collision_manager is None:
+        self._dimension = dimension
+        if self_collision_manager is None:
             logger.warning(f"This Planner does not do collision checking")
         else:
-            self.collision_manager = collision_manager
+            self.self_collision_manager = self_collision_manager
 
-            check_collision = self.collision_manager.collision_check()
+            check_collision = self.self_collision_manager.in_collision_internal()
             if check_collision:
                 raise CollisionError("Conflict confirmed. Check the joint settings again")
 
@@ -78,6 +73,7 @@ class Planner(ABC):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
+    @abstractclassmethod
     def collision_free(self, new_q, visible_name=False):
         """
         Check collision free between robot and obstacles
@@ -92,22 +88,7 @@ class Planner(ABC):
             result(bool): If collision free, return True
             names(set of 2-tup): The set of pairwise collisions. 
         """
-        transformations = self._get_transformations(new_q)
-        for link, transformations in transformations.items():
-            if link in self.collision_manager._objs:
-                transform = transformations.h_mat
-                self.collision_manager.set_transform(name=link, transform=transform)
-        is_collision = self.collision_manager.collision_check(return_names=False, return_data=False)
-
-        name = None
-        if visible_name:
-            if is_collision:
-                return False, name
-            return True, name
-
-        if is_collision:
-            return False
-        return True
+        raise NotImplementedError
 
     def _get_transformations(self, q_in):
         """
@@ -131,3 +112,11 @@ class Planner(ABC):
         write planner algorithm you want 
         """
         raise NotImplementedError
+
+    @property
+    def dimension(self):
+        return self._dimension
+
+    @dimension.setter
+    def dimension(self, dimesion):
+        self._dimension = dimesion

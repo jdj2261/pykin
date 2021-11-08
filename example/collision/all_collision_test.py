@@ -27,7 +27,7 @@ mesh_path = pykin_path+"/asset/urdf/iiwa14/"
 c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot, fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
-test, name, data = c_manager.collision_check(return_names=True, return_data=True)
+test, name, data = c_manager.in_collision_internal(return_names=True, return_data=True)
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
@@ -47,7 +47,7 @@ c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot, fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
 
-result, objs_in_collision, contact_data = c_manager.collision_check(return_names=True, return_data=True)
+result, objs_in_collision, contact_data = c_manager.in_collision_internal(return_names=True, return_data=True)
 print(result, objs_in_collision, len(contact_data))
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
 
@@ -65,7 +65,7 @@ mesh_path = pykin_path+"/asset/urdf/sawyer/"
 c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
-test, name, data = c_manager.collision_check(return_names=True, return_data=True)
+test, name, data = c_manager.in_collision_internal(return_names=True, return_data=True)
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
 
 # baxter

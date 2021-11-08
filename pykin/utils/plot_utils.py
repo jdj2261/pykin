@@ -6,12 +6,6 @@ import matplotlib.animation as animation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
-try:
-    import trimesh
-except ImportError:
-    warnings.warn(
-        "Cannot display mesh. Library 'trimesh' not installed.")
-
 # Colors of each directions axes. For ex X is green
 directions_colors = ["green", "cyan", "orange"]
 
@@ -181,7 +175,7 @@ def plot_trajectories(ax, path):
     """
     Plot plot_trajectories
     """
-    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=70, c='r')
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
 
 def plot_animation(
     robot, 
@@ -235,10 +229,18 @@ def plot_obstacles(obstacles, ax):
     """
     Plot obstacles
     """
-    for _, value in obstacles:
+    import trimesh
+    from pykin.kinematics.transform import Transform
+    for key, value in obstacles:
         o_type = value[0]
         o_param = value[1]
-        o_pose = np.array(value[2])
+        o_pose = value[2]
+
+        if not isinstance(o_pose, Transform):
+            raise TypeError("Check obstacle pose type..")
+
+        if o_type == "mesh":
+            plot_mesh(ax, mesh=o_param, A2B=o_pose.h_mat)
         if o_type == "sphere":
             plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
         if o_type == "box":
@@ -392,6 +394,27 @@ def plot_path_planner(path, ax):
     ax.text(path[0][0], path[0][1], path[0][2], 'Start', verticalalignment='bottom', horizontalalignment='center', size="20")
     ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
 
+
+def plot_mesh(ax=None, mesh=None, A2B=np.eye(4),
+              s=np.array([1.0, 1.0, 1.0]), ax_s=1, wireframe=False,
+              convex_hull=False, alpha=1.0, color="k"):
+
+    try:
+        import trimesh
+    except ImportError:
+        warnings.warn(
+            "Cannot display mesh. Library 'trimesh' not installed.")
+        return ax
+
+    vertices = mesh.vertices * s
+    vertices = np.hstack((vertices, np.ones((len(vertices), 1))))
+    vertices = np.dot(vertices, A2B.T)[:, :3]
+    vectors = np.array([vertices[[i, j, k]] for i, j, k in mesh.faces])
+
+    surface = Poly3DCollection(vectors)
+    surface.set_facecolor(color)
+    surface.set_alpha(alpha)
+    ax.add_collection3d(surface)
 
 def init_3d_figure(name=None, figsize=(15,7.5), dpi= 80):
     """

@@ -14,7 +14,7 @@ class Obstacle():
     Obstacles are noe of three types(sphere, box, cylinder)
 
     """
-    obstacle_types = ["sphere", "box", "cylinder"]
+    obstacle_types = ["mesh", "sphere", "box", "cylinder"]
     def __init__(self):
         self._obstacles = defaultdict(tuple)
         self._gtype = None
@@ -36,7 +36,7 @@ class Obstacle():
         name=None, 
         gtype=None, 
         gparam=None, 
-        gpose=None):
+        gpose=Transform()):
         """
         Add obstacles
 

@@ -27,7 +27,7 @@ c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot, fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
 
-result, objs_in_collision, contact_data = c_manager.collision_check(return_names=True, return_data=True)
+result, objs_in_collision, contact_data = c_manager.in_collision_internal(return_names=True, return_data=True)
 print(result, objs_in_collision, len(contact_data))
 
 scene = trimesh.Scene()

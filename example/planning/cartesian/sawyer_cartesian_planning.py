@@ -59,8 +59,7 @@ c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
 
 task_plan = CartesianPlanner(
     robot, 
-    obstacles=[],
-    collision_manager=c_manager,
+    self_collision_manager=c_manager,
     current_pose=init_eef_pose,
     goal_pose=goal_eef_pose,
     n_step=args.timesteps,

@@ -3,6 +3,10 @@ import numpy as np
 
 from pykin.planners.joint_planner import JointPlanner
 from pykin.planners.tree import Tree
+from pykin.utils.log_utils import create_logger
+from pykin.utils.kin_utils import ShellColors as sc
+
+logger = create_logger('RRT Star Planner', "debug")
 
 class RRTStarPlanner(JointPlanner):
     """
@@ -10,7 +14,6 @@ class RRTStarPlanner(JointPlanner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        obstacles(Obstacle): The obstacles
         current_q(np.array or Iterable of floats): current joint angle
         goal_q(np.array or Iterable of floats): target joint angle obtained through Inverse Kinematics 
         delta_distance(float): distance between nearest vertex and new vertex
@@ -21,18 +24,21 @@ class RRTStarPlanner(JointPlanner):
     def __init__(
         self, 
         robot,
-        obstacles,
-        current_q=None,
-        goal_q=None,
+        self_collision_manager=None,
+        obstacle_collision_manager=None,
+        cur_q=None,
+        goal_pose=None,
         delta_distance=0.5,
         epsilon=0.2,
         max_iter=3000,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
+        dimension=7,
     ):
-        super(RRTStarPlanner, self).__init__(robot, obstacles)
-      
-        self.cur_q = current_q
-        self.goal_q  = goal_q
+        super(RRTStarPlanner, self).__init__(robot, self_collision_manager, dimension)
+
+        self.obstacle_c_manager=obstacle_collision_manager
+        self.cur_q = super()._change_types(cur_q)
+        self.goal_pose = super()._change_types(goal_pose)
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -42,42 +48,15 @@ class RRTStarPlanner(JointPlanner):
         self.cost = None
 
         self.arm = None
-        self.dimension = self.robot.dof
+        self.dimension = dimension
         self.eef_name = self.robot.eef_name
+
+        super()._setup_q_limits()
+        super()._setup_eef_name()
 
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
         
-    def setup_start_goal_joint(
-        self, 
-        current_q, 
-        goal_q, 
-        arm=None, 
-        init_transformation=None
-    ):
-        """
-        Setup start joints and goal joints
-
-        Args:
-            current_q(np.array or Iterable of floats): current joint angle
-            goal_q(np.array or Iterable of floats): target joint angle obtained through Inverse Kinematics 
-            arm(str): If Manipulator types is bimanul, must put the arm type.
-            init_transformation: Initial transformations
-        """
-        self.cur_q = super()._change_types(current_q)
-        self.goal_q = super()._change_types(goal_q)
-
-        if init_transformation is None:
-            init_transformation = self.robot.init_transformations
-
-        self.arm = arm
-        self.dimension = len(current_q)
-
-        super()._setup_q_limits()
-        super()._setup_eef_name()
-        super()._setup_collision_manager(init_transformation)
-        super()._check_init_collision(self.goal_q)
-
     def get_path_in_joinst_space(self):
         """
         Get path in joint space
@@ -85,38 +64,59 @@ class RRTStarPlanner(JointPlanner):
         Returns:
             path(list) : result path (from start joints to goal joints)
         """
-        path = None
-        self.T = Tree()
-        self.cost = {}
+        cnt = 0
+        total_cnt = 10
+        while True:
+            cnt += 1
+            for _ in range(total_cnt):
+                self.goal_q = self.robot.inverse_kin(np.random.randn(self._dimension), self.goal_pose)
+                if self._check_q_in_limits(self.goal_q):
+                    break
+                print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
-        self.T.add_vertex(self.cur_q)
-        self.cost[0] = 0
+            path = None
+            self.T = Tree()
+            self.cost = {}
 
-        for k in range(self.max_iter):
-            if k % 300 == 0 and k !=0:
-                print(f"iter : {k}")
-                
-            rand_q = self.random_state()
-            if not self.collision_free(rand_q):
-                continue
+            self.T.add_vertex(self.cur_q)
+            self.cost[0] = 0
 
-            nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
-            new_q = self.new_state(nearest_q, rand_q)
-   
-            if self.collision_free(new_q) and self._check_q_in_limits(new_q):
-                neighbor_indexes = self.get_near_neighbor_indices(new_q)
-                min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
-                min_cost, nearest_idx = self.get_minimum_cost_and_index(neighbor_indexes, new_q, min_cost, nearest_idx)
- 
-                self.T.add_vertex(new_q)
-                new_idx = len(self.T.vertices) - 1
-                self.cost[new_idx] = min_cost
-                self.T.add_edge([nearest_idx, new_idx])
+            for step in range(self.max_iter):
+                if step % 300 == 0 and step !=0:
+                    logger.info(f"iter : {step}")
+                    
+                rand_q = self.random_state()
+                if not self.collision_free(rand_q):
+                    continue
 
-                self.rewire(neighbor_indexes, new_q, new_idx)
+                nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
+                new_q = self.new_state(nearest_q, rand_q)
+    
+                if self.collision_free(new_q) and self._check_q_in_limits(new_q):
+                    neighbor_indexes = self.get_near_neighbor_indices(new_q)
+                    min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
+                    min_cost, nearest_idx = self.get_minimum_cost_and_index(neighbor_indexes, new_q, min_cost, nearest_idx)
+    
+                    self.T.add_vertex(new_q)
+                    new_idx = len(self.T.vertices) - 1
+                    self.cost[new_idx] = min_cost
+                    self.T.add_edge([nearest_idx, new_idx])
 
-                if self.reach_to_goal(new_q):                    
-                    path = self.find_path(self.T)
+                    self.rewire(neighbor_indexes, new_q, new_idx)
+
+                    if self.reach_to_goal(new_q):        
+                        path = self.find_path(self.T)
+
+            if path is not None:
+                logger.info(f"Generate Path Sucessfully!!")  
+                break 
+
+            if cnt > total_cnt:
+                logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
+                break
+            logger.error(f"Failed Generate Path..")
+            print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
+        
         return path
 
     def random_state(self):
@@ -167,6 +167,38 @@ class RRTStarPlanner(JointPlanner):
             Norm(float or ndarray)
         """
         return np.linalg.norm(pointB - pointA)
+
+    def collision_free(self, new_q, visible_name=False):
+        """
+        Check collision free between robot and obstacles
+        If visible name is True, return collision result and collision object names
+        otherwise, return only collision result
+
+        Args:
+            new_q(np.array): new joint angles
+            visible_name(bool)
+
+        Returns:
+            result(bool): If collision free, return True
+            names(set of 2-tup): The set of pairwise collisions. 
+        """
+        transformations = self._get_transformations(new_q)
+        for link, transformations in transformations.items():
+            if link in self.self_collision_manager._objs:
+                transform = transformations.h_mat
+                self.self_collision_manager.set_transform(name=link, transform=transform)
+        is_self_collision = self.self_collision_manager.in_collision_internal(return_names=False, return_data=False)
+        is_obstacle_collision = self.self_collision_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
+
+        name = None
+        if visible_name:
+            if is_self_collision:
+                return False, name
+            return True, name
+
+        if is_self_collision or is_obstacle_collision:
+            return False
+        return True
 
     def new_state(self, nearest_q, random_q):
         """

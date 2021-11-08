@@ -281,7 +281,7 @@ $ git submodule update
       collision_manager.add_object(name, gtype, gparam, transform)
   
   # you can get collision result, contacted object name, fcl contatct_data
-  result, objs_in_collision, contact_data = collision_manager.collision_check(return_names=True, return_data=True)
+  result, objs_in_collision, contact_data = collision_manager.in_collision_internal(return_names=True, return_data=True)
   
   print(result, objs_in_collision, contact_data)
   
@@ -298,7 +298,7 @@ $ git submodule update
       transform = transformation.h_mat
       collision_manager.set_transform(name=name, transform=transform)
   
-  result, objs_in_collision, contact_data = collision_manager.collision_check(return_names=True, return_data=True)
+  result, objs_in_collision, contact_data = collision_manager.in_collision_internal(return_names=True, return_data=True)
   print(result, objs_in_collision, contact_data)
   ~~~
 

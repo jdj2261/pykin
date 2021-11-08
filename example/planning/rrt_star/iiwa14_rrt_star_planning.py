@@ -1,74 +1,99 @@
 import numpy as np
+import sys, os
+import json
+import trimesh
+
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
+from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
+from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils import plot_utils as plt
+from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
+
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
 
 file_path = '../../../asset/urdf/iiwa14/iiwa14.urdf'
+mesh_path = pykin_path+"/asset/urdf/iiwa14/"
+json_path = '../../../asset/config/iiwa14_init_params.json'
 
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+with open(json_path) as f:
+            controller_config = json.load(f)
 
+robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
 
-# set target joints angle
-target_thetas = np.array([np.pi/4 , -np.pi/2, -np.pi/2, -np.pi/4, -np.pi/4 , -np.pi/4 ,-np.pi/4])
-target_transformations = robot.forward_kin(target_thetas)
+##################################################################
+init_qpos = controller_config["init_qpos"]
+init_fk = robot.forward_kin(init_qpos)
+init_eef_pose = robot.get_eef_pose(init_fk)
+goal_eef_pose = controller_config["goal_pose"]
 
-init_q_space = np.zeros(robot.dof)
-target_pose = robot.get_eef_pose(target_transformations)
+c_manager = CollisionManager(mesh_path)
+c_manager.filter_contact_names(robot, init_fk)
+c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
 
-fig, ax = plt.init_3d_figure()
+milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
+milk_mesh = trimesh.load_mesh(milk_path)
+
+obs = Obstacle()
+o_manager = CollisionManager(milk_path)
+for i in range(9):
+    name = "miik_" + str(i)
+    if i < 3:
+        obs_pos = [0.3, -0.5 + i * 0.5, 0.3] 
+    elif 3 <= i < 6:
+        obs_pos = [0.3, -0.5 + (i-3) * 0.5, 0.9] 
+    else:
+        obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
+
+    o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+    obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+
+##################################################################
 
 planner = RRTStarPlanner(
     robot=robot,
-    obstacles=[],
+    self_collision_manager=c_manager,
+    obstacle_collision_manager=o_manager,
+    cur_q=init_qpos,
+    goal_pose=goal_eef_pose,
     delta_distance=0.1,
     epsilon=0.2, 
-    max_iter=500,
-    gamma_RRT_star=1,
+    max_iter=1000,
+    gamma_RRT_star=10,
+    dimension=7
 )
 
-cnt = 0
-done = True
-while cnt <= 20 and done:
+joint_path = planner.get_path_in_joinst_space()
 
-    target_q_space = robot.inverse_kin(
-        np.random.randn(robot.dof), 
-        target_pose, 
-        method="LM", 
-        maxIter=100)
+if joint_path is None :
+    print("Cannot Visulization Path")
+    exit()
 
-    path = {}
-    planner.setup_start_goal_joint(init_q_space, target_q_space)
-    path = planner.get_path_in_joinst_space()
+joint_trajectory = []
+eef_poses = []
+resolution = 0.1
+print(len(joint_path))
+for step, joint in enumerate(joint_path):
+    if step % (1/resolution) == 0 or step == len(joint_path)-1:
+        transformations = robot.forward_kin(joint)
+        joint_trajectory.append(transformations)
+        eef_poses.append(transformations[robot.eef_name].pos)
 
-    result = []
-    trajectories = []
-    eef_poses = []
-    if path is None:
-        done = True
-        cnt += 1
-        print(f"{cnt}th try to find path..")
-    else:
-        done = False
-        trajectory_joints = np.array(path)
+plt.plot_animation(
+    robot,
+    joint_trajectory, 
+    fig, 
+    ax,
+    eef_poses=eef_poses,
+    obstacles=obs,
+    visible_obstacles=True,
+    visible_collision=True, 
+    interval=1, 
+    repeat=True,
+    result=None)
 
-        for i, current_joint in enumerate(trajectory_joints):
-
-            transformations = robot.forward_kin(current_joint)
-            trajectories.append(transformations)
-            eef_poses.append(transformations[robot.eef_name].pos)
-
-        plt.plot_animation(
-            robot,
-            trajectories, 
-            fig, 
-            ax,
-            eef_poses=eef_poses,
-            obstacles=[],
-            visible_obstacles=False,
-            visible_collision=True, 
-            interval=1, 
-            repeat=True,
-            result=None)

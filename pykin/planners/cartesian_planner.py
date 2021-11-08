@@ -22,20 +22,20 @@ class CartesianPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        obstacles(Obstacle): The obstacles
     """
     def __init__(
         self,
         robot,
-        obstacles,
-        collision_manager=None,
+        self_collision_manager=None,
+        obstacle_collision_manager=None,
         current_pose=None,
         goal_pose=None,
         n_step=500,
         dimension=7,
         waypoint_type="Linear"
     ):
-        super(CartesianPlanner, self).__init__(robot, obstacles, collision_manager)
+        super(CartesianPlanner, self).__init__(robot, self_collision_manager, dimension)
+        self.obstacle_collision_manager = obstacle_collision_manager
         self.cur_pose = super()._change_types(current_pose)
         self.goal_pose = super()._change_types(goal_pose)
         self.n_step = n_step
@@ -85,9 +85,6 @@ class CartesianPlanner(Planner):
                 
             cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
 
-            # super()._setup_collision_manager(cur_fk)
-            # super()._check_init_collision()
-
             current_transform = cur_fk[self.eef_name].h_mat
             eef_position = cur_fk[self.eef_name].pos
 
@@ -122,21 +119,48 @@ class CartesianPlanner(Planner):
 
             if err < pos_sensitivity:
                 logger.info(f"Generate Path Sucessfully!! Error is {err:6f}")
-                # print(f"{sc.OKGREEN}Generate Path Sucessfully!! Position Error is {err}{sc.ENDC}\n")
                 break
 
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
-                # print(f"{sc.FAIL}Failed Generate Path.. The number of retries of {cnt} exceeded {total_cnt}. {err}{sc.ENDC}")
                 paths, target_posistions = None, None
                 break
 
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             
-            # self.collision_manager.reset_all_object()
-
         return paths, target_posistions
+
+    def collision_free(self, new_q, visible_name=False):
+        """
+        Check collision free between robot and obstacles
+        If visible name is True, return collision result and collision object names
+        otherwise, return only collision result
+
+        Args:
+            new_q(np.array): new joint angles
+            visible_name(bool)
+
+        Returns:
+            result(bool): If collision free, return True
+            names(set of 2-tup): The set of pairwise collisions. 
+        """
+        transformations = self._get_transformations(new_q)
+        for link, transformations in transformations.items():
+            if link in self.self_collision_manager._objs:
+                transform = transformations.h_mat
+                self.self_collision_manager.set_transform(name=link, transform=transform)
+        is_collision = self.self_collision_manager.in_collision_internal(return_names=False, return_data=False)
+
+        name = None
+        if visible_name:
+            if is_collision:
+                return False, name
+            return True, name
+
+        if is_collision:
+            return False
+        return True
 
     def genearte_waypoints(self):
         if self.waypoint_type == "Linear":
@@ -182,10 +206,10 @@ class CartesianPlanner(Planner):
     def _get_cicular_path(self):
         pass
 
-    @property
-    def dimension(self):
-        return self._dimension
+    # @property
+    # def dimension(self):
+    #     return self._dimension
 
-    @dimension.setter
-    def dimension(self, dimesion):
-        self._dimension = dimesion
+    # @dimension.setter
+    # def dimension(self, dimesion):
+    #     self._dimension = dimesion

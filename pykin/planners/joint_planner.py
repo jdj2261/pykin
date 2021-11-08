@@ -11,9 +11,10 @@ class JointPlanner(Planner):
     def __init__(
         self,
         robot,
-        obstacles
+        collision_manager,
+        dimension
     ):
-        super(JointPlanner, self).__init__(robot, obstacles)
+        super(JointPlanner, self).__init__(robot, collision_manager,dimension)
 
     def __repr__(self):
         return 'pykin.planners.joint_planner.{}()'.format(type(self).__name__)

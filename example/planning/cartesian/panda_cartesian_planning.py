@@ -45,7 +45,7 @@ goal_transformations = robot.forward_kin(target_joints)
 # scene.show()
 
 init_eef_pose = robot.get_eef_pose(fk)
-goal_eef_pose = controller_config["goal_pos"]
+goal_eef_pose = controller_config["goal_pose"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)
@@ -54,7 +54,6 @@ c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
 
 task_plan = CartesianPlanner(
     robot, 
-    obstacles=[],
     collision_manager=c_manager,
     current_pose=init_eef_pose,
     goal_pose=goal_eef_pose,

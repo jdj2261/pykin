@@ -29,7 +29,7 @@ mesh_path = pykin_path+"/asset/urdf/iiwa14/"
 c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot, fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
-test, name, data = c_manager.collision_check(return_names=True, return_data=True)
+test, name, data = c_manager.in_collision_internal(return_names=True, return_data=True)
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
@@ -43,10 +43,10 @@ scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 # o_manager = CollisionManager(milk_path)
 # o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.1, 0, 0]).h_mat)
 # o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.1, 0, 0.1]).h_mat)
-# test, name, data = o_manager.collision_check(return_names=True, return_data=True)
+# test, name, data = o_manager.in_collision_internal(return_names=True, return_data=True)
 # print(test, name)
 
-# test, name, data = c_manager.collision_check(o_manager, True, True)
+# test, name, data = c_manager.in_collision_internal(o_manager, True, True)
 # print(test, name)
 
 scene.show()

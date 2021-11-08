@@ -49,7 +49,6 @@ init_fk = robot.forward_kin(init_qpos)
 
 # scene.show()
 
-
 init_eef_pose = robot.get_eef_pose(init_fk)
 # goal_eef_pose = robot.get_eef_pose(goal_transformations)
 goal_eef_pose = controller_config["goal_pos"]
@@ -61,8 +60,8 @@ c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
 
 task_plan = CartesianPlanner(
     robot, 
-    obstacles=[],
-    collision_manager=c_manager,
+    self_collision_manager=c_manager,
+    obstacle_collision_manager=None,
     current_pose=init_eef_pose,
     goal_pose=goal_eef_pose,
     n_step=args.timesteps,

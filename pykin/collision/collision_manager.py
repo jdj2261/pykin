@@ -9,7 +9,7 @@ try:
 except BaseException:
     fcl = None
 
-from pykin.utils.error_utils import CollisionError
+from pykin.utils.error_utils import CollisionError, NotFoundError
 from pykin.utils.log_utils import create_logger
 from pykin.collision.contact_data import ContactData
 logger = create_logger('Collision Manager', "debug",)
@@ -62,7 +62,7 @@ class CollisionManager:
                 A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
                 self.add_object(robot.links[link].name, "mesh", mesh, A2B)
 
-        _, names = self.collision_check(return_names=True)
+        _, names = self.in_collision_internal(return_names=True)
         self._filter_names = copy.deepcopy(names)
 
         if robot.robot_name == "ur5":
@@ -164,26 +164,7 @@ class CollisionManager:
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
 
-    def collision_check(self, other_manager=None, return_names=False, return_data=False):
-        """
-        Check if any pair of objects in the manager collide with one another.
-        
-        Args:
-            return_names (bool): If true, a set is returned containing the names of all pairs of objects in collision.
-            return_data (bool): If true, a list of ContactData is returned as well
-        
-        Returns:
-            is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
-            names (set of 2-tup): The set of pairwise collisions. 
-            contacts (list of ContactData): All contacts detected
-        """
-
-        if other_manager is None:
-            return self.in_collision_internal(return_names, return_data)
-        else:
-            return self.in_collision_other(other_manager, return_names, return_data)
-
-    def in_collision_internal(self, return_names, return_data):
+    def in_collision_internal(self, return_names=False, return_data=False):
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
@@ -218,7 +199,10 @@ class CollisionManager:
 
         return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
 
-    def in_collision_other(self, other_manager, return_names, return_data):
+    def in_collision_other(self, other_manager=None, return_names=False, return_data=False):
+        if other_manager is None:
+            return 
+            
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
@@ -254,9 +238,9 @@ class CollisionManager:
                         coll_names = reversed(coll_names)
                     contact_data.append(ContactData(coll_names, contact))
 
-        if not objs_in_collision:
-            result = False
-            objs_in_collision = "No object collided.."
+            if not objs_in_collision:
+                result = False
+                objs_in_collision = "No object collided.."
 
         return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
 
