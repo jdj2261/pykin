@@ -101,6 +101,7 @@ q
             joints (np.array): target joint angles
         """
         self._set_desired_frame()
+
         joints = self.kin.inverse_kinematics(
             self.desired_frames,
             current_joints,

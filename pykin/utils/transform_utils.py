@@ -193,10 +193,11 @@ def get_quaternion_slerp(qA, qB, t):
     if isinstance(qA, (np.ndarray, list)) and isinstance(qB, (np.ndarray, list)):
         qA = np.asarray(qA)
         qB = np.asarray(qB)
-
-        if qA.shape != (4,) or qB.shape != (4,):  # quaternion
+        if qA.shape != (4,):  # quaternion
             raise ValueError("Expecting the shape of the orientation to be (4,)")
-        
+        if qB.shape == (0,):
+            qB = np.asarray([1.0, 0.0, 0.0, 0.0])
+            
         a = qB * get_quaternion_inverse(qA)
         result = np.sign(a) * (np.abs(a)) ** t * qA
         return result

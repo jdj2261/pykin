@@ -1,12 +1,12 @@
 import numpy as np
-from abc import ABC, abstractclassmethod
+from abc import abstractclassmethod, ABCMeta
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
 
 logger = create_logger('Cartesian Planner', "debug",)
 
-class Planner(ABC):
+class Planner(metaclass=ABCMeta):
     """
     Base Planner class 
 
@@ -90,6 +90,13 @@ class Planner(ABC):
         """
         raise NotImplementedError
 
+    @abstractclassmethod
+    def get_path_in_joinst_space(self):
+        """
+        write planner algorithm you want 
+        """
+        raise NotImplementedError
+
     def _get_transformations(self, q_in):
         """
         Get transformations corresponding to q_in
@@ -106,13 +113,6 @@ class Planner(ABC):
             transformations = self.robot.forward_kin(q_in, self.robot.desired_frames)
         return transformations
 
-    @abstractclassmethod
-    def get_path_in_joinst_space(self):
-        """
-        write planner algorithm you want 
-        """
-        raise NotImplementedError
-
     @property
     def dimension(self):
         return self._dimension
@@ -120,3 +120,19 @@ class Planner(ABC):
     @dimension.setter
     def dimension(self, dimesion):
         self._dimension = dimesion
+
+    @property
+    def cur_qpos(self):
+        return self._cur_qpos
+
+    @cur_qpos.setter
+    def cur_qpos(self, cur_qpos):
+        self._cur_qpos = cur_qpos
+
+    @property
+    def goal_pose(self):
+        return self._goal_pose
+
+    @goal_pose.setter
+    def goal_pose(self, goal_pose):
+        self._goal_pose = goal_pose

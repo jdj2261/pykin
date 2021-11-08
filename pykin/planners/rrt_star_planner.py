@@ -1,14 +1,14 @@
 import math
 import numpy as np
 
-from pykin.planners.joint_planner import JointPlanner
+from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc
 
 logger = create_logger('RRT Star Planner', "debug")
 
-class RRTStarPlanner(JointPlanner):
+class RRTStarPlanner(Planner):
     """
     RRT star path planner
 
@@ -26,8 +26,6 @@ class RRTStarPlanner(JointPlanner):
         robot,
         self_collision_manager=None,
         obstacle_collision_manager=None,
-        cur_q=None,
-        goal_pose=None,
         delta_distance=0.5,
         epsilon=0.2,
         max_iter=3000,
@@ -37,13 +35,13 @@ class RRTStarPlanner(JointPlanner):
         super(RRTStarPlanner, self).__init__(robot, self_collision_manager, dimension)
 
         self.obstacle_c_manager=obstacle_collision_manager
-        self.cur_q = super()._change_types(cur_q)
-        self.goal_pose = super()._change_types(goal_pose)
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.max_iter = max_iter
         self.gamma_RRTs = gamma_RRT_star
         
+        self._cur_qpos = None
+        self._goal_pose = None
         self.T = None
         self.cost = None
 
@@ -57,19 +55,21 @@ class RRTStarPlanner(JointPlanner):
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
         
-    def get_path_in_joinst_space(self):
+    def get_path_in_joinst_space(self, cur_q, goal_pose):
         """
         Get path in joint space
 
         Returns:
             path(list) : result path (from start joints to goal joints)
         """
+        self._cur_qpos = super()._change_types(cur_q)
+        self._goal_pose = super()._change_types(goal_pose)
         cnt = 0
         total_cnt = 10
         while True:
             cnt += 1
             for _ in range(total_cnt):
-                self.goal_q = self.robot.inverse_kin(np.random.randn(self._dimension), self.goal_pose)
+                self.goal_q = self.robot.inverse_kin(np.random.randn(self._dimension), self._goal_pose)
                 if self._check_q_in_limits(self.goal_q):
                     break
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
@@ -78,7 +78,7 @@ class RRTStarPlanner(JointPlanner):
             self.T = Tree()
             self.cost = {}
 
-            self.T.add_vertex(self.cur_q)
+            self.T.add_vertex(self._cur_qpos)
             self.cost[0] = 0
 
             for step in range(self.max_iter):
@@ -108,7 +108,7 @@ class RRTStarPlanner(JointPlanner):
                         path = self.find_path(self.T)
 
             if path is not None:
-                logger.info(f"Generate Path Sucessfully!!")  
+                logger.info(f"Generate Path Successfully!!")  
                 break 
 
             if cnt > total_cnt:
@@ -333,7 +333,7 @@ class RRTStarPlanner(JointPlanner):
                 path.append(tree.vertices[goal_idx])
             parent_idx = tree.edges[goal_idx-1][0]
             goal_idx = parent_idx
-        path.append(self.cur_q)
+        path.append(self._cur_qpos)
 
         return path[::-1]
 

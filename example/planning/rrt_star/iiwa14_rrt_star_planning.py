@@ -59,16 +59,14 @@ planner = RRTStarPlanner(
     robot=robot,
     self_collision_manager=c_manager,
     obstacle_collision_manager=o_manager,
-    cur_q=init_qpos,
-    goal_pose=goal_eef_pose,
-    delta_distance=0.1,
+    delta_distance=0.05,
     epsilon=0.2, 
-    max_iter=1000,
-    gamma_RRT_star=10,
+    max_iter=1500,
+    gamma_RRT_star=1,
     dimension=7
 )
 
-joint_path = planner.get_path_in_joinst_space()
+joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
 
 if joint_path is None :
     print("Cannot Visulization Path")
@@ -76,7 +74,7 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-resolution = 0.1
+resolution = 0.5
 print(len(joint_path))
 for step, joint in enumerate(joint_path):
     if step % (1/resolution) == 0 or step == len(joint_path)-1:

@@ -62,13 +62,12 @@ task_plan = CartesianPlanner(
     robot, 
     self_collision_manager=c_manager,
     obstacle_collision_manager=None,
-    current_pose=init_eef_pose,
-    goal_pose=goal_eef_pose,
     n_step=args.timesteps,
     dimension=7)
 
-joint_path, target_poses = task_plan.get_path_in_joinst_space(
-    epsilon=float(1e-6),
+joint_path, target_poses = task_plan.get_patqh_in_joinst_space(
+    current_q=init_qpos,
+    goal_pose=goal_eef_pose,
     resolution=args.resolution, 
     damping=args.damping,
     pos_sensitivity=args.pos_sensitivity)

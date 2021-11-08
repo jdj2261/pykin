@@ -28,16 +28,12 @@ class CartesianPlanner(Planner):
         robot,
         self_collision_manager=None,
         obstacle_collision_manager=None,
-        current_pose=None,
-        goal_pose=None,
         n_step=500,
         dimension=7,
         waypoint_type="Linear"
     ):
         super(CartesianPlanner, self).__init__(robot, self_collision_manager, dimension)
         self.obstacle_collision_manager = obstacle_collision_manager
-        self.cur_pose = super()._change_types(current_pose)
-        self.goal_pose = super()._change_types(goal_pose)
         self.n_step = n_step
         self.waypoint_type = waypoint_type
         self.eef_name = self.robot.eef_name
@@ -46,22 +42,30 @@ class CartesianPlanner(Planner):
 
         super()._setup_q_limits()
         super()._setup_eef_name()
-        
-        self.waypoints = self.genearte_waypoints()
+    
 
     def __repr__(self):
         return 'pykin.planners.cartesian_planner.{}()'.format(type(self).__name__)
         
     def get_path_in_joinst_space(
         self, 
+        current_q=None,
+        goal_pose=None,
         waypoints=None,
         resolution=1, 
         damping=0.5,
         epsilon=1e-12,
         pos_sensitivity = 0.03
     ):
+        self._cur_qpos = super()._change_types(current_q)
+        self._goal_pose = super()._change_types(goal_pose)
+
+        init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
+        self._cur_pose = self.robot.get_eef_pose(init_fk)
+
         if waypoints is None:
-            waypoints = self.waypoints
+            waypoints = self.genearte_waypoints()
+
         paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
         return paths, target_posistions
 
@@ -75,20 +79,15 @@ class CartesianPlanner(Planner):
     ):
         cnt = 0
         total_cnt = 10
+
         while True:
             cnt += 1
-            for _ in range(total_cnt):
-                current_joints = self.robot.inverse_kin(np.random.randn(self._dimension), self.cur_pose)
-                if self._check_q_in_limits(current_joints):
-                    break
-                print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
-                
-            cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
+            cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
 
             current_transform = cur_fk[self.eef_name].h_mat
             eef_position = cur_fk[self.eef_name].pos
 
-            paths = [current_joints]
+            paths = [self._cur_qpos]
             target_posistions = [eef_position]
 
             for step, (pos, ori) in enumerate(waypoints):
@@ -98,27 +97,27 @@ class CartesianPlanner(Planner):
                 Jh = np.dot(np.linalg.pinv(np.dot(J.T, J) + damping**2 * np.identity(self._dimension)), J.T)
 
                 dq = damping * np.dot(Jh, err_pose)
-                current_joints = np.array([(current_joints[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
+                self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                collision_free = self.collision_free(current_joints, visible_name=False)
+                collision_free = self.collision_free(self._cur_qpos, visible_name=False)
 
                 if not collision_free :
                     continue
 
-                if not self._check_q_in_limits(current_joints):
+                if not self._check_q_in_limits(self._cur_qpos):
                     continue
 
-                cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, current_joints)
+                cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
                 current_transform = cur_fk[self.robot.eef_name].h_mat
 
                 if step % (1/resolution) == 0 or step == len(waypoints)-1:
-                    paths.append(current_joints)
+                    paths.append(self._cur_qpos)
                     target_posistions.append(pos)
 
-            err = t_utils.compute_pose_error(self.goal_pose[:3], cur_fk[self.eef_name].pos)
+            err = t_utils.compute_pose_error(self._goal_pose[:3], cur_fk[self.eef_name].pos)
 
             if err < pos_sensitivity:
-                logger.info(f"Generate Path Sucessfully!! Error is {err:6f}")
+                logger.info(f"Generate Path Successfully!! Error is {err:6f}")
                 break
 
             if cnt > total_cnt:
@@ -195,8 +194,8 @@ class CartesianPlanner(Planner):
     def _get_linear_path(self):
         for step in range(1, self.n_step + 1):
             delta_t = step / self.n_step
-            pos = t_utils.get_linear_interpoation(self.cur_pose[:3], self.goal_pose[:3], delta_t)
-            ori = t_utils.get_quaternion_slerp(self.cur_pose[3:], self.goal_pose[3:], delta_t)
+            pos = t_utils.get_linear_interpoation(self._cur_pose[:3], self._goal_pose[:3], delta_t)
+            ori = t_utils.get_quaternion_slerp(self._cur_pose[3:], self._goal_pose[3:], delta_t)
 
             yield (pos, ori)
 

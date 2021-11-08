@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(usage=help_str)
 parser.add_argument("--timesteps", type=int, default=1000)
 parser.add_argument("--damping", type=float, default=0.03)
 parser.add_argument("--resolution", type=float, default=0.01)
-parser.add_argument("--pos-sensitivity", type=float, default=0.05)
+parser.add_argument("--pos-sensitivity", type=float, default=0.03)
 args = parser.parse_args()
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
@@ -45,7 +45,7 @@ goal_transformations = robot.forward_kin(target_joints)
 # scene.show()
 
 init_eef_pose = robot.get_eef_pose(fk)
-goal_eef_pose = controller_config["goal_pose"]
+goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)
@@ -54,14 +54,14 @@ c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
 
 task_plan = CartesianPlanner(
     robot, 
-    collision_manager=c_manager,
-    current_pose=init_eef_pose,
-    goal_pose=goal_eef_pose,
+    self_collision_manager=c_manager,
+    obstacle_collision_manager=None,
     n_step=args.timesteps,
     dimension=7)
 
 joint_path, target_poses = task_plan.get_path_in_joinst_space(
-    epsilon=float(1e-6),
+    current_q=init_qpos,
+    goal_pose=goal_eef_pose,
     resolution=args.resolution, 
     damping=args.damping,
     pos_sensitivity=args.pos_sensitivity)

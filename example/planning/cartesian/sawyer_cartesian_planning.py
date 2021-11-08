@@ -18,25 +18,25 @@ help_str = "python sawyer_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
-parser.add_argument("--timesteps", type=int, default=1000)
-parser.add_argument("--damping", type=float, default=0.03)
+parser.add_argument("--timesteps", type=int, default=300)
+parser.add_argument("--damping", type=float, default=0.5)
 parser.add_argument("--resolution", type=float, default=0.05)
-parser.add_argument("--pos-sensitivity", type=float, default=0.03)
+parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
 file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
 mesh_path = pykin_path+"/asset/urdf/sawyer/"
-json_path = '../../../asset/config/iiwa14_init_params.json'
+json_path = '../../../asset/config/sawyer_init_params.json'
 
 with open(json_path) as f:
     controller_config = json.load(f)
-init_qpos = [0] + controller_config["init_qpos"]
+init_qpos = controller_config["init_qpos"]
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("base", "right_l6")
 
 ##################################################################
-init_fk = robot.forward_kin(init_qpos)
+init_fk = robot.forward_kin([0] + init_qpos)
 
 # target_joints = [0.0, 1.2, 0.0, -1.89, 0.0, 0.6, 0.0]
 # robot.offset.pos = [1, 0, 0]
@@ -60,13 +60,13 @@ c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
 task_plan = CartesianPlanner(
     robot, 
     self_collision_manager=c_manager,
-    current_pose=init_eef_pose,
-    goal_pose=goal_eef_pose,
+    obstacle_collision_manager=None,
     n_step=args.timesteps,
     dimension=7)
 
 joint_path, target_poses = task_plan.get_path_in_joinst_space(
-    epsilon=float(1e-6),
+    current_q=init_qpos,
+    goal_pose=goal_eef_pose,
     resolution=args.resolution, 
     damping=args.damping,
     pos_sensitivity=args.pos_sensitivity)
