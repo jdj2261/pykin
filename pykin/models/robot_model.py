@@ -77,3 +77,10 @@ class RobotModel:
         Number of actuated(revolute or prismatic) joints
         """
         raise NotImplementedError
+
+    @property
+    def num_revolute_joints(self):
+        """
+        Number of revolute joints
+        """
+        raise NotImplementedError

@@ -36,6 +36,18 @@ class SingleArm(Robot):
                 self.joint_limits_lower.append(limit_lower)
                 self.joint_limits_upper.append(limit_upper)
 
+    def check_limit_joint(self, q_in):
+        """
+        check q_in within joint limits
+        If q_in is in joint limits, return True
+        otherwise, return False
+
+        Returns:
+            bool(True or False)
+        """
+        print(q_in)
+        return np.all([q_in >= self.joint_limits_lower, q_in <= self.joint_limits_upper])
+
     def setup_link_name(self, base_name="", eef_name=None):
         """
         Sets robot's desired frame

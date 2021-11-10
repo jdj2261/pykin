@@ -65,7 +65,7 @@ task_plan = CartesianPlanner(
     n_step=args.timesteps,
     dimension=7)
 
-joint_path, target_poses = task_plan.get_patqh_in_joinst_space(
+joint_path, target_poses = task_plan.get_path_in_joinst_space(
     current_q=init_qpos,
     goal_pose=goal_eef_pose,
     resolution=args.resolution, 

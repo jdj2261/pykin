@@ -104,7 +104,7 @@ class CartesianPlanner(Planner):
                 if not collision_free :
                     continue
 
-                if not self._check_q_in_limits(self._cur_qpos):
+                if not self.robot.check_q_in_limits(self._cur_qpos):
                     continue
 
                 cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)

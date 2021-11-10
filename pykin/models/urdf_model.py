@@ -429,6 +429,14 @@ class URDFModel(RobotModel):
         """
         return sum([1 for joint in self.joints.values() if joint.num_dof != 0])
 
+    @property
+    def num_revolute_joints(self):
+        """
+        Returns:
+            int: number of actuated joints
+        """
+        return len(self.get_revolute_joint_names())
+
     @staticmethod
     def generate_desired_frame_recursive(base_frame, eef_name):
         """
