@@ -24,7 +24,7 @@ with open(json_path) as f:
             controller_config = json.load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("panda_link0", "panda_hand")
+robot.setup_link_name("panda_link0", "panda_link7")
 
 ##################################################################
 init_qpos = controller_config["init_qpos"]

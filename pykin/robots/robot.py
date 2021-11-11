@@ -6,6 +6,7 @@ sys.path.append(pykin_path)
 from pykin.kinematics.transform import Transform
 from pykin.kinematics.kinematics import Kinematics
 from pykin.models.urdf_model import URDFModel
+from pykin.utils.transform_utils import compute_pose_error
 
 class Robot(URDFModel):
     """
@@ -118,6 +119,9 @@ class Robot(URDFModel):
 
     def _set_joint_limits_upper_and_lower(self):
         raise NotImplementedError
+
+    def get_pose_error(self, target=np.eye(4), result=np.eye(4)):
+        return compute_pose_error(target, result)
 
     @property
     def offset(self):

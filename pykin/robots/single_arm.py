@@ -45,7 +45,6 @@ class SingleArm(Robot):
         Returns:
             bool(True or False)
         """
-        print(q_in)
         return np.all([q_in >= self.joint_limits_lower, q_in <= self.joint_limits_upper])
 
     def setup_link_name(self, base_name="", eef_name=None):
@@ -122,7 +121,7 @@ q
             maxIter=1000)
         return joints
 
-    def get_eef_pose(self, transformations):
+    def get_eef_pose(self, transformations=None):
         """
         Get end effector's pose
 
@@ -132,7 +131,46 @@ q
         Returns:
             vals(dict)
         """
+        if transformations is None:
+            transformations = self.init_transformations
+
         return np.concatenate((transformations[self.eef_name].pos, transformations[self.eef_name].rot))
+
+    def get_eef_h_mat(self, transformations=None):
+        if transformations is None:
+            transformations = self.init_transformations
+
+        return transformations[self.eef_name].h_mat
+
+    def get_eef_pos(self, transformations=None):
+        """
+        Get end effector's position
+
+        Args:
+            transformations(OrderedDict)
+        
+        Returns:
+            vals(dict)
+        """
+        if transformations is None:
+            transformations = self.init_transformations
+
+        return transformations[self.eef_name].pos
+
+    def get_eef_ori(self, transformations=None):
+        """
+        Get end effector's orientation
+
+        Args:
+            transformations(OrderedDict)
+        
+        Returns:
+            vals(dict)
+        """
+        if transformations is None:
+            transformations = self.init_transformations
+
+        return transformations[self.eef_name].rot
 
     @property
     def base_name(self):

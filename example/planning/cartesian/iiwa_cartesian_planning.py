@@ -55,7 +55,7 @@ goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)
-c_manager.filter_contact_names(robot)
+c_manager.filter_contact_names(robot, init_fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
 
 task_plan = CartesianPlanner(

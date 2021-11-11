@@ -101,10 +101,10 @@ class CartesianPlanner(Planner):
 
                 collision_free = self.collision_free(self._cur_qpos, visible_name=False)
 
-                if not collision_free :
+                if not collision_free:
                     continue
 
-                if not self.robot.check_q_in_limits(self._cur_qpos):
+                if not self._check_q_in_limits(self._cur_qpos):
                     continue
 
                 cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
@@ -161,6 +161,8 @@ class CartesianPlanner(Planner):
             return False
         return True
 
+    # TODO
+    # generate cubic, circular waypoints
     def genearte_waypoints(self):
         if self.waypoint_type == "Linear":
             waypoints = [path for path in self._get_linear_path()]
