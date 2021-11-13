@@ -183,3 +183,7 @@ q
     @property
     def active_joint_names(self):
         return self._revolute_joint_names
+
+    @property
+    def arm_dof(self):
+        return len([ joint for joint in self.get_revolute_joint_names() if "head" not in joint])

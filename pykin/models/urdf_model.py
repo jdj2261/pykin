@@ -118,7 +118,7 @@ class URDFModel(RobotModel):
             URDFModel._get_all_active_joint_names_recursive(joint_names, child)
         return joint_names
 
-    def get_revolute_joint_names(self, desired_frames=None, included_name=None):
+    def get_revolute_joint_names(self, desired_frames=None):
         """
         Returns revolute joint names
 
@@ -137,13 +137,6 @@ class URDFModel(RobotModel):
             if "head" in joint:
                 head_joint = joint_names.pop(i)
                 joint_names.insert(0, head_joint)
-
-        if included_name is not None:
-            only_include_names = []
-            for joint_name in joint_names:
-                if included_name in joint_name:
-                    only_include_names.append(joint_name)
-            return only_include_names
 
         return joint_names
 
