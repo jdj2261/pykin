@@ -125,7 +125,7 @@ class Kinematics:
             joints (np.array): target joint angles
         """
         lamb = 0.5
-        iterator = 0
+        iterator = 1
         EPS = float(1e-6)
         dof = len(current_joints)
 
@@ -169,7 +169,7 @@ class Kinematics:
         Returns:
             joints (np.array): target joint angles
         """
-        iterator = 0
+        iterator = 1
         EPS = float(1E-12)
         dof = len(current_joints)
         wn_pos = 1/0.3
