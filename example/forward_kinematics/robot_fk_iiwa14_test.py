@@ -8,7 +8,7 @@ file_path = '../../asset/urdf/iiwa14/iiwa14.urdf'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
-robot.setup_link_name(eef_name="iiwa_link_7")
+robot.setup_link_name(eef_name="iiwa14_link_7")
 
 target_thetas = [np.pi/3, np.pi/3, 0, 0, 0, 0, 0]
 robot_transformations = robot.forward_kin(target_thetas)

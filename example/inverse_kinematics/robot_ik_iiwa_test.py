@@ -1,5 +1,7 @@
 import numpy as np
-
+import sys, os
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics import transform as tf
 from pykin.utils import plot_utils as plt
@@ -12,7 +14,7 @@ robot = SingleArm(urdf_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 target_thetas = np.array([np.random.uniform(-np.pi, np.pi) for _ in range(robot.dof)])
 init_thetas = np.random.randn(robot.dof)
 
-robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
+robot.setup_link_name("iiwa14_link_0", "iiwa14_link_7")
 fk = robot.forward_kin(target_thetas)
 target_pose = robot.get_eef_pose(fk)
 

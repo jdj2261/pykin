@@ -24,7 +24,7 @@ with open(json_path) as f:
             controller_config = json.load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("iiwa_link_0", "iiwa_link_ee")
+robot.setup_link_name("iiwa14_link_0", "iiwa14_link_ee")
 
 ##################################################################
 init_qpos = controller_config["init_qpos"]

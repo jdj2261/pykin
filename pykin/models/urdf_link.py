@@ -12,7 +12,7 @@ class URDF_Link:
         for elem_visual in elem_link.findall('visual'):
             URDF_Link.set_visual_origin(elem_visual, link_frame)
             URDF_Link.set_visual_geometry(elem_visual, link_frame)
-            URDF_Link.set_color(elem_visual, link_frame)
+            URDF_Link.set_visual_color(elem_visual, link_frame)
 
     @staticmethod
     def set_collision(elem_link, link_frame):
@@ -22,7 +22,7 @@ class URDF_Link:
         for elem_collision in elem_link.findall('collision'):
             URDF_Link.set_collision_origin(elem_collision, link_frame)
             URDF_Link.set_collision_geometry(elem_collision, link_frame)
-            URDF_Link.set_color(elem_collision, link_frame)
+            URDF_Link.set_collision_color(elem_collision, link_frame)
             
     @staticmethod
     def set_visual_origin(elem_visual, frame):
@@ -66,7 +66,7 @@ class URDF_Link:
                     _set_link_visual_geom(shapes, frame)
 
     @staticmethod
-    def set_color(elem_visual, frame):
+    def set_visual_color(elem_visual, frame):
         """
         Set link visual's color
         """ 
@@ -112,3 +112,14 @@ class URDF_Link:
         for shape_type in LINK_TYPES:
             for shapes in elem_geometry.findall(shape_type):
                 _set_link_collision_geom(shapes, frame)
+
+    @staticmethod
+    def set_collision_color(elem_collision, frame):
+        """
+        Set link visual's color
+        """ 
+        for elem_matrial in elem_collision.findall('material'):
+            for elem_color in elem_matrial.findall('color'):
+                rgba = convert_string_to_narray(elem_color.attrib.get('rgba'))
+                frame.link.collision.gparam['color'] = {elem_matrial.get('name') : rgba}
+    
