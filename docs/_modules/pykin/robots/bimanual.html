@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.robots.bimanual &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pykin.robots.bimanual</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pykin.robots.bimanual</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pykin.robots.robot</span> <span class="kn">import</span> <span class="n">Robot</span>
+<span class="kn">from</span> <span class="nn">pykin.utils.error_utils</span> <span class="kn">import</span> <span class="n">NotFoundError</span>
+
+<div class="viewcode-block" id="Bimanual"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.bimanual.Bimanual">[docs]</a><span class="k">class</span> <span class="nc">Bimanual</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes a bimanual robot simulation object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname (str): path to the urdf file.</span>
+<span class="sd">        offset (Transform): robot init offset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Bimanual</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_input2dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_joint_limits_upper_and_lower</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setup_input2dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Setup dictionary name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_base_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_pose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_lower</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_input2dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function that converts an input that is either a single value or a list into a dict with keys for</span>
+<span class="sd">        each arm: &quot;right&quot;, &quot;left&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inp (str or list or None): Input value to be converted to dict</span>
+<span class="sd">            :Note: If inp is a list, then assumes format is [right, left]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Inputs mapped for each robot arm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First, convert to list if necessary</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="p">[</span><span class="n">inp</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+        <span class="c1"># Now, convert list to dict and return</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_arms</span><span class="p">,</span> <span class="n">inp</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">_set_joint_limits_upper_and_lower</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set joint limits upper and lower</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">limits_lower</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">limits_upper</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">joint</span><span class="p">,</span> <span class="p">(</span><span class="n">limit_lower</span><span class="p">,</span> <span class="n">limit_upper</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">limits_lower</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">joint</span><span class="p">,</span> <span class="n">limit_lower</span><span class="p">))</span>
+            <span class="n">limits_upper</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">joint</span><span class="p">,</span> <span class="n">limit_upper</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">arm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arms</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_lower</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">limit_lower</span> <span class="k">for</span> <span class="n">joint</span><span class="p">,</span> <span class="n">limit_lower</span> <span class="ow">in</span> <span class="n">limits_lower</span> <span class="k">if</span> <span class="n">arm</span> <span class="ow">in</span> <span class="n">joint</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">joint_limits_upper</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">limit_upper</span> <span class="k">for</span> <span class="n">joint</span><span class="p">,</span> <span class="n">limit_upper</span> <span class="ow">in</span> <span class="n">limits_upper</span> <span class="k">if</span> <span class="n">arm</span> <span class="ow">in</span> <span class="n">joint</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Bimanual.setup_link_name"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.bimanual.Bimanual.setup_link_name">[docs]</a>    <span class="k">def</span> <span class="nf">setup_link_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">eef_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets robot&#39;s link name</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_name (str): reference link name</span>
+<span class="sd">            eef_name (str): end effector name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;right&quot;</span> <span class="ow">in</span> <span class="n">eef_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eef_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_desired_base_frame</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_desired_frame</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="s2">&quot;left&quot;</span> <span class="ow">in</span> <span class="n">eef_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eef_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_desired_base_frame</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_desired_frame</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_desired_base_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets robot&#39;s desired base frame</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arm (str): robot arm (right or left)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desired_base_frame</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desired_base_frame</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_frame&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_desired_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets robot&#39;s desired frame</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arm (str): robot arm (right or left)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_frames</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_desired_frame_recursive</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desired_base_frame</span><span class="p">[</span><span class="n">arm</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">[</span><span class="n">arm</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_frames</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span><span class="p">[</span><span class="n">arm</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_pose</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span><span class="p">[</span><span class="n">arm</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="Bimanual.inverse_kin"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.bimanual.Bimanual.inverse_kin">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_kin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns joint angles obtained by computing IK</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            current_joints (sequence of float): input joint angles</span>
+<span class="sd">            target_pose (np.array): goal pose to achieve</span>
+<span class="sd">            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</span>
+<span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            joints (np.array): target joint angles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_pose</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Be sure to input the target pose in dictionary form.&quot;</span><span class="p">)</span>
+
+        <span class="n">joints</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input2dict</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arm</span> <span class="ow">in</span> <span class="n">target_pose</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_desired_frame</span><span class="p">(</span><span class="n">arm</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_target_pose</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_target_pose_type_to_npy</span><span class="p">(</span><span class="n">target_pose</span><span class="p">[</span><span class="n">arm</span><span class="p">])</span>
+
+                <span class="n">joints</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">inverse_kinematics</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_frames</span><span class="p">[</span><span class="n">arm</span><span class="p">],</span>
+                    <span class="n">current_joints</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_target_pose</span><span class="p">[</span><span class="n">arm</span><span class="p">],</span>
+                    <span class="n">method</span><span class="p">,</span>
+                    <span class="n">maxIter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joints</span></div>
+
+    <span class="k">def</span> <span class="nf">_convert_target_pose_type_to_npy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        convert input type to numpy array</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value(list or tupe)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Bimanual.compute_eef_pose"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.bimanual.Bimanual.compute_eef_pose">[docs]</a>    <span class="k">def</span> <span class="nf">compute_eef_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute end effector&#39;s pose</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            transformations(OrderedDict)</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            vals(dict)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">arm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arm_type</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]:</span>
+                <span class="n">vals</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">transformations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]]</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">transformations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">[</span><span class="n">arm</span><span class="p">]]</span><span class="o">.</span><span class="n">rot</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">vals</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_arms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns name of arms used as naming convention throughout this module</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            2-tuple: (&#39;right&#39;, &#39;left&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="s2">&quot;left&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">arm_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return arm type </span>
+<span class="sd">        If number of eef_name is two, return tuple type(&quot;right&quot;, &quot;left)</span>
+<span class="sd">        otherwise, return list type([&quot;right] or [&quot;left&quot;])</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            arm types (tuple or list)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_arms</span>
+        <span class="k">elif</span> <span class="s2">&quot;right&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;left&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFoundError</span><span class="p">(</span><span class="s2">&quot;Can not find robot&#39;s arm type&quot;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eef_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eef_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">active_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

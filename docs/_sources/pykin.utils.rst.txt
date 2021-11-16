@@ -1,6 +1,9 @@
 pykin.utils package
 ===================
 
+Submodules
+----------
+
 pykin.utils.error\_utils module
 -------------------------------
 
@@ -25,6 +28,14 @@ pykin.utils.kin\_utils module
    :undoc-members:
    :show-inheritance:
 
+pykin.utils.obstacle\_utils module
+----------------------------------
+
+.. automodule:: pykin.utils.obstacle_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pykin.utils.plot\_utils module
 ------------------------------
 
@@ -45,6 +56,14 @@ pykin.utils.urdf\_utils module
 ------------------------------
 
 .. automodule:: pykin.utils.urdf_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: pykin.utils
    :members:
    :undoc-members:
    :show-inheritance:
