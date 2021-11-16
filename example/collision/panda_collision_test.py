@@ -1,16 +1,11 @@
 import numpy as np
-import sys, os
 import trimesh
 import json
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
-
 
 
 file_path = '../../asset/urdf/panda/panda.urdf'

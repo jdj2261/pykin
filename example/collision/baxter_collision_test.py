@@ -1,10 +1,6 @@
 import numpy as np
-import sys, os
 import trimesh
 import json
-
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
 
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform

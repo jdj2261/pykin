@@ -1,7 +1,4 @@
 import numpy as np
-import sys, os
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
-sys.path.append(pykin_path)
 
 from pykin.kinematics import transform as tf
 from pykin.robots.single_arm import SingleArm
