@@ -3,8 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 Python Interface for the Robot Kinematics Library [pykin](https://jdj2261.github.io/pykin/)
-Even motion planning is supported.
-This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git).
+This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git)
 
 ## Features
 
