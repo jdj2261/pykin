@@ -8,7 +8,7 @@ from pykin.utils.transform_utils import compute_pose_error
 file_path = '../../asset/urdf/sawyer/sawyer.urdf'
 
 robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-robot.setup_link_name("base", "right_l6")
+robot.setup_link_name("sawyer_base", "sawyer_right_l6")
 
 # panda_example
 target_thetas = [0, np.pi/3, np.pi/2, np.pi/2, 0, np.pi/3, 0, 0]

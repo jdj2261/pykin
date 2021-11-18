@@ -24,7 +24,7 @@ with open(json_path) as f:
             controller_config = json.load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("base", "right_l6")
+robot.setup_link_name("sawyer_base", "sawyer_right_l6")
 
 ##################################################################
 init_qpos = controller_config["init_qpos"]
