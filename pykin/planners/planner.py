@@ -24,6 +24,7 @@ class Planner(metaclass=ABCMeta):
         self._dimension = dimension
         if self_collision_manager is None:
             logger.warning(f"This Planner does not do collision checking")
+            self.self_collision_manager = None
         else:
             self.self_collision_manager = self_collision_manager
 

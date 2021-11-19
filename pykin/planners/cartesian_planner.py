@@ -144,6 +144,10 @@ class CartesianPlanner(Planner):
             result(bool): If collision free, return True
             names(set of 2-tup): The set of pairwise collisions. 
         """
+
+        if self.self_collision_manager is None:
+            return True
+
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
             if link in self.self_collision_manager._objs:
