@@ -1,12 +1,11 @@
 import numpy as np
 import trimesh
-import json
+import yaml
 import sys, os
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
 sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
-from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
@@ -14,9 +13,10 @@ from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_
 file_path = '../../asset/urdf/iiwa7/iiwa7.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.5]))
 
-custom_fpath = '../../asset/config/iiwa14_init_params.json'
+custom_fpath = '../../asset/config/iiwa7_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = json.load(f)
+    controller_config = yaml.safe_load(f)
+
 init_qpos = controller_config["init_qpos"]
 
 print(init_qpos)

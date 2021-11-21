@@ -65,7 +65,7 @@ class CollisionManager:
         _, names = self.in_collision_internal(return_names=True)
         self._filter_names = copy.deepcopy(names)
 
-        if robot.robot_name == "ur5":
+        if robot.robot_name == "ur5e":
             return
 
         collision_datas = _check_init_collision()

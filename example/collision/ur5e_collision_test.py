@@ -1,23 +1,26 @@
 import numpy as np
 import trimesh
-import json
+import yaml
+import sys, os
 
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
 
-file_path = '../../asset/urdf/ur5/ur5.urdf'
+file_path = '../../asset/urdf/ur5e/ur5e.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, -1]))
 
-custom_fpath = '../../asset/config/ur5_init_params.json'
+custom_fpath = '../../asset/config/ur5e_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = json.load(f)
+            controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
-fk = robot.forward_kin(np.zeros(6))
+fk = robot.forward_kin(init_qpos)
 
-mesh_path = pykin_path+"/asset/urdf/ur5/"
+mesh_path = pykin_path+"/asset/urdf/ur5e/"
 c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot, fk)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)

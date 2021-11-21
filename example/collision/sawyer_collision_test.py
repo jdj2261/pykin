@@ -1,21 +1,20 @@
 import numpy as np
-import json
+import yaml
 import sys, os
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
-from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
 import trimesh
 
-custom_fpath = '../../asset/config/sawyer_init_params.json'
+custom_fpath = '../../asset/config/sawyer_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = json.load(f)
+            controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
 
 file_path = '../../asset/urdf/sawyer/sawyer.urdf'

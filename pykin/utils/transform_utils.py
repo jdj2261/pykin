@@ -386,3 +386,27 @@ def compute_pose_error(target=np.eye(4), result=np.eye(4)):
 
 def get_transform_to_visual(transform, visual_transform):
     return np.dot(transform, visual_transform)
+
+
+def change_to_pose(pose_list):
+    if isinstance(pose_list, list):
+        result = np.asarray(pose_list)
+        
+    result = np.zeros(7)
+
+    if len(pose_list) == 7:
+        result = pose_list
+
+    if len(pose_list) == 6:
+        result[0] = pose_list[0]
+        result[1] = pose_list[1]
+        result[2] = pose_list[2]
+        q = get_quaternion(pose_list[3:])
+        result[3] = q[0]
+        result[4] = q[1]
+        result[5] = q[2]
+        result[6] = q[3]
+
+    return result
+
+        

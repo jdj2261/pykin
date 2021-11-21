@@ -1,6 +1,6 @@
 import numpy as np
 import trimesh
-import json
+import yaml
 import sys, os
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
@@ -14,9 +14,10 @@ from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_
 file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, -1]))
 
-custom_fpath = '../../asset/config/baxter_init_params.json'
+custom_fpath = '../../asset/config/baxter_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = json.load(f)
+    controller_config = yaml.safe_load(f)
+
 init_qpos = controller_config["init_qpos"]
 fk = robot.forward_kin(np.concatenate((np.zeros(1), np.array(init_qpos))))
 
