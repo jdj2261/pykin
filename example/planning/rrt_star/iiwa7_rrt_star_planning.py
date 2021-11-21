@@ -1,6 +1,6 @@
 import numpy as np
 import sys, os
-import json
+import yaml
 import trimesh
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
@@ -18,10 +18,10 @@ fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
 
 file_path = '../../../asset/urdf/iiwa7/iiwa7.urdf'
 mesh_path = pykin_path+"/asset/urdf/iiwa7/"
-json_path = '../../../asset/config/iiwa14_init_params.json'
+yaml_path = '../../../asset/config/iiwa14_init_params.yaml'
 
-with open(json_path) as f:
-            controller_config = json.load(f)
+with open(yaml_path) as f:
+            controller_config = yaml.load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("iiwa7_link_0", "iiwa7_link_ee")
