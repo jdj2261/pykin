@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
 import sys, os
-import json
+import yaml
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
@@ -26,10 +26,10 @@ args = parser.parse_args()
 
 file_path = '../../../asset/urdf/iiwa7/iiwa7.urdf'
 mesh_path = pykin_path+"/asset/urdf/iiwa7/"
-json_path = '../../../asset/config/iiwa14_init_params.json'
+yaml_path = '../../../asset/config/iiwa14_init_params.yaml'
 
-with open(json_path) as f:
-            controller_config = json.load(f)
+with open(yaml_path) as f:
+            controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))

@@ -16,8 +16,8 @@ robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, -1]))
 
 custom_fpath = '../../asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = yaml.safe_load(f)
-init_qpos = controller_config["init_qpos"]
+    controller_config = yaml.safe_load(f)
+init_qpos = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
 fk = robot.forward_kin(np.array(init_qpos))
 
 mesh_path = pykin_path+"/asset/urdf/panda/"
@@ -34,7 +34,7 @@ scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 test_mesh = trimesh.load_mesh(milk_path)
-scene.add_geometry(test_mesh, transform=Transform(pos=[1, 0, 0]).h_mat)
+scene.add_geometry(test_mesh, transform=Transform(pos=[0, 0, 0]).h_mat)
 
 table_path = pykin_path+"/asset/objects/meshes/custom_table.stl"
 table_mesh = trimesh.load_mesh(table_path)

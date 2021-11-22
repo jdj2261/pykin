@@ -247,7 +247,8 @@ def plot_obstacles(obstacles, ax):
             A2B = tf.get_h_mat(o_pose)
             plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
         if o_type == "cylinder":
-            A2B = tf.get_h_mat(o_pose)
+            A2B = tf.get_h_mat(o_pose.pos)
+            print(A2B)
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
 def plot_collision(robot, transformations, ax, alpha=0.8):

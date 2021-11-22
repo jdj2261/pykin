@@ -55,19 +55,24 @@ class CartesianPlanner(Planner):
         resolution=1, 
         damping=0.5,
         epsilon=1e-12,
-        pos_sensitivity = 0.03
+        pos_sensitivity = 0.03,
+        is_slerp=False
     ):
         self._cur_qpos = super()._change_types(current_q)
         self._goal_pose = super()._change_types(goal_pose)
-
+        is_get_path = False
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
 
         if waypoints is None:
-            waypoints = self.genearte_waypoints()
+            waypoints = self.genearte_waypoints(is_slerp)
 
         paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
-        return paths, target_posistions
+        
+        if paths is not None:
+            is_get_path = True
+        
+        return paths, is_get_path, target_posistions
 
     def _compute_path_and_target_pose(
         self, 
@@ -167,9 +172,9 @@ class CartesianPlanner(Planner):
 
     # TODO
     # generate cubic, circular waypoints
-    def genearte_waypoints(self):
+    def genearte_waypoints(self, is_slerp):
         if self.waypoint_type == "Linear":
-            waypoints = [path for path in self._get_linear_path()]
+            waypoints = [path for path in self._get_linear_path(is_slerp)]
         if self.waypoint_type == "Cubic":
             pass
         if self.waypoint_type == "Circular":
@@ -197,11 +202,13 @@ class CartesianPlanner(Planner):
 
         return ret
 
-    def _get_linear_path(self):
+    def _get_linear_path(self, is_slerp):
         for step in range(1, self.n_step + 1):
             delta_t = step / self.n_step
             pos = t_utils.get_linear_interpoation(self._cur_pose[:3], self._goal_pose[:3], delta_t)
-            ori = t_utils.get_quaternion_slerp(self._cur_pose[3:], self._goal_pose[3:], delta_t)
+            ori = self._cur_pose[3:]
+            if is_slerp:
+                ori = t_utils.get_quaternion_slerp(self._cur_pose[3:], self._goal_pose[3:], delta_t)
 
             yield (pos, ori)
 

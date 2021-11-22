@@ -21,7 +21,7 @@ mesh_path = pykin_path+"/asset/urdf/sawyer/"
 yaml_path = '../../../asset/config/sawyer_init_params.yaml'
 
 with open(yaml_path) as f:
-            controller_config = yaml.load(f)
+            controller_config = yaml.safe_load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("sawyer_base", "sawyer_right_l6")
@@ -42,17 +42,26 @@ milk_mesh = trimesh.load_mesh(milk_path)
 
 obs = Obstacle()
 o_manager = CollisionManager(milk_path)
-for i in range(9):
-    name = "miik_" + str(i)
-    if i < 3:
-        obs_pos = [0.3, -0.5 + i * 0.5, 0.3] 
-    elif 3 <= i < 6:
-        obs_pos = [0.3, -0.5 + (i-3) * 0.5, 0.9] 
-    else:
-        obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
+# for i in range(9):
+#     name = "miik_" + str(i)
+#     if i < 3:
+#         obs_pos = [0.3, -0.5 + i * 0.5, 0.3] 
+#     elif 3 <= i < 6:
+#         obs_pos = [0.3, -0.5 + (i-3) * 0.5, 0.9] 
+#     else:
+#         obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
 
-    o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+#     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+#     obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+
+o_manager.add_object("cylinder", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0, 0.5]).h_mat)
+o_manager.add_object("cylinder1", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.4, 0.5]).h_mat)
+o_manager.add_object("cylinder2", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.8, 0.5]).h_mat)
+o_manager.add_object("cylinder3", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 1.2, 0.5]).h_mat)
+obs(name="cylinder", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0, 0.5]))
+obs(name="cylinder1", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0.4, 0.5]))
+obs(name="cylinder2", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0.8, 0.5]))
+obs(name="cylinder3", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 1.2, 0.5]))
 
 ##################################################################
 
@@ -62,7 +71,7 @@ planner = RRTStarPlanner(
     obstacle_collision_manager=o_manager,
     delta_distance=0.05,
     epsilon=0.2, 
-    max_iter=2000,
+    max_iter=500,
     gamma_RRT_star=1,
     dimension=7
 )

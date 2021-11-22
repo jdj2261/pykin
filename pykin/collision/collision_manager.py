@@ -10,6 +10,7 @@ except BaseException:
     fcl = None
 
 from pykin.utils.error_utils import CollisionError, NotFoundError
+from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
 from pykin.collision.contact_data import ContactData
 logger = create_logger('Collision Manager', "debug",)
@@ -96,13 +97,16 @@ class CollisionManager:
             transform = np.eye(4)
         transform = np.asanyarray(transform, dtype=np.float32)
         if transform.shape != (4, 4):
-            raise ValueError('transform must be (4,4)!')
+            if transform.shape == (3,):
+                transform = get_h_mat(position=transform)
+            else:
+                raise ValueError('transform must be (4,4)!')
 
         if gtype == "mesh":
             geom = self._get_BVH(gparam)
         else:
             geom = self._get_geom(gtype, gparam)
-            
+        
         t = fcl.Transform(transform[:3, :3], transform[:3, 3])
         o = fcl.CollisionObject(geom, t)
 

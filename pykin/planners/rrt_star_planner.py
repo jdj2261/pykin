@@ -5,7 +5,7 @@ from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc
-
+from pykin.utils.transform_utils import compute_pose_error
 logger = create_logger('RRT Star Planner', "debug")
 
 class RRTStarPlanner(Planner):
@@ -55,7 +55,7 @@ class RRTStarPlanner(Planner):
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
         
-    def get_path_in_joinst_space(self, cur_q, goal_pose):
+    def get_path_in_joinst_space(self, cur_q, goal_pose, resolution=1):
         """
         Get path in joint space
 
@@ -64,13 +64,19 @@ class RRTStarPlanner(Planner):
         """
         self._cur_qpos = super()._change_types(cur_q)
         self._goal_pose = super()._change_types(goal_pose)
+
         cnt = 0
         total_cnt = 10
+        is_get_path=False
+
         while True:
             cnt += 1
             for _ in range(total_cnt):
                 self.goal_q = self.robot.inverse_kin(np.random.randn(self._dimension), self._goal_pose)
                 if self._check_q_in_limits(self.goal_q):
+                    break
+                if cnt > total_cnt:
+                    logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
                     break
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
@@ -117,7 +123,15 @@ class RRTStarPlanner(Planner):
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
         
-        return path
+        result_path = []
+        if path is not None:
+            is_get_path = True
+            for step, joint in enumerate(path):
+                if step % round(1/resolution) == 0 or step == len(path)-1:
+                    result_path.append(joint)
+
+        print(len(result_path), len(path))
+        return result_path, is_get_path
 
     def random_state(self):
         """
@@ -182,8 +196,11 @@ class RRTStarPlanner(Planner):
             result(bool): If collision free, return True
             names(set of 2-tup): The set of pairwise collisions. 
         """
+ 
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
+            if "pedestal" in link:
+                continue
             if link in self.self_collision_manager._objs:
                 transform = transformations.h_mat
                 self.self_collision_manager.set_transform(name=link, transform=transform)
@@ -311,6 +328,13 @@ class RRTStarPlanner(Planner):
             bool
         """
         dist = self.distance(point, self.goal_q)
+        
+        # cur_pos = self.robot.forward_kin(point)[self.robot.eef_name].pos
+        # goal_pos = self.robot.forward_kin(self.goal_q)[self.robot.eef_name].pos
+
+        # err = compute_pose_error(cur_pos, goal_pos)
+
+        # print(err)
         if dist <= 0.5:
             return True
         return False

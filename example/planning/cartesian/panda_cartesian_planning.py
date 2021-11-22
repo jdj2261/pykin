@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
 import sys, os
-import json
+import yaml
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
 sys.path.append(pykin_path)
@@ -25,13 +25,13 @@ args = parser.parse_args()
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
 mesh_path = pykin_path+"/asset/urdf/panda/"
-json_fpath = '../../../asset/config/panda_init_params.json'
+yaml_fpath = '../../../asset/config/panda_init_params.yaml'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("panda_link0", "panda_link7")
 
-with open(json_fpath) as f:
-    controller_config = json.load(f)
+with open(yaml_fpath) as f:
+    controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
 fk = robot.forward_kin(np.array(init_qpos))
 

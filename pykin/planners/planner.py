@@ -111,7 +111,7 @@ class Planner(metaclass=ABCMeta):
         if self.arm is not None:
             transformations = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
         else:
-            transformations = self.robot.forward_kin(q_in, self.robot.desired_frames)
+            transformations = self.robot.forward_kin(q_in)
         return transformations
 
     @property
