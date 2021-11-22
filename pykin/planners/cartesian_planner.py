@@ -1,10 +1,5 @@
 import numpy as np
-import signal
 
-def handler(signum, frame):
-    exit()
-# Set the signal handler
-signal.signal(signal.SIGINT, handler)
 
 from pykin.planners.planner import Planner
 from pykin.utils.error_utils import OriValueError, CollisionError
@@ -55,12 +50,11 @@ class CartesianPlanner(Planner):
         resolution=1, 
         damping=0.5,
         epsilon=1e-12,
-        pos_sensitivity = 0.03,
+        pos_sensitivity=0.03,
         is_slerp=False
     ):
         self._cur_qpos = super()._change_types(current_q)
         self._goal_pose = super()._change_types(goal_pose)
-        is_get_path = False
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
 
@@ -69,10 +63,7 @@ class CartesianPlanner(Planner):
 
         paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
         
-        if paths is not None:
-            is_get_path = True
-        
-        return paths, is_get_path, target_posistions
+        return paths, target_posistions
 
     def _compute_path_and_target_pose(
         self, 
@@ -99,7 +90,7 @@ class CartesianPlanner(Planner):
                 target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
-                Jh = np.dot(np.linalg.pinv(np.dot(J.T, J) + damping**2 * np.identity(self._dimension)), J.T)
+                Jh = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + damping**2 * np.identity(6)))
 
                 dq = damping * np.dot(Jh, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
@@ -152,7 +143,7 @@ class CartesianPlanner(Planner):
 
         if self.self_collision_manager is None:
             return True
-
+            
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
             if link in self.self_collision_manager._objs:

@@ -29,7 +29,7 @@ mesh_path = pykin_path+"/asset/urdf/iiwa7/"
 yaml_path = '../../../asset/config/iiwa14_init_params.yaml'
 
 with open(yaml_path) as f:
-            controller_config = yaml.safe_load(f)
+    controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
@@ -51,7 +51,7 @@ init_fk = robot.forward_kin(init_qpos)
 
 init_eef_pose = robot.get_eef_pose(init_fk)
 # goal_eef_pose = robot.get_eef_pose(goal_transformations)
-goal_eef_pose = controller_config["goal_pos"]
+goal_eef_pose = controller_config["ini"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)

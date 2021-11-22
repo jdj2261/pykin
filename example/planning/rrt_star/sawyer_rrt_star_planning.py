@@ -85,7 +85,6 @@ if joint_path is None :
 joint_trajectory = []
 eef_poses = []
 resolution = 0.5
-print(len(joint_path))
 for step, joint in enumerate(joint_path):
     if step % (1/resolution) == 0 or step == len(joint_path)-1:
         transformations = robot.forward_kin(np.concatenate((np.zeros(1),joint)))

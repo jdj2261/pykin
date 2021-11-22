@@ -67,7 +67,6 @@ class RRTStarPlanner(Planner):
 
         cnt = 0
         total_cnt = 10
-        is_get_path=False
 
         while True:
             cnt += 1
@@ -125,13 +124,11 @@ class RRTStarPlanner(Planner):
         
         result_path = []
         if path is not None:
-            is_get_path = True
             for step, joint in enumerate(path):
                 if step % round(1/resolution) == 0 or step == len(path)-1:
                     result_path.append(joint)
 
-        print(len(result_path), len(path))
-        return result_path, is_get_path
+        return result_path
 
     def random_state(self):
         """
@@ -329,12 +326,6 @@ class RRTStarPlanner(Planner):
         """
         dist = self.distance(point, self.goal_q)
         
-        # cur_pos = self.robot.forward_kin(point)[self.robot.eef_name].pos
-        # goal_pos = self.robot.forward_kin(self.goal_q)[self.robot.eef_name].pos
-
-        # err = compute_pose_error(cur_pos, goal_pos)
-
-        # print(err)
         if dist <= 0.5:
             return True
         return False

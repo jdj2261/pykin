@@ -1,5 +1,12 @@
 import sys, os
 import numpy as np
+
+import signal
+def handler(signum, frame):
+    exit()
+# Set the signal handler
+signal.signal(signal.SIGINT, handler)
+
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
 

@@ -108,6 +108,9 @@ class Planner(metaclass=ABCMeta):
         Returns:
             transformations(OrderedDict)
         """
+        if self.robot.robot_name == "sawyer":
+            q_in = np.concatenate((np.zeros(1), q_in))
+
         if self.arm is not None:
             transformations = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
         else:

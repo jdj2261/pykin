@@ -60,7 +60,7 @@ planner = RRTStarPlanner(
     obstacle_collision_manager=o_manager,
     delta_distance=0.2,
     epsilon=0.2, 
-    max_iter=2000,
+    max_iter=1000,
     gamma_RRT_star=1,
     dimension=7
 )
@@ -76,6 +76,7 @@ eef_poses = []
 resolution = 1
 print(len(joint_path))
 for step, joint in enumerate(joint_path):
+    print(joint)
     if step % (1/resolution) == 0 or step == len(joint_path)-1:
         transformations = robot.forward_kin(joint)
         joint_trajectory.append(transformations)
