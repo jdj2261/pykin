@@ -90,9 +90,9 @@ class CartesianPlanner(Planner):
                 target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
-                Jh = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + damping**2 * np.identity(6)))
+                J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + damping**2 * np.identity(6)))
 
-                dq = damping * np.dot(Jh, err_pose)
+                dq = damping * np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
                 collision_free = self.collision_free(self._cur_qpos, visible_name=False)

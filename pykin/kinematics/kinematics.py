@@ -193,10 +193,10 @@ class Kinematics:
             lamb = Ek + 0.002
 
             J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
-            Jh = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
+            J_dls = np.dot(np.dot(J.T, We), J) + np.dot(Wn, lamb)
             
             gerr = np.dot(np.dot(J.T, We), err)
-            dq = np.dot(np.linalg.pinv(Jh), gerr)
+            dq = np.dot(np.linalg.inv(J_dls), gerr)
             current_joints = [current_joints[i] + dq[i] for i in range(dof)]
            
             cur_fk = self.forward_kinematics(frames, current_joints)
