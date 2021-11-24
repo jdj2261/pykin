@@ -92,7 +92,7 @@ class CartesianPlanner(Planner):
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
                 J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + damping**2 * np.identity(6)))
 
-                dq = damping * np.dot(J_dls, err_pose)
+                dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
                 collision_free = self.collision_free(self._cur_qpos, visible_name=False)

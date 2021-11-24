@@ -3,7 +3,8 @@ import argparse
 import sys, os
 import yaml
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+parent_dir = os.path.dirname(os.getcwd())
+pykin_path = parent_dir + "/../../"
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -23,9 +24,9 @@ parser.add_argument("--resolution", type=float, default=0.05)
 parser.add_argument("--pos-sensitivity", type=float, default=0.04)
 args = parser.parse_args()
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = pykin_path+'asset/urdf/panda/panda.urdf'
 mesh_path = pykin_path+"/asset/urdf/panda/"
-yaml_fpath = '../../../asset/config/panda_init_params.yaml'
+yaml_fpath = pykin_path+'/asset/config/panda_init_params.yaml'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("panda_link0", "panda_link7")

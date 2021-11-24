@@ -3,7 +3,8 @@ import argparse
 import sys, os
 import yaml
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+parent_dir = os.path.dirname(os.getcwd())
+pykin_path = parent_dir + "/../../"
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -18,15 +19,15 @@ help_str = "python iiwa7_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
-parser.add_argument("--timesteps", type=int, default=500)
+parser.add_argument("--timesteps", type=int, default=1000)
 parser.add_argument("--damping", type=float, default=0.03)
 parser.add_argument("--resolution", type=float, default=0.2)
 parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
-file_path = '../../../asset/urdf/iiwa7/iiwa7.urdf'
+file_path = pykin_path+'asset/urdf/iiwa7/iiwa7.urdf'
 mesh_path = pykin_path+"/asset/urdf/iiwa7/"
-yaml_path = '../../../asset/config/iiwa14_init_params.yaml'
+yaml_path = pykin_path+'asset/config/iiwa14_init_params.yaml'
 
 with open(yaml_path) as f:
     controller_config = yaml.safe_load(f)
@@ -51,7 +52,7 @@ init_fk = robot.forward_kin(init_qpos)
 
 init_eef_pose = robot.get_eef_pose(init_fk)
 # goal_eef_pose = robot.get_eef_pose(goal_transformations)
-goal_eef_pose = controller_config["ini"]
+goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)

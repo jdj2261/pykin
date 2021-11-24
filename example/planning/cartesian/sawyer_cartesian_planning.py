@@ -3,7 +3,8 @@ import argparse
 import sys, os
 import yaml
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+parent_dir = os.path.dirname(os.getcwd())
+pykin_path = parent_dir + "/../../"
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -18,15 +19,15 @@ help_str = "python sawyer_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
-parser.add_argument("--timesteps", type=int, default=300)
+parser.add_argument("--timesteps", type=int, default=500)
 parser.add_argument("--damping", type=float, default=0.5)
 parser.add_argument("--resolution", type=float, default=0.05)
 parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
-file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
+file_path = pykin_path+'/asset/urdf/sawyer/sawyer.urdf'
 mesh_path = pykin_path+"/asset/urdf/sawyer/"
-yaml_path = '../../../asset/config/sawyer_init_params.yaml'
+yaml_path = pykin_path+'/asset/config/sawyer_init_params.yaml'
 
 with open(yaml_path) as f:
     controller_config = yaml.safe_load(f)
