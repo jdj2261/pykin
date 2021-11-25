@@ -27,8 +27,11 @@ class CartesianPlanner(Planner):
         dimension=7,
         waypoint_type="Linear"
     ):
-        super(CartesianPlanner, self).__init__(robot, self_collision_manager, dimension)
-        self.obstacle_collision_manager = obstacle_collision_manager
+        super(CartesianPlanner, self).__init__(
+            robot, 
+            self_collision_manager, 
+            obstacle_collision_manager,
+            dimension)
         self.n_step = n_step
         self.waypoint_type = waypoint_type
         self.eef_name = self.robot.eef_name
@@ -75,9 +78,9 @@ class CartesianPlanner(Planner):
     ):
         cnt = 0
         total_cnt = 10
-
         while True:
             cnt += 1
+            collision_pose = {}
             cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
 
             current_transform = cur_fk[self.eef_name].h_mat
@@ -98,6 +101,7 @@ class CartesianPlanner(Planner):
                 collision_free = self.collision_free(self._cur_qpos, visible_name=False)
 
                 if not collision_free:
+                    collision_pose[step] = np.round(target_transform[:3,3],3)
                     continue
 
                 if not self._check_q_in_limits(self._cur_qpos):
@@ -121,6 +125,13 @@ class CartesianPlanner(Planner):
                 paths, target_posistions = None, None
                 break
 
+            if collision_pose.keys():
+                logger.error(f"Failed Generate Path.. Collision may occur.")
+                # logger.warning(f"Collision Position : {collision_pose.values()}")
+                for pose in collision_pose.values():
+                    logger.warning(f"Collision Position : {pose}")
+                raise CollisionError("Conflict confirmed. Check the object position!")
+                
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             
@@ -141,23 +152,26 @@ class CartesianPlanner(Planner):
             names(set of 2-tup): The set of pairwise collisions. 
         """
 
-        if self.self_collision_manager is None:
+        if self.self_c_manager is None:
             return True
             
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
-            if link in self.self_collision_manager._objs:
+            if "pedestal" in link:
+                continue
+            if link in self.self_c_manager._objs:
                 transform = transformations.h_mat
-                self.self_collision_manager.set_transform(name=link, transform=transform)
-        is_collision = self.self_collision_manager.in_collision_internal(return_names=False, return_data=False)
+                self.self_c_manager.set_transform(name=link, transform=transform)
+        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
+        is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
 
         name = None
         if visible_name:
-            if is_collision:
+            if is_self_collision:
                 return False, name
             return True, name
 
-        if is_collision:
+        if is_self_collision or is_obstacle_collision:
             return False
         return True
 

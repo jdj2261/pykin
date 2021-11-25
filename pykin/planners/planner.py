@@ -18,19 +18,20 @@ class Planner(metaclass=ABCMeta):
         self,
         robot,
         self_collision_manager,
+        obstacle_collision_manager,
         dimension
     ):
         self.robot = robot
         self._dimension = dimension
         if self_collision_manager is None:
             logger.warning(f"This Planner does not do collision checking")
-            self.self_collision_manager = None
+            self.self_c_manager = None
         else:
-            self.self_collision_manager = self_collision_manager
-
-            check_collision = self.self_collision_manager.in_collision_internal()
+            self.self_c_manager = self_collision_manager
+            check_collision = self.self_c_manager.in_collision_internal()
             if check_collision:
                 raise CollisionError("Conflict confirmed. Check the joint settings again")
+        self.obstacle_c_manager = obstacle_collision_manager
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)

@@ -91,6 +91,5 @@ plt.plot_animation(
     visible_obstacles=True,
     visible_collision=True, 
     interval=1, 
-    repeat=True,
-    result=None)
+    repeat=True)
 

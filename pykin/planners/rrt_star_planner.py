@@ -33,8 +33,6 @@ class RRTStarPlanner(Planner):
         dimension=7,
     ):
         super(RRTStarPlanner, self).__init__(robot, self_collision_manager, dimension)
-
-        self.obstacle_c_manager=obstacle_collision_manager
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.max_iter = max_iter
@@ -194,15 +192,18 @@ class RRTStarPlanner(Planner):
             names(set of 2-tup): The set of pairwise collisions. 
         """
  
+        if self.self_c_manager is None:
+            return True
+
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
             if "pedestal" in link:
                 continue
-            if link in self.self_collision_manager._objs:
+            if link in self.self_c_manager._objs:
                 transform = transformations.h_mat
-                self.self_collision_manager.set_transform(name=link, transform=transform)
-        is_self_collision = self.self_collision_manager.in_collision_internal(return_names=False, return_data=False)
-        is_obstacle_collision = self.self_collision_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
+                self.self_c_manager.set_transform(name=link, transform=transform)
+        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
+        is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
 
         name = None
         if visible_name:

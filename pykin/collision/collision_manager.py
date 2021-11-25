@@ -73,7 +73,7 @@ class CollisionManager:
         if is_collision:
             for name1, name2 in collision_datas:
                 logger.error(f"{name1} and {name2} is Collision..")
-            raise CollisionError(f"Collision..") 
+            raise CollisionError(f"Conflict confirmed. Check the joint settings again") 
     
     def add_object(self, 
                    name, 

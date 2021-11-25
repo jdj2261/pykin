@@ -189,8 +189,8 @@ def plot_animation(
     visible_text=True,
     visible_scatter=True,
     interval=100, 
-    repeat=False,
-    result=None):
+    repeat=False
+    ):
 
     """
     Plot animation
@@ -210,10 +210,6 @@ def plot_animation(
         if eef_poses is not None:
             plot_trajectories(ax, eef_poses)
           
-        if result is not None:
-            print(result[i])
-            print()
-
         plot_robot(
             robot, 
             transformations=trajectory[i], 
