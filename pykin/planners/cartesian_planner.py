@@ -59,7 +59,7 @@ class CartesianPlanner(Planner):
         self._cur_pose = self.robot.get_eef_pose(init_fk)
 
         if waypoints is None:
-            waypoints = self.genearte_waypoints(is_slerp)
+            waypoints = self.generate_waypoints(is_slerp)
 
         paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
         
@@ -163,7 +163,7 @@ class CartesianPlanner(Planner):
 
     # TODO
     # generate cubic, circular waypoints
-    def genearte_waypoints(self, is_slerp):
+    def generate_waypoints(self, is_slerp):
         if self.waypoint_type == "Linear":
             waypoints = [path for path in self._get_linear_path(is_slerp)]
         if self.waypoint_type == "Cubic":
