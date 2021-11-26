@@ -115,7 +115,14 @@ class CartesianPlanner(Planner):
                     target_posistions.append(pos)
 
             err = t_utils.compute_pose_error(self._goal_pose[:3], cur_fk[self.eef_name].pos)
-
+            
+            if collision_pose.keys():
+                logger.error(f"Failed Generate Path.. Collision may occur.")
+                # logger.warning(f"Collision Position : {collision_pose.values()}")
+                for pose in collision_pose.values():
+                    logger.warning(f"Collision Position : {pose}")
+                raise CollisionError("Conflict confirmed. Check the object position!")
+                
             if err < pos_sensitivity:
                 logger.info(f"Generate Path Successfully!! Error is {err:6f}")
                 break
@@ -125,12 +132,7 @@ class CartesianPlanner(Planner):
                 paths, target_posistions = None, None
                 break
 
-            if collision_pose.keys():
-                logger.error(f"Failed Generate Path.. Collision may occur.")
-                # logger.warning(f"Collision Position : {collision_pose.values()}")
-                for pose in collision_pose.values():
-                    logger.warning(f"Collision Position : {pose}")
-                raise CollisionError("Conflict confirmed. Check the object position!")
+
                 
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
