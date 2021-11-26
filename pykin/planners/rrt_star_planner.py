@@ -32,7 +32,11 @@ class RRTStarPlanner(Planner):
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
     ):
-        super(RRTStarPlanner, self).__init__(robot, self_collision_manager, dimension)
+        super(RRTStarPlanner, self).__init__(
+            robot, self_collision_manager, 
+            obstacle_collision_manager,
+            dimension
+        )
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.max_iter = max_iter

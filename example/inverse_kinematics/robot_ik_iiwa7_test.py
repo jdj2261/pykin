@@ -12,7 +12,7 @@ robot = SingleArm(urdf_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 target_thetas = np.array([np.random.uniform(-np.pi, np.pi) for _ in range(robot.dof)])
 init_thetas = np.random.randn(robot.dof)
 
-robot.setup_link_name("iiwa7_link_0", "iiwa7_link_7")
+robot.setup_link_name("iiwa7_link_0", "iiwa7_right_hand")
 fk = robot.forward_kin(target_thetas)
 target_pose = robot.get_eef_pose(fk)
 

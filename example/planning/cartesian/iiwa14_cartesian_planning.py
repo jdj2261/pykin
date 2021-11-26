@@ -34,7 +34,7 @@ with open(yaml_path) as f:
 init_qpos = controller_config["init_qpos"]
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("iiwa14_link_0", "iiwa14_link_ee")
+robot.setup_link_name("iiwa14_link_0", "iiwa14_right_hand")
 
 ##################################################################
 init_fk = robot.forward_kin(init_qpos)

@@ -24,7 +24,7 @@ with open(yaml_path) as f:
             controller_config = yaml.safe_load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("panda_link0", "panda_link7")
+robot.setup_link_name("panda_link0", "panda_right_hand")
 
 ##################################################################
 init_qpos = controller_config["init_qpos"]
@@ -92,6 +92,5 @@ plt.plot_animation(
     visible_obstacles=True,
     visible_collision=True, 
     interval=1, 
-    repeat=True,
-    result=None)
+    repeat=True)
 

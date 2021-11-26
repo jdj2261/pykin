@@ -32,7 +32,7 @@ mesh_path = pykin_path+"/asset/urdf/panda/"
 yaml_fpath = pykin_path+'/asset/config/panda_init_params.yaml'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-robot.setup_link_name("panda_link0", "panda_link7")
+robot.setup_link_name("panda_link0", "panda_right_hand")
 
 with open(yaml_fpath) as f:
     controller_config = yaml.safe_load(f)
@@ -51,13 +51,13 @@ milk_mesh = trimesh.load_mesh(milk_path)
 
 obs = Obstacle()
 o_manager = CollisionManager(milk_path)
-name="milk1"
-obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
+# name="milk1"
+# obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
 
-o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
-o_manager.add_object(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
-obs(name="milk2", gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]))
+# o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+# obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+# o_manager.add_object(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
+# obs(name="milk2", gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]))
 
 
 task_plan = CartesianPlanner(

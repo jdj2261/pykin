@@ -24,7 +24,7 @@ with open(yaml_path) as f:
             controller_config = yaml.safe_load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
-robot.setup_link_name("iiwa7_link_0", "iiwa7_link_ee")
+robot.setup_link_name("iiwa7_link_0", "iiwa7_right_hand")
 
 ##################################################################
 init_qpos = controller_config["init_qpos"]

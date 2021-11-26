@@ -1,5 +1,8 @@
 import numpy as np
+import sys, os
 
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+sys.path.append(pykin_path)
 from pykin.kinematics import transform as tf
 from pykin.robots.single_arm import SingleArm
 from pykin.utils import plot_utils as plt
@@ -8,7 +11,7 @@ from pykin.utils.transform_utils import compute_pose_error
 file_path = '../../asset/urdf/sawyer/sawyer.urdf'
 
 robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-robot.setup_link_name("sawyer_base", "sawyer_right_l6")
+robot.setup_link_name("sawyer_base", "sawyer_right_hand")
 
 # panda_example
 target_thetas = [0, np.pi/3, np.pi/2, np.pi/2, 0, np.pi/3, 0, 0]
