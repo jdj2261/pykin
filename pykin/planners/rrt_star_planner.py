@@ -5,7 +5,8 @@ from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc
-from pykin.utils.transform_utils import compute_pose_error
+from pykin.utils.transform_utils import get_linear_interpoation
+
 logger = create_logger('RRT Star Planner', "debug")
 
 class RRTStarPlanner(Planner):
@@ -31,6 +32,7 @@ class RRTStarPlanner(Planner):
         max_iter=3000,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
+        n_step=10
     ):
         super(RRTStarPlanner, self).__init__(
             robot, self_collision_manager, 
@@ -49,6 +51,7 @@ class RRTStarPlanner(Planner):
 
         self.arm = None
         self.dimension = dimension
+        self.n_step = n_step
         self.eef_name = self.robot.eef_name
 
         super()._setup_q_limits()
@@ -121,6 +124,7 @@ class RRTStarPlanner(Planner):
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
                 break
+
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
         
@@ -130,7 +134,14 @@ class RRTStarPlanner(Planner):
                 if step % round(1/resolution) == 0 or step == len(path)-1:
                     result_path.append(joint)
 
-        return result_path
+            interpolate_path = []
+            interpolate_paths = []
+            
+            for i in range(len(result_path)-1):
+                interpolate_path = [path.tolist() for path in self._get_linear_path(result_path[i], result_path[i+1])]
+                interpolate_paths.extend(interpolate_path)
+
+        return result_path, interpolate_paths
 
     def random_state(self):
         """
@@ -370,3 +381,9 @@ class RRTStarPlanner(Planner):
             goal_node = self.T.vertices[edge[1]]
             vertices.append((from_node, goal_node))
         return vertices
+
+    def _get_linear_path(self, init_pose, goal_pose):
+        for step in range(1, self.n_step + 1):
+            delta_t = step / self.n_step
+            qpos = get_linear_interpoation(init_pose, goal_pose, delta_t)
+            yield qpos

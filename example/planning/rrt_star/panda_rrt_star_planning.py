@@ -3,7 +3,8 @@ import sys, os
 import yaml
 import trimesh
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+parent_dir = os.path.dirname(os.getcwd())
+pykin_path = parent_dir + "/../../"
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -62,10 +63,11 @@ planner = RRTStarPlanner(
     epsilon=0.2, 
     max_iter=1000,
     gamma_RRT_star=1,
-    dimension=7
+    dimension=7,
+    n_step=5
 )
 
-joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
+joint_path, interpolated_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose, resolution=0.3)
 
 if joint_path is None :
     print("Cannot Visulization Path")
@@ -73,14 +75,11 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-resolution = 1
 print(len(joint_path))
-for step, joint in enumerate(joint_path):
-    print(joint)
-    if step % (1/resolution) == 0 or step == len(joint_path)-1:
-        transformations = robot.forward_kin(joint)
-        joint_trajectory.append(transformations)
-        eef_poses.append(transformations[robot.eef_name].pos)
+for step, joint in enumerate(interpolated_path):
+    transformations = robot.forward_kin(joint)
+    joint_trajectory.append(transformations)
+    eef_poses.append(transformations[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,

@@ -1,13 +1,15 @@
 import numpy as np
 
 
+import pykin.utils.transform_utils as t_utils
+import pykin.utils.kin_utils as k_utils
+import pykin.kinematics.jacobian as jac
+
 from pykin.planners.planner import Planner
 from pykin.utils.error_utils import OriValueError, CollisionError
 from pykin.utils.kin_utils import ShellColors as sc
 from pykin.utils.log_utils import create_logger
-import pykin.utils.transform_utils as t_utils
-import pykin.utils.kin_utils as k_utils
-import pykin.kinematics.jacobian as jac
+from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp
 
 logger = create_logger('Cartesian Planner', "debug",)
 
@@ -181,7 +183,7 @@ class CartesianPlanner(Planner):
     # generate cubic, circular waypoints
     def generate_waypoints(self, is_slerp):
         if self.waypoint_type == "Linear":
-            waypoints = [path for path in self._get_linear_path(is_slerp)]
+            waypoints = [path for path in self._get_linear_path(self._cur_pose, self._goal_pose, is_slerp)]
         if self.waypoint_type == "Cubic":
             pass
         if self.waypoint_type == "Circular":
@@ -209,13 +211,13 @@ class CartesianPlanner(Planner):
 
         return ret
 
-    def _get_linear_path(self, is_slerp):
+    def _get_linear_path(self, init_pose, goal_pose, is_slerp):
         for step in range(1, self.n_step + 1):
             delta_t = step / self.n_step
-            pos = t_utils.get_linear_interpoation(self._cur_pose[:3], self._goal_pose[:3], delta_t)
-            ori = self._cur_pose[3:]
+            pos = get_linear_interpoation(init_pose[:3], goal_pose[:3], delta_t)
+            ori = init_pose[3:]
             if is_slerp:
-                ori = t_utils.get_quaternion_slerp(self._cur_pose[3:], self._goal_pose[3:], delta_t)
+                ori = get_quaternion_slerp(init_pose[3:], goal_pose[3:], delta_t)
 
             yield (pos, ori)
 
@@ -224,11 +226,3 @@ class CartesianPlanner(Planner):
 
     def _get_cicular_path(self):
         pass
-
-    # @property
-    # def dimension(self):
-    #     return self._dimension
-
-    # @dimension.setter
-    # def dimension(self, dimesion):
-    #     self._dimension = dimesion

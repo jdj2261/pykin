@@ -99,6 +99,10 @@ class Planner(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
+    @abstractclassmethod
+    def _get_linear_path(self, init_pose, goal_pose):
+        raise NotImplementedError
+
     def _get_transformations(self, q_in):
         """
         Get transformations corresponding to q_in

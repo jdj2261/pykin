@@ -3,7 +3,8 @@ import sys, os
 import yaml
 import trimesh
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../../" )
+parent_dir = os.path.dirname(os.getcwd())
+pykin_path = parent_dir + "/../../"
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm

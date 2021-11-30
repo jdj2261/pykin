@@ -81,7 +81,6 @@ if joint_path is None and target_poses is None:
 joint_trajectory = []
 for joint in joint_path:
     transformations = robot.forward_kin(joint)
-    print(transformations[robot.eef_name].pose)
     joint_trajectory.append(transformations)
 
 print(f"Computed Goal Position : {joint_trajectory[-1][robot.eef_name].pose}")
