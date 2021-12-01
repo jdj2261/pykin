@@ -38,7 +38,7 @@ class CollisionManager:
             
         is_collision = False
 
-        def _check_init_collision():
+        def _get_collision_datas():
             nonlocal is_collision
             result = []
             for (name1, name2) in self._filter_names:
@@ -69,7 +69,7 @@ class CollisionManager:
         if robot.robot_name == "ur5e":
             return
 
-        collision_datas = _check_init_collision()
+        collision_datas = _get_collision_datas()
         if is_collision:
             for name1, name2 in collision_datas:
                 logger.error(f"{name1} and {name2} is Collision..")

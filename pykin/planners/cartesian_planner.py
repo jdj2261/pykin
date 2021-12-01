@@ -134,8 +134,6 @@ class CartesianPlanner(Planner):
                 paths, target_posistions = None, None
                 break
 
-
-                
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             
@@ -161,11 +159,10 @@ class CartesianPlanner(Planner):
             
         transformations = self._get_transformations(new_q)
         for link, transformations in transformations.items():
-            if "pedestal" in link:
-                continue
-            if link in self.self_c_manager._objs:
+           if link in self.self_c_manager._objs:
                 transform = transformations.h_mat
-                self.self_c_manager.set_transform(name=link, transform=transform)
+                A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                self.self_c_manager.set_transform(name=link, transform=A2B)
         is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
         is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
 
