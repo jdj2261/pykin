@@ -3,8 +3,9 @@ import trimesh
 import yaml
 import sys, os
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
+
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
@@ -33,13 +34,10 @@ for link, transform in goal_fk.items():
     if link in c_manager._objs:
         transform = transform.h_mat
         A2B = np.dot(transform, robot.links[link].visual.offset.h_mat)
-        print(link, A2B)
         c_manager.set_transform(name=link, transform=A2B)
 
 result, objs_in_collision, contact_data = c_manager.in_collision_internal(return_names=True, return_data=True)
 distance = c_manager.get_distances_internal()
-print(distance)
-print(result, objs_in_collision, len(contact_data))
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)

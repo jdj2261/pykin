@@ -67,7 +67,7 @@ planner = RRTStarPlanner(
     n_step=5
 )
 
-joint_path, interpolated_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose, resolution=0.3)
+interpolated_path, joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose, resolution=0.3)
 
 if joint_path is None :
     print("Cannot Visulization Path")
@@ -75,7 +75,7 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-print(len(joint_path))
+
 for step, joint in enumerate(interpolated_path):
     transformations = robot.forward_kin(joint)
     joint_trajectory.append(transformations)

@@ -3,8 +3,9 @@ import trimesh
 import yaml
 import sys, os
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../../" )
+pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
+
 from pykin.robots.single_arm import SingleArm
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform

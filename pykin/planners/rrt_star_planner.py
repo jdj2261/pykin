@@ -115,9 +115,9 @@ class RRTStarPlanner(Planner):
                     self.rewire(neighbor_indexes, new_q, new_idx)
 
                     if self.reach_to_goal(new_q):        
-                        path = self.find_path(self.T)
+                        q_paths = self.find_path(self.T)
 
-            if path is not None:
+            if q_paths is not None:
                 logger.info(f"Generate Path Successfully!!")  
                 break 
 
@@ -128,20 +128,20 @@ class RRTStarPlanner(Planner):
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
         
-        result_path = []
-        if path is not None:
-            for step, joint in enumerate(path):
-                if step % round(1/resolution) == 0 or step == len(path)-1:
-                    result_path.append(joint)
+        result_q_paths = []
+        if q_paths is not None:
+            for step, joint in enumerate(q_paths):
+                if step % round(1/resolution) == 0 or step == len(q_paths)-1:
+                    result_q_paths.append(joint)
 
             interpolate_path = []
             interpolate_paths = []
             
-            for i in range(len(result_path)-1):
-                interpolate_path = [path.tolist() for path in self._get_linear_path(result_path[i], result_path[i+1])]
+            for i in range(len(result_q_paths)-1):
+                interpolate_path = [path.tolist() for path in self._get_linear_path(result_q_paths[i], result_q_paths[i+1])]
                 interpolate_paths.extend(interpolate_path)
 
-        return result_path, interpolate_paths
+        return interpolate_paths, result_q_paths
 
     def random_state(self):
         """

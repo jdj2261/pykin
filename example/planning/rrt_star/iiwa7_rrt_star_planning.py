@@ -67,7 +67,7 @@ planner = RRTStarPlanner(
     dimension=7
 )
 
-joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
+_, joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
 
 if joint_path is None :
     print("Cannot Visulization Path")
@@ -93,6 +93,5 @@ plt.plot_animation(
     visible_obstacles=True,
     visible_collision=True, 
     interval=1, 
-    repeat=True,
-    result=None)
+    repeat=True)
 

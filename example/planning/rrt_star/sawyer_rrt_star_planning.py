@@ -77,7 +77,7 @@ planner = RRTStarPlanner(
     dimension=7
 )
 
-joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
+joint_path,_ = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
 
 if joint_path is None :
     print("Cannot Visulization Path")
