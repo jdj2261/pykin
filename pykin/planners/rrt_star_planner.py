@@ -84,7 +84,7 @@ class RRTStarPlanner(Planner):
                     break
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
-            path = None
+            q_paths = None
             self.T = Tree()
             self.cost = {}
 

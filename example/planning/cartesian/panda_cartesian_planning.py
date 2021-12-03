@@ -32,7 +32,7 @@ mesh_path = pykin_path+"/asset/urdf/panda/"
 yaml_fpath = pykin_path+'/asset/config/panda_init_params.yaml'
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-robot.setup_link_name("panda_link0", "panda_right_hand")
+robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 with open(yaml_fpath) as f:
     controller_config = yaml.safe_load(f)

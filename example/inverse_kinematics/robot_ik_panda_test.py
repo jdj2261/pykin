@@ -7,7 +7,7 @@ from pykin.utils import plot_utils as plt
 file_path = '../../asset/urdf/panda/panda.urdf'
 
 robot = SingleArm(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.0]))
-robot.setup_link_name("panda_link0", "panda_right_hand")
+robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 #panda_example
 target_thetas = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
