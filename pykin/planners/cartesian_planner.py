@@ -43,7 +43,6 @@ class CartesianPlanner(Planner):
         super()._setup_q_limits()
         super()._setup_eef_name()
     
-
     def __repr__(self):
         return 'pykin.planners.cartesian_planner.{}()'.format(type(self).__name__)
         
@@ -63,21 +62,19 @@ class CartesianPlanner(Planner):
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
 
+        self._resolution = resolution
+        self._damping = damping
+        self._pos_sensitivity = pos_sensitivity
+        self._is_slerp = is_slerp
+
         if waypoints is None:
             waypoints = self.generate_waypoints(is_slerp)
 
-        paths, target_posistions = self._compute_path_and_target_pose(waypoints, resolution, damping, epsilon, pos_sensitivity)
+        paths, target_posistions = self._compute_path_and_target_pose(waypoints, epsilon)
         
         return paths, target_posistions
 
-    def _compute_path_and_target_pose(
-        self, 
-        waypoints, 
-        resolution, 
-        damping, 
-        epsilon,
-        pos_sensitivity
-    ):
+    def _compute_path_and_target_pose(self, waypoints, epsilon):
         cnt = 0
         total_cnt = 10
         while True:
@@ -95,7 +92,7 @@ class CartesianPlanner(Planner):
                 target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
-                J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + damping**2 * np.identity(6)))
+                J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + self._damping**2 * np.identity(6)))
 
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
@@ -112,7 +109,7 @@ class CartesianPlanner(Planner):
                 cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
                 current_transform = cur_fk[self.robot.eef_name].h_mat
 
-                if step % (1/resolution) == 0 or step == len(waypoints)-1:
+                if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
                     paths.append(self._cur_qpos)
                     target_posistions.append(pos)
 
@@ -125,7 +122,7 @@ class CartesianPlanner(Planner):
                     logger.warning(f"Collision Position : {pose}")
                 raise CollisionError("Conflict confirmed. Check the object position!")
                 
-            if err < pos_sensitivity:
+            if err < self._pos_sensitivity:
                 logger.info(f"Generate Path Successfully!! Error is {err:6f}")
                 break
 
@@ -223,3 +220,35 @@ class CartesianPlanner(Planner):
 
     def _get_cicular_path(self):
         pass
+
+    @property
+    def resolution(self):
+        return self._resolution
+    
+    @resolution.setter
+    def resolution(self, resolution):
+        self._resolution = resolution
+
+    @property
+    def damping(self):
+        return self._damping
+    
+    @damping.setter
+    def damping(self, damping):
+        self._damping = damping
+
+    @property
+    def pos_sensitivity(self):
+        return self._pos_sensitivity
+    
+    @pos_sensitivity.setter
+    def pos_sensitivity(self, pos_sensitivity):
+        self._pos_sensitivity = pos_sensitivity
+
+    @property
+    def is_slerp(self):
+        return self._is_slerp
+    
+    @is_slerp.setter
+    def is_slerp(self, is_slerp):
+        self._is_slerp = is_slerp
