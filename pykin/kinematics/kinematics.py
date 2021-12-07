@@ -102,10 +102,13 @@ class Kinematics:
             for frame in frames:
                 trans = trans * frame.get_transform(thetas[cnt])
                 transformations[frame.link.name] = trans * frame.link.offset
+                
                 if frame.joint.dtype != "fixed":
                     cnt += 1
+                
                 if cnt >= len(thetas):
                     cnt -= 1     
+                
                 if self.robot_name == "baxter":
                     Baxter.add_visual_link(transformations, frame)
 

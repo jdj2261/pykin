@@ -1,5 +1,8 @@
 import numpy as np
+import sys, os
 
+pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics import transform as tf
 from pykin.utils import plot_utils as plt
