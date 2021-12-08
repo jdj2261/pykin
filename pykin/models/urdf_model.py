@@ -196,11 +196,11 @@ class URDFModel(RobotModel):
         attrib = elem_link.attrib
         link_name = attrib.get('name', 'link_' + str(idx))
         link_frame = Frame(name=link_name + '_frame',
-                      link=Link(
-                          name=link_name, 
-                          offset=Transform(), 
-                          visual=Visual(), 
-                          collision=Collision()))
+                           link=Link(
+                           name=link_name, 
+                           offset=Transform(), 
+                           visual=Visual(), 
+                           collision=Collision()))
 
         URDF_Link.set_visual(elem_link, link_frame)
         URDF_Link.set_collision(elem_link, link_frame)
@@ -221,11 +221,11 @@ class URDFModel(RobotModel):
         attrib = elem_joint.attrib
         joint_name = attrib.get('name', 'joint_' + str(idx))
         joint_frame = Frame(name=joint_name + '_frame',
-                      joint=Joint(
-                          name=joint_name, 
-                          offset=Transform(), 
-                          dtype=attrib['type'], 
-                          limit=[None, None]))
+                            joint=Joint(
+                            name=joint_name, 
+                            offset=Transform(), 
+                            dtype=attrib['type'], 
+                            limit=[None, None]))
 
         parent_tag = elem_joint.find('parent')
         joint_frame.joint.parent = parent_tag.attrib['link']

@@ -106,20 +106,10 @@ class Robot(URDFModel):
         """
         raise NotImplementedError
 
-    def forward_kin(self, thetas, desired_frames=None):
-        if desired_frames is not None:
-            self._frames = desired_frames
-        else:
-            self._convert_desired_frames_to_all_frames()
+    def forward_kin(self, thetas):
+        self._frames = self.root
         transformation = self.kin.forward_kinematics(self._frames, thetas)
         return transformation
-
-    def _convert_desired_frames_to_all_frames(self):
-        """
-        Resets robot's desired frame
-        """
-        self._frames = self.root
-        self._revolute_joint_names = super().get_revolute_joint_names()
 
     def inverse_kin(self, current_joints, target_pose, method, maxIter):
         raise NotImplementedError

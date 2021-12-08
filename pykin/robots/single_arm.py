@@ -78,7 +78,7 @@ class SingleArm(Robot):
     def _set_desired_base_frame(self):
         """
         Sets robot's desired base frame
-q
+
         Args:
             arm (str): robot arm (right or left)
         """
@@ -118,7 +118,7 @@ q
             current_joints,
             target_pose,
             method,
-            maxIter=1000)
+            maxIter)
         return joints
 
     def get_eef_pose(self, transformations=None):
