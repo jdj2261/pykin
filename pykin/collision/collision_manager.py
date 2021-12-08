@@ -8,6 +8,7 @@ try:
     import trimesh
 except BaseException:
     fcl = None
+    trimesh = None
 
 from pykin.utils.error_utils import CollisionError, NotFoundError
 from pykin.utils.transform_utils import get_h_mat
