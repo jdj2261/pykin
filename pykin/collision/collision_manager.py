@@ -32,7 +32,7 @@ class CollisionManager:
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
 
-    def filter_contact_names(self, robot, fk=None):
+    def filter_contact_names(self, robot, fk=None, geom="visual"):
 
         if fk is None:
             fk = robot.init_transformations
@@ -56,13 +56,30 @@ class CollisionManager:
                                 result.append((name1, name2))
             return result
 
+
         for link, transformation in fk.items():
-            if robot.links[link].visual.gtype == "mesh":
-                mesh_name = robot.links[link].visual.gparam.get('filename')
-                file_name = self.mesh_path + mesh_name
-                mesh = trimesh.load_mesh(file_name)
-                A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
-                self.add_object(robot.links[link].name, "mesh", mesh, A2B)
+            if geom == "visual":
+                if robot.links[link].visual.gtype == "mesh":
+                    mesh_name = robot.links[link].visual.gparam.get('filename')
+                    file_name = self.mesh_path + mesh_name
+                    mesh = trimesh.load_mesh(file_name)
+                    A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                    self.add_object(robot.links[link].name, "mesh", mesh, A2B)
+
+            if geom == "collision":
+                # if "pedestal" in link:
+                #     mesh_name = robot.links[link].visual.gparam.get('filename')
+                #     file_name = self.mesh_path + mesh_name
+                #     mesh = trimesh.load_mesh(file_name)
+                #     A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                #     self.add_object(robot.links[link].name, "mesh", mesh, A2B)
+
+                if robot.links[link].collision.gtype == "mesh":
+                    mesh_name = robot.links[link].collision.gparam.get('filename')
+                    file_name = self.mesh_path + mesh_name
+                    mesh = trimesh.load_mesh(file_name)
+                    A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+                    self.add_object(robot.links[link].name, "mesh", mesh, A2B)
 
         _, names = self.in_collision_internal(return_names=True)
         self._filter_names = copy.deepcopy(names)
