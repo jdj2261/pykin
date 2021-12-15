@@ -1,13 +1,26 @@
-import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
 # Colors of each directions axes. For ex X is green
 directions_colors = ["green", "cyan", "orange"]
+
+def init_3d_figure(name=None, figsize=(15,7.5), dpi= 80):
+    """
+    Initializes 3d figure
+    """
+    fig = plt.figure(name, figsize=figsize, dpi= dpi)
+    ax = fig.add_subplot(111, projection='3d')
+    return fig, ax
+
+
+def show_figure():
+    """
+    Show figure
+    """
+    plt.show()
 
 
 def _check_color_type(color):
@@ -225,7 +238,6 @@ def plot_obstacles(obstacles, ax):
     """
     Plot obstacles
     """
-    import trimesh
     from pykin.kinematics.transform import Transform
     for key, value in obstacles:
         o_type = value[0]
@@ -394,14 +406,6 @@ def plot_path_planner(path, ax):
 def plot_mesh(ax=None, mesh=None, A2B=np.eye(4),
               s=np.array([1.0, 1.0, 1.0]), ax_s=1, wireframe=False,
               convex_hull=False, alpha=1.0, color="k"):
-
-    try:
-        import trimesh
-    except ImportError:
-        warnings.warn(
-            "Cannot display mesh. Library 'trimesh' not installed.")
-        return ax
-
     vertices = mesh.vertices * s
     vertices = np.hstack((vertices, np.ones((len(vertices), 1))))
     vertices = np.dot(vertices, A2B.T)[:, :3]
@@ -412,17 +416,17 @@ def plot_mesh(ax=None, mesh=None, A2B=np.eye(4),
     surface.set_alpha(alpha)
     ax.add_collection3d(surface)
 
-def init_3d_figure(name=None, figsize=(15,7.5), dpi= 80):
-    """
-    Initializes 3d figure
-    """
-    fig = plt.figure(name, figsize=figsize, dpi= dpi)
-    ax = fig.add_subplot(111, projection='3d')
-    return fig, ax
+
+def plot_normal_vector(ax, vertices, normals, scale=1, linewidths=(1,), edgecolor="red"):
+    ax.quiver(
+        [vertex[0] for vertex in vertices], 
+        [vertex[1] for vertex in vertices], 
+        [vertex[2] for vertex in vertices], 
+        [normal[0]*scale for normal in normals], 
+        [normal[1]*scale for normal in normals], 
+        [normal[2]*scale for normal in normals], linewidths=linewidths, edgecolor=edgecolor)    
 
 
-def show_figure():
-    """
-    Show figure
-    """
-    plt.show()
+def plot_vertices(ax, vertices, s=5, c='k'):
+    ax.scatter([x[0] for x in vertices], [x[1] for x in vertices], 
+        [x[2] for x in vertices], s=5, c='k')

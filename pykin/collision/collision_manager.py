@@ -67,13 +67,6 @@ class CollisionManager:
                     self.add_object(robot.links[link].name, "mesh", mesh, A2B)
 
             if geom == "collision":
-                # if "pedestal" in link:
-                #     mesh_name = robot.links[link].visual.gparam.get('filename')
-                #     file_name = self.mesh_path + mesh_name
-                #     mesh = trimesh.load_mesh(file_name)
-                #     A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
-                #     self.add_object(robot.links[link].name, "mesh", mesh, A2B)
-
                 if robot.links[link].collision.gtype == "mesh":
                     mesh_name = robot.links[link].collision.gparam.get('filename')
                     file_name = self.mesh_path + mesh_name
@@ -249,8 +242,7 @@ class CollisionManager:
                     continue
 
                 if coll_names[0] is None:
-                    coll_names = (self._extract_name(contact.o2),
-                             other_manager._extract_name(contact.o1))
+                    coll_names = (self._extract_name(contact.o2), other_manager._extract_name(contact.o1))
                     reverse = True
 
                 if return_names:

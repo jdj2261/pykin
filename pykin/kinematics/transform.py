@@ -135,8 +135,11 @@ class Transform:
         Returns:
             np.array: position
         """
-        if len(pos) == 3:
-            pos = np.array(pos)
-        else:
-            raise ValueError("Size of pos must be 3.")
+        if not isinstance(pos, np.ndarray):
+            if len(pos) == 3:
+                pos = np.array(pos)
+            else:
+                raise ValueError("Size of pos must be 3.")
+        assert pos.shape == (3,)
+        
         return pos
