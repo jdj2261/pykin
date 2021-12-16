@@ -15,6 +15,7 @@ This library has been created simply by referring to [ikpy](https://github.com/P
 - Path Planning (Caretsian Planning)
 - Motion Planning (RRT-star)
 - Plot Robot Kinematic Chain and Mesh
+- Compute and Visualize grasp pose
 
 ## Installation
 
