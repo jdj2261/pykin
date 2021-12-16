@@ -1,6 +1,7 @@
 import numpy as np
 import trimesh
 np.seterr(divide='ignore', invalid='ignore')
+import pykin.utils.plot_utils as plt
 
 class GraspManager:
     def __init__(self, gripper=None, max_width=None):
@@ -9,10 +10,38 @@ class GraspManager:
             self.grasp_c_manager = trimesh.collision.CollisionManager()
         self.max_width = max_width
     
-    def compute_grasp_pose(self):
-        T = np.eye(4)
+        self.mesh_point = np.zeros(3)
+        self.contact_points = None
+        self.x = None
+        self.y = None
+        self.z = None
 
-        return T
+    def compute_grasp_pose(self, mesh, approach_distance=0.08, limit_angle=0.02):
+        while True:
+            vertices, normals = self.surface_sampling(mesh, n_samples=2)
+            if self.is_force_closure(vertices, normals, limit_angle):
+                break
+
+        self.contact_points = vertices
+
+        p1 = self.contact_points[0]
+        p2 = self.contact_points[1]
+        center_point = (p1 + p2) / 2
+
+        self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [center_point])
+
+        self.y = self.normalize(p1 - p2)
+        self.z = center_point - self.mesh_point[0]
+        self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
+        self.x = self.normalize(np.cross(self.y, self.z))
+
+        grasp_pose = np.eye(4)
+        grasp_pose[:3,0] = self.x
+        grasp_pose[:3,1] = self.y
+        grasp_pose[:3,2] = self.z
+        grasp_pose[:3,3] = self.mesh_point - approach_distance * self.z
+
+        return grasp_pose
 
     def compute_robust_force_closure(self, mesh, vertices, normals, limit_radian=0.02, n_trials=5):
         sigma = 1e-3
@@ -41,7 +70,7 @@ class GraspManager:
         vectorAB = vectorB - vectorA
         distance = np.linalg.norm(vectorAB)
 
-        unit_vectorAB = GraspManager.normalize(vectorAB)
+        unit_vectorAB = self.normalize(vectorAB)
         angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
 
         unit_vectorBA = -1 * unit_vectorAB
@@ -86,6 +115,9 @@ class GraspManager:
     def normalize(vec):
         return vec / np.linalg.norm(vec)
 
-    @staticmethod
-    def visualize_grasp_point():
-        pass
+    def visualize_grasp_pose(self, ax):
+        plt.plot_vertices(ax, self.contact_points)
+        plt.plot_vertices(ax, self.mesh_point)   
+        plt.plot_normal_vector(ax, self.mesh_point, self.x, scale=0.1, edgecolor="red")    
+        plt.plot_normal_vector(ax, self.mesh_point, self.y, scale=0.1, edgecolor="green")    
+        plt.plot_normal_vector(ax, self.mesh_point, self.z, scale=0.1, edgecolor="blue")  
