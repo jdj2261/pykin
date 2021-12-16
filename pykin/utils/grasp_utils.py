@@ -3,13 +3,16 @@ import trimesh
 np.seterr(divide='ignore', invalid='ignore')
 
 class GraspManager:
-    def __init__(self, gripper=None):
+    def __init__(self, gripper=None, max_width=None):
         if gripper is not None:
             self.gripper = gripper
             self.grasp_c_manager = trimesh.collision.CollisionManager()
-
+        self.max_width = max_width
+    
     def compute_grasp_pose(self):
-        pass
+        T = np.eye(4)
+
+        return T
 
     def compute_robust_force_closure(self, mesh, vertices, normals, limit_radian=0.02, n_trials=5):
         sigma = 1e-3
@@ -28,22 +31,28 @@ class GraspManager:
                 count += 1
         return count/n_trials
 
-    def is_force_closure(self, vertices, normals, limit_radian=0.05):
-        normal0 = -1.0 * normals[0] / (1.0 * np.linalg.norm(normals[0]))
-        normal1 = -1.0 * normals[1] / (1.0 * np.linalg.norm(normals[1]))
+    def is_force_closure(self, vertices, normals, limit_angle=0.1):
+        vectorA = vertices[0]
+        vectorB = vertices[1]
 
-        alpha = np.arctan(limit_radian)
-        line = vertices[0] - vertices[1]
-        
-        line = line / np.linalg.norm(line)
-        angle1 = np.arccos(normal1.dot(line))
+        normalA = -normals[0]
+        normalB = -normals[1]
 
-        line = -1 * line
-        angle2 = np.arccos(normal0.dot(line))
+        vectorAB = vectorB - vectorA
+        distance = np.linalg.norm(vectorAB)
 
+        unit_vectorAB = GraspManager.normalize(vectorAB)
+        angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
 
-        if angle1 > alpha or angle2 > alpha:
+        unit_vectorBA = -1 * unit_vectorAB
+        angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
+
+        if distance > self.max_width:
             return False
+
+        if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
+            return False
+
         return True
 
     @staticmethod
@@ -54,38 +63,29 @@ class GraspManager:
 
     @staticmethod
     def find_intersections(mesh, p1, p2):
-        pass
-    
+        ray_origin = (p1 + p2) / 2
+        ray_length = np.linalg.norm(p1 - p2)
+        ray_dir = (p2 - p1) / ray_length
+        locations, index_ray, index_tri = mesh.ray.intersects_location(
+            ray_origins=[ray_origin, ray_origin],
+            ray_directions=[ray_dir, -ray_dir],
+            multiple_hits=True)
+        if len(locations) == 0:
+            return [], []
+        dist_to_center = np.linalg.norm(locations - ray_origin, axis=1)
+        dist_mask = dist_to_center <= (ray_length / 2) # only keep intersections on the segment.
+        on_segment = locations[dist_mask]
+        faces = index_tri[dist_mask]
+        return on_segment, faces
+
+    @staticmethod
+    def projection(v, u):
+        return np.dot(v, u) / np.dot(u, u) * u
+
+    @staticmethod
+    def normalize(vec):
+        return vec / np.linalg.norm(vec)
+
     @staticmethod
     def visualize_grasp_point():
         pass
-
-# if __name__ == "__main__":
-#     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
-
-#     gm = GraspManager()
-#     mesh = trimesh.load('../../asset/objects/meshes/box_goal.stl')
-#     mesh.apply_scale(0.001)
-
-#     while True:
-
-#         # vertices, normals = gm.surface_sampling(mesh, n_samples=2)
-#         # result = gm.compute_robust_force_closure(mesh, vertices, normals)
-#         # if result > 0.2:
-#         #     break
-        
-#         vertices, normals = gm.surface_sampling(mesh, n_samples=2)
-#         if gm.is_force_closure(vertices, normals, limit_radian=0.02):
-#             break
-
-#     offset_pos = np.array([0.5, 0.5, 0.5])
-#     vertices = vertices + np.tile(offset_pos, (2,1))
-    
-#     plt.plot_mesh(ax=ax, mesh=mesh, A2B=Transform(pos=offset_pos).h_mat, alpha=0.1, color=[0.5, 0, 0])
-#     plt.plot_vertices(ax, vertices)
-#     plt.plot_normal_vector(ax, vertices, -normals, scale=0.1)    
-#     plt.show_figure()
-    
-
-
-

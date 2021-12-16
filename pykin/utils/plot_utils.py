@@ -418,6 +418,12 @@ def plot_mesh(ax=None, mesh=None, A2B=np.eye(4),
 
 
 def plot_normal_vector(ax, vertices, normals, scale=1, linewidths=(1,), edgecolor="red"):
+    
+    if vertices.ndim != 2:
+        vertices = vertices.reshape(1, -1)
+    if normals.ndim != 2:
+        normals = normals.reshape(1, -1)
+
     ax.quiver(
         [vertex[0] for vertex in vertices], 
         [vertex[1] for vertex in vertices], 
@@ -428,5 +434,7 @@ def plot_normal_vector(ax, vertices, normals, scale=1, linewidths=(1,), edgecolo
 
 
 def plot_vertices(ax, vertices, s=5, c='k'):
+    if vertices.ndim != 2:
+        vertices = vertices.reshape(1, -1)
     ax.scatter([x[0] for x in vertices], [x[1] for x in vertices], 
         [x[2] for x in vertices], s=5, c='k')
