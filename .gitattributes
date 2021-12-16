@@ -1,1 +1,3 @@
 *.ipynb linguist-detectable=false
+tutorials/* linguist-documentation=false
+tutorials/* linguist-vendored=false
