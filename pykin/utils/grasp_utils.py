@@ -42,13 +42,6 @@ class GraspManager:
         transforms, is_grasp_success= self._compute_posture(robot, grasp_pose, n_steps, epsilon)
         return transforms, is_grasp_success
 
-    def _compute_kinematics(self, robot, grasp_pose):
-        eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
-        qpos = robot.inverse_kin(np.random.randn(7), eef_pose)
-        transforms = robot.forward_kin(np.array(qpos))
-
-        return eef_pose, qpos, transforms
-
     def _compute_posture(self, robot, grasp_pose, n_steps, epsilon):
         eef_pose, qpos, transforms = self._compute_kinematics(robot, grasp_pose)
         is_grasp_success = False
@@ -69,6 +62,13 @@ class GraspManager:
             return transforms, is_grasp_success
 
         return None, is_grasp_success
+
+    def _compute_kinematics(self, robot, grasp_pose):
+        eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
+        qpos = robot.inverse_kin(np.random.randn(7), eef_pose)
+        transforms = robot.forward_kin(np.array(qpos))
+
+        return eef_pose, qpos, transforms
 
     def compute_grasp_pose(self, mesh, approach_distance=0.08, limit_angle=0.02):
         while True:

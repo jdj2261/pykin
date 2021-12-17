@@ -291,4 +291,14 @@ $ git submodule update
     |                         iiwa14                          |                          panda                           |                          sawyer                           |
     | :-----------------------------------------------------: | :------------------------------------------------------: | :-------------------------------------------------------: |
     | <img src="img/iiwa_rrt.gif" weight="500" height="200"/> | <img src="img/panda_rrt.gif" weight="500" height="200"/> | <img src="img/sawyer_rrt.gif" weight="500" height="200"/> |
+  
+- Grasping
 
+  You can see an visualization the posture for the robot to grasp an object.
+
+  - Panda Grasping
+
+  
+    |                      pre grasp posture                       |                        grasp posture                         |
+    | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
