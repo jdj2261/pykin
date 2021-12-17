@@ -4,6 +4,9 @@ import copy
 np.seterr(divide='ignore', invalid='ignore')
 import pykin.utils.plot_utils as plt
 import pykin.utils.transform_utils as t_utils
+from pykin.utils.log_utils import create_logger
+
+logger = create_logger('Grasping Manager', "debug")
 
 class GraspManager:
     def __init__(self, gripper=None, max_width=None):
@@ -18,64 +21,12 @@ class GraspManager:
         self.y = None
         self.z = None
 
-    def get_pre_grasp_posture(
-        self, 
-        robot, 
-        grasp_pose=None, 
-        desired_distance=0.1,
-        n_steps=3, 
-        epsilon=1e-2
-    ):
-        assert grasp_pose is not None
-        
-        pre_grasp_posture = np.eye(4)
-        grasp_posure = copy.deepcopy(grasp_pose)
-
-        pre_grasp_posture[:3, :3] = grasp_posure[:3, :3]
-        pre_grasp_posture[:3, 3] = grasp_posure[:3, 3] - desired_distance * grasp_posure[:3,2]
-        
-        transforms, is_grasp_success= self._compute_posture(robot, pre_grasp_posture, n_steps, epsilon)
-        return transforms, is_grasp_success
-
-    def get_grasp_posture(self, robot, grasp_pose=None, n_steps=3, epsilon=1e-1):
-        assert grasp_pose is not None
-        transforms, is_grasp_success= self._compute_posture(robot, grasp_pose, n_steps, epsilon)
-        return transforms, is_grasp_success
-
-    def _compute_posture(self, robot, grasp_pose, n_steps, epsilon):
-        eef_pose, qpos, transforms = self._compute_kinematics(robot, grasp_pose)
-        is_grasp_success = False
-
-        for _ in range(n_steps):
-            transforms = robot.forward_kin(np.array(qpos))
-            goal_pose = transforms[robot.eef_name].h_mat
-
-            is_joint_limit = robot.check_limit_joint(qpos)
-            error_pose = robot.get_pose_error(grasp_pose, goal_pose)
-            print(error_pose)
-            if is_joint_limit and error_pose < epsilon:
-                is_grasp_success = True
-                break
-            qpos = robot.inverse_kin(np.random.randn(len(qpos)), eef_pose, method="LM")
-
-        if is_grasp_success:
-            return transforms, is_grasp_success
-
-        return None, is_grasp_success
-
-    def _compute_kinematics(self, robot, grasp_pose):
-        eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
-        qpos = robot.inverse_kin(np.random.randn(7), eef_pose)
-        transforms = robot.forward_kin(np.array(qpos))
-
-        return eef_pose, qpos, transforms
-
     def compute_grasp_pose(self, mesh, approach_distance=0.08, limit_angle=0.02):
         while True:
             vertices, normals = self.surface_sampling(mesh, n_samples=2)
             if self.is_force_closure(vertices, normals, limit_angle):
                 break
-
+        
         self.contact_points = vertices
 
         p1 = self.contact_points[0]
@@ -137,8 +88,82 @@ class GraspManager:
 
         if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
             return False
-
+        
         return True
+
+    def get_pre_grasp_posture(
+        self, 
+        robot, 
+        grasp_pose=None, 
+        desired_distance=0.1,
+        n_steps=3, 
+        epsilon=1e-2
+    ):
+        assert grasp_pose is not None
+        
+        pre_grasp_posture = np.eye(4)
+        grasp_posure = copy.deepcopy(grasp_pose)
+
+        pre_grasp_posture[:3, :3] = grasp_posure[:3, :3]
+        pre_grasp_posture[:3, 3] = grasp_posure[:3, 3] - desired_distance * grasp_posure[:3,2]
+        
+        transforms, is_grasp_success= self._compute_posture(robot, pre_grasp_posture, n_steps, epsilon)
+        
+        self._show_logger(is_grasp_success, text="pre")
+
+        return transforms, is_grasp_success
+
+    def get_grasp_posture(self, robot, grasp_pose=None, n_steps=3, epsilon=1e-1):
+        assert grasp_pose is not None
+        transforms, is_grasp_success= self._compute_posture(robot, grasp_pose, n_steps, epsilon)
+        
+        self._show_logger(is_grasp_success, text="post")
+
+        return transforms, is_grasp_success
+
+    def _compute_posture(self, robot, grasp_pose, n_steps, epsilon):
+        eef_pose, qpos, transforms = self._compute_kinematics(robot, grasp_pose)
+        is_grasp_success = False
+
+        for _ in range(n_steps):
+            transforms = robot.forward_kin(np.array(qpos))
+            goal_pose = transforms[robot.eef_name].h_mat
+
+            self.is_joint_limit = robot.check_limit_joint(qpos)
+            self.error_pose = robot.get_pose_error(grasp_pose, goal_pose)
+
+            if self.is_joint_limit and self.error_pose < epsilon:
+                is_grasp_success = True
+                break
+            qpos = robot.inverse_kin(np.random.randn(len(qpos)), eef_pose, method="LM")
+
+        if is_grasp_success:
+            return transforms, is_grasp_success
+
+        return None, is_grasp_success
+
+    def _compute_kinematics(self, robot, grasp_pose):
+        eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
+        qpos = robot.inverse_kin(np.random.randn(7), eef_pose)
+        transforms = robot.forward_kin(np.array(qpos))
+
+        return eef_pose, qpos, transforms
+
+    def _show_logger(self, is_success, text):
+        if is_success:
+            if text == "pre":
+                logger.info(f"Success to get pre grasp posure.")
+            else:
+                logger.info(f"Success to get grasp posure.")
+        else:
+            if text == "pre":
+                logger.error("Failed to get pre grasp posure.")
+            else:
+                logger.error("Failed to get grasp posure.")
+            
+            logger.error("The pose error is {:.6f}".format(self.error_pose))
+            if not self.is_joint_limit:
+                logger.error("The joint limit was exceeded.")
 
     @staticmethod
     def surface_sampling(mesh, n_samples=2):
