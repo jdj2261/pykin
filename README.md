@@ -1,4 +1,4 @@
-# pykin
+pykin
 
 [![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
@@ -298,7 +298,7 @@ $ git submodule update
 
   - Panda Grasping
 
-  
     |                      pre grasp posture                       |                        grasp posture                         |
     | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
+    | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
+
