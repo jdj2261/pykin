@@ -1,7 +1,6 @@
 import numpy as np
 import trimesh
 import copy
-import random
 np.seterr(divide='ignore', invalid='ignore')
 import pykin.utils.plot_utils as plt
 import pykin.utils.transform_utils as t_utils
@@ -34,39 +33,32 @@ class GraspManager:
 
         p1 = self.contact_points[0]
         p2 = self.contact_points[1]
-        self.center_point = (p1 + p2) / 2
 
-        # #TODO : change to get mesh_point
-        self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [self.center_point])
+        center_point = (p1 + p2) / 2
+        line = p2 - p1 
         
-        for norm_vector in self.get_normal_vectors(self.center_point,20):
-            self.y = self.normalize(p1 - p2)
-            self.z = norm_vector
-            # self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
-            self.x = self.normalize(np.cross(self.y, self.z))
+        # #TODO : change to get mesh_point
+        # normal_vector = self.compute_normal_vector(mesh, line)
+        for i, normal_vector in enumerate(self.compute_normal_vector(line, n_trials=5)):
 
+            self.y = self.normalize(line)
+            
+            locations, _, _ = mesh.ray.intersects_location(
+            ray_origins=[center_point,],
+            ray_directions=[-normal_vector])
+            if len(locations) != 0:
+                self.mesh_point = locations[0]
+            print(i+1)
+            self.z = self.normalize(center_point - self.mesh_point)
+            self.x = self.normalize(np.cross(self.y, self.z))
+        
             grasp_pose = np.eye(4)
             grasp_pose[:3,0] = self.x
             grasp_pose[:3,1] = self.y
             grasp_pose[:3,2] = self.z
-            grasp_pose[:3,3] = self.center_point
+            grasp_pose[:3,3] = self.mesh_point - approach_distance * self.z
 
-            # print(grasp_pose)
             yield grasp_pose
-        # self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [center_point])
-
-        # self.y = self.normalize(p1 - p2)
-        # self.z = center_point - self.mesh_point[0]
-        # self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
-        # self.x = self.normalize(np.cross(self.y, self.z))
-
-        # grasp_pose = np.eye(4)
-        # grasp_pose[:3,0] = self.x
-        # grasp_pose[:3,1] = self.y
-        # grasp_pose[:3,2] = self.z
-        # grasp_pose[:3,3] = self.mesh_point - approach_distance * self.z
-
-        # return grasp_pose
 
     def compute_robust_force_closure(self, mesh, vertices, normals, limit_radian=0.02, n_trials=5):
         sigma = 1e-3
@@ -114,7 +106,7 @@ class GraspManager:
         robot, 
         grasp_pose=None, 
         desired_distance=0.1,
-        n_steps=3, 
+        n_steps=1, 
         epsilon=1e-2
     ):
         assert grasp_pose is not None
@@ -131,7 +123,7 @@ class GraspManager:
 
         return transforms, is_grasp_success
 
-    def get_grasp_posture(self, robot, grasp_pose=None, n_steps=3, epsilon=1e-1):
+    def get_grasp_posture(self, robot, grasp_pose=None, n_steps=1, epsilon=1e-5):
         assert grasp_pose is not None
         transforms, is_grasp_success= self._compute_posture(robot, grasp_pose, n_steps, epsilon)
         
@@ -191,12 +183,17 @@ class GraspManager:
             multiple_hits=False)
         return locations, face_ind
 
-    def get_normal_vectors(self, point, n_trials=10):
-        normal_vector = self.normalize(point)
-        for theta in np.linspace(0, np.pi*2, n_trials):
-            R = t_utils.get_matrix_from_rpy([0, theta, 0])
-            vector = np.dot(R, normal_vector)
-            yield vector
+    def compute_normal_vector(self, vector, n_trials=10):
+        norm_vector = self.normalize(vector)
+        e1, e2 = np.eye(3)[:2]
+        v1 = e1 - self.projection(e1, norm_vector)
+        v1 = self.normalize(v1)
+        v2 = e2 - self.projection(e2, norm_vector) - self.projection(e2, v1)
+        v2 = self.normalize(v2)
+
+        for theta in np.linspace(-np.pi/2, np.pi/2, n_trials):
+            normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
+            yield normal_dir
 
     @staticmethod
     def surface_sampling(mesh, n_samples=2):
@@ -230,8 +227,8 @@ class GraspManager:
         return vec / np.linalg.norm(vec)
 
     def visualize_grasp_pose(self, ax):
-        plt.plot_vertices(ax, self.contact_points)
-        plt.plot_vertices(ax, self.mesh_point)   
-        plt.plot_normal_vector(ax, self.mesh_point, self.x, scale=0.1, edgecolor="red")    
-        plt.plot_normal_vector(ax, self.mesh_point, self.y, scale=0.1, edgecolor="green")    
-        plt.plot_normal_vector(ax, self.mesh_point, self.z, scale=0.1, edgecolor="blue")  
+        plt.plot_vertices(ax, self.contact_points, s=10, c='red')
+        # plt.plot_vertices(ax, self.mesh_point)   
+        # plt.plot_normal_vector(ax, self.mesh_point, self.x, scale=0.1, edgecolor="red")    
+        # plt.plot_normal_vector(ax, self.mesh_point, self.y, scale=0.1, edgecolor="green")    
+        # plt.plot_normal_vector(ax, self.mesh_point, self.z, scale=0.1, edgecolor="blue")  

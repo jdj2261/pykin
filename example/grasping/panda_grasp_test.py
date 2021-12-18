@@ -1,5 +1,6 @@
 import numpy as np
 import trimesh
+import yaml
 import sys, os
 
 pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
@@ -10,7 +11,6 @@ from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.grasp_utils import GraspManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager
-
 import pykin.utils.plot_utils as plt
 import  pykin.utils.transform_utils as t_utils
 
@@ -36,60 +36,70 @@ obj_mesh.apply_translation(offset_pos)
 color = obj_mesh.visual.face_colors[0][:3]/255
 plt.plot_mesh(ax=ax, mesh=obj_mesh, alpha=0.2, color=color)
 
-for transform in gm.compute_grasp_pose(obj_mesh):
-    # print(transform)
-    plt.plot_vertices(ax, gm.contact_points)
-    plt.plot_vertices(ax, gm.mesh_point, c='red')
-    # plt.plot_normal_vector(ax, transform[:3, 3], transform[:3, 0], scale=0.05, edgecolor="red")    
-    plt.plot_normal_vector(ax, transform[:3, 3], transform[:3, 1], scale=0.05, edgecolor="green")    
-    plt.plot_normal_vector(ax, transform[:3, 3], transform[:3, 2], scale=0.05, edgecolor="blue")  
-    plt.plot_vertices(ax, transform[:3, 3])
+# grasp_pose = gm.compute_grasp_pose(obj_mesh, 0.08, 0.02)
 
-plt.show_figure()
-# while True:
-#     grasp_pose = gm.compute_grasp_pose(obj_mesh, 0.08, 0.02)
-#     transforms, is_grasp_success = gm.get_grasp_posture(robot, grasp_pose, epsilon=0.5)
-#     post_transforms, is_post_grasp_success = gm.get_pre_grasp_posture(robot, grasp_pose, epsilon=0.5)
-#     if is_post_grasp_success:
-#         break
+# line = gm.contact_points[1] - gm.contact_points[0]
 
-# gripper_name = ["right_gripper", "leftfinger", "rightfinger"]
-# mesh_path = pykin_path+"/asset/urdf/panda/"
-
-# for link, transform in post_transforms.items():
-#     if "pedestal" in link:
-#         continue
-#     if robot.links[link].collision.gtype == "mesh":
-#         mesh_name = mesh_path + robot.links[link].collision.gparam.get('filename')
-#         mesh = trimesh.load_mesh(mesh_name)
-#         A2B = np.dot(transform.h_mat, robot.links[link].collision.offset.h_mat)
-#         color = robot.links[link].collision.gparam.get('color')
-
-#         if color is None:
-#             color = np.array([0.2, 0, 0])
-#         else:
-#             color = np.array([color for color in color.values()]).flatten()
-#             if "link" in link:
-#                 color = np.array([0.2, 0.2, 0.2])
-#         mesh.visual.face_colors = color
-#         # if link in gripper_name:
-#         # plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=1.0, color=color)
-#         # scene.add_geometry(mesh, transform=A2B)  
-
-# gripper_pose = post_transforms["panda_right_hand"].h_mat
-
-# gripper_pos = gripper_pose[:3, 3]
-# gripper_ori_x = gripper_pose[:3, 0]
-# gripper_ori_y = gripper_pose[:3, 1]
-# gripper_ori_z = gripper_pose[:3, 2]
-
-# # print(gripper_pose, t_eef_pose)
-# plt.plot_basis(robot, ax)
-# gm.visualize_grasp_pose(ax)
-
-# plt.plot_vertices(ax, gripper_pos)   
-# plt.plot_normal_vector(ax, gripper_pos, gripper_ori_x, scale=0.2, edgecolor="red")    
-# plt.plot_normal_vector(ax, gripper_pos, gripper_ori_y, scale=0.2, edgecolor="green")    
-# plt.plot_normal_vector(ax, gripper_pos, gripper_ori_z, scale=0.2, edgecolor="blue")   
- 
+# for pose in gm.compute_grasp_pose(obj_mesh, 0.08, 0.02):
+#     plt.plot_vertices(ax, gm.contact_points, s=10, c='red')
+#     pos = pose[:3, 3]
+#     plt.plot_vertices(ax, pos)    
+#     # plt.plot_normal_vector(ax, pos, gm.x, scale=0.05, edgecolor="red")    
+#     plt.plot_normal_vector(ax, pos, gm.y, scale=0.05, edgecolor="green")    
+#     plt.plot_normal_vector(ax, pos, gm.z, scale=0.02, edgecolor="blue") 
 # plt.show_figure()
+    
+while True:
+    # grasp_pose = gm.compute_grasp_pose(obj_mesh, 0.08, 0.02)
+    test = []
+    for grasp_pose in gm.compute_grasp_pose(obj_mesh, approach_distance=0.08, limit_angle=0.1):
+        transforms, is_grasp_success = gm.get_grasp_posture(robot, grasp_pose, epsilon=0.5)
+        # post_transforms, is_post_grasp_success = gm.get_pre_grasp_posture(robot, grasp_pose, epsilon=0.5)
+        test.append(grasp_pose[:3, 3])
+
+        if is_grasp_success:
+            break
+
+    if is_grasp_success:
+        break
+plt.plot_vertices(ax, np.array(test))
+gm.visualize_grasp_pose(ax)
+gripper_name = ["right_gripper", "leftfinger", "rightfinger"]
+mesh_path = pykin_path+"/asset/urdf/panda/"
+
+for link, transform in transforms.items():
+    if "pedestal" in link:
+        continue
+    if robot.links[link].collision.gtype == "mesh":
+        mesh_name = mesh_path + robot.links[link].collision.gparam.get('filename')
+        mesh = trimesh.load_mesh(mesh_name)
+        A2B = np.dot(transform.h_mat, robot.links[link].collision.offset.h_mat)
+        color = robot.links[link].collision.gparam.get('color')
+
+        if color is None:
+            color = np.array([0.2, 0, 0])
+        else:
+            color = np.array([color for color in color.values()]).flatten()
+            if "link" in link:
+                color = np.array([0.2, 0.2, 0.2])
+        mesh.visual.face_colors = color
+        # if link in gripper_name:
+        plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=1.0, color=color)
+        # scene.add_geometry(mesh, transform=A2B)  
+
+gripper_pose = transforms["panda_right_hand"].h_mat
+
+gripper_pos = gripper_pose[:3, 3]
+gripper_ori_x = gripper_pose[:3, 0]
+gripper_ori_y = gripper_pose[:3, 1]
+gripper_ori_z = gripper_pose[:3, 2]
+
+# print(gripper_pose, t_eef_pose)
+plt.plot_basis(robot, ax)
+
+plt.plot_vertices(ax, gripper_pos)   
+plt.plot_normal_vector(ax, gripper_pos, gripper_ori_x, scale=0.2, edgecolor="red")    
+plt.plot_normal_vector(ax, gripper_pos, gripper_ori_y, scale=0.2, edgecolor="green")    
+plt.plot_normal_vector(ax, gripper_pos, gripper_ori_z, scale=0.2, edgecolor="blue")   
+ 
+plt.show_figure()
