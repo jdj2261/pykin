@@ -437,4 +437,4 @@ def plot_vertices(ax, vertices, s=5, c='k'):
     if vertices.ndim != 2:
         vertices = vertices.reshape(1, -1)
     ax.scatter([x[0] for x in vertices], [x[1] for x in vertices], 
-        [x[2] for x in vertices], s=5, c='k')
+        [x[2] for x in vertices], s=s, c=c)

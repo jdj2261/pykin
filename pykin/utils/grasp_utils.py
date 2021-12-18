@@ -1,6 +1,7 @@
 import numpy as np
 import trimesh
 import copy
+import random
 np.seterr(divide='ignore', invalid='ignore')
 import pykin.utils.plot_utils as plt
 import pykin.utils.transform_utils as t_utils
@@ -20,6 +21,8 @@ class GraspManager:
         self.x = None
         self.y = None
         self.z = None
+        self.is_joint_limit = False
+        self.error_pose = None
 
     def compute_grasp_pose(self, mesh, approach_distance=0.08, limit_angle=0.02):
         while True:
@@ -31,24 +34,39 @@ class GraspManager:
 
         p1 = self.contact_points[0]
         p2 = self.contact_points[1]
-        center_point = (p1 + p2) / 2
+        self.center_point = (p1 + p2) / 2
 
-        #TODO : change to get mesh_point
-        # self.mesh_point = self.compute_mesh_point(mesh, center_point)
-        self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [center_point])
+        # #TODO : change to get mesh_point
+        self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [self.center_point])
+        
+        for norm_vector in self.get_normal_vectors(self.center_point,20):
+            self.y = self.normalize(p1 - p2)
+            self.z = norm_vector
+            # self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
+            self.x = self.normalize(np.cross(self.y, self.z))
 
-        self.y = self.normalize(p1 - p2)
-        self.z = center_point - self.mesh_point[0]
-        self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
-        self.x = self.normalize(np.cross(self.y, self.z))
+            grasp_pose = np.eye(4)
+            grasp_pose[:3,0] = self.x
+            grasp_pose[:3,1] = self.y
+            grasp_pose[:3,2] = self.z
+            grasp_pose[:3,3] = self.center_point
 
-        grasp_pose = np.eye(4)
-        grasp_pose[:3,0] = self.x
-        grasp_pose[:3,1] = self.y
-        grasp_pose[:3,2] = self.z
-        grasp_pose[:3,3] = self.mesh_point - approach_distance * self.z
+            # print(grasp_pose)
+            yield grasp_pose
+        # self.mesh_point, _, _ = trimesh.proximity.closest_point(mesh, [center_point])
 
-        return grasp_pose
+        # self.y = self.normalize(p1 - p2)
+        # self.z = center_point - self.mesh_point[0]
+        # self.z = self.normalize(self.z - self.projection(self.z, self.y)) # Gram-Schmidt
+        # self.x = self.normalize(np.cross(self.y, self.z))
+
+        # grasp_pose = np.eye(4)
+        # grasp_pose[:3,0] = self.x
+        # grasp_pose[:3,1] = self.y
+        # grasp_pose[:3,2] = self.z
+        # grasp_pose[:3,3] = self.mesh_point - approach_distance * self.z
+
+        # return grasp_pose
 
     def compute_robust_force_closure(self, mesh, vertices, normals, limit_radian=0.02, n_trials=5):
         sigma = 1e-3
@@ -165,15 +183,26 @@ class GraspManager:
             if not self.is_joint_limit:
                 logger.error("The joint limit was exceeded.")
 
+    def find_grasp_vertices(self, mesh, vectorA, vectorB):
+        vectorAB = vectorB - vectorA
+        locations, index_ray, face_ind = mesh.ray.intersects_location(
+            ray_origins=[vectorA, vectorB],
+            ray_directions=[vectorB - vectorA, vectorA - vectorB],
+            multiple_hits=False)
+        return locations, face_ind
+
+    def get_normal_vectors(self, point, n_trials=10):
+        normal_vector = self.normalize(point)
+        for theta in np.linspace(0, np.pi*2, n_trials):
+            R = t_utils.get_matrix_from_rpy([0, theta, 0])
+            vector = np.dot(R, normal_vector)
+            yield vector
+
     @staticmethod
     def surface_sampling(mesh, n_samples=2):
         vertices, face_ind = trimesh.sample.sample_surface(mesh, count=n_samples)
         normals = mesh.face_normals[face_ind]
         return vertices, normals
-
-    @staticmethod
-    def compute_mesh_point(mesh, point):
-        pass
 
     @staticmethod
     def find_intersections(mesh, p1, p2):
