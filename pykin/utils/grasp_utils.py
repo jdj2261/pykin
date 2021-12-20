@@ -9,11 +9,19 @@ from pykin.utils.log_utils import create_logger
 logger = create_logger('Grasping Manager', "debug")
 
 class GraspManager:
-    def __init__(self, gripper=None, max_width=None):
+    def __init__(
+        self, 
+        gripper=None, 
+        max_width=None,
+        self_c_manager=None,
+        obstacle_c_manager=None
+        ):
         if gripper is not None:
             self.gripper = gripper
-            self.grasp_c_manager = trimesh.collision.CollisionManager()
+
         self.max_width = max_width
+        self.c_manager = self_c_manager
+        self.o_manager = obstacle_c_manager
     
         self.mesh_point = np.zeros(3)
         self.contact_points = None
@@ -23,7 +31,9 @@ class GraspManager:
         self.is_joint_limit = False
         self.error_pose = None
 
-    def compute_grasp_pose(self, mesh, approach_distance=0.08, limit_angle=0.02):
+    def compute_grasp_pose(self, mesh, obs_pose, approach_distance=0.08, limit_angle=0.02, n_trials=5):
+        mesh = copy.deepcopy(mesh)
+        mesh.apply_translation(obs_pose)
         while True:
             vertices, normals = self.surface_sampling(mesh, n_samples=2)
             if self.is_force_closure(vertices, normals, limit_angle):
@@ -36,10 +46,8 @@ class GraspManager:
 
         center_point = (p1 + p2) / 2
         line = p2 - p1 
-        
-        # #TODO : change to get mesh_point
-        # normal_vector = self.compute_normal_vector(mesh, line)
-        for i, normal_vector in enumerate(self.compute_normal_vector(line, n_trials=5)):
+
+        for i, normal_vector in enumerate(self.compute_normal_vector(line, n_trials)):
 
             self.y = self.normalize(line)
             
@@ -117,19 +125,28 @@ class GraspManager:
         pre_grasp_posture[:3, :3] = grasp_posure[:3, :3]
         pre_grasp_posture[:3, 3] = grasp_posure[:3, 3] - desired_distance * grasp_posure[:3,2]
         
-        transforms, is_grasp_success= self._compute_posture(robot, pre_grasp_posture, n_steps, epsilon)
+        transforms, is_get_posture = self._compute_posture(robot, pre_grasp_posture, n_steps, epsilon)
         
-        self._show_logger(is_grasp_success, text="pre")
+        if is_get_posture:
+            # self._show_logger(is_get_posture, text="pre")
+            if self.collision_free(robot, transforms):
+                return transforms, is_get_posture
+            print("Pre Collision..")
+        self._show_logger(is_get_posture, text="pre")
+        return None, False
 
-        return transforms, is_grasp_success
 
     def get_grasp_posture(self, robot, grasp_pose=None, n_steps=1, epsilon=1e-5):
         assert grasp_pose is not None
-        transforms, is_grasp_success= self._compute_posture(robot, grasp_pose, n_steps, epsilon)
-        
-        self._show_logger(is_grasp_success, text="post")
+        transforms, is_get_posture = self._compute_posture(robot, grasp_pose, n_steps, epsilon)
 
-        return transforms, is_grasp_success
+        if is_get_posture:
+            # self._show_logger(is_get_posture, text="post")
+            if self.collision_free(robot, transforms):
+                return transforms, is_get_posture
+            print("Post Collision..")
+        self._show_logger(is_get_posture, text="pre")
+        return None, False
 
     def _compute_posture(self, robot, grasp_pose, n_steps, epsilon):
         eef_pose, qpos, transforms = self._compute_kinematics(robot, grasp_pose)
@@ -142,19 +159,33 @@ class GraspManager:
             self.is_joint_limit = robot.check_limit_joint(qpos)
             self.error_pose = robot.get_pose_error(grasp_pose, goal_pose)
 
-            if self.is_joint_limit and self.error_pose < epsilon:
+            if self.error_pose < epsilon:
                 is_grasp_success = True
                 break
-            qpos = robot.inverse_kin(np.random.randn(len(qpos)), eef_pose, method="LM")
+            qpos = robot.inverse_kin(np.random.randn(len(qpos)), eef_pose, method="LM", maxIter=500)
 
         if is_grasp_success:
             return transforms, is_grasp_success
 
         return None, is_grasp_success
 
+    def collision_free(self, robot, transformations):
+        for link, transformation in transformations.items():
+            if link in self.c_manager._objs:
+                transform = transformation.h_mat
+                A2B = np.dot(transform, robot.links[link].collision.offset.h_mat)
+                self.c_manager.set_transform(name=link, transform=A2B)
+
+        is_self_collision = self.c_manager.in_collision_internal()
+        is_obstacle_collision = self.c_manager.in_collision_other(other_manager=self.o_manager)
+
+        if is_self_collision or is_obstacle_collision:
+            return False
+        return True
+
     def _compute_kinematics(self, robot, grasp_pose):
         eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
-        qpos = robot.inverse_kin(np.random.randn(7), eef_pose)
+        qpos = robot.inverse_kin(np.random.randn(7), eef_pose, maxIter=500)
         transforms = robot.forward_kin(np.array(qpos))
 
         return eef_pose, qpos, transforms
@@ -170,10 +201,11 @@ class GraspManager:
                 logger.error("Failed to get pre grasp posure.")
             else:
                 logger.error("Failed to get grasp posure.")
-            
+
             logger.error("The pose error is {:.6f}".format(self.error_pose))
-            if not self.is_joint_limit:
-                logger.error("The joint limit was exceeded.")
+            # if not self.is_joint_limit:
+            #     logger.error("The joint limit was exceeded.")
+
 
     def find_grasp_vertices(self, mesh, vectorA, vectorB):
         vectorAB = vectorB - vectorA
@@ -191,7 +223,7 @@ class GraspManager:
         v2 = e2 - self.projection(e2, norm_vector) - self.projection(e2, v1)
         v2 = self.normalize(v2)
 
-        for theta in np.linspace(-np.pi/2, np.pi/2, n_trials):
+        for theta in np.linspace(-np.pi/4, np.pi/4, n_trials):
             normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
             yield normal_dir
 

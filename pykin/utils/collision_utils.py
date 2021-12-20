@@ -78,8 +78,9 @@ def apply_robot_to_scene(mesh_path=None, scene=None, robot=None, fk=None, geom="
                 
                 mesh.visual.face_colors = color
                 scene.add_geometry(mesh, transform=A2B)      
-           
+    scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
     return scene
+
 
 def get_mesh_param(link_type):
     file_name = str(link_type.gparam.get('filename'))

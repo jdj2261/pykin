@@ -36,7 +36,7 @@ class Obstacle():
         name=None, 
         gtype=None, 
         gparam=None, 
-        gpose=Transform()):
+        transform=Transform()):
         """
         Add obstacles
 
@@ -49,7 +49,7 @@ class Obstacle():
         obs_name = self._convert_name(name)
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)
-        self.obstacles[obs_name] = (gtype, gparam, gpose)
+        self.obstacles[obs_name] = (gtype, gparam, transform)
 
     @staticmethod
     def _convert_name(name):

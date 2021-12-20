@@ -218,7 +218,7 @@ def plot_animation(
         ax.clear()
 
         if visible_obstacles and obstacles:
-            plot_obstacles(obstacles, ax)
+            plot_obstacles(ax, obstacles)
         
         if eef_poses is not None:
             plot_trajectories(ax, eef_poses)
@@ -234,7 +234,7 @@ def plot_animation(
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
-def plot_obstacles(obstacles, ax):    
+def plot_obstacles(ax, obstacles):    
     """
     Plot obstacles
     """
@@ -248,9 +248,9 @@ def plot_obstacles(obstacles, ax):
             raise TypeError("Check obstacle pose type..")
 
         if o_type == "mesh":
-            plot_mesh(ax, mesh=o_param, A2B=o_pose.h_mat)
+            plot_mesh(ax, mesh=o_param, A2B=o_pose.h_mat, alpha=0.3)
         if o_type == "sphere":
-            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
+            plot_sphere(ax, radius=o_param, p=o_pose.pos, alpha=0.8, color='g')
         if o_type == "box":
             A2B = tf.get_h_mat(o_pose)
             plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')

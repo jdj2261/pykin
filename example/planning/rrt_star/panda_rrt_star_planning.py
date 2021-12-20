@@ -51,7 +51,7 @@ for i in range(9):
         obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
 
     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
 
 ##################################################################
 

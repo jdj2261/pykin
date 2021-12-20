@@ -53,16 +53,16 @@ for i in range(9):
         obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
 
     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, gpose=Transform(pos=obs_pos))
+    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
 
 # o_manager.add_object("cylinder", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0, 0.5]).h_mat)
 # o_manager.add_object("cylinder1", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.4, 0.5]).h_mat)
 # o_manager.add_object("cylinder2", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.8, 0.5]).h_mat)
 # o_manager.add_object("cylinder3", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 1.2, 0.5]).h_mat)
-# obs(name="cylinder", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0, 0.5]))
-# obs(name="cylinder1", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0.4, 0.5]))
-# obs(name="cylinder2", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 0.8, 0.5]))
-# obs(name="cylinder3", gtype="cylinder", gparam=[0.03, 0.3], gpose=Transform(pos=[0.5, 1.2, 0.5]))
+# obs(name="cylinder", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0, 0.5]))
+# obs(name="cylinder1", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.4, 0.5]))
+# obs(name="cylinder2", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.8, 0.5]))
+# obs(name="cylinder3", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 1.2, 0.5]))
 
 ##################################################################
 
