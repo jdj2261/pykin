@@ -9,7 +9,7 @@ from pykin.utils.log_utils import create_logger
 
 logger = create_logger('Grasping Manager', "debug")
 
-class GraspManager:
+class PnPManager:
     def __init__(
         self, 
         gripper=None, 
