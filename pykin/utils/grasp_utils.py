@@ -1,7 +1,8 @@
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore')
 import trimesh
 import copy
-np.seterr(divide='ignore', invalid='ignore')
+
 import pykin.utils.plot_utils as plt
 import pykin.utils.transform_utils as t_utils
 from pykin.utils.log_utils import create_logger
@@ -28,12 +29,45 @@ class GraspManager:
         self.x = None
         self.y = None
         self.z = None
-        self.is_joint_limit = False
         self.error_pose = None
 
-    def compute_grasp_pose(self, mesh, obs_pose, approach_distance=0.08, limit_angle=0.02, n_trials=5):
+    def get_all_grasp_transforms(
+        self,
+        robot,
+        obj_mesh,
+        obj_pose,
+        approach_distance,
+        limit_angle,
+        n_trials
+    ):
+        while True:
+            grasp_poses = self.compute_grasp_pose(
+                obj_mesh, 
+                obj_pose, 
+                approach_distance, 
+                limit_angle, 
+                n_trials)
+            for grasp_pose in grasp_poses:
+                post_transforms, is_grasp_success = self.get_grasp_posture(robot, grasp_pose, n_steps=1, epsilon=0.1)
+                pre_transforms, is_post_grasp_success = self.get_pre_grasp_posture(robot, grasp_pose, desired_distance=0.14, n_steps=1, epsilon=0.1)
+                if is_grasp_success and is_post_grasp_success:
+                    break
+            if is_grasp_success and is_post_grasp_success:
+                break
+        
+        return post_transforms, pre_transforms
+        
+    def compute_grasp_pose(
+        self, 
+        mesh, 
+        obs_pose, 
+        approach_distance=0.08, 
+        limit_angle=0.02, 
+        n_trials=5
+    ):
         mesh = copy.deepcopy(mesh)
         mesh.apply_translation(obs_pose)
+        
         while True:
             vertices, normals = self.surface_sampling(mesh, n_samples=2)
             if self.is_force_closure(vertices, normals, limit_angle):
@@ -48,7 +82,7 @@ class GraspManager:
         line = p2 - p1 
 
         for i, normal_vector in enumerate(self.compute_normal_vector(line, n_trials)):
-
+            logger.debug("{} Get Grasp pose".format(i+1))
             self.y = self.normalize(line)
             
             locations, _, _ = mesh.ray.intersects_location(
@@ -56,7 +90,6 @@ class GraspManager:
             ray_directions=[-normal_vector])
             if len(locations) != 0:
                 self.mesh_point = locations[0]
-            print(i+1)
             self.z = self.normalize(center_point - self.mesh_point)
             self.x = self.normalize(np.cross(self.y, self.z))
         
@@ -68,13 +101,13 @@ class GraspManager:
 
             yield grasp_pose
 
+    # TODO
     def compute_robust_force_closure(self, mesh, vertices, normals, limit_radian=0.02, n_trials=5):
         sigma = 1e-3
         noise = np.random.normal(0, sigma, (n_trials, 2, 3))
         
         count = 0
         for i in range(n_trials):
-            # vertices_copy = vertices.copy()
             new_vertices = vertices + noise[i]
 
             points, _, faces = trimesh.proximity.closest_point(mesh, new_vertices)        
@@ -117,6 +150,7 @@ class GraspManager:
         n_steps=1, 
         epsilon=1e-2
     ):
+        logger.debug("Compute the pre grasp posture")
         assert grasp_pose is not None
         
         pre_grasp_posture = np.eye(4)
@@ -128,24 +162,23 @@ class GraspManager:
         transforms, is_get_posture = self._compute_posture(robot, pre_grasp_posture, n_steps, epsilon)
         
         if is_get_posture:
-            # self._show_logger(is_get_posture, text="pre")
             if self.collision_free(robot, transforms):
+                logger.info(f"Success to get pre grasp posure.\n")
                 return transforms, is_get_posture
-            print("Pre Collision..")
-        self._show_logger(is_get_posture, text="pre")
+            logger.error(f"A collision has occurred in grasp posture.")
         return None, False
 
-
     def get_grasp_posture(self, robot, grasp_pose=None, n_steps=1, epsilon=1e-5):
+        logger.debug("Compute the grasp posture")
         assert grasp_pose is not None
+
         transforms, is_get_posture = self._compute_posture(robot, grasp_pose, n_steps, epsilon)
 
         if is_get_posture:
-            # self._show_logger(is_get_posture, text="post")
             if self.collision_free(robot, transforms):
+                logger.info(f"Success to get grasp posure.\n")
                 return transforms, is_get_posture
-            print("Post Collision..")
-        self._show_logger(is_get_posture, text="pre")
+            logger.error(f"A collision has occurred in pre grasp posture.")
         return None, False
 
     def _compute_posture(self, robot, grasp_pose, n_steps, epsilon):
@@ -155,8 +188,6 @@ class GraspManager:
         for _ in range(n_steps):
             transforms = robot.forward_kin(np.array(qpos))
             goal_pose = transforms[robot.eef_name].h_mat
-
-            self.is_joint_limit = robot.check_limit_joint(qpos)
             self.error_pose = robot.get_pose_error(grasp_pose, goal_pose)
 
             if self.error_pose < epsilon:
@@ -167,7 +198,7 @@ class GraspManager:
         if is_grasp_success:
             return transforms, is_grasp_success
 
-        return None, is_grasp_success
+        return None, False
 
     def collision_free(self, robot, transformations):
         for link, transformation in transformations.items():
@@ -190,28 +221,11 @@ class GraspManager:
 
         return eef_pose, qpos, transforms
 
-    def _show_logger(self, is_success, text):
-        if is_success:
-            if text == "pre":
-                logger.info(f"Success to get pre grasp posure.")
-            else:
-                logger.info(f"Success to get grasp posure.")
-        else:
-            if text == "pre":
-                logger.error("Failed to get pre grasp posure.")
-            else:
-                logger.error("Failed to get grasp posure.")
-
-            logger.error("The pose error is {:.6f}".format(self.error_pose))
-            # if not self.is_joint_limit:
-            #     logger.error("The joint limit was exceeded.")
-
-
     def find_grasp_vertices(self, mesh, vectorA, vectorB):
         vectorAB = vectorB - vectorA
         locations, index_ray, face_ind = mesh.ray.intersects_location(
             ray_origins=[vectorA, vectorB],
-            ray_directions=[vectorB - vectorA, vectorA - vectorB],
+            ray_directions=[vectorAB, -vectorAB],
             multiple_hits=False)
         return locations, face_ind
 
@@ -234,23 +248,6 @@ class GraspManager:
         return vertices, normals
 
     @staticmethod
-    def find_intersections(mesh, p1, p2):
-        ray_origin = (p1 + p2) / 2
-        ray_length = np.linalg.norm(p1 - p2)
-        ray_dir = (p2 - p1) / ray_length
-        locations, index_ray, index_tri = mesh.ray.intersects_location(
-            ray_origins=[ray_origin, ray_origin],
-            ray_directions=[ray_dir, -ray_dir],
-            multiple_hits=True)
-        if len(locations) == 0:
-            return [], []
-        dist_to_center = np.linalg.norm(locations - ray_origin, axis=1)
-        dist_mask = dist_to_center <= (ray_length / 2) # only keep intersections on the segment.
-        on_segment = locations[dist_mask]
-        faces = index_tri[dist_mask]
-        return on_segment, faces
-
-    @staticmethod
     def projection(v, u):
         return np.dot(v, u) / np.dot(u, u) * u
 
@@ -260,7 +257,55 @@ class GraspManager:
 
     def visualize_grasp_pose(self, ax):
         plt.plot_vertices(ax, self.contact_points, s=10, c='red')
-        # plt.plot_vertices(ax, self.mesh_point)   
-        # plt.plot_normal_vector(ax, self.mesh_point, self.x, scale=0.1, edgecolor="red")    
-        # plt.plot_normal_vector(ax, self.mesh_point, self.y, scale=0.1, edgecolor="green")    
-        # plt.plot_normal_vector(ax, self.mesh_point, self.z, scale=0.1, edgecolor="blue")  
+
+    def visualize_robot(
+        self, 
+        ax, 
+        robot, 
+        transformations, 
+        gripper_names, 
+        mesh_path, 
+        alpha=1.0,
+        only_gripper=False
+    ):
+        plt.plot_basis(robot, ax)
+        for link, transform in transformations.items():
+            if "pedestal" in link:
+                continue
+            if robot.links[link].collision.gtype == "mesh":
+                mesh_name = mesh_path + robot.links[link].collision.gparam.get('filename')
+                mesh = trimesh.load_mesh(mesh_name)
+                A2B = np.dot(transform.h_mat, robot.links[link].collision.offset.h_mat)
+                color = robot.links[link].collision.gparam.get('color')
+
+                if color is None:
+                    color = np.array([0.2, 0, 0])
+                else:
+                    color = np.array([color for color in color.values()]).flatten()
+                    if "link" in link:
+                        color = np.array([0.2, 0.2, 0.2])
+                mesh.visual.face_colors = color
+                
+                if only_gripper:
+                    if link in gripper_names:
+                        plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+                else:
+                    plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+
+    def visualize_axis(
+        self,
+        ax,
+        transformations,
+        eef_name,
+    ):
+        gripper_pose = transformations[eef_name].h_mat
+
+        gripper_pos = gripper_pose[:3, 3]
+        gripper_ori_x = gripper_pose[:3, 0]
+        gripper_ori_y = gripper_pose[:3, 1]
+        gripper_ori_z = gripper_pose[:3, 2]
+
+        plt.plot_vertices(ax, gripper_pos)   
+        plt.plot_normal_vector(ax, gripper_pos, gripper_ori_x, scale=0.2, edgecolor="red")
+        plt.plot_normal_vector(ax, gripper_pos, gripper_ori_y, scale=0.2, edgecolor="green")
+        plt.plot_normal_vector(ax, gripper_pos, gripper_ori_z, scale=0.2, edgecolor="blue")
