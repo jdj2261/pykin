@@ -298,7 +298,7 @@ $ git submodule update
 
   - Panda Grasping
 
-    |                      pre grasp posture                       |                        grasp posture                         |
-    | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
+    |                     all grasp posture                      |                      pre grasp posture                       | grasp posture                                                |
+    | :--------------------------------------------------------: | :----------------------------------------------------------: | ------------------------------------------------------------ |
+    | <img src="img/all_posture.png" weight="500" height="200"/> | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
 
