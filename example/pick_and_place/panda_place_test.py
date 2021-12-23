@@ -60,7 +60,7 @@ pnp = PnPManager(gripper_max_width=0.08, self_c_manager=c_manager, obstacle_c_ma
 grasp_transforms, pre_grasp_transforms = pnp.get_all_grasp_transforms(robot, obj_mesh1, obs_pos1.h_mat, 0.08, 0.05, 5)
 release_transforms = pnp.get_all_release_transforms(robot, obj_mesh2, obs_pos2.h_mat, approach_distance=0.15, n_trials=5, n_samples=5)
 
-plt.plot_mesh(ax, pnp.test, alpha=0.2)
+plt.plot_mesh(ax, pnp.place_object_mesh, alpha=0.2)
 plt.plot_vertices(ax, pnp.place_points, c='red')
 plt.plot_vertices(ax, pnp.support_point, s=10, c='blue')
 
@@ -80,7 +80,6 @@ pre_qpos = robot.get_result_qpos(init_qpos, pre_eef_pose)
 transforms = robot.forward_kin(qpos)
 pre_transforms = robot.forward_kin(pre_qpos)
 
-gripper_name = ["right_gripper", "leftfinger", "rightfinger"]
 pnp.visualize_grasp_pose(ax)
 pnp.visualize_robot(ax, robot, transforms, mesh_path, gripper_name , 0.3, True)
 pnp.visualize_robot(ax, robot, pre_transforms, mesh_path, gripper_name,1, True)

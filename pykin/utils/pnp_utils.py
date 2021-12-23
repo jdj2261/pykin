@@ -30,6 +30,7 @@ class PnPManager:
         self.y = None
         self.z = None
         self.error_pose = None
+        self.grasp_transforms = None
 
     def get_all_grasp_transforms(
         self,
@@ -48,8 +49,8 @@ class PnPManager:
                 limit_angle, 
                 n_trials)
             for grasp_pose in grasp_poses:
-                transforms, is_grasp_success = self.get_posture(robot, grasp_pose, epsilon=0.1)
-                pre_transforms, is_post_grasp_success = self.get_pre_posture(robot, grasp_pose, desired_distance=0.14, epsilon=0.1)
+                transforms, is_grasp_success = self.get_transforms(robot, grasp_pose, epsilon=0.1)
+                pre_transforms, is_post_grasp_success = self.get_pre_transforms(robot, grasp_pose, desired_distance=0.14, epsilon=0.1)
                 if is_grasp_success and is_post_grasp_success:
                     break
             if is_grasp_success and is_post_grasp_success:
@@ -78,9 +79,11 @@ class PnPManager:
                 n_trials,
                 n_samples
             )
-            # print(release_poses)
+            
             for release_pose in release_poses:
-                transforms, is_release_success = self.get_posture(robot, release_pose, epsilon=0.1)
+                transforms, is_release_success = self.get_transforms(robot, release_pose, epsilon=0.1)
+                # TODO 
+                # get_pre_transforms
                 if is_release_success:
                     break
                 logger.warning("Retry release pose")
@@ -98,7 +101,8 @@ class PnPManager:
         n_trials=5
     ):
         self.pick_object_mesh = obj_mesh
-        self.grasp_obs_pose = obs_pose
+        self.pick_object_pose = obs_pose
+
         mesh = copy.deepcopy(obj_mesh)    
         mesh.apply_transform(obs_pose)
         
@@ -114,7 +118,7 @@ class PnPManager:
         center_point = (p1 + p2) / 2
         line = p2 - p1 
 
-        for i, normal_vector in enumerate(self.compute_normal_vector(line, n_trials)):
+        for i, normal_vector in enumerate(self._compute_normal_directions(line, n_trials)):
             logger.debug("{} Get Grasp pose".format(i+1))
             self.y = self.normalize(line)
             
@@ -134,7 +138,6 @@ class PnPManager:
 
             yield grasp_pose
 
-
     # TODO approach_distance
     def compute_release_pose(
         self,
@@ -150,7 +153,6 @@ class PnPManager:
 
         mesh = copy.deepcopy(obj_mesh)
         mesh.apply_transform(obs_pose)
-        self.place_object_mesh = mesh
 
         weights = np.zeros(len(mesh.faces))
         for idx, vertex in enumerate(mesh.vertices[mesh.faces]):
@@ -160,8 +162,8 @@ class PnPManager:
 
         self.place_points, face_ind, _ = self.surface_sampling(mesh, n_samples, face_weight=weights)
         for vertex, idx in zip(self.place_points, face_ind):
-            self.test = copy.deepcopy(self.pick_object_mesh)
             for theta in np.linspace(0, np.pi, n_trials):
+                self.place_object_mesh = copy.deepcopy(self.pick_object_mesh)
                 gripper_pose = self.grasp_transforms[robot.eef_name].h_mat    
                 normal_vector = mesh.face_normals[idx]
                 gripper_pose[:3,3][:2] = vertex[:2]
@@ -170,10 +172,10 @@ class PnPManager:
                 gripper_pose[:3,:3] = np.dot(R, gripper_pose[:3,:3])
 
                 T = np.dot(gripper_pose, np.linalg.inv(self.grasp_transforms[robot.eef_name].h_mat))
-                object_pose = np.dot(T, self.grasp_obs_pose)
+                object_pose = np.dot(T, self.pick_object_pose)
     
-                self.test.apply_transform(object_pose)
-                center_point = self.test.center_mass
+                self.place_object_mesh.apply_transform(object_pose)
+                center_point = self.place_object_mesh.center_mass
                 locations, _, _ = mesh.ray.intersects_location(
                                         ray_origins=[center_point,],
                                         ray_directions=[-normal_vector])
@@ -209,42 +211,42 @@ class PnPManager:
         
         return True
 
-    def get_pre_posture(
+    def get_pre_transforms(
         self, 
         robot, 
         grasp_pose=None, 
         desired_distance=0.1,
         epsilon=1e-2
     ):
-        logger.debug("Compute the pre grasp posture")
+        logger.debug("Compute the pre grasp pose")
         assert grasp_pose is not None
         
-        pre_grasp_posture = np.eye(4)
+        pre_grasp_pose = np.eye(4)
         grasp_posure = copy.deepcopy(grasp_pose)
 
-        pre_grasp_posture[:3, :3] = grasp_posure[:3, :3]
-        pre_grasp_posture[:3, 3] = grasp_posure[:3, 3] - desired_distance * grasp_posure[:3,2]
+        pre_grasp_pose[:3, :3] = grasp_posure[:3, :3]
+        pre_grasp_pose[:3, 3] = grasp_posure[:3, 3] - desired_distance * grasp_posure[:3,2]
         
-        transforms, is_get_posture = self._compute_posture(robot, pre_grasp_posture, epsilon)
+        transforms, is_get_pose = self._compute_transforms(robot, pre_grasp_pose, epsilon)
         
-        if is_get_posture:
+        if is_get_pose:
             if self.collision_free(robot, transforms):
-                logger.info(f"Success to get pre posture.\n")
-                return transforms, is_get_posture
-            logger.error(f"A collision has occurred in pre posture.")
+                logger.info(f"Success to get pre pose.\n")
+                return transforms, is_get_pose
+            logger.error(f"A collision has occurred in pre pose.")
         return None, False
 
-    def get_posture(self, robot, grasp_pose=None, epsilon=1e-5):
-        logger.debug("Compute the grasp posture")
+    def get_transforms(self, robot, grasp_pose=None, epsilon=1e-5):
+        logger.debug("Compute the grasp pose")
         assert grasp_pose is not None
 
-        transforms, is_get_posture = self._compute_posture(robot, grasp_pose, epsilon)
+        transforms, is_get_pose = self._compute_transforms(robot, grasp_pose, epsilon)
 
-        if is_get_posture:
+        if is_get_pose:
             if self.collision_free(robot, transforms):
-                logger.info(f"Success to get posture.\n")
-                return transforms, is_get_posture
-            logger.error(f"A collision has occurred in posture.")
+                logger.info(f"Success to get pose.\n")
+                return transforms, is_get_pose
+            logger.error(f"A collision has occurred in pose.")
         return None, False
 
     def collision_free(self, robot, transformations):
@@ -261,11 +263,8 @@ class PnPManager:
             return False
         return True
 
-    def support_check(self):
-        pass
-
-    def _compute_posture(self, robot, grasp_pose, epsilon):
-        _, qpos, transforms = self._compute_kinematics(robot, grasp_pose)
+    def _compute_transforms(self, robot, grasp_pose, epsilon):
+        qpos = self._compute_inverse_kinematics(robot, grasp_pose)
         is_success = False
 
         transforms = robot.forward_kin(np.array(qpos))
@@ -278,22 +277,12 @@ class PnPManager:
 
         return None, False
 
-    def _compute_kinematics(self, robot, grasp_pose):
+    def _compute_inverse_kinematics(self, robot, grasp_pose):
         eef_pose = t_utils.get_pose_from_homogeneous(grasp_pose)
         qpos = robot.inverse_kin(np.random.randn(7), eef_pose, maxIter=500)
-        transforms = robot.forward_kin(np.array(qpos))
+        return qpos
 
-        return eef_pose, qpos, transforms
-
-    def find_grasp_vertices(self, mesh, vectorA, vectorB):
-        vectorAB = vectorB - vectorA
-        locations, index_ray, face_ind = mesh.ray.intersects_location(
-            ray_origins=[vectorA, vectorB],
-            ray_directions=[vectorAB, -vectorAB],
-            multiple_hits=False)
-        return locations, face_ind
-
-    def compute_normal_vector(self, vector, n_trials=10):
+    def _compute_normal_directions(self, vector, n_trials=10):
         norm_vector = self.normalize(vector)
         e1, e2 = np.eye(3)[:2]
         v1 = e1 - self.projection(e1, norm_vector)
