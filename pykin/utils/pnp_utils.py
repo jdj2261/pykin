@@ -9,6 +9,7 @@ from pykin.utils.log_utils import create_logger
 
 logger = create_logger('Grasping Manager', "debug")
 
+# TODO : Level wise, approach distance, gripper collision check
 class PnPManager:
     def __init__(
         self, 
@@ -122,6 +123,7 @@ class PnPManager:
             logger.debug("{} Get Grasp pose".format(i+1))
             self.y = self.normalize(line)
             
+            # TODO
             locations, _, _ = mesh.ray.intersects_location(
             ray_origins=[center_point,],
             ray_directions=[-normal_vector])
