@@ -296,13 +296,13 @@ $ git submodule update
 
   You can see an visualization the pose for the robot to grasp an object.
 
-  - Panda grasping pose
+  - Compute panda robot's grasping pose
 
     |                       all grasp pose                       |                        pre grasp pose                        |                          grasp pose                          |
     | :--------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/all_posture.png" weight="500" height="200"/> | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
 
-  - Panda pick and place pose
+  - Compute panda robot's pick and place pose
 
     | <img src="img/pnp_demo.png" weight="300" height="200"/> | <img src="img/pnp_demo2.png" weight="300" height="200"/> |
     | :-----------------------------------------------------: | :------------------------------------------------------: |
