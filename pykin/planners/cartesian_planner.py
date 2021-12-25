@@ -70,9 +70,9 @@ class CartesianPlanner(Planner):
         if waypoints is None:
             waypoints = self.generate_waypoints(is_slerp)
 
-        paths, target_posistions = self._compute_path_and_target_pose(waypoints, epsilon)
+        paths, target_positions = self._compute_path_and_target_pose(waypoints, epsilon)
         
-        return paths, target_posistions
+        return paths, target_positions
 
     def _compute_path_and_target_pose(self, waypoints, epsilon):
         cnt = 0
@@ -86,7 +86,7 @@ class CartesianPlanner(Planner):
             eef_position = cur_fk[self.eef_name].pos
 
             paths = [self._cur_qpos]
-            target_posistions = [eef_position]
+            target_positions = [eef_position]
 
             for step, (pos, ori) in enumerate(waypoints):
                 target_transform = t_utils.get_h_mat(pos, ori)
@@ -111,7 +111,7 @@ class CartesianPlanner(Planner):
 
                 if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
                     paths.append(self._cur_qpos)
-                    target_posistions.append(pos)
+                    target_positions.append(pos)
 
             err = t_utils.compute_pose_error(self._goal_pose[:3], cur_fk[self.eef_name].pos)
             
@@ -128,13 +128,13 @@ class CartesianPlanner(Planner):
 
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
-                paths, target_posistions = None, None
+                paths, target_positions = None, None
                 break
 
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             
-        return paths, target_posistions
+        return paths, target_positions
 
     def collision_free(self, new_q, visible_name=False):
         """
