@@ -137,6 +137,15 @@ class SingleArm(Robot):
         return np.concatenate((transformations[self.eef_name].pos, transformations[self.eef_name].rot))
 
     def get_eef_h_mat(self, transformations=None):
+        """
+        Get end effector's homogeneous marix
+
+        Args:
+            transformations(OrderedDict)
+        
+        Returns:
+            vals(dict)
+        """
         if transformations is None:
             transformations = self.init_transformations
 

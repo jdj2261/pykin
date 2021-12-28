@@ -298,36 +298,6 @@ class URDFModel(RobotModel):
             assert (ret != None), f"Not Found {name}, please check the name again"
             return ret
 
-    def _get_actuated_joint_names(self):
-        """
-        Return the name of the actuated joint(revolute, prismatic)
-
-        Returns:
-            list: Append joint if joint's dof is not zero
-        """
-        if self.root is not None:
-            joint_names = []
-            joint_names =  self._get_all_actuated_joint_names_recursive(joint_names, self.root)
-        return joint_names
-
-
-    # @staticmethod
-    # def _get_desired_actuated_joint_names(desired_frames):
-    #     """
-    #     Return the name of desired actuated joint(revolute, prismatic)
-
-    #     Args:
-    #         desired_frames (list): desired actuated joint names
-
-    #     Returns:
-    #         list: Append joint if joint's dof is not zero
-    #     """
-    #     joint_names = []
-    #     for f in desired_frames:
-    #         if f.joint.num_dof != 0:
-    #             joint_names.append(f.joint.name)
-    #     return joint_names
-    
     def _get_revolute_joint_names(self, frame):
         """
         Return the name of the actuated joint(revolute, prismatic)

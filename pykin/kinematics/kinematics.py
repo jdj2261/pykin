@@ -116,7 +116,7 @@ class Kinematics:
 
     def _compute_IK_NR(self, frames, current_joints, target_pose, maxIter):
         """
-        Computes inverse kinematics using newton raphson method
+        Computes inverse kinematics using Newton Raphson method
 
         Args:
             frames (list or Frame()): robot's frame for inverse kinematics
