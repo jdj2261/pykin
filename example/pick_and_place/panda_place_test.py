@@ -8,7 +8,7 @@ sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.pnp_utils import PnPManager
+from pykin.utils.task_utils import PnPManager
 from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils.collision_utils import apply_robot_to_collision_manager
 import pykin.utils.plot_utils as plt
@@ -56,9 +56,19 @@ plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
 plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
 
-pnp = PnPManager(gripper_max_width=0.08, self_c_manager=c_manager, obstacle_c_manager=o_manager)
-grasp_transforms, pre_grasp_transforms = pnp.get_all_grasp_transforms(robot, obj_mesh1, obs_pos1.h_mat, 0.08, 0.05, 5)
-release_transforms = pnp.get_all_release_transforms(robot, obj_mesh2, obs_pos2.h_mat, approach_distance=0.15, n_trials=5, n_samples=5)
+
+gripper_names = ["right_gripper", "leftfinger", "rightfinger"]
+pnp = PnPManager(
+    robot=robot, 
+    gripper_names=gripper_names, 
+    gripper_max_width=0.08,
+    self_c_manager=c_manager, 
+    obstacle_c_manager=o_manager,
+    mesh_path=mesh_path)
+
+
+grasp_transforms, pre_grasp_transforms = pnp.get_all_grasp_transforms(obj_mesh1, obs_pos1.h_mat, 0.08, 0.05, 5)
+release_transforms = pnp.get_all_release_transforms(obj_mesh2, obs_pos2.h_mat, approach_distance=0.15, n_trials=5, n_samples=5)
 
 plt.plot_mesh(ax, pnp.place_object_mesh, alpha=0.2)
 plt.plot_vertices(ax, pnp.place_points, c='red')
@@ -68,8 +78,7 @@ eef_pose = robot.get_eef_pose(release_transforms)
 qpos = robot.get_result_qpos(init_qpos, eef_pose, 300)
 release_transforms = robot.forward_kin(qpos)
 
-gripper_name = ["right_gripper", "leftfinger", "rightfinger"]
-pnp.visualize_robot(ax, robot, release_transforms, mesh_path, gripper_name, 1, True)
+pnp.visualize_robot(ax, release_transforms, 1, True)
 pnp.visualize_axis(ax, release_transforms, "panda_right_hand")
 
 eef_pose = robot.get_eef_pose(grasp_transforms)
@@ -81,8 +90,8 @@ transforms = robot.forward_kin(qpos)
 pre_transforms = robot.forward_kin(pre_qpos)
 
 pnp.visualize_grasp_pose(ax)
-pnp.visualize_robot(ax, robot, transforms, mesh_path, gripper_name , 0.3, True)
-pnp.visualize_robot(ax, robot, pre_transforms, mesh_path, gripper_name,1, True)
+pnp.visualize_robot(ax, transforms, 0.3, True)
+pnp.visualize_robot(ax, pre_transforms, 1, True)
 pnp.visualize_axis(ax, transforms, "panda_right_hand")
 pnp.visualize_axis(ax, pre_transforms, "panda_right_hand")
 

@@ -45,31 +45,27 @@ o_manager.add_object("table", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2
 plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 # plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=Transform(pos=obs_pos2).h_mat, alpha=0.2)
 
-gripper_names = ["right_gripper", "leftfinger", "rightfinger"]
-pnp = PnPManager(
-    robot=robot, 
-    gripper_names=gripper_names, 
-    gripper_max_width=0.08, 
-    self_c_manager=c_manager, 
-    obstacle_c_manager=o_manager,
-    mesh_path=mesh_path)
-post_transforms, pre_transforms = pnp.get_all_grasp_transforms(obj_mesh1, obs_pos1.h_mat, 0.08, 0.05, 5)
-
-eef_pose = robot.get_eef_pose(post_transforms)
-pre_eef_pose = robot.get_eef_pose(pre_transforms)
-
-qpos = robot.get_result_qpos(init_qpos, eef_pose)
-pre_qpos = robot.get_result_qpos(init_qpos, pre_eef_pose)
-transforms = robot.forward_kin(qpos)
-pre_transforms = robot.forward_kin(pre_qpos)
+pnp = PnPManager(gripper_max_width=0.08, self_c_manager=c_manager, obstacle_c_manager=o_manager)
 
 
-pnp.visualize_grasp_pose(ax)
-# pnp.visualize_gripper(ax, transforms, 1.0)
-pnp.visualize_robot(ax, transforms, 0.3, True)
-pnp.visualize_robot(ax, pre_transforms,1, True)
-pnp.visualize_axis(ax, transforms, "panda_right_hand")
-pnp.visualize_axis(ax, pre_transforms, "panda_right_hand")
 
-plt.show_figure()
+# pnp.get_only_gripper()
+# post_transforms, pre_transforms = pnp.get_all_grasp_transforms(robot, obj_mesh1, obs_pos1.h_mat, 0.08, 0.05, 5)
+
+# eef_pose = robot.get_eef_pose(post_transforms)
+# pre_eef_pose = robot.get_eef_pose(pre_transforms)
+
+# qpos = robot.get_result_qpos(init_qpos, eef_pose)
+# pre_qpos = robot.get_result_qpos(init_qpos, pre_eef_pose)
+# transforms = robot.forward_kin(qpos)
+# pre_transforms = robot.forward_kin(pre_qpos)
+
+# gripper_name = ["right_gripper", "leftfinger", "rightfinger"]
+# pnp.visualize_grasp_pose(ax)
+# pnp.visualize_robot(ax, robot, transforms, mesh_path, gripper_name , 0.3, True)
+# pnp.visualize_robot(ax, robot, pre_transforms, mesh_path, gripper_name,1, True)
+# pnp.visualize_axis(ax, transforms, "panda_right_hand")
+# pnp.visualize_axis(ax, pre_transforms, "panda_right_hand")
+
+# plt.show_figure()
 

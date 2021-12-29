@@ -438,3 +438,12 @@ def plot_vertices(ax, vertices, s=5, c='k'):
         vertices = vertices.reshape(1, -1)
     ax.scatter([x[0] for x in vertices], [x[1] for x in vertices], 
         [x[2] for x in vertices], s=s, c=c)
+
+
+def plot_line(ax, vertices, linewidth=1):
+    if vertices.ndim != 2:
+        vertices = vertices.reshape(1, -1)
+    ax.plot(
+        [x[0] for x in vertices], 
+        [x[1] for x in vertices],
+        [x[2] for x in vertices], linewidth=linewidth)
