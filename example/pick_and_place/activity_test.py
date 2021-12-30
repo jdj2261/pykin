@@ -43,6 +43,8 @@ obs(name="can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1)
 obs(name="table", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2)
 o_manager.add_object("can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1.h_mat)
 o_manager.add_object("table", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat)
+plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
+plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
 
 configures = {}
 configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]
@@ -50,24 +52,56 @@ configures["gripper_max_width"] = 0.08
 configures["gripper_max_depth"] = 0.035
 configures["tcp_position"] = np.array([0, 0, 0.097])
 
-
 #######################################
 # 2. grasp test
 grasp_man = Grasp(robot, c_manager, o_manager, mesh_path, **configures)
-plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 gripper = grasp_man.get_gripper()
 
-for i, (eef_pose, tcp_pose, contact_points) in enumerate(grasp_man.generate_eef_poses(obj_mesh1, obs_pos1.h_mat, limit_angle=0.05, n_steps=1, n_trials=1)):
-    print(i)
-    # plt.plot_vertices(ax, tcp_pose[:3, 3])
-    gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
-    grasp_man.visualize_gripper(ax, gripper, alpha=0.5)
-    grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
-    plt.plot_line(ax, contact_points, 1)
+######
+waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
+pre_grasp_pose = waypoints["pre_grasp"]
+grasp_pose = waypoints["grasp"]
 
+gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose))
+grasp_man.visualize_gripper(ax, gripper, alpha=1)
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose), axis=[1,1,1], scale=0.1)
+gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(grasp_pose))
+grasp_man.visualize_gripper(ax, gripper, alpha=1)
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
 plt.show_figure()
+######
 
+######
+# eef_pose, tcp_pose, contact_points = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
+# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+# gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
+# grasp_man.visualize_gripper(ax, gripper, alpha=1)
+# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+# plt.plot_line(ax, contact_points, 1)
+# plt.show_figure()
+######
+# grasp_poses = list(grasp_man.generate_grasps(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10))
 
+# grasp_pose, tcp_pose, contact_points = grasp_man.filter_grasps(grasp_poses, 1)
+# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+# gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
+# grasp_man.visualize_gripper(ax, gripper, alpha=1)
+# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+# plt.plot_line(ax, contact_points, 1)
+# plt.show_figure()
+######
+# grasp_poses = list(grasp_man.generate_grasps(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=2))
+
+# for i, (eef_pose, tcp_pose, contact_points) in enumerate(grasp_poses):
+#     print(i)
+#     plt.plot_vertices(ax, tcp_pose[:3, 3])
+#     gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
+#     # grasp_man.visualize_gripper(ax, gripper, alpha=1)
+#     grasp_man.visualize_axis(ax, eef_pose, axis=[1,1,1], scale=0.05)
+#     grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+#     plt.plot_line(ax, contact_points, 1)
+# plt.show_figure()
+######
 
 
 #######################################
@@ -84,7 +118,9 @@ plt.show_figure()
 # fk = robot.forward_kin(qpos)
 # print(tcp_pose.h_mat, eef_transform)
 
-# ac_base.visualize_gripper(ax, fk, 0.1)
+# gripper = ac_base.get_gripper()
+# gripper = ac_base.get_gripper_transformed(gripper, tcp_pose.h_mat)
+# ac_base.visualize_gripper(ax, gripper, 0.1)
 # ac_base.visualize_axis(ax, fk, "panda_right_hand")
 # ac_base.visualize_axis(ax, fk, "tcp")
 # ac_base.visualize_point(ax, fk, "panda_right_hand")
@@ -92,4 +128,4 @@ plt.show_figure()
 # # ac_base.visualize_eef_point(ax, fk)
 
 # plt.show_figure()
-#######################################
+####################################### 

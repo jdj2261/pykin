@@ -2,6 +2,8 @@ import numpy as np
 from abc import abstractclassmethod
 
 # import pykin.utils.pnp_utils
+
+from pykin.collision.collision_manager import CollisionManager
 import pykin.utils.plot_utils as plt
 import pykin.utils.transform_utils as t_utils
 import trimesh
@@ -18,6 +20,7 @@ class ActivityBase:
         self.robot = robot
         self.robot_c_manager = robot_col_manager
         self.obstacles_c_manager = obstacles_col_manager
+        self.gripper_c_manager = CollisionManager()
         self.mesh_path = mesh_path
         self.gripper_names = gripper_configures.get("gripper_names", None)
         self.gripper_names.insert(0, self.robot.eef_name)
@@ -32,16 +35,17 @@ class ActivityBase:
     def generate_tcp_poses(self):
         pass
 
-    @abstractclassmethod
-    def collision_free(self):
-        pass
-
     def get_gripper(self):
         gripper = {}
         for link, transform in self.robot.init_transformations.items():
             if link in self.gripper_names:
                 gripper[link] = transform.h_mat
-        
+                if self.robot.links[link].collision.gtype == "mesh":
+                    mesh_name = self.robot.links[link].collision.gparam.get('filename')
+                    file_name = self.mesh_path + mesh_name
+                    mesh = trimesh.load_mesh(file_name)
+                    A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                    self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, transform=A2B)
         return gripper
 
     def get_gripper_transformed(self, gripper, tcp_pose):
@@ -49,8 +53,31 @@ class ActivityBase:
         for link, transform in gripper.items():
             T = np.dot(tcp_pose, np.linalg.inv(gripper[self.gripper_names[-1]]))
             transform_gripper[link] = np.dot(T, transform)
-        
         return transform_gripper
+
+    def collision_free(self, transformations, only_gripper=False) -> bool:
+        for link, transform in transformations.items():
+            if only_gripper:
+                if self.robot.links[link].collision.gtype == "mesh":
+                    A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                    self.gripper_c_manager.set_transform(link, A2B)
+            else:
+                for link, transform in transformations.items():
+                    if link in self.robot_c_manager._objs:
+                        A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                        self.robot_c_manager.set_transform(name=link, transform=A2B)
+          
+        if only_gripper:
+            is_obstacle_collision = self.gripper_c_manager.in_collision_other(other_manager=self.obstacles_c_manager)
+            if is_obstacle_collision:
+                return False
+            return True
+        else:
+            is_self_collision = self.robot_c_manager.in_collision_internal()
+            is_obstacle_collision = self.robot_c_manager.in_collision_other(other_manager=self.obstacles_c_manager)
+            if is_self_collision or is_obstacle_collision:
+                return False
+            return True
 
     def get_tcp_pose(self, transformations):
         return transformations["tcp"]
@@ -58,8 +85,39 @@ class ActivityBase:
     def get_eef_h_mat_from_tcp(self, tcp_pose):
         eef_pose = np.eye(4)
         eef_pose[:3, :3] = tcp_pose[:3, :3]
-        eef_pose[:3, 3] = tcp_pose[:3, 3] - self.tcp_position
+        eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(self.tcp_position[-1], tcp_pose[:3, 2])
         return eef_pose
+
+    def get_tcp_h_mat_from_eef(self, eef_pose):
+        tcp_pose = np.eye(4)
+        tcp_pose[:3, :3] = eef_pose[:3, :3]
+        tcp_pose[:3, 3] = eef_pose[:3, 3] + np.dot(self.tcp_position[-1], eef_pose[:3, 2])
+        return tcp_pose
+
+    def visualize_robot(
+        self, 
+        ax, 
+        transformations, 
+        alpha=1.0,
+        only_gripper=False
+    ):
+        plt.plot_basis(self.robot, ax)
+        for link, transform in transformations.items():
+            if "pedestal" in link:
+                continue
+            if self.robot.links[link].collision.gtype == "mesh":
+                mesh_name = self.mesh_path + self.robot.links[link].collision.gparam.get('filename')
+                mesh = trimesh.load_mesh(mesh_name)
+                A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                color = self.robot.links[link].collision.gparam.get('color')
+                color = np.array([color for color in color.values()]).flatten()
+                mesh.visual.face_colors = color
+                
+                if only_gripper:
+                    if link in self.gripper_names:
+                        plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+                else:
+                    plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
 
     def visualize_gripper(
         self,

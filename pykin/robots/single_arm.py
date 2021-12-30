@@ -181,20 +181,18 @@ class SingleArm(Robot):
 
         return transformations[self.eef_name].rot
 
-    def get_result_qpos(self, init_qpos, eef_pose, n_trials=200):
-        is_limit_qpos = False
-        result_qpos = self.inverse_kin(init_qpos, eef_pose, method="LM")
-        is_limit_qpos = self.check_limit_joint(result_qpos)
-        if is_limit_qpos:
-            return result_qpos
-
+    def get_result_qpos(self, init_qpos, eef_pose, n_trials=5):
         cnt = 0
-        while not is_limit_qpos:
-            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pose, method="LM")
+        is_limit_qpos = False
+        while cnt <= n_trials:
+            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pose, "LM", 500)
             is_limit_qpos = self.check_limit_joint(result_qpos)
-            if cnt > n_trials:
-                raise NotFoundError(result_qpos)
+            if is_limit_qpos:
+                break
             cnt += 1
+
+        if not is_limit_qpos:
+            return None
         return result_qpos
 
     @property

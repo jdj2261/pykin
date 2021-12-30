@@ -12,10 +12,12 @@ logger = create_logger('Grasping Manager', "debug")
 def normalize(vec):
     return vec / np.linalg.norm(vec)
 
+
 def surface_sampling(mesh, n_samples=2, face_weight=None):
     vertices, face_ind = trimesh.sample.sample_surface(mesh, count=n_samples, face_weight=face_weight)
     normals = mesh.face_normals[face_ind]
     return vertices, face_ind, normals
+
 
 def projection(v, u):
     return np.dot(v, u) / np.dot(u, u) * u
