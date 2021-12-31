@@ -162,12 +162,11 @@ class ActivityBase:
         self,
         ax,
         transformation,
-        link
+        link=None
     ):
         pose = transformation
         if link is not None:
             pose = transformation[link].h_mat
             
-        pose = transformation[link].h_mat
         plt.plot_basis(self.robot, ax)
         plt.plot_vertices(ax, pose[:3, 3])   

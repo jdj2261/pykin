@@ -10,7 +10,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.activity import ActivityBase
-from pykin.tasks.grasp import Grasp
+from pykin.tasks.grasp import GraspManager
 from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils.collision_utils import apply_robot_to_collision_manager
 import pykin.utils.plot_utils as plt
@@ -32,19 +32,27 @@ c_manager.filter_contact_names(robot, fk)
 
 obs = Obstacle()
 o_manager = CollisionManager()
-obs_pos1 = Transform(np.array([0.6, 0, 0.78]))
-obs_pos2 = Transform(np.array([0.4, 0.24, 0.0]))
+obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
+obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
+obs_pos3 = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
-obj_mesh1 = trimesh.load(pykin_path+'/asset/objects/meshes/can.stl')
-obj_mesh2 = trimesh.load(pykin_path+'/asset/objects/meshes/custom_table.stl')
-obj_mesh2.apply_scale(0.01)
+obj_mesh1 = trimesh.load(pykin_path+'/asset/objects/meshes/square_box.stl')
+obj_mesh2 = trimesh.load(pykin_path+'/asset/objects/meshes/box_goal.stl')
+obj_mesh3 = trimesh.load(pykin_path+'/asset/objects/meshes/custom_table.stl')
+
+obj_mesh1.apply_scale(0.001)
+obj_mesh2.apply_scale(0.001)
+obj_mesh3.apply_scale(0.01)
 
 obs(name="can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1)
-obs(name="table", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2)
+obs(name="box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2)
+obs(name="table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3)
 o_manager.add_object("can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1.h_mat)
-o_manager.add_object("table", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat)
+o_manager.add_object("box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat)
+o_manager.add_object("table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3.h_mat)
 plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
+# plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
 
 configures = {}
 configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]
@@ -54,35 +62,36 @@ configures["tcp_position"] = np.array([0, 0, 0.097])
 
 #######################################
 # 2. grasp test
-grasp_man = Grasp(robot, c_manager, o_manager, mesh_path, **configures)
+grasp_man = GraspManager(robot, c_manager, o_manager, mesh_path, **configures)
 gripper = grasp_man.get_gripper()
 
 ######
-waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
-pre_grasp_pose = waypoints["pre_grasp"]
-grasp_pose = waypoints["grasp"]
+# waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10, desired_distance=0.15)
+# pre_grasp_pose = waypoints["pre_grasp"]
+# grasp_pose = waypoints["grasp"]
 
-gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose))
-grasp_man.visualize_gripper(ax, gripper, alpha=1)
-grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose), axis=[1,1,1], scale=0.1)
-gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(grasp_pose))
-grasp_man.visualize_gripper(ax, gripper, alpha=1)
-grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
-plt.show_figure()
+# gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose))
+# grasp_man.visualize_gripper(ax, gripper, alpha=1)
+# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose), axis=[1,1,1], scale=0.1)
+# gripper = grasp_man.get_gripper_transformed(gripper, grasp_man.get_tcp_h_mat_from_eef(grasp_pose))
+# grasp_man.visualize_gripper(ax, gripper, alpha=1)
+# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
+# plt.show_figure()
 ######
 
 ######
-# eef_pose, tcp_pose, contact_points = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
+# eef_pose, tcp_pose, contact_points, _ = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
 # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
 # gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
 # grasp_man.visualize_gripper(ax, gripper, alpha=1)
 # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
 # plt.plot_line(ax, contact_points, 1)
 # plt.show_figure()
+
 ######
 # grasp_poses = list(grasp_man.generate_grasps(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10))
 
-# grasp_pose, tcp_pose, contact_points = grasp_man.filter_grasps(grasp_poses, 1)
+# grasp_pose, tcp_pose, contact_points, _ = grasp_man.filter_grasps(grasp_poses, 1)
 # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
 # gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
 # grasp_man.visualize_gripper(ax, gripper, alpha=1)
@@ -90,9 +99,11 @@ plt.show_figure()
 # plt.plot_line(ax, contact_points, 1)
 # plt.show_figure()
 ######
+
+######
 # grasp_poses = list(grasp_man.generate_grasps(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=2))
 
-# for i, (eef_pose, tcp_pose, contact_points) in enumerate(grasp_poses):
+# for i, (eef_pose, tcp_pose, contact_points, _) in enumerate(grasp_poses):
 #     print(i)
 #     plt.plot_vertices(ax, tcp_pose[:3, 3])
 #     gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
@@ -109,7 +120,6 @@ plt.show_figure()
 
 # ac_base = ActivityBase(robot, c_manager, o_manager, mesh_path, **configures)
 # tcp_pose = ac_base.get_tcp_pose(fk)
-# tcp_pose.pos[2] = 0.9
 # # tcp_transform[2, 3] = 1.0
 # eef_transform = ac_base.get_eef_h_mat_from_tcp(tcp_pose.h_mat)
 # eef_pose = get_pose_from_homogeneous(eef_transform)
@@ -120,7 +130,7 @@ plt.show_figure()
 
 # gripper = ac_base.get_gripper()
 # gripper = ac_base.get_gripper_transformed(gripper, tcp_pose.h_mat)
-# ac_base.visualize_gripper(ax, gripper, 0.1)
+# ac_base.visualize_gripper(ax, gripper, 1)
 # ac_base.visualize_axis(ax, fk, "panda_right_hand")
 # ac_base.visualize_axis(ax, fk, "tcp")
 # ac_base.visualize_point(ax, fk, "panda_right_hand")
@@ -129,3 +139,23 @@ plt.show_figure()
 
 # plt.show_figure()
 ####################################### 
+
+# Release test
+
+eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
+grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+gripper = grasp_man.get_gripper_transformed(gripper, tcp_pose)
+grasp_man.visualize_gripper(ax, gripper, alpha=1)
+grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+grasp_man.visualize_point(ax, tcp_pose)
+# plt.plot_normal_vector(ax, contact_points, normals, scale=0.1)
+
+for point, normal in grasp_man.generate_points_on_support(obj_mesh2, obs_pos2.h_mat, n_samples=10):
+    plt.plot_vertices(ax, point)
+    plt.plot_normal_vector(ax, point, normal, scale=0.1)
+
+for point, normal in grasp_man.generate_points_for_support(obj_mesh1, obs_pos1.h_mat, n_samples=50):
+    plt.plot_vertices(ax, point)
+    plt.plot_normal_vector(ax, point, normal, scale=0.1)
+
+plt.show_figure()
