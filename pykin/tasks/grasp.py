@@ -1,9 +1,10 @@
 import numpy as np
+import math
 from collections import OrderedDict
 from copy import deepcopy
 
 from pykin.tasks.activity import ActivityBase
-from pykin.utils.task_utils import normalize, surface_sampling, projection
+from pykin.utils.task_utils import normalize, surface_sampling, projection, get_transform
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 
@@ -72,12 +73,11 @@ class GraspManager(ActivityBase):
         n_trials=1
     ):
         cnt = 0
-        gripper = self.get_gripper()
         while cnt < num_grasp * n_trials:
             tcp_poses = self.generate_tcp_poses(obj_mesh, obj_pose, limit_angle, n_trials)
             for tcp_pose, contact_point, normal in tcp_poses:
                 eef_pose = self.get_eef_h_mat_from_tcp(tcp_pose)
-                gripper_transformed = self.get_gripper_transformed(gripper, tcp_pose)
+                gripper_transformed = self.get_gripper_transformed(tcp_pose)
 
                 if self.collision_free(gripper_transformed, only_gripper=True):
                     yield (eef_pose, tcp_pose, contact_point, normal)
@@ -197,6 +197,77 @@ class GraspManager(ActivityBase):
         if error_pose < err_limit:
             return True
         return False
+
+    def get_support_pose(self):
+        self.generate_supports()
+        self.filter_supports()
+
+    def generate_supports(
+        self,
+        obj_mesh_on_sup,
+        obj_pose_on_sup,
+        n_samples_on_sup,
+        obj_mesh_for_sup,
+        obj_pose_for_sup,
+        n_samples_for_sup,
+    ):
+        support_points = self.sample_supports(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup,
+                                        obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup)
+
+        for pose_on_sup, T, pose_for_sup in self.transform_points_on_support(support_points):
+            yield pose_on_sup, T, pose_for_sup
+
+    def sample_supports(
+        self,
+        obj_mesh_on_sup,
+        obj_pose_on_sup,
+        n_samples_on_sup,
+        obj_mesh_for_sup,
+        obj_pose_for_sup,
+        n_samples_for_sup,
+    ):
+        sample_points_on_support = self.generate_points_on_support(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup)
+        sample_points_for_support = list(self.generate_points_for_support(obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup))
+
+        for point_on_support, normal_on_support in sample_points_on_support:
+            for point_for_support, normal_for_support in sample_points_for_support:
+                yield point_on_support, normal_on_support, point_for_support, normal_for_support
+
+    def transform_points_on_support(self, support_points):
+        for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in support_points:
+            pose_on_sup = self._get_pose_axis_z(point_on_sup, normal_on_sup)
+            pose_on_sup[:3, 2] = -pose_on_sup[:3, 2]
+            pose_for_sup = self._get_pose_axis_z(point_for_sup, normal_for_sup)
+
+            try:
+                T = get_transform(pose_for_sup, pose_on_sup)
+                yield pose_on_sup, T, pose_for_sup
+            except:
+                continue
+
+    @staticmethod
+    def _get_pose_axis_z(point, normal):
+        pose = np.eye(4)
+        pose[:3, 2] = normal
+        pose[:3, 3] = point
+        return pose
+
+    @staticmethod
+    def rotation_matrix_from_vectors(v1, v2):
+        v1 = v1 / np.linalg.norm(v1)
+        v2 = v2 / np.linalg.norm(v2)
+        theta = np.dot(v1, v2)
+        if theta == 1:
+            return np.identity(3)
+        # if theta == -1:
+        #     raise ValueError
+        k = np.cross(v1, v2)
+        k /= np.linalg.norm(k)
+        K = np.matrix([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+        return np.identity(3) + math.sqrt(1 - theta * theta) * K + np.dot((1 - theta) * K * K, v1)
+
+    def filter_supports(self):
+        pass
 
     def generate_points_on_support(
         self,

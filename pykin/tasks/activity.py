@@ -1,12 +1,13 @@
 import numpy as np
+import trimesh
 from abc import abstractclassmethod
 
 # import pykin.utils.pnp_utils
 
-from pykin.collision.collision_manager import CollisionManager
 import pykin.utils.plot_utils as plt
-import pykin.utils.transform_utils as t_utils
-import trimesh
+from pykin.collision.collision_manager import CollisionManager
+from pykin.utils.task_utils import get_transform
+
 
 class ActivityBase:
     def __init__(
@@ -27,6 +28,7 @@ class ActivityBase:
         self.gripper_max_width = gripper_configures.get("gripper_max_width", 0.0)
         self.gripper_max_depth = gripper_configures.get("gripper_max_depth", 0.0)
         self.tcp_position = gripper_configures.get("tcp_position", np.zeros(3))
+        self.gripper = self._generate_gripper()
 
     def __repr__(self) -> str:
         return 'pykin.tasks.activity.{}()'.format(type(self).__name__)
@@ -35,7 +37,7 @@ class ActivityBase:
     def generate_tcp_poses(self):
         pass
 
-    def get_gripper(self):
+    def _generate_gripper(self):
         gripper = {}
         for link, transform in self.robot.init_transformations.items():
             if link in self.gripper_names:
@@ -48,10 +50,15 @@ class ActivityBase:
                     self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, transform=A2B)
         return gripper
 
-    def get_gripper_transformed(self, gripper, tcp_pose):
+    def get_gripper(self):
+        return self.gripper
+
+    def get_gripper_transformed(self, tcp_pose):
         transform_gripper = {}
+        gripper = self.get_gripper()
         for link, transform in gripper.items():
-            T = np.dot(tcp_pose, np.linalg.inv(gripper[self.gripper_names[-1]]))
+            # T = np.dot(tcp_pose, np.linalg.inv(gripper[self.gripper_names[-1]]))
+            T = get_transform(gripper[self.gripper_names[-1]], tcp_pose)
             transform_gripper[link] = np.dot(T, transform)
         return transform_gripper
 
@@ -167,6 +174,6 @@ class ActivityBase:
         pose = transformation
         if link is not None:
             pose = transformation[link].h_mat
-            
+
         plt.plot_basis(self.robot, ax)
         plt.plot_vertices(ax, pose[:3, 3])   
