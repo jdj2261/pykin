@@ -25,12 +25,16 @@ def get_transform(A, B):
     # T = B * inv(A)
     return np.dot(B, np.linalg.inv(A))
 
-def get_angle_from_vectors(A, B):
+def get_rotation_from_vectors(A, B):
     unit_A = A / np.linalg.norm(A)
     unit_B = B / np.linalg.norm(B)
     dot_product = np.dot(unit_A, unit_B)
     angle = np.arccos(dot_product)
-    return angle
+
+    rot_axis = np.cross(unit_B, unit_A)
+    R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
+
+    return R
 
 # TODO : Level wise, approach distance, gripper collision check
 class PnPManager:

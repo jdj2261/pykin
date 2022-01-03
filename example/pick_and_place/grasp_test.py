@@ -31,10 +31,11 @@ c_manager.filter_contact_names(robot, fk)
 
 obs = Obstacle()
 o_manager = CollisionManager()
-# obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
+obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 # obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
 
-obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]))
+# obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]))
+# obs_pos1 = Transform()
 obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]))
 obs_pos3 = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -167,38 +168,29 @@ grasp_man = GraspManager(robot, c_manager, o_manager, mesh_path, **configures)
 # eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
 
 # for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in grasp_man.sample_supports(obj_mesh2, obs_pos2.h_mat, 1 , obj_mesh1, obs_pos1.h_mat, 6):
-#     print(point_for_sup, normal_for_sup)
 #     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 #     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 #     plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
 
-#     # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
-#     # gripper = grasp_man.get_gripper_transformed(tcp_pose)
-#     # grasp_man.visualize_gripper(ax, gripper, alpha=1)
-#     # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
-#     # grasp_man.visualize_point(ax, tcp_pose)
+#     grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+#     gripper = grasp_man.get_gripper_transformed(tcp_pose)
+#     grasp_man.visualize_gripper(ax, gripper, alpha=1)
+#     grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+#     grasp_man.visualize_point(ax, tcp_pose)
     
-#     # plt.plot_vertices(ax, point_on_sup)
-#     # plt.plot_normal_vector(ax, point_on_sup, normal_on_sup, scale=0.1)
-#     plt.plot_vertices(ax, point_for_sup)
-#     plt.plot_normal_vector(ax, point_for_sup, normal_for_sup, scale=0.1)
+#     plt.plot_vertices(ax, point_on_sup)
+#     plt.plot_normal_vector(ax, point_on_sup, normal_on_sup, scale=0.1)
+#     plt.plot_vertices(ax, point_for_sup + obs_pos1.pos)
+#     plt.plot_normal_vector(ax, point_for_sup + obs_pos1.pos, normal_for_sup, scale=0.1)
 #     plt.show_figure()
 #########
 
-# vector_1 = np.array([0,0,1])
-# vector_2 = np.array([0, 0, -1])
+eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
 
-# unit_vector_1 = vector_1 / np.linalg.norm(vector_1)
-# unit_vector_2 = vector_2 / np.linalg.norm(vector_2)
-# dot_product = np.dot(unit_vector_1, unit_vector_2)
-# angle = np.arccos(dot_product)
-
-for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in grasp_man.sample_supports(obj_mesh2, obs_pos2.h_mat, 1 , obj_mesh1, obs_pos1.h_mat, 6):
+for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in grasp_man.sample_supports(obj_mesh2, obs_pos2.h_mat, 3, obj_mesh1, obs_pos1.h_mat, 3):
     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-    # print(-normal_on_sup, normal_for_sup)
     normal_on_sup = -normal_on_sup
     
-    T = np.eye(4)
     unit_vector_1 = normal_for_sup / np.linalg.norm(normal_for_sup)
     unit_vector_2 = normal_on_sup / np.linalg.norm(normal_on_sup)
 
@@ -208,25 +200,65 @@ for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in grasp_man.samp
     rot_axis = np.cross(unit_vector_2, unit_vector_1)
     R = get_matrix_from_axis_angle(rot_axis, angle)
 
-    T[:3, :3] = R
-    A2B = np.dot(obs_pos1.h_mat, T)
-
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=A2B, alpha=0.2)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-
-    point_transformed = np.dot(point_for_sup-obs_pos1.pos, R) + obs_pos1.pos
-    normal_transformed = np.dot(normal_for_sup, R)
-    plt.plot_normal_vector(ax, point_transformed, normal_transformed, scale=0.3, edgecolor='green')
-
-    p = point_on_sup - point_transformed
-    T[:3, 3] = p
+    grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+    gripper = grasp_man.get_gripper_transformed(tcp_pose)
+    grasp_man.visualize_gripper(ax, gripper, alpha=1)
+    # grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
+    # grasp_man.visualize_point(ax, tcp_pose)
     
-    plt.plot_normal_vector(ax, point_on_sup, normal_on_sup, scale=0.1)
-    plt.plot_normal_vector(ax, point_transformed, normal_for_sup, scale=0.1)
-    A2B = np.dot(obs_pos1.h_mat, T)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=A2B, alpha=0.2)
+    A2B = np.eye(4)
+    A2B[:3, :3] = np.dot(R, obs_pos1.h_mat[:3, :3])
+    A2B[:3, 3] = obs_pos1.h_mat[:3, 3]
+
+    T = np.dot(obs_pos1.h_mat, np.linalg.inv(A2B))
+    gripper_pose = np.dot(T, tcp_pose)
+
+    gripper = grasp_man.get_gripper_transformed(gripper_pose)
+    # grasp_man.visualize_gripper(ax, gripper, alpha=1)
+    # grasp_man.visualize_axis(ax, gripper_pose, axis=[1,1,1], scale=0.05)
+    # grasp_man.visualize_point(ax, gripper_pose)
+
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=A2B, alpha=0.2, color='blue')
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2, color='red')
+    plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
+    
+    point_transformed = np.dot(point_for_sup, R) + obs_pos1.pos
+    normal_transformed = np.dot(normal_for_sup, R)
+
+    plt.plot_normal_vector(ax, point_transformed, normal_transformed, scale=0.3, edgecolor='green')
+    plt.plot_normal_vector(ax, point_on_sup, normal_on_sup, scale=0.1, edgecolor='green')
+    plt.plot_normal_vector(ax, point_for_sup + obs_pos1.pos, normal_for_sup, scale=0.3)
+
+    T = np.eye(4)
+    T[:3, :3] = A2B[:3, :3]
+    T[:3, 3] = obs_pos1.pos + (point_on_sup - point_transformed)
+
+    result_gripper_pose = np.eye(4)
+    result_gripper_pose[:3, :3] = gripper_pose[:3, :3]
+    result_gripper_pose[:3, 3] = gripper_pose[:3, 3] + (point_on_sup - point_transformed)
+    gripper = grasp_man.get_gripper_transformed(result_gripper_pose)
+    grasp_man.visualize_gripper(ax, gripper, alpha=1)
+    # grasp_man.visualize_axis(ax, result_gripper_pose, axis=[1,1,1], scale=0.05)
+    # grasp_man.visualize_point(ax, result_gripper_pose)
+
+
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=T, alpha=0.2, color='blue')
     plt.show_figure()
+
+#########
+# for T, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in grasp_man.generate_supports(obj_mesh2, obs_pos2.h_mat, 1, obj_mesh1, obs_pos1.h_mat, 8):
+#     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=T, alpha=0.3, color='blue')
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2, color='red')
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
+#     plt.plot_normal_vector(ax, point_on_sup, normal_on_sup, scale=0.1)
+#     plt.plot_normal_vector(ax, point_for_sup, normal_for_sup, scale=0.1)
+
+#     point_transformed = np.dot(point_for_sup-obs_pos1.pos, T[:3, :3]) + obs_pos1.pos
+#     normal_transformed = np.dot(normal_for_sup, T[:3, :3])
+#     plt.plot_normal_vector(ax, point_transformed, normal_transformed, scale=0.3, edgecolor='green')
+
+#     plt.show_figure()
 
 #########
 # eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)

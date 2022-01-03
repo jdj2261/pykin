@@ -4,7 +4,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from pykin.tasks.activity import ActivityBase
-from pykin.utils.task_utils import normalize, surface_sampling, projection, get_transform
+from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 
@@ -214,8 +214,8 @@ class GraspManager(ActivityBase):
         support_points = self.sample_supports(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup,
                                         obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup)
 
-        for pose_on_sup, T, pose_for_sup in self.transform_points_on_support(support_points):
-            yield pose_on_sup, T, pose_for_sup
+        for T, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in self.transform_points_on_support(support_points, obj_pose_on_sup, obj_pose_for_sup):
+            yield T, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup
 
     def sample_supports(
         self,
@@ -233,17 +233,17 @@ class GraspManager(ActivityBase):
             for point_for_support, normal_for_support in sample_points_for_support:
                 yield point_on_support, normal_on_support, point_for_support, normal_for_support
 
-    def transform_points_on_support(self, support_points):
+    def transform_points_on_support(self, support_points, obj_pose_on_sup, obj_pose_for_sup):
         for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in support_points:
-            pose_on_sup = self._get_pose_axis_z(point_on_sup, normal_on_sup)
-            pose_on_sup[:3, 2] = -pose_on_sup[:3, 2]
-            pose_for_sup = self._get_pose_axis_z(point_for_sup, normal_for_sup)
+            T = np.eye(4)
+            normal_on_sup = -normal_on_sup
+            R_mat = get_rotation_from_vectors(normal_for_sup, normal_on_sup)
+            T[:3, :3] = np.dot(R_mat, self.obj_pose.T[:3, :3])
+            A2B = np.dot(obj_pose_for_sup, T)
+            print(A2B)
+            
+            yield A2B, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup
 
-            try:
-                T = get_transform(pose_for_sup, pose_on_sup)
-                yield pose_on_sup, T, pose_for_sup
-            except:
-                continue
 
     @staticmethod
     def _get_pose_axis_z(point, normal):
@@ -300,8 +300,10 @@ class GraspManager(ActivityBase):
         n_samples
     ):
         copied_mesh = deepcopy(obj_mesh)
-        copied_mesh.apply_transform(obj_pose)
-
+        T = np.eye(4)
+        T[:3, :3] = obj_pose[:3,:3]
+        copied_mesh.apply_transform(T)
+    
         weights = np.zeros(len(copied_mesh.faces))
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
             weights[idx]=0.2
