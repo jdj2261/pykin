@@ -117,13 +117,9 @@ class GraspManager(ActivityBase):
         if not is_success_filtered:
             logger.error(f"Failed to filter grasp poses")
             return None, None, None, None
+        logger.info(f"Success to get grasp pose.\n")
 
         return grasp_pose, tcp_pose, contact_point, normal
-
-    def _compute_inverse_kinematics(self, grasp_pose):
-        eef_pose = get_pose_from_homogeneous(grasp_pose)
-        qpos = self.robot.inverse_kin(np.random.randn(7), eef_pose, maxIter=500)
-        return qpos
 
     def generate_tcp_poses(
         self,
@@ -291,7 +287,7 @@ class GraspManager(ActivityBase):
     def filter_supports(self, support_poses):
         is_success_filtered = False
         for result_obj_pose, gripper_transformed in support_poses:
-            if not self.support_check(result_obj_pose):
+            if not self._check_support(result_obj_pose):
                 continue
 
             release_pose = gripper_transformed[self.robot.eef_name]
@@ -318,22 +314,8 @@ class GraspManager(ActivityBase):
             logger.error(f"Failed to filter release poses")
             return None, None, None, None
         
+        logger.info(f"Success to get release pose.\n")
         return release_pose, result_obj_pose
-
-    def support_check(self, obj_pose):
-        obj_mesh = deepcopy(self.obj_mesh_for_sup)
-        obj_mesh.apply_transform(obj_pose)
-        self.obj_center_point = obj_mesh.center_mass
-        locations, _, _ = self.obj_mesh_on_sup.ray.intersects_location(
-                    ray_origins=[self.obj_center_point],
-                    ray_directions=[[0, 0, -1]])
-
-        if len(locations) != 0:
-            support_index = np.where(locations == np.max(locations, axis=0)[2])
-            self.obj_support_point = locations[support_index[0]]
-            return True
-        logger.warning("Not found support point")
-        return False
 
     def generate_points_on_support(
         self,
@@ -373,6 +355,10 @@ class GraspManager(ActivityBase):
         for point, normal_vector in zip(place_points, normal_vectors):
             yield point, normal_vector
 
+    def _compute_inverse_kinematics(self, grasp_pose):
+        eef_pose = get_pose_from_homogeneous(grasp_pose)
+        qpos = self.robot.inverse_kin(np.random.randn(7), eef_pose, maxIter=500)
+        return qpos
 
     def _generate_contact_points(
         self,
@@ -429,4 +415,20 @@ class GraspManager(ActivityBase):
         error_pose = self.robot.get_pose_error(eef_pose, goal_pose)
         if error_pose < err_limit:
             return True
+        return False
+
+
+    def _check_support(self, obj_pose):
+        obj_mesh = deepcopy(self.obj_mesh_for_sup)
+        obj_mesh.apply_transform(obj_pose)
+        self.obj_center_point = obj_mesh.center_mass
+        locations, _, _ = self.obj_mesh_on_sup.ray.intersects_location(
+                    ray_origins=[self.obj_center_point],
+                    ray_directions=[[0, 0, -1]])
+
+        if len(locations) != 0:
+            support_index = np.where(locations == np.max(locations, axis=0)[2])
+            self.obj_support_point = locations[support_index[0]]
+            return True
+        logger.warning("Not found support point")
         return False

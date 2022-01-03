@@ -247,8 +247,8 @@ $ git submodule update
 
   *The image below shows the result of a sawyer head and milk collision.*
 
-  | <img src="img/sawyer_mesh_collision.png" weight="800" height="200"/> | <img src="img/sawyer_collision_result.png" weight="50" height="200"/> |
-  | ------------------------------------------------------------ | ------------------------------------------------------------ |
+  | <img src="img/sawyer_mesh_collision.png" height="200"/> | <img src="img/sawyer_collision_result.png" height="200"/> |
+  | ------------------------------------------------------- | --------------------------------------------------------- |
 
 ## Visualization
 
@@ -268,7 +268,7 @@ $ git submodule update
 
 |               baxter               |               sawyer               |
 | :-----------------------------------: | :-----------------------------------: |
-| <img src="img/baxter_collision.png" weight="500" height="200"/> | <img src="img/sawyer_collision.png" weight="200" height="200"/> |
+| <img src="img/baxter_collision.png" width="200" height="200"/> | <img src="img/sawyer_collision.png" width="200" height="200"/> |
 
 - mesh
 
@@ -284,26 +284,19 @@ $ git submodule update
 
     |                            iiwa14                            |                            panda                             |                            sawyer                            |
     | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/iiwa_cartesian.gif" weight="500" height="200"/> | <img src="img/panda_cartesian.gif" weight="500" height="200"/> | <img src="img/sawyer_cartesian.gif" weight="500" height="200"/> |
+    | <img src="img/iiwa_cartesian.gif" width="500" height="200"/> | <img src="img/panda_cartesian.gif" width="500" height="200"/> | <img src="img/sawyer_cartesian.gif" width="500" height="200"/> |
 
   - RRT-star planning
 
-    |                         iiwa14                          |                          panda                           |                          sawyer                           |
-    | :-----------------------------------------------------: | :------------------------------------------------------: | :-------------------------------------------------------: |
-    | <img src="img/iiwa_rrt.gif" weight="500" height="200"/> | <img src="img/panda_rrt.gif" weight="500" height="200"/> | <img src="img/sawyer_rrt.gif" weight="500" height="200"/> |
+    |                         iiwa14                         |                          panda                          |                          sawyer                          |
+    | :----------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: |
+    | <img src="img/iiwa_rrt.gif" width="500" height="200"/> | <img src="img/panda_rrt.gif" width="500" height="200"/> | <img src="img/sawyer_rrt.gif" width="500" height="200"/> |
   
 - Grasping
 
   You can see an visualization the pose for the robot to grasp an object.
 
-  - Compute panda robot's grasping pose
-
-    |                       all grasp pose                       |                        pre grasp pose                        |                          grasp pose                          |
-    | :--------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/all_posture.png" weight="500" height="200"/> | <img src="img/pre_grasp_posture.png" weight="500" height="200"/> | <img src="img/grasp_posture.png" weight="200" height="200"/> |
-
   - Compute panda robot's pick and place pose
 
-    | <img src="img/pnp_demo.png" weight="300" height="200"/> | <img src="img/pnp_demo2.png" weight="300" height="200"/> |
-    | :-----------------------------------------------------: | :------------------------------------------------------: |
+    <img src="img/pnp_pose.png" width="400" height="400"/>
 
