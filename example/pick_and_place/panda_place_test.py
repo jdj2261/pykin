@@ -84,8 +84,8 @@ pnp.visualize_axis(ax, release_transforms, "panda_right_hand")
 eef_pose = robot.get_eef_pose(grasp_transforms)
 pre_eef_pose = robot.get_eef_pose(pre_grasp_transforms)
 
-qpos = robot.get_result_qpos(init_qpos, eef_pose)
-pre_qpos = robot.get_result_qpos(init_qpos, pre_eef_pose)
+qpos = robot.get_result_qpos(init_qpos, eef_pose, 20)
+pre_qpos = robot.get_result_qpos(init_qpos, pre_eef_pose, 20)
 transforms = robot.forward_kin(qpos)
 pre_transforms = robot.forward_kin(pre_qpos)
 

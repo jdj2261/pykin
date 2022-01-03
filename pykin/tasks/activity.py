@@ -53,11 +53,15 @@ class ActivityBase:
     def get_gripper(self):
         return self.gripper
 
-    def get_gripper_transformed(self, tcp_pose):
+    def get_gripper_transformed(self, pose, is_tcp=True):
         transform_gripper = {}
         gripper = self.get_gripper()
+        tcp_pose = pose
+
+        if not is_tcp:
+            tcp_pose = self.get_tcp_h_mat_from_eef(pose)
+
         for link, transform in gripper.items():
-            # T = np.dot(tcp_pose, np.linalg.inv(gripper[self.gripper_names[-1]]))
             T = get_transform(gripper[self.gripper_names[-1]], tcp_pose)
             transform_gripper[link] = np.dot(T, transform)
         return transform_gripper
