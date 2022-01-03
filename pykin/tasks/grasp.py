@@ -40,7 +40,7 @@ class GraspManager(ActivityBase):
     ):
         waypoints = OrderedDict()
 
-        grasp_pose, tcp_pose, contact_point, _= self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials, desired_distance)
+        grasp_pose, _, _, _= self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials, desired_distance)
         
         waypoints["pre_grasp"] = self.pre_grasp_pose
         waypoints["grasp"] = grasp_pose
@@ -204,6 +204,35 @@ class GraspManager(ActivityBase):
             return True
         return False
 
+    def get_release_waypoints(
+        self,
+        obj_mesh_on_sup,
+        obj_pose_on_sup,
+        n_samples_on_sup,
+        obj_mesh_for_sup,
+        obj_pose_for_sup,
+        n_samples_for_sup,
+        n_trials=1,
+        desired_distance=0.1
+    ):
+        waypoints = OrderedDict()
+
+        release_pose, _, _, _= self.get_support_pose(
+            obj_mesh_on_sup,
+            obj_pose_on_sup,
+            n_samples_on_sup,
+            obj_mesh_for_sup,
+            obj_pose_for_sup,
+            n_samples_for_sup, 
+            n_trials,
+            desired_distance)
+        
+        waypoints["pre_release"] = self.pre_relase_pose
+        waypoints["release"] = release_pose
+        waypoints["post_release"] =self.post_release_pose
+
+        return waypoints
+        
     def get_support_pose(
         self,
         obj_mesh_on_sup,
@@ -212,6 +241,8 @@ class GraspManager(ActivityBase):
         obj_mesh_for_sup,
         obj_pose_for_sup,
         n_samples_for_sup,
+        n_trials,
+        desired_distance,
     ):
         support_poses = self.generate_supports(
             obj_mesh_on_sup,
@@ -219,9 +250,17 @@ class GraspManager(ActivityBase):
             n_samples_on_sup,
             obj_mesh_for_sup,
             obj_pose_for_sup,
-            n_samples_for_sup)
+            n_samples_for_sup,
+            n_trials)
 
-        self.filter_supports(support_poses, obj_pose_for_sup)
+        release_pose, _ = self.filter_supports(support_poses, desired_distance)
+        return release_pose
+
+    def get_pre_release_pose(self, release_pose, desired_distance):
+        pre_release_pose = np.eye(4)
+        pre_release_pose[:3, :3] = release_pose[:3, :3]
+        pre_release_pose[:3, 3] = release_pose[:3, 3] + np.array([0, 0, desired_distance])
+        return pre_release_pose
 
     def generate_supports(
         self,
@@ -231,12 +270,24 @@ class GraspManager(ActivityBase):
         obj_mesh_for_sup,
         obj_pose_for_sup,
         n_samples_for_sup,
+        n_trials=1
     ):
-        support_points = self.sample_supports(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup,
-                                        obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup)
+        cnt = 0
+        while cnt < n_trials:
+            support_points = self.sample_supports(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup,
+                                            obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup)
+            
+            for result_obj_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed in self.transform_points_on_support(support_points, obj_pose_for_sup):
+                T = np.dot(obj_pose_for_sup, np.linalg.inv(obj_pose_transformed_for_sup))
+                gripper_pose_transformed = np.dot(T, self.tcp_pose)
+                result_gripper_pose = np.eye(4)
+                result_gripper_pose[:3, :3] = gripper_pose_transformed[:3, :3]
+                result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed)
 
-        for result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed in self.transform_points_on_support(support_points, obj_pose_for_sup):
-            yield result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed
+                gripper_transformed = self.get_gripper_transformed(result_gripper_pose)
+                if self.collision_free(gripper_transformed, only_gripper=True):
+                    yield result_obj_pose, gripper_transformed
+            cnt += 1
 
     def sample_supports(
         self,
@@ -266,23 +317,40 @@ class GraspManager(ActivityBase):
             point_transformed = np.dot(point_for_sup - obj_pose_for_sup[:3, 3], R_mat) + obj_pose_for_sup[:3, 3]
             normal_transformed = np.dot(normal_for_sup, R_mat)
 
-            result_pose = np.eye(4)
-            result_pose[:3, :3] = obj_pose_transformed_for_sup[:3, :3]
-            result_pose[:3, 3] = obj_pose_for_sup[:3, 3] + (point_on_sup - point_transformed)
+            result_obj_pose = np.eye(4)
+            result_obj_pose[:3, :3] = obj_pose_transformed_for_sup[:3, :3]
+            result_obj_pose[:3, 3] = obj_pose_for_sup[:3, 3] + (point_on_sup - point_transformed)
 
-            yield result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed
+            yield result_obj_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed
 
-    def filter_supports(self, support_poses, obj_pose_for_sup):
+    def filter_supports(self, support_poses, desired_distance=0.1):
         is_success_filtered = False
-        for support_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, _ in support_poses:
-            T = np.dot(obj_pose_for_sup, np.linalg.inv(obj_pose_transformed_for_sup))
-            gripper_pose_transformed = np.dot(T, self.tcp_pose)
-            
-            result_gripper_pose = np.eye(4)
-            result_gripper_pose[:3, :3] = gripper_pose_transformed[:3, :3]
-            result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed)
+        for result_obj_pose, gripper_transformed in support_poses:
+            release_pose = gripper_transformed[self.robot.eef_name]
+            qpos = self._compute_inverse_kinematics(release_pose)
+            if qpos is None:
+                continue
 
-            yield support_pose, result_gripper_pose
+            transforms = self.robot.forward_kin(np.array(qpos))
+            goal_pose = transforms[self.robot.eef_name].h_mat
+
+            if self._check_ik_solution(release_pose, goal_pose) and self.collision_free(transforms):
+                pre_release_pose = self.get_pre_release_pose(release_pose, desired_distance)
+                pre_qpos = self._compute_inverse_kinematics(pre_release_pose)
+                pre_transforms = self.robot.forward_kin(np.array(pre_qpos))
+                pre_goal_pose = pre_transforms[self.robot.eef_name].h_mat
+
+                if self._check_ik_solution(pre_release_pose, pre_goal_pose) and self.collision_free(pre_transforms):
+                    self.pre_release_pose = pre_release_pose
+                    self.post_release_pose = pre_release_pose
+                    is_success_filtered = True
+                    break
+
+        if not is_success_filtered:
+            logger.error(f"Failed to filter release poses")
+            return None, None, None, None
+        
+        return release_pose, result_obj_pose
 
     def generate_points_on_support(
         self,
@@ -299,11 +367,6 @@ class GraspManager(ActivityBase):
             if np.all(vertex[:,2] >= copied_mesh.bounds[1][2] * 0.98):                
                 weights[idx] = 1.0
 
-        # self.place_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples)
-        # surface_probs = copied_mesh.vertices[copied_mesh.faces[face_ind]]
-        # print(copied_mesh.face_normals)
-        # print(copied_mesh.vertices)
-
         place_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(place_points, normal_vectors):
             yield point, normal_vector
@@ -315,16 +378,13 @@ class GraspManager(ActivityBase):
         n_samples
     ):
         copied_mesh = deepcopy(obj_mesh)
-        T = np.eye(4)
-        T[:3, :3] = obj_pose[:3,:3]
         copied_mesh.apply_transform(obj_pose)
     
         weights = np.zeros(len(copied_mesh.faces))
-        print(copied_mesh.bounds)
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
-            weights[idx]=0.2
+            weights[idx]=0.1
             if np.all(vertex[:,2] <= copied_mesh.bounds[0][2] * 1.02):                
-                weights[idx] = 0.8
+                weights[idx] = 0.9
   
         place_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(place_points, normal_vectors):
