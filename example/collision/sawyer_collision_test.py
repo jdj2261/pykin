@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 import sys, os
-
+import trimesh
 pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
 
@@ -10,11 +10,10 @@ from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
-import trimesh
 
 custom_fpath = '../../asset/config/sawyer_init_params.yaml'
 with open(custom_fpath) as f:
-            controller_config = yaml.safe_load(f)
+    controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
 
 file_path = '../../asset/urdf/sawyer/sawyer.urdf'
@@ -27,7 +26,6 @@ fk = robot.forward_kin(np.array(np.concatenate((np.zeros(1), init_qpos))))
 mesh_path = pykin_path+"/asset/urdf/sawyer/"
 
 # init_trainsform
-# 로봇의 경우 첫 collision은 제외 일어난 이름은 제외 
 c_manager = CollisionManager(mesh_path)
 c_manager.filter_contact_names(robot)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
@@ -53,10 +51,5 @@ print(result)
 for (a,b), dis in result.items():
     if dis <= 0.0:
         print(a,b, dis)
-
-# # table_path = pykin_path+"/asset/objects/meshes/twin_tower_goal.stl"
-# # table_mesh = trimesh.load_mesh(table_path)
-# # table_mesh.apply_scale(0.001)
-# # scene.add_geometry(table_mesh, transform=Transform(pos=[-1, 0, 0]).h_mat)
 
 scene.show()

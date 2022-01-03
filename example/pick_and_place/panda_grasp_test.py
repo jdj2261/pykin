@@ -9,7 +9,6 @@ from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.grasp import GraspManager
-from pykin.utils.obstacle_utils import Obstacle
 from pykin.utils.collision_utils import apply_robot_to_collision_manager
 from pykin.utils.transform_utils import get_matrix_from_axis_angle
 
@@ -27,7 +26,6 @@ c_manager = CollisionManager(mesh_path)
 c_manager = apply_robot_to_collision_manager(c_manager, robot, fk, geom="collision")
 c_manager.filter_contact_names(robot, fk)
 
-obs = Obstacle()
 o_manager = CollisionManager()
 obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
 obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
@@ -41,9 +39,6 @@ obj_mesh1.apply_scale(0.001)
 obj_mesh2.apply_scale(0.001)
 obj_mesh3.apply_scale(0.01)
 
-obs(name="can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1)
-obs(name="box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2)
-obs(name="table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3)
 o_manager.add_object("can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1.h_mat)
 o_manager.add_object("box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat)
 o_manager.add_object("table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3.h_mat)
