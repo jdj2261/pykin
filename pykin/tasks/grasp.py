@@ -26,6 +26,9 @@ class GraspManager(ActivityBase):
             mesh_path,
             **gripper_configures)
 
+        self.tcp_pose = np.eye(4)
+        self.contact_point = None
+
     def get_grasp_waypoints(
         self,
         obj_mesh,
@@ -37,7 +40,7 @@ class GraspManager(ActivityBase):
     ):
         waypoints = OrderedDict()
 
-        grasp_pose, _, _, _ = self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials, desired_distance)
+        grasp_pose, tcp_pose, contact_point, _= self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials, desired_distance)
         
         waypoints["pre_grasp"] = self.pre_grasp_pose
         waypoints["grasp"] = grasp_pose
@@ -56,6 +59,9 @@ class GraspManager(ActivityBase):
     ):
         grasp_poses = list(self.generate_grasps(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials))
         grasp_pose, tcp_pose, contact_point, normal = self.filter_grasps(grasp_poses, desired_distance)
+        self.tcp_pose = tcp_pose
+        self.contact_point = contact_point
+        
         return grasp_pose, tcp_pose, contact_point, normal
 
     def get_pre_grasp_pose(self, grasp_pose, desired_distance):
@@ -198,9 +204,24 @@ class GraspManager(ActivityBase):
             return True
         return False
 
-    def get_support_pose(self):
-        self.generate_supports()
-        self.filter_supports()
+    def get_support_pose(
+        self,
+        obj_mesh_on_sup,
+        obj_pose_on_sup,
+        n_samples_on_sup,
+        obj_mesh_for_sup,
+        obj_pose_for_sup,
+        n_samples_for_sup,
+    ):
+        support_poses = self.generate_supports(
+            obj_mesh_on_sup,
+            obj_pose_on_sup,
+            n_samples_on_sup,
+            obj_mesh_for_sup,
+            obj_pose_for_sup,
+            n_samples_for_sup)
+
+        self.filter_supports(support_poses, obj_pose_for_sup)
 
     def generate_supports(
         self,
@@ -214,8 +235,8 @@ class GraspManager(ActivityBase):
         support_points = self.sample_supports(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup,
                                         obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup)
 
-        for T, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in self.transform_points_on_support(support_points, obj_pose_on_sup, obj_pose_for_sup):
-            yield T, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup
+        for result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed in self.transform_points_on_support(support_points, obj_pose_for_sup):
+            yield result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed
 
     def sample_supports(
         self,
@@ -233,41 +254,35 @@ class GraspManager(ActivityBase):
             for point_for_support, normal_for_support in sample_points_for_support:
                 yield point_on_support, normal_on_support, point_for_support, normal_for_support
 
-    def transform_points_on_support(self, support_points, obj_pose_on_sup, obj_pose_for_sup):
+    def transform_points_on_support(self, support_points, obj_pose_for_sup):
         for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in support_points:
-            T = np.eye(4)
             normal_on_sup = -normal_on_sup
             R_mat = get_rotation_from_vectors(normal_for_sup, normal_on_sup)
-            T[:3, :3] = np.dot(R_mat, self.obj_pose.T[:3, :3])
-            A2B = np.dot(obj_pose_for_sup, T)
-            print(A2B)
             
-            yield A2B, point_on_sup, normal_on_sup, point_for_sup, normal_for_sup
+            obj_pose_transformed_for_sup = np.eye(4)
+            obj_pose_transformed_for_sup[:3, :3] = np.dot(R_mat, obj_pose_for_sup[:3, :3])
+            obj_pose_transformed_for_sup[:3, 3] = obj_pose_for_sup[:3, 3]
 
+            point_transformed = np.dot(point_for_sup - obj_pose_for_sup[:3, 3], R_mat) + obj_pose_for_sup[:3, 3]
+            normal_transformed = np.dot(normal_for_sup, R_mat)
 
-    @staticmethod
-    def _get_pose_axis_z(point, normal):
-        pose = np.eye(4)
-        pose[:3, 2] = normal
-        pose[:3, 3] = point
-        return pose
+            result_pose = np.eye(4)
+            result_pose[:3, :3] = obj_pose_transformed_for_sup[:3, :3]
+            result_pose[:3, 3] = obj_pose_for_sup[:3, 3] + (point_on_sup - point_transformed)
 
-    @staticmethod
-    def rotation_matrix_from_vectors(v1, v2):
-        v1 = v1 / np.linalg.norm(v1)
-        v2 = v2 / np.linalg.norm(v2)
-        theta = np.dot(v1, v2)
-        if theta == 1:
-            return np.identity(3)
-        # if theta == -1:
-        #     raise ValueError
-        k = np.cross(v1, v2)
-        k /= np.linalg.norm(k)
-        K = np.matrix([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
-        return np.identity(3) + math.sqrt(1 - theta * theta) * K + np.dot((1 - theta) * K * K, v1)
+            yield result_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, normal_transformed
 
-    def filter_supports(self):
-        pass
+    def filter_supports(self, support_poses, obj_pose_for_sup):
+        is_success_filtered = False
+        for support_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed, _ in support_poses:
+            T = np.dot(obj_pose_for_sup, np.linalg.inv(obj_pose_transformed_for_sup))
+            gripper_pose_transformed = np.dot(T, self.tcp_pose)
+            
+            result_gripper_pose = np.eye(4)
+            result_gripper_pose[:3, :3] = gripper_pose_transformed[:3, :3]
+            result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed)
+
+            yield support_pose, result_gripper_pose
 
     def generate_points_on_support(
         self,
@@ -302,9 +317,10 @@ class GraspManager(ActivityBase):
         copied_mesh = deepcopy(obj_mesh)
         T = np.eye(4)
         T[:3, :3] = obj_pose[:3,:3]
-        copied_mesh.apply_transform(T)
+        copied_mesh.apply_transform(obj_pose)
     
         weights = np.zeros(len(copied_mesh.faces))
+        print(copied_mesh.bounds)
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
             weights[idx]=0.2
             if np.all(vertex[:,2] <= copied_mesh.bounds[0][2] * 1.02):                
