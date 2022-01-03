@@ -132,20 +132,8 @@ grasp_man = GraspManager(
 
 ####################################### 
 # Release test
-####
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
-# eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
-# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
-# gripper = grasp_man.get_gripper_transformed(tcp_pose)
-# grasp_man.visualize_gripper(ax, gripper, alpha=1)
-# grasp_man.visualize_axis(ax, tcp_pose, axis=[1,1,1], scale=0.05)
-# grasp_man.visualize_point(ax, tcp_pose)
-# plt.show_figure()
-
 #########
+# random sample
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 # plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
 # plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
@@ -241,15 +229,6 @@ grasp_man = GraspManager(
 #     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=T, alpha=0.2, color='blue')
 #     plt.show_figure()
 
-#########
-# eef_pose, tcp_pose, contact_points, normals = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
-# for result_obj_pose, gripper_transformed in grasp_man.generate_supports(obj_mesh2, obs_pos2.h_mat, 1, obj_mesh1, obs_pos1.h_mat, 8):
-#     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=result_obj_pose, alpha=0.3, color='blue')
-#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2, color='red')
-#     plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-#     grasp_man.visualize_gripper(ax, gripper_transformed, alpha=1)
-#     plt.show_figure()
 #########
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 # plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2)
