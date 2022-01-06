@@ -134,7 +134,8 @@ class ActivityBase:
         self,
         ax,
         gripper,
-        alpha=1.0
+        alpha=1.0,
+        color=None
     ):
         plt.plot_basis(self.robot, ax)
         for link, transform in gripper.items():
@@ -142,12 +143,14 @@ class ActivityBase:
                 mesh_name = self.mesh_path + self.robot.links[link].collision.gparam.get('filename')
                 mesh = trimesh.load_mesh(mesh_name)
                 A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                color = self.robot.links[link].collision.gparam.get('color')
-                color = np.array([color for color in color.values()]).flatten()
-                mesh.visual.face_colors = color
+
+                mesh_color = color
+                if color is None:
+                    mesh_color = self.robot.links[link].collision.gparam.get('color')
+                    mesh_color = np.array([color for color in mesh_color.values()]).flatten()
                 if "finger" in link:
                     alpha = 1
-                plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+                plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=mesh_color)
 
     def visualize_axis(
         self,
