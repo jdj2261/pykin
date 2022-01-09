@@ -58,12 +58,6 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ make install
     ~~~
 
-If the above installation is complete
-
-~~~
-pip install python-fcl
-~~~
-
 ### Install Pykin
 
 ~~~
