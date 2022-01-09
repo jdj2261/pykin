@@ -18,21 +18,19 @@ robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 custom_fpath = '../../asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
-init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
+init_qpos = np.array([0, np.pi/16.0, 0.00, -np.pi/2.0 - np.pi/3.0, 0.00, np.pi-0.2, -np.pi/4])
 init_qpos = np.array([8.41803072e-02, -1.57518581e-07, -8.41802951e-02, -1.57080031e+00,
  -2.66881047e-08,  1.86750033e+00,  2.02461868e-08])
 fk = robot.forward_kin(np.array(init_qpos))
 
 mesh_path = pykin_path+"/asset/urdf/panda/"
 c_manager = CollisionManager(mesh_path)
-c_manager.filter_contact_names(robot, fk, geom='collision')
-c_manager = apply_robot_to_collision_manager(c_manager, robot, fk, geom='collision')
+c_manager.setup_robot_collision(robot, fk, geom="visual")
+# c_manager.filter_contact_names(robot, fk, geom='collision')
+# c_manager = apply_robot_to_collision_manager(c_manager, robot, fk, geom='collision')
 
 goal_qpos = np.array([ 0.00872548,  0.12562256, -0.81809503, -1.53245947,  2.48667667,  2.6287517, -1.93698104])
 goal_fk = robot.forward_kin(goal_qpos)
-
-# print(goal_fk["rightfinger"].h_mat)
-# print(goal_fk["leftfinger"].h_mat)
 
 for link, transform in goal_fk.items():
     if link in c_manager._objs:
@@ -42,7 +40,6 @@ for link, transform in goal_fk.items():
 
 result, objs_in_collision, contact_data = c_manager.in_collision_internal(return_names=True, return_data=True)
 print(result, objs_in_collision)
-distance = c_manager.get_distances_internal()
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk, geom="collision")
@@ -56,5 +53,4 @@ table_path = pykin_path+"/asset/objects/meshes/custom_table.stl"
 table_mesh = trimesh.load_mesh(table_path)
 table_mesh.apply_scale(0.01)
 scene.add_geometry(table_mesh, transform=Transform(pos=[0.7, 0, 0]).h_mat)
-
 scene.show()

@@ -10,7 +10,7 @@ except BaseException:
     fcl = None
     trimesh = None
 
-from pykin.utils.error_utils import CollisionError, NotFoundError
+from pykin.utils.error_utils import CollisionError
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
 from pykin.collision.contact_data import ContactData
@@ -32,11 +32,12 @@ class CollisionManager:
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
 
-    def filter_contact_names(self, robot, fk=None, geom="visual"):
-
+    def setup_robot_collision(self, robot, fk=None, geom="visual"):
         if fk is None:
             fk = robot.init_transformations
-            
+        self._filter_contact_names(robot, fk, geom)
+        
+    def _filter_contact_names(self, robot, fk, geom):            
         is_collision = False
 
         def _get_collision_datas():
@@ -55,7 +56,6 @@ class CollisionManager:
                                 is_collision = True
                                 result.append((name1, name2))
             return result
-
 
         for link, transformation in fk.items():
             if geom == "visual":

@@ -128,9 +128,6 @@ class Robot(URDFModel):
     def offset(self, offset):
         self._offset = offset
 
-    def visual_offset(self, link):
-        return self.links[link].visual.offset
-
     @property
     def base_name(self):
         raise NotImplementedError

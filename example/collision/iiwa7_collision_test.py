@@ -26,8 +26,8 @@ fk = robot.forward_kin(np.array(init_qpos))
 mesh_path = pykin_path+"/asset/urdf/iiwa7/"
 
 c_manager = CollisionManager(mesh_path)
-c_manager.filter_contact_names(robot, fk)
-c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
+c_manager.setup_robot_collision(robot, fk)
+
 test, name, data = c_manager.in_collision_internal(return_names=True, return_data=True)
 
 scene = trimesh.Scene()

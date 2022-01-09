@@ -22,7 +22,7 @@ mesh_path = pykin_path+"/asset/urdf/iiwa7/"
 yaml_path = '../../../asset/config/iiwa14_init_params.yaml'
 
 with open(yaml_path) as f:
-            controller_config = yaml.safe_load(f)
+    controller_config = yaml.safe_load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("iiwa7_link_0", "iiwa7_right_hand")

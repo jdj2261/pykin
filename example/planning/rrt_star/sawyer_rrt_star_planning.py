@@ -22,7 +22,7 @@ mesh_path = pykin_path+"/asset/urdf/sawyer/"
 yaml_path = '../../../asset/config/sawyer_init_params.yaml'
 
 with open(yaml_path) as f:
-            controller_config = yaml.safe_load(f)
+    controller_config = yaml.safe_load(f)
 
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("sawyer_base", "sawyer_right_hand")
