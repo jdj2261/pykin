@@ -85,7 +85,8 @@ def plot_robot(
     transformations=None, 
     visible_collision=False, 
     visible_text=True,
-    visible_scatter=True):
+    visible_scatter=True,
+    visible_basis=True):
 
     """
     Plot robot
@@ -94,7 +95,9 @@ def plot_robot(
         transformations = robot.init_transformations
 
     name = robot.robot_name
-    plot_basis(robot, ax)
+
+    if visible_basis:
+        plot_basis(robot, ax)
     
     links = []
     nodes = []
@@ -184,11 +187,11 @@ def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
         ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
             [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
 
-def plot_trajectories(ax, path):
+def plot_trajectories(ax, path, size=10, color='r'):
     """
     Plot plot_trajectories
     """
-    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=size, c=color)
 
 def plot_animation(
     robot, 

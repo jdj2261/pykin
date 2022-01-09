@@ -18,10 +18,10 @@ from pykin.utils.obstacle_utils import Obstacle
 
 
 help_str = "python panda_cartesian_planning.py"\
-            " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
+            " --timesteps 100 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"
 
 parser = argparse.ArgumentParser(usage=help_str)
-parser.add_argument("--timesteps", type=int, default=1000)
+parser.add_argument("--timesteps", type=int, default=500)
 parser.add_argument("--damping", type=float, default=0.03)
 parser.add_argument("--resolution", type=float, default=0.05)
 parser.add_argument("--pos-sensitivity", type=float, default=0.04)
@@ -44,15 +44,15 @@ goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)
-c_manager.filter_contact_names(robot, fk)
-c_manager = apply_robot_to_collision_manager(c_manager, robot, fk)
+c_manager.setup_robot_collision(robot, fk)
+
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
 
 obs = Obstacle()
 o_manager = CollisionManager(milk_path)
-# name="milk1"
-# obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
+name="milk1"
+obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
 
 # o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
 # obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))

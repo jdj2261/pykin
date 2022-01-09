@@ -7,7 +7,7 @@ import pykin.kinematics.jacobian as jac
 
 from pykin.planners.planner import Planner
 from pykin.utils.error_utils import OriValueError, CollisionError
-from pykin.utils.kin_utils import ShellColors as sc
+from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.log_utils import create_logger
 from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp
 
@@ -45,7 +45,8 @@ class CartesianPlanner(Planner):
     
     def __repr__(self):
         return 'pykin.planners.cartesian_planner.{}()'.format(type(self).__name__)
-        
+    
+    @logging_time
     def get_path_in_joinst_space(
         self, 
         current_q=None,
@@ -100,7 +101,7 @@ class CartesianPlanner(Planner):
                 collision_free = self.collision_free(self._cur_qpos, visible_name=False)
 
                 if not collision_free:
-                    collision_pose[step] = np.round(target_transform[:3,3],3)
+                    collision_pose[step] = np.round(target_transform[:3,3], 6)
                     continue
 
                 if not self._check_q_in_limits(self._cur_qpos):

@@ -26,8 +26,6 @@ fk = robot.forward_kin(np.array(init_qpos))
 mesh_path = pykin_path+"/asset/urdf/panda/"
 c_manager = CollisionManager(mesh_path)
 c_manager.setup_robot_collision(robot, fk, geom="visual")
-# c_manager.filter_contact_names(robot, fk, geom='collision')
-# c_manager = apply_robot_to_collision_manager(c_manager, robot, fk, geom='collision')
 
 goal_qpos = np.array([ 0.00872548,  0.12562256, -0.81809503, -1.53245947,  2.48667667,  2.6287517, -1.93698104])
 goal_fk = robot.forward_kin(goal_qpos)

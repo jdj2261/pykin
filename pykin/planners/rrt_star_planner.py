@@ -4,7 +4,7 @@ import numpy as np
 from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
-from pykin.utils.kin_utils import ShellColors as sc
+from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
 
 logger = create_logger('RRT Star Planner', "debug")
@@ -15,12 +15,14 @@ class RRTStarPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        current_q(np.array or Iterable of floats): current joint angle
-        goal_q(np.array or Iterable of floats): target joint angle obtained through Inverse Kinematics 
+        self_collision_manager: CollisionManager for robot's self collision check
+        obstacle_collision_manager: CollisionManager for collision check between robot and object
         delta_distance(float): distance between nearest vertex and new vertex
         epsilon(float): 1-epsilon is probability of random sampling
-        max_iter(int): maximum number of iterations
         gamma_RRT_star(int): factor used for search radius
+        max_iter(int): maximum number of iterations
+        dimension(int): robot arm's dof
+        n_step(int): for n equal divisions between waypoints
     """
     def __init__(
         self, 
@@ -59,7 +61,9 @@ class RRTStarPlanner(Planner):
 
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
-        
+    
+
+    @logging_time
     def get_path_in_joinst_space(self, cur_q, goal_pose, resolution=1):
         """
         Get path in joint space

@@ -35,8 +35,7 @@ init_eef_pose = robot.get_eef_pose(init_fk)
 goal_eef_pose = controller_config["goal_pose"]
 
 c_manager = CollisionManager(mesh_path)
-c_manager.filter_contact_names(robot, init_fk)
-c_manager = apply_robot_to_collision_manager(c_manager, robot, init_fk)
+c_manager.setup_robot_collision(robot, init_fk)
 
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)

@@ -23,8 +23,7 @@ fk = robot.forward_kin(np.array(init_qpos))
 
 mesh_path = pykin_path+"/asset/urdf/panda/"
 c_manager = CollisionManager(mesh_path)
-c_manager = apply_robot_to_collision_manager(c_manager, robot, fk, geom="collision")
-c_manager.filter_contact_names(robot, fk)
+c_manager.setup_robot_collision(robot, fk)
 
 o_manager = CollisionManager()
 obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
