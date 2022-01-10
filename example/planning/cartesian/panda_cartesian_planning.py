@@ -13,7 +13,6 @@ from pykin.kinematics.transform import Transform
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils import plot_utils as plt
-from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 from pykin.utils.obstacle_utils import Obstacle
 
 
