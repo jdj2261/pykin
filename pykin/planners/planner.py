@@ -12,7 +12,9 @@ class Planner(metaclass=ABCMeta):
 
     Args:
         robot (SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        obstacles (dictionary) : The obstacles
+        self_collision_manager: CollisionManager for robot's self collision check
+        obstacle_collision_manager: CollisionManager for collision check between robot and object
+        dimension(int): robot arm's dof
     """
     def __init__(
         self,
@@ -75,8 +77,7 @@ class Planner(metaclass=ABCMeta):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
-    @abstractclassmethod
-    def collision_free(self, new_q, visible_name=False):
+    def _collision_free(self, new_q, visible_name=False):
         """
         Check collision free between robot and obstacles
         If visible name is True, return collision result and collision object names
@@ -90,7 +91,30 @@ class Planner(metaclass=ABCMeta):
             result(bool): If collision free, return True
             names(set of 2-tup): The set of pairwise collisions. 
         """
-        raise NotImplementedError
+ 
+        if self.self_c_manager is None:
+            return True
+
+        transformations = self._get_transformations(new_q)
+
+        for link, transformations in transformations.items():
+            if link in self.self_c_manager._objs:
+                transform = transformations.h_mat
+                A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                self.self_c_manager.set_transform(name=link, transform=A2B)
+        
+        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
+        is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)  
+
+        name = None
+        if visible_name:
+            if is_self_collision:
+                return False, name
+            return True, name
+
+        if is_self_collision or is_obstacle_collision:
+            return False
+        return True
 
     @abstractclassmethod
     def get_path_in_joinst_space(self):

@@ -19,6 +19,11 @@ class CartesianPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
+        self_collision_manager: CollisionManager for robot's self collision check
+        obstacle_collision_manager: CollisionManager for collision check between robot and object
+        n_step(int): Number of waypoints
+        dimension(int): robot arm's dof
+        waypoint_type(str): Type of waypoint ex) "Linear", "Cubic", "Circular"
     """
     def __init__(
         self,
@@ -98,9 +103,9 @@ class CartesianPlanner(Planner):
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                collision_free = self.collision_free(self._cur_qpos, visible_name=False)
+                is_collision_free = self._collision_free(self._cur_qpos, visible_name=False)
 
-                if not collision_free:
+                if not is_collision_free:
                     collision_pose[step] = np.round(target_transform[:3,3], 6)
                     continue
 
@@ -118,7 +123,7 @@ class CartesianPlanner(Planner):
             
             if collision_pose.keys():
                 logger.error(f"Failed Generate Path.. Collision may occur.")
-                # logger.warning(f"Collision Position : {collision_pose.values()}")
+                
                 for pose in collision_pose.values():
                     logger.warning(f"Collision Position : {pose}")
                 raise CollisionError("Conflict confirmed. Check the object position!")
@@ -136,43 +141,6 @@ class CartesianPlanner(Planner):
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             
         return paths, target_positions
-
-    def collision_free(self, new_q, visible_name=False):
-        """
-        Check collision free between robot and obstacles
-        If visible name is True, return collision result and collision object names
-        otherwise, return only collision result
-
-        Args:
-            new_q(np.array): new joint angles
-            visible_name(bool)
-
-        Returns:
-            result(bool): If collision free, return True
-            names(set of 2-tup): The set of pairwise collisions. 
-        """
-
-        if self.self_c_manager is None:
-            return True
-            
-        transformations = self._get_transformations(new_q)
-        for link, transformations in transformations.items():
-           if link in self.self_c_manager._objs:
-                transform = transformations.h_mat
-                A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
-                self.self_c_manager.set_transform(name=link, transform=A2B)
-        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
-        is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)
-
-        name = None
-        if visible_name:
-            if is_self_collision:
-                return False, name
-            return True, name
-
-        if is_self_collision or is_obstacle_collision:
-            return False
-        return True
 
     # TODO
     # generate cubic, circular waypoints

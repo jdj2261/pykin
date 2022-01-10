@@ -22,7 +22,7 @@ class RRTStarPlanner(Planner):
         gamma_RRT_star(int): factor used for search radius
         max_iter(int): maximum number of iterations
         dimension(int): robot arm's dof
-        n_step(int): for n equal divisions between waypoints
+        n_step(int): number for n equal divisions between waypoints
     """
     def __init__(
         self, 
@@ -100,13 +100,13 @@ class RRTStarPlanner(Planner):
                     logger.info(f"iter : {step}")
                     
                 rand_q = self.random_state()
-                if not self.collision_free(rand_q):
+                if not self._collision_free(rand_q):
                     continue
 
                 nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
                 new_q = self.new_state(nearest_q, rand_q)
     
-                if self.collision_free(new_q) and self._check_q_in_limits(new_q):
+                if self._collision_free(new_q) and self._check_q_in_limits(new_q):
                     neighbor_indexes = self.get_near_neighbor_indices(new_q)
                     min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
                     min_cost, nearest_idx = self.get_minimum_cost_and_index(neighbor_indexes, new_q, min_cost, nearest_idx)
@@ -195,45 +195,6 @@ class RRTStarPlanner(Planner):
             Norm(float or ndarray)
         """
         return np.linalg.norm(pointB - pointA)
-
-    def collision_free(self, new_q, visible_name=False):
-        """
-        Check collision free between robot and obstacles
-        If visible name is True, return collision result and collision object names
-        otherwise, return only collision result
-
-        Args:
-            new_q(np.array): new joint angles
-            visible_name(bool)
-
-        Returns:
-            result(bool): If collision free, return True
-            names(set of 2-tup): The set of pairwise collisions. 
-        """
- 
-        if self.self_c_manager is None:
-            return True
-
-        transformations = self._get_transformations(new_q)
-
-        for link, transformations in transformations.items():
-            if link in self.self_c_manager._objs:
-                transform = transformations.h_mat
-                A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
-                self.self_c_manager.set_transform(name=link, transform=A2B)
-        
-        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
-        is_obstacle_collision = self.self_c_manager.in_collision_other(other_manager=self.obstacle_c_manager, return_names=False)  
-
-        name = None
-        if visible_name:
-            if is_self_collision:
-                return False, name
-            return True, name
-
-        if is_self_collision or is_obstacle_collision:
-            return False
-        return True
 
     def new_state(self, nearest_q, random_q):
         """
