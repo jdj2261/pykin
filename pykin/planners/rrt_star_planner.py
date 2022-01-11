@@ -43,7 +43,7 @@ class RRTStarPlanner(Planner):
         )
         self.delta_dis = delta_distance
         self.epsilon = epsilon
-        self.max_iter = max_iter
+        self._max_iter = max_iter
         self.gamma_RRTs = gamma_RRT_star
         
         self._cur_qpos = None
@@ -64,7 +64,7 @@ class RRTStarPlanner(Planner):
     
 
     @logging_time
-    def get_path_in_joinst_space(self, cur_q, goal_pose, resolution=1):
+    def get_path_in_joinst_space(self, cur_q, goal_pose, max_iter=None, resolution=1):
         """
         Get path in joint space
 
@@ -73,6 +73,9 @@ class RRTStarPlanner(Planner):
         """
         self._cur_qpos = super()._change_types(cur_q)
         self._goal_pose = super()._change_types(goal_pose)
+        
+        if max_iter is not None:
+            self._max_iter = max_iter
 
         cnt = 0
         total_cnt = 10
@@ -95,7 +98,7 @@ class RRTStarPlanner(Planner):
             self.T.add_vertex(self._cur_qpos)
             self.cost[0] = 0
 
-            for step in range(self.max_iter):
+            for step in range(self._max_iter):
                 if step % 300 == 0 and step !=0:
                     logger.info(f"iter : {step}")
                     
@@ -353,3 +356,11 @@ class RRTStarPlanner(Planner):
             delta_t = step / self.n_step
             qpos = get_linear_interpoation(init_pose, goal_pose, delta_t)
             yield qpos
+
+    @property
+    def max_iter(self):
+        return self._max_iter
+
+    @max_iter.setter
+    def max_iter(self, max_iter):
+        self._max_iter = max_iter

@@ -9,9 +9,6 @@ from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.grasp import GraspManager
-from pykin.utils.collision_utils import apply_robot_to_collision_manager
-from pykin.utils.transform_utils import get_matrix_from_axis_angle
-
 import pykin.utils.plot_utils as plt
 
 file_path = '../../asset/urdf/panda/panda.urdf'
@@ -27,7 +24,7 @@ c_manager.setup_robot_collision(robot, fk)
 
 o_manager = CollisionManager()
 obs_pos1 = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
-obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
+obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 obs_pos3 = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
 obj_mesh1 = trimesh.load(pykin_path+'/asset/objects/meshes/square_box.stl')
@@ -40,7 +37,7 @@ obj_mesh3.apply_scale(0.01)
 
 o_manager.add_object("can", gtype="mesh", gparam=obj_mesh1, transform=obs_pos1.h_mat)
 o_manager.add_object("box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat)
-# o_manager.add_object("table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3.h_mat)
+o_manager.add_object("table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3.h_mat)
 
 configures = {}
 configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]
@@ -124,17 +121,17 @@ grasp_man = GraspManager(
 #     plt.plot_normal_vector(ax, point, normal, scale=0.1)
 # plt.show_figure()
 #########
-support_poses = grasp_man.generate_supports(obj_mesh2, obs_pos2.h_mat, 3, obj_mesh1, obs_pos1.h_mat, 10)
+# support_poses = grasp_man.generate_supports(obj_mesh2, obs_pos2.h_mat, 3, obj_mesh1, obs_pos1.h_mat, 10)
 
-for _, result_obj_pose in support_poses:
-    fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2, color='blue')
-    plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.obj_pose_transformed_for_sup, alpha=0.2, color='red')
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=result_obj_pose, alpha=0.2, color='red')
+# for _, result_obj_pose in support_poses:
+#     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.2, color='blue')
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.obj_pose_transformed_for_sup, alpha=0.2, color='red')
+#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=result_obj_pose, alpha=0.2, color='red')
 
-    plt.show_figure()
+#     plt.show_figure()
 
 #########
 # eef_pose = grasp_man.get_grasp_pose(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
@@ -225,36 +222,36 @@ for _, result_obj_pose in support_poses:
 
 # plt.show_figure()
 # ########
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.5, color='orange')
-# plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
-# waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.05, num_grasp=10, n_trials=10)
-# pre_grasp_pose = waypoints["pre_grasp"]
-# grasp_pose = waypoints["grasp"]
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.5, color='orange')
+plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
+plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
+waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.05, num_grasp=10, n_trials=10)
+pre_grasp_pose = waypoints["pre_grasp"]
+grasp_pose = waypoints["grasp"]
 
-# gripper = grasp_man.get_gripper_transformed(pre_grasp_pose, is_tcp=False)
-# grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
-# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose), axis=[1,1,1], scale=0.1)
-# gripper = grasp_man.get_gripper_transformed(grasp_pose, is_tcp=False)
+gripper = grasp_man.get_gripper_transformed(pre_grasp_pose, is_tcp=False)
+grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_grasp_pose), axis=[1,1,1], scale=0.1)
+gripper = grasp_man.get_gripper_transformed(grasp_pose, is_tcp=False)
 
-# grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
-# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
+grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
 
-# waypoints = grasp_man.get_release_waypoints(obj_mesh2, obs_pos2.h_mat, 10, obj_mesh1, obs_pos1.h_mat, 10, n_trials=1)
-# pre_release_pose = waypoints["pre_release"]
-# release_pose = waypoints["release"]
+waypoints = grasp_man.get_release_waypoints(obj_mesh2, obs_pos2.h_mat, 10, obj_mesh1, obs_pos1.h_mat, 10, n_trials=1)
+pre_release_pose = waypoints["pre_release"]
+release_pose = waypoints["release"]
 
-# plt.plot_vertices(ax, grasp_man.obj_center_point)
-# plt.plot_vertices(ax, grasp_man.obj_support_point)
-# gripper = grasp_man.get_gripper_transformed(release_pose, is_tcp=False)
+plt.plot_vertices(ax, grasp_man.obj_center_point)
+plt.plot_vertices(ax, grasp_man.obj_support_point)
+gripper = grasp_man.get_gripper_transformed(release_pose, is_tcp=False)
 
-# grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='red')
-# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(release_pose), axis=[1,1,1], scale=0.1)
+grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='red')
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(release_pose), axis=[1,1,1], scale=0.1)
 
-# gripper = grasp_man.get_gripper_transformed(grasp_man.pre_release_pose, is_tcp=False)
-# grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='red')
-# grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_release_pose), axis=[1,1,1], scale=0.1)
+gripper = grasp_man.get_gripper_transformed(grasp_man.pre_release_pose, is_tcp=False)
+grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='red')
+grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_release_pose), axis=[1,1,1], scale=0.1)
 
-# plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.result_obj_pose, alpha=0.2, color='blue')
-# plt.show_figure()
+plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.result_obj_pose, alpha=0.2, color='blue')
+plt.show_figure()
