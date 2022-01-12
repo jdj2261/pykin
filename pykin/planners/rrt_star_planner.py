@@ -311,7 +311,7 @@ class RRTStarPlanner(Planner):
         """
         dist = self.distance(point, self.goal_q)
         
-        if dist <= 0.5:
+        if dist <= 1.0:
             return True
         return False
 

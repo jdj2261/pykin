@@ -214,6 +214,12 @@ class GraspManager(ActivityBase):
         pre_release_pose[:3, 3] = release_pose[:3, 3] + np.array([0, 0, self.retreat_distance])
         return pre_release_pose
 
+    def get_post_release_pose(self, grasp_pose):
+        post_release_pose = np.eye(4)
+        post_release_pose[:3, :3] = grasp_pose[:3, :3] 
+        post_release_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2]
+        return post_release_pose
+
     def generate_supports(
         self,
         obj_mesh_on_sup,
@@ -301,7 +307,7 @@ class GraspManager(ActivityBase):
 
                 if self._check_ik_solution(pre_release_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_release_pose = pre_release_pose
-                    self.post_release_pose = pre_release_pose
+                    self.post_release_pose = self.get_post_release_pose(release_pose)
                     self.result_obj_pose = result_obj_pose
                     is_success_filtered = True
                     break
