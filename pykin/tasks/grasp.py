@@ -1,5 +1,5 @@
 import numpy as np
-import math
+from enum import Enum, auto
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -9,6 +9,14 @@ from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 
 logger = create_logger('Grasp', "debug")
+
+class GraspStatus(Enum):
+    pre_grasp_pose = auto()
+    grasp_pose = auto()
+    post_grasp_pose = auto()
+    pre_release_pose = auto()
+    release_pose = auto()
+    post_release_pose = auto()
 
 class GraspManager(ActivityBase):
     def __init__(
@@ -45,9 +53,9 @@ class GraspManager(ActivityBase):
         waypoints = OrderedDict()
 
         grasp_pose = self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials)    
-        waypoints["pre_grasp"] = self.pre_grasp_pose
-        waypoints["grasp"] = grasp_pose
-        waypoints["post_grasp"] =self.post_grasp_pose
+        waypoints[GraspStatus.pre_grasp_pose] = self.pre_grasp_pose
+        waypoints[GraspStatus.grasp_pose] = grasp_pose
+        waypoints[GraspStatus.post_grasp_pose] =self.post_grasp_pose
 
         return waypoints
         
@@ -67,7 +75,14 @@ class GraspManager(ActivityBase):
         pre_grasp_pose = np.eye(4)
         pre_grasp_pose[:3, :3] = grasp_pose[:3, :3]
         pre_grasp_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2]    
+        # pre_grasp_pose[:3, 3] = grasp_pose[:3, 3] + np.array([0, 0, self.retreat_distance])  
         return pre_grasp_pose
+
+    def get_post_grasp_pose(self, grasp_pose):
+        post_grasp_pose = np.eye(4)
+        post_grasp_pose[:3, :3] = grasp_pose[:3, :3] 
+        post_grasp_pose[:3, 3] = grasp_pose[:3, 3] + np.array([0, 0, self.retreat_distance])  
+        return post_grasp_pose
 
     def generate_grasps(
         self,
@@ -108,7 +123,7 @@ class GraspManager(ActivityBase):
 
                 if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_grasp_pose = pre_grasp_pose
-                    self.post_grasp_pose = pre_grasp_pose
+                    self.post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
                     is_success_filtered = True
                     break
 
@@ -165,9 +180,9 @@ class GraspManager(ActivityBase):
             n_samples_for_sup, 
             n_trials)
         
-        waypoints["pre_release"] = self.pre_release_pose
-        waypoints["release"] = release_pose
-        waypoints["post_release"] =self.post_release_pose
+        waypoints[GraspStatus.pre_release_pose] = self.pre_release_pose
+        waypoints[GraspStatus.release_pose] = release_pose
+        waypoints[GraspStatus.post_release_pose] =self.post_release_pose
 
         return waypoints
         
@@ -328,9 +343,9 @@ class GraspManager(ActivityBase):
     
         weights = np.zeros(len(copied_mesh.faces))
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
-            weights[idx]=0.3
+            weights[idx]=0.4
             if np.all(vertex[:,2] <= copied_mesh.bounds[0][2] * 1.02):                
-                weights[idx] = 0.7
+                weights[idx] = 0.6
   
         support_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(support_points, normal_vectors):

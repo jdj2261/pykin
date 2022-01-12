@@ -8,7 +8,7 @@ sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
-from pykin.tasks.grasp import GraspManager
+from pykin.tasks.grasp import GraspManager, GraspStatus
 import pykin.utils.plot_utils as plt
 
 file_path = '../../asset/urdf/panda/panda.urdf'
@@ -227,8 +227,8 @@ plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obs_pos1.h_mat, alpha=0.5, color='orang
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
 plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
 waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.05, num_grasp=10, n_trials=10)
-pre_grasp_pose = waypoints["pre_grasp"]
-grasp_pose = waypoints["grasp"]
+pre_grasp_pose = waypoints[GraspStatus.pre_grasp_pose]
+grasp_pose = waypoints[GraspStatus.grasp_pose]
 
 gripper = grasp_man.get_gripper_transformed(pre_grasp_pose, is_tcp=False)
 grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
@@ -239,8 +239,8 @@ grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
 grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
 
 waypoints = grasp_man.get_release_waypoints(obj_mesh2, obs_pos2.h_mat, 10, obj_mesh1, obs_pos1.h_mat, 10, n_trials=1)
-pre_release_pose = waypoints["pre_release"]
-release_pose = waypoints["release"]
+pre_release_pose = waypoints[GraspStatus.pre_release_pose]
+release_pose = waypoints[GraspStatus.release_pose]
 
 plt.plot_vertices(ax, grasp_man.obj_center_point)
 plt.plot_vertices(ax, grasp_man.obj_support_point)
