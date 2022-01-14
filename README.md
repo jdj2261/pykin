@@ -6,7 +6,7 @@ Python Interface for the Robot Kinematics Library [pykin](https://jdj2261.github
 
 This library has been created simply by referring to [ikpy](https://github.com/Phylliade/ikpy.git)
 
-You can see Pick and Place Demo [here](https://youtu.be/p9TlIp-xxbs){:target="_blank"}  in Mujoco using pykin library
+You can see a Pick and Place demo video using pykin library <a href="https://youtu.be/p9TlIp-xxbs" target="_blank">here</a> in Mujoco 
 
 ## Features
 
