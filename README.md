@@ -288,9 +288,9 @@ $ git submodule update
   
 - Grasping
 
-  You can see an visualization the pose for the robot to grasp an object.
+  You can see an visualization the pose for the robot to grasp and release an object.
 
-  - Compute panda robot's pick and place pose
+  - Compute panda robot's pick and place waypoints.
 
-    <img src="img/pnp_pose.png" width="400" height="400"/>
-
+    | <img src="img/grasp01.png" width="400" height="400"/> | <img src="img/grasp02.png" width="400" height="400"/> |
+    | ----------------------------------------------------- | ----------------------------------------------------- |
