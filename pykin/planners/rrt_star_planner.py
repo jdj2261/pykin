@@ -197,7 +197,20 @@ class RRTStarPlanner(Planner):
         Returns:
             Norm(float or ndarray)
         """
-        return np.linalg.norm(pointB - pointA)
+
+        theta1 = 0
+        theta2 = 0
+        dx, dy, dist = 0, 0, 0
+
+        for i in range(self.dimension):
+            theta1 += pointA[i]
+            theta2 += pointB[i]
+            dx += np.cos(theta1) - np.cos(theta2)
+            dy += np.sin(theta1) - np.sin(theta2)
+            dist += np.sqrt(dx * dx + dy * dy)
+
+        return dist * 1 / self.dimension
+        # return np.linalg.norm(pointB - pointA)
 
     def new_state(self, nearest_q, random_q):
         """
@@ -233,7 +246,6 @@ class RRTStarPlanner(Planner):
         """
         card_V = len(self.T.vertices) + 1
         r = self.gamma_RRTs * ((math.log(card_V) / card_V) ** (1/self.dimension))
-
         search_radius = min(r, self.delta_dis)
         dist_list = [self.distance(vertex, q) for vertex in self.T.vertices]
                                                    
@@ -310,8 +322,7 @@ class RRTStarPlanner(Planner):
             bool
         """
         dist = self.distance(point, self.goal_q)
-        
-        if dist <= 1.0:
+        if dist <= 0.5:
             return True
         return False
 

@@ -307,6 +307,7 @@ class GraspManager(ActivityBase):
 
                 if self._check_ik_solution(pre_release_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_release_pose = pre_release_pose
+                    # self.post_release_pose = pre_release_pose
                     self.post_release_pose = self.get_post_release_pose(release_pose)
                     self.result_obj_pose = result_obj_pose
                     is_success_filtered = True
@@ -409,7 +410,7 @@ class GraspManager(ActivityBase):
         v2 = e2 - projection(e2, norm_vector) - projection(e2, v1)
         v2 = normalize(v2)
 
-        for theta in np.linspace(-np.pi/2, np.pi/2, n_trials):
+        for theta in np.linspace(-np.pi, np.pi, n_trials):
             normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
             yield normal_dir
 

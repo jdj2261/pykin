@@ -39,28 +39,22 @@ milk_mesh = trimesh.load_mesh(milk_path)
 
 obs = Obstacle()
 o_manager = CollisionManager(milk_path)
-for i in range(9):
+for i in range(6):
     name = "miik_" + str(i)
-    if i < 3:
-        obs_pos = [0.3, -0.5 + i * 0.5, 0.3] 
-    elif 3 <= i < 6:
-        obs_pos = [0.3, -0.5 + (i-3) * 0.5, 0.9] 
-    else:
-        obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
+    obs_pos = [0.5, -0.2+i*0.1, 0.3]
 
     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
     obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
-
 ##################################################################
 
 planner = RRTStarPlanner(
     robot=robot,
     self_collision_manager=c_manager,
     obstacle_collision_manager=o_manager,
-    delta_distance=0.2,
-    epsilon=0.2, 
+    delta_distance=0.1,
+    epsilon=0.4, 
     max_iter=1000,
-    gamma_RRT_star=1,
+    gamma_RRT_star=0.1,
     dimension=7,
     n_step=5
 )

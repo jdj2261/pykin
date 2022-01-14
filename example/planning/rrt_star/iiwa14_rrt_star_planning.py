@@ -59,10 +59,10 @@ planner = RRTStarPlanner(
     robot=robot,
     self_collision_manager=c_manager,
     obstacle_collision_manager=o_manager,
-    delta_distance=0.03,
+    delta_distance=0.1,
     epsilon=0.2, 
-    max_iter=1000,
-    gamma_RRT_star=10,
+    max_iter=300,
+    gamma_RRT_star=0.1,
     dimension=7
 )
 

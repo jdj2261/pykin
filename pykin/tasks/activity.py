@@ -135,9 +135,11 @@ class ActivityBase:
         ax,
         gripper,
         alpha=1.0,
-        color=None
+        color=None,
+        visible_basis=False
     ):
-        plt.plot_basis(self.robot, ax)
+        if visible_basis:
+            plt.plot_basis(self.robot, ax)
         for link, transform in gripper.items():
             if self.robot.links[link].collision.gtype == "mesh":
                 mesh_name = self.mesh_path + self.robot.links[link].collision.gparam.get('filename')
@@ -164,7 +166,6 @@ class ActivityBase:
         pose = transformation
         if link is not None:
             pose = transformation[link].h_mat
-        plt.plot_basis(self.robot, ax)
         if axis[0]:
             plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 0], scale=scale, edgecolor="red")
         if axis[1]:

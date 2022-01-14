@@ -92,8 +92,8 @@ grasp_man = GraspManager(
 # plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
 # plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
 # waypoints = grasp_man.get_grasp_waypoints(obj_mesh1, obs_pos1.h_mat, limit_angle=0.1, num_grasp=10, n_trials=10)
-# pre_grasp_pose = waypoints["pre_grasp"]
-# grasp_pose = waypoints["grasp"]
+# pre_grasp_pose = waypoints[GraspStatus.pre_grasp_pose]
+# grasp_pose = waypoints[GraspStatus.grasp_pose]
 
 # gripper = grasp_man.get_gripper_transformed(pre_grasp_pose, is_tcp=False)
 # grasp_man.visualize_gripper(ax, gripper, alpha=1)
