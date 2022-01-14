@@ -238,7 +238,7 @@ gripper = grasp_man.get_gripper_transformed(grasp_pose, is_tcp=False)
 grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
 grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(grasp_pose), axis=[1,1,1], scale=0.1)
 
-waypoints = grasp_man.get_release_waypoints(obj_mesh2, obs_pos2.h_mat, 10, obj_mesh1, obs_pos1.h_mat, 10, n_trials=1)
+waypoints = grasp_man.get_release_waypoints(obj_mesh2, obs_pos2.h_mat, 10, obj_mesh1, obs_pos1.h_mat, 10, n_trials=10)
 pre_release_pose = waypoints[GraspStatus.pre_release_pose]
 release_pose = waypoints[GraspStatus.release_pose]
 
