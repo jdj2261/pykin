@@ -60,7 +60,7 @@ c_manager.setup_robot_collision(robot, init_fk)
 task_plan = CartesianPlanner(
     robot, 
     self_collision_manager=c_manager,
-    obstacle_collision_manager=None,
+    object_collision_manager=None,
     n_step=args.timesteps,
     dimension=7)
 
@@ -92,5 +92,5 @@ plt.plot_animation(
     ax=ax,
     visible_collision=True,
     eef_poses=target_poses,
-    obstacles=[],
+    objects=[],
     repeat=True)

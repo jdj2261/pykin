@@ -11,7 +11,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
-from pykin.utils.obstacle_utils import Obstacle
+from pykin.utils.object_utils import ObjectManager
 from pykin.utils import plot_utils as plt
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
@@ -31,26 +31,27 @@ init_qpos = controller_config["init_qpos"]
 init_fk = robot.forward_kin(init_qpos)
 goal_eef_pose = controller_config["goal_pose"]
 
-c_manager = CollisionManager(mesh_path)
-c_manager.setup_robot_collision(robot, init_fk)
+robot_c_manager = CollisionManager(mesh_path)
+robot_c_manager.setup_robot_collision(robot, init_fk)
 
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
 
-obs = Obstacle()
-o_manager = CollisionManager(milk_path)
+objs = ObjectManager()
+obj_c_manager = CollisionManager(milk_path)
 for i in range(6):
-    name = "miik_" + str(i)
+    name = "milk_" + str(i)
     obs_pos = [0.5, -0.2+i*0.1, 0.3]
 
-    o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
+    obj_c_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+    objs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
 ##################################################################
 
+objs.remove_object("milk_1")
 planner = RRTStarPlanner(
     robot=robot,
-    self_collision_manager=c_manager,
-    obstacle_collision_manager=o_manager,
+    self_collision_manager=robot_c_manager,
+    object_collision_manager=obj_c_manager,
     delta_distance=0.1,
     epsilon=0.4, 
     max_iter=1000,
@@ -79,8 +80,8 @@ plt.plot_animation(
     fig, 
     ax,
     eef_poses=eef_poses,
-    obstacles=obs,
-    visible_obstacles=True,
+    objects=objs,
+    visible_objects=True,
     visible_collision=True, 
     interval=1, 
     repeat=True)

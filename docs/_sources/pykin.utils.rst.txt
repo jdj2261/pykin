@@ -31,7 +31,7 @@ pykin.utils.kin\_utils module
 pykin.utils.obstacle\_utils module
 ----------------------------------
 
-.. automodule:: pykin.utils.obstacle_utils
+.. automodule:: pykin.utils.object_utils
    :members:
    :undoc-members:
    :show-inheritance:

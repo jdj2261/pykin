@@ -71,7 +71,7 @@
 <li><a class="reference internal" href="#module-pykin.utils.error_utils">pykin.utils.error_utils module</a></li>
 <li><a class="reference internal" href="#module-pykin.utils.fcl_utils">pykin.utils.fcl_utils module</a></li>
 <li><a class="reference internal" href="#module-pykin.utils.kin_utils">pykin.utils.kin_utils module</a></li>
-<li><a class="reference internal" href="#module-pykin.utils.obstacle_utils">pykin.utils.obstacle_utils module</a></li>
+<li><a class="reference internal" href="#module-pykin.utils.object_utils">pykin.utils.object_utils module</a></li>
 <li><a class="reference internal" href="#module-pykin.utils.plot_utils">pykin.utils.plot_utils module</a></li>
 <li><a class="reference internal" href="#module-pykin.utils.transform_utils">pykin.utils.transform_utils module</a></li>
 <li><a class="reference internal" href="#module-pykin.utils.urdf_utils">pykin.utils.urdf_utils module</a></li>
@@ -541,17 +541,17 @@ gparam: geom’s param</p>
 </dd></dl>
 
 </section>
-<section id="module-pykin.utils.obstacle_utils">
-<span id="pykin-utils-obstacle-utils-module"></span><h2>pykin.utils.obstacle_utils module<a class="headerlink" href="#module-pykin.utils.obstacle_utils" title="Permalink to this headline"></a></h2>
+<section id="module-pykin.utils.object_utils">
+<span id="pykin-utils-obstacle-utils-module"></span><h2>pykin.utils.object_utils module<a class="headerlink" href="#module-pykin.utils.object_utils" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pykin.utils.obstacle_utils.Obstacle">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.obstacle_utils.</span></span><span class="sig-name descname"><span class="pre">Obstacle</span></span><a class="reference internal" href="_modules/pykin/utils/obstacle_utils.html#Obstacle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.obstacle_utils.Obstacle" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pykin.utils.object_utils.Obstacle">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.utils.object_utils.</span></span><span class="sig-name descname"><span class="pre">Obstacle</span></span><a class="reference internal" href="_modules/pykin/utils/object_utils.html#Obstacle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.object_utils.Obstacle" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Obstacle class
 Obstacles are noe of three types(sphere, box, cylinder)</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pykin.utils.obstacle_utils.Obstacle.add_obstacles">
-<span class="sig-name descname"><span class="pre">add_obstacles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gparam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/obstacle_utils.html#Obstacle.add_obstacles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.obstacle_utils.Obstacle.add_obstacles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pykin.utils.object_utils.Obstacle.add_obstacles">
+<span class="sig-name descname"><span class="pre">add_obstacles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gparam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/utils/object_utils.html#Obstacle.add_obstacles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.utils.object_utils.Obstacle.add_obstacles" title="Permalink to this definition"></a></dt>
 <dd><p>Add obstacles</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -566,13 +566,13 @@ Obstacles are noe of three types(sphere, box, cylinder)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pykin.utils.obstacle_utils.Obstacle.obstacle_types">
-<span class="sig-name descname"><span class="pre">obstacle_types</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['sphere',</span> <span class="pre">'box',</span> <span class="pre">'cylinder']</span></em><a class="headerlink" href="#pykin.utils.obstacle_utils.Obstacle.obstacle_types" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pykin.utils.object_utils.Obstacle.obstacle_types">
+<span class="sig-name descname"><span class="pre">obstacle_types</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['sphere',</span> <span class="pre">'box',</span> <span class="pre">'cylinder']</span></em><a class="headerlink" href="#pykin.utils.object_utils.Obstacle.obstacle_types" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pykin.utils.obstacle_utils.Obstacle.obstacles">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">obstacles</span></span><a class="headerlink" href="#pykin.utils.obstacle_utils.Obstacle.obstacles" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pykin.utils.object_utils.Obstacle.obstacles">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">obstacles</span></span><a class="headerlink" href="#pykin.utils.object_utils.Obstacle.obstacles" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

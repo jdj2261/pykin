@@ -15,10 +15,15 @@ def surface_sampling(mesh, n_samples=2, face_weight=None):
 def projection(v, u):
     return np.dot(v, u) / np.dot(u, u) * u
 
-def get_transform(A, B):
+def get_absolute_transform(A, B):
     # TA = B
     # T = B * inv(A)
     return np.dot(B, np.linalg.inv(A))
+
+def get_relative_transform(A, B):
+    # AT = B
+    # T = inv(A) * B
+    return np.dot(np.linalg.inv(A), B)
 
 def get_rotation_from_vectors(A, B):
     unit_A = A / np.linalg.norm(A)

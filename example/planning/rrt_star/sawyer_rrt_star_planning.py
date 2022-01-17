@@ -11,9 +11,8 @@ from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
-from pykin.utils.obstacle_utils import Obstacle
+from pykin.utils.object_utils import ObjectManager
 from pykin.utils import plot_utils as plt
-from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
 
@@ -40,7 +39,7 @@ c_manager.setup_robot_collision(robot, init_fk)
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
 
-obs = Obstacle()
+obs = ObjectManager()
 o_manager = CollisionManager(milk_path)
 for i in range(9):
     name = "miik_" + str(i)
@@ -52,28 +51,19 @@ for i in range(9):
         obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
 
     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
-
-# o_manager.add_object("cylinder", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0, 0.5]).h_mat)
-# o_manager.add_object("cylinder1", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.4, 0.5]).h_mat)
-# o_manager.add_object("cylinder2", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.8, 0.5]).h_mat)
-# o_manager.add_object("cylinder3", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 1.2, 0.5]).h_mat)
-# obs(name="cylinder", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0, 0.5]))
-# obs(name="cylinder1", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.4, 0.5]))
-# obs(name="cylinder2", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 0.8, 0.5]))
-# obs(name="cylinder3", gtype="cylinder", gparam=[0.03, 0.3], transform=Transform(pos=[0.5, 1.2, 0.5]))
-
+    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
 ##################################################################
 
 planner = RRTStarPlanner(
     robot=robot,
     self_collision_manager=c_manager,
-    obstacle_collision_manager=o_manager,
+    object_collision_manager=o_manager,
     delta_distance=0.1,
     epsilon=0.2, 
     max_iter=300,
-    gamma_RRT_star=1,
-    dimension=7
+    gamma_RRT_star=0.2,
+    dimension=7,
+    n_step=1
 )
 
 joint_path,_ = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
@@ -84,12 +74,10 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-resolution = 0.5
 for step, joint in enumerate(joint_path):
-    if step % (1/resolution) == 0 or step == len(joint_path)-1:
-        transformations = robot.forward_kin(np.concatenate((np.zeros(1),joint)))
-        joint_trajectory.append(transformations)
-        eef_poses.append(transformations[robot.eef_name].pos)
+    transformations = robot.forward_kin(np.concatenate((np.zeros(1),joint)))
+    joint_trajectory.append(transformations)
+    eef_poses.append(transformations[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,
@@ -97,9 +85,8 @@ plt.plot_animation(
     fig, 
     ax,
     eef_poses=eef_poses,
-    obstacles=obs,
-    visible_obstacles=True,
+    objects=obs,
+    visible_objects=True,
     visible_collision=True, 
     interval=1, 
     repeat=True)
-

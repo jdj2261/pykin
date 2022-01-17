@@ -20,7 +20,7 @@ class CartesianPlanner(Planner):
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
         self_collision_manager: CollisionManager for robot's self collision check
-        obstacle_collision_manager: CollisionManager for collision check between robot and object
+        object_collision_manager: CollisionManager for collision check between robot and object
         n_step(int): Number of waypoints
         dimension(int): robot arm's dof
         waypoint_type(str): Type of waypoint ex) "Linear", "Cubic", "Circular"
@@ -29,7 +29,7 @@ class CartesianPlanner(Planner):
         self,
         robot,
         self_collision_manager=None,
-        obstacle_collision_manager=None,
+        object_collision_manager=None,
         n_step=500,
         dimension=7,
         waypoint_type="Linear"
@@ -37,7 +37,7 @@ class CartesianPlanner(Planner):
         super(CartesianPlanner, self).__init__(
             robot, 
             self_collision_manager, 
-            obstacle_collision_manager,
+            object_collision_manager,
             dimension)
         self.n_step = n_step
         self.waypoint_type = waypoint_type
@@ -103,7 +103,7 @@ class CartesianPlanner(Planner):
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                is_collision_free = self._collision_free(self._cur_qpos, visible_name=False)
+                is_collision_free = self._collision_free(self._cur_qpos)
 
                 if not is_collision_free:
                     collision_pose[step] = np.round(target_transform[:3,3], 6)

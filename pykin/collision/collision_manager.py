@@ -36,7 +36,11 @@ class CollisionManager:
         if fk is None:
             fk = robot.init_transformations
         self._filter_contact_names(robot, fk, geom)
-        
+
+    def setup_object_collision(self, objects):
+        for name, info in objects:
+            self.add_object(name, info[0], info[1], info[2])
+
     def _filter_contact_names(self, robot, fk, geom):            
         is_collision = False
 
@@ -166,9 +170,8 @@ class CollisionManager:
             geom_id = id(self._objs.pop(name)['geom'])
             # remove names
             self._names.pop(geom_id)
-            print(f"{name} object is removed")
         else:
-            raise ValueError('{} not in collision manager!'.format(name))
+            logger.warn('{} not in collision manager!'.format(name))
 
     def reset_all_object(self):
         """

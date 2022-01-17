@@ -199,8 +199,8 @@ def plot_animation(
     fig=None,
     ax=None,
     eef_poses=None,
-    obstacles=None,
-    visible_obstacles=False,
+    objects=None,
+    visible_objects=False,
     visible_collision=False,
     visible_text=True,
     visible_scatter=True,
@@ -220,8 +220,8 @@ def plot_animation(
             print("Animation Finished..")
         ax.clear()
 
-        if visible_obstacles and obstacles:
-            plot_obstacles(ax, obstacles)
+        if visible_objects and objects:
+            plot_objects(ax, objects)
         
         if eef_poses is not None:
             plot_trajectories(ax, eef_poses)
@@ -237,28 +237,24 @@ def plot_animation(
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
-def plot_obstacles(ax, obstacles):    
+def plot_objects(ax, objects):    
     """
-    Plot obstacles
+    Plot objects
     """
-    from pykin.kinematics.transform import Transform
-    for key, value in obstacles:
+    for key, value in objects:
         o_type = value[0]
         o_param = value[1]
         o_pose = value[2]
 
-        if not isinstance(o_pose, Transform):
-            raise TypeError("Check obstacle pose type..")
-
         if o_type == "mesh":
-            plot_mesh(ax, mesh=o_param, A2B=o_pose.h_mat, alpha=0.3)
+            plot_mesh(ax, mesh=o_param, A2B=o_pose, alpha=0.3)
         if o_type == "sphere":
-            plot_sphere(ax, radius=o_param, p=o_pose.pos, alpha=0.8, color='g')
+            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
         if o_type == "box":
             A2B = tf.get_h_mat(o_pose)
             plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
         if o_type == "cylinder":
-            A2B = tf.get_h_mat(o_pose.pos)
+            A2B = tf.get_h_mat(o_pose)
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
 
 def plot_collision(robot, transformations, ax, alpha=0.8):
@@ -385,12 +381,6 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
     p3c.set_facecolor(color)
     ax.add_collection3d(p3c)
 
-def plot_rrt_vertices(vertices, ax):
-    """
-    Plot rrt* trees
-    """
-    for vertex in vertices:
-        ax.plot([x for (x, y, z) in vertex],[y for (x, y, z) in vertex], [z for (x, y, z) in vertex],'k', linewidth=0.1,)
 
 def plot_path_planner(path, ax):
     """
@@ -434,6 +424,20 @@ def plot_normal_vector(ax, vertices, normals, scale=1, linewidths=(1,), edgecolo
         [normal[0]*scale for normal in normals], 
         [normal[1]*scale for normal in normals], 
         [normal[2]*scale for normal in normals], linewidths=linewidths, edgecolor=edgecolor)    
+
+
+def plot_axis(
+    ax,
+    pose,
+    axis=[1, 1, 1],
+    scale=0.1
+):
+    if axis[0]:
+        plot_normal_vector(ax, pose[:3, 3], pose[:3, 0], scale=scale, edgecolor="red")
+    if axis[1]:
+        plot_normal_vector(ax, pose[:3, 3], pose[:3, 1], scale=scale, edgecolor="green")
+    if axis[2]:
+        plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
 
 
 def plot_vertices(ax, vertices, s=5, c='k'):

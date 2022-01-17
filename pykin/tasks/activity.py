@@ -6,7 +6,7 @@ from abc import abstractclassmethod
 
 import pykin.utils.plot_utils as plt
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.task_utils import get_transform
+from pykin.utils.task_utils import get_absolute_transform
 
 
 class ActivityBase:
@@ -14,13 +14,13 @@ class ActivityBase:
         self,
         robot,
         robot_col_manager,
-        obstacles_col_manager,
+        objects_col_manager,
         mesh_path,
         **gripper_configures
     ):
         self.robot = robot
         self.robot_c_manager = robot_col_manager
-        self.obstacles_c_manager = obstacles_col_manager
+        self.objects_c_manager = objects_col_manager
         self.gripper_c_manager = CollisionManager()
         self.mesh_path = mesh_path
         self.gripper_names = gripper_configures.get("gripper_names", None)
@@ -62,7 +62,7 @@ class ActivityBase:
             tcp_pose = self.get_tcp_h_mat_from_eef(pose)
 
         for link, transform in gripper.items():
-            T = get_transform(gripper[self.gripper_names[-1]], tcp_pose)
+            T = get_absolute_transform(gripper[self.gripper_names[-1]], tcp_pose)
             transform_gripper[link] = np.dot(T, transform)
         return transform_gripper
 
@@ -77,16 +77,16 @@ class ActivityBase:
                     if link in self.robot_c_manager._objs:
                         A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
                         self.robot_c_manager.set_transform(name=link, transform=A2B)
-          
+        
         if only_gripper:
-            is_obstacle_collision = self.gripper_c_manager.in_collision_other(other_manager=self.obstacles_c_manager)
-            if is_obstacle_collision:
+            is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.objects_c_manager)
+            if is_object_collision:
                 return False
             return True
         else:
             is_self_collision = self.robot_c_manager.in_collision_internal()
-            is_obstacle_collision = self.robot_c_manager.in_collision_other(other_manager=self.obstacles_c_manager)
-            if is_self_collision or is_obstacle_collision:
+            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.objects_c_manager)
+            if is_self_collision or is_object_collision:
                 return False
             return True
 
@@ -160,9 +160,11 @@ class ActivityBase:
         transformation,
         link=None,
         axis=[1, 1, 1],
-        scale=0.1
-        
+        scale=0.1,
+        visible_basis=False
     ):
+        if visible_basis:
+            plt.plot_basis(self.robot, ax)
         pose = transformation
         if link is not None:
             pose = transformation[link].h_mat

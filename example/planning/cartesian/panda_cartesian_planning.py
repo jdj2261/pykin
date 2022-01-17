@@ -13,7 +13,7 @@ from pykin.kinematics.transform import Transform
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils import plot_utils as plt
-from pykin.utils.obstacle_utils import Obstacle
+from pykin.utils.object_utils import ObjectManager
 
 
 help_str = "python panda_cartesian_planning.py"\
@@ -48,21 +48,19 @@ c_manager.setup_robot_collision(robot, fk)
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
 
-obs = Obstacle()
+obs = ObjectManager()
 o_manager = CollisionManager(milk_path)
 name="milk1"
 obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
 
-# o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-# obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
-# o_manager.add_object(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
-# obs(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]))
-
+obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+obs(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
+# o_manager.setup_object_collision(obs)
 
 task_plan = CartesianPlanner(
     robot, 
     self_collision_manager=c_manager,
-    obstacle_collision_manager=o_manager,
+    object_collision_manager=o_manager,
     n_step=args.timesteps,
     dimension=7)
 
@@ -94,6 +92,6 @@ plt.plot_animation(
     ax=ax,
     visible_collision=True,
     eef_poses=target_poses,
-    obstacles=obs,
-    visible_obstacles=True,
+    objects=obs,
+    visible_objects=True,
     repeat=True)

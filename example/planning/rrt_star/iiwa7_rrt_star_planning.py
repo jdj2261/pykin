@@ -1,4 +1,3 @@
-import numpy as np
 import sys, os
 import yaml
 import trimesh
@@ -11,9 +10,8 @@ from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
-from pykin.utils.obstacle_utils import Obstacle
+from pykin.utils.object_utils import ObjectManager
 from pykin.utils import plot_utils as plt
-from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
 
@@ -39,7 +37,7 @@ c_manager.setup_robot_collision(robot, init_fk)
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
 
-obs = Obstacle()
+obs = ObjectManager()
 o_manager = CollisionManager(milk_path)
 for i in range(9):
     name = "miik_" + str(i)
@@ -51,14 +49,14 @@ for i in range(9):
         obs_pos = [0.3, -0.5 + (i-6) * 0.5, -0.3]
 
     o_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos))
+    obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
 
 ##################################################################
 
 planner = RRTStarPlanner(
     robot=robot,
     self_collision_manager=c_manager,
-    obstacle_collision_manager=o_manager,
+    object_collision_manager=o_manager,
     delta_distance=0.05,
     epsilon=0.2, 
     max_iter=300,
@@ -88,8 +86,8 @@ plt.plot_animation(
     fig, 
     ax,
     eef_poses=eef_poses,
-    obstacles=obs,
-    visible_obstacles=True,
+    objects=obs,
+    visible_objects=True,
     visible_collision=True, 
     interval=1, 
     repeat=True)

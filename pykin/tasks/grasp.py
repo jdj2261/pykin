@@ -4,7 +4,7 @@ from collections import OrderedDict
 from copy import deepcopy
 
 from pykin.tasks.activity import ActivityBase
-from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors
+from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 
@@ -23,7 +23,7 @@ class GraspManager(ActivityBase):
         self,
         robot,
         robot_col_manager,
-        obstacles_col_manager,
+        objects_col_manager,
         mesh_path,
         retreat_distance = 0.1,
         release_distance = 0.01,
@@ -32,7 +32,7 @@ class GraspManager(ActivityBase):
         super().__init__(
             robot,
             robot_col_manager,
-            obstacles_col_manager,
+            objects_col_manager,
             mesh_path,
             **gripper_configures)
 
@@ -41,16 +41,24 @@ class GraspManager(ActivityBase):
         self.tcp_pose = np.eye(4)
         self.result_obj_pose = np.eye(4)
         self.contact_points = None
+        self.result_object_c_manager = []
+        self.result_object_c_manager.append(self.objects_c_manager)
+        self.obj_info = None
 
     def get_grasp_waypoints(
         self,
-        obj_mesh,
-        obj_pose,
-        limit_angle,
+        obj_info=None,
+        obj_mesh=None,
+        obj_pose=None,
+        limit_angle=0.1,
         num_grasp=1,
         n_trials=1,
     ):
         waypoints = OrderedDict()
+        if obj_info:
+            self.obj_info = obj_info
+            obj_mesh = obj_info["gtype"]
+            obj_pose = obj_info["transform"]
 
         grasp_pose = self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials)    
         waypoints[GraspStatus.pre_grasp_pose] = self.pre_grasp_pose
@@ -81,7 +89,8 @@ class GraspManager(ActivityBase):
     def get_post_grasp_pose(self, grasp_pose):
         post_grasp_pose = np.eye(4)
         post_grasp_pose[:3, :3] = grasp_pose[:3, :3] 
-        post_grasp_pose[:3, 3] = grasp_pose[:3, 3] + np.array([0, 0, self.retreat_distance])  
+        post_grasp_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2] 
+        # post_grasp_pose[:3, 3] = grasp_pose[:3, 3] + np.array([0, 0, self.retreat_distance])  
         return post_grasp_pose
 
     def generate_grasps(
@@ -123,13 +132,33 @@ class GraspManager(ActivityBase):
 
                 if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_grasp_pose = pre_grasp_pose
-                    self.post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
-                    is_success_filtered = True
-                    break
+                    
+                    post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
+                    post_qpos = self._compute_inverse_kinematics(post_grasp_pose)
+                    post_transforms = self.robot.forward_kin(np.array(post_qpos))
+                    post_goal_pose = post_transforms[self.robot.eef_name].h_mat
+                    
+                    if self.obj_info:
+                        self.T_between_gripper_and_obj = get_relative_transform(grasp_pose, self.obj_info["transform"])
+                        obj_post_grasp_pose = np.dot(post_grasp_pose, self.T_between_gripper_and_obj)
+
+                        self.robot_c_manager.add_object(
+                            self.obj_info["name"], 
+                            gtype="mesh", gparam=self.obj_info["gtype"], transform=obj_post_grasp_pose)
+                        self.obj_grasp_pose = self.obj_info["transform"]
+                        self.obj_post_grasp_pose = obj_post_grasp_pose
+                    
+                    if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self.collision_free(post_transforms):
+                        self.post_grasp_pose = post_grasp_pose
+                        
+                        is_success_filtered = True
+                        break
 
         if not is_success_filtered:
             logger.error(f"Failed to filter grasp poses")
             return None
+
+        # self.robot_c_manager.remove_object(self.obj_info["name"])
         logger.info(f"Success to get grasp pose.\n")
 
         return grasp_pose
@@ -161,15 +190,25 @@ class GraspManager(ActivityBase):
 
     def get_release_waypoints(
         self,
-        obj_mesh_on_sup,
-        obj_pose_on_sup,
-        n_samples_on_sup,
-        obj_mesh_for_sup,
-        obj_pose_for_sup,
-        n_samples_for_sup,
-        n_trials=1
+        obj_info_on_sup=None,
+        n_samples_on_sup=1,
+        obj_info_for_sup=None,
+        n_samples_for_sup=1,
+        n_trials=1,
+        obj_mesh_on_sup=None,
+        obj_pose_on_sup=None,
+        obj_mesh_for_sup=None,
+        obj_pose_for_sup=None,
     ):
         waypoints = OrderedDict()
+
+        if obj_info_on_sup:
+            obj_mesh_on_sup = obj_info_on_sup["gtype"]
+            obj_pose_on_sup = obj_info_on_sup["transform"]
+
+        if obj_info_for_sup:
+            obj_mesh_for_sup = obj_info_for_sup["gtype"]
+            obj_pose_for_sup = obj_info_for_sup["transform"]
 
         release_pose = self.get_release_pose(
             obj_mesh_on_sup,
@@ -299,24 +338,45 @@ class GraspManager(ActivityBase):
             transforms = self.robot.forward_kin(np.array(qpos))
             goal_pose = transforms[self.robot.eef_name].h_mat
 
+            if self.obj_info:
+                self.robot_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
+                
             if self._check_ik_solution(release_pose, goal_pose) and self.collision_free(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
                 pre_qpos = self._compute_inverse_kinematics(pre_release_pose)
                 pre_transforms = self.robot.forward_kin(np.array(pre_qpos))
                 pre_goal_pose = pre_transforms[self.robot.eef_name].h_mat
 
+                if self.obj_info:
+                    obj_pre_release_pose = np.dot(pre_release_pose, self.T_between_gripper_and_obj)
+                    self.robot_c_manager.set_transform(self.obj_info["name"], obj_pre_release_pose)
+                    self.obj_pre_release_pose = obj_pre_release_pose
+
                 if self._check_ik_solution(pre_release_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_release_pose = pre_release_pose
-                    # self.post_release_pose = pre_release_pose
-                    self.post_release_pose = self.get_post_release_pose(release_pose)
-                    self.result_obj_pose = result_obj_pose
-                    is_success_filtered = True
-                    break
+                    
+                    post_release_pose = self.get_post_release_pose(release_pose)
+                    post_qpos = self._compute_inverse_kinematics(post_release_pose)
+                    post_transforms = self.robot.forward_kin(np.array(post_qpos))
+                    post_goal_pose = post_transforms[self.robot.eef_name].h_mat
+
+                    if self.obj_info:
+                        self.objects_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
+
+                    if self._check_ik_solution(post_release_pose, post_goal_pose) and self.collision_free(post_transforms):
+                        self.post_release_pose = post_release_pose
+                        self.result_obj_pose = result_obj_pose
+                        is_success_filtered = True
+                        break
 
         if not is_success_filtered:
             logger.error(f"Failed to filter release poses")
             return None
         
+        if self.obj_info:
+            self.result_object_c_manager.append(self.objects_c_manager)
+            self.robot_c_manager.remove_object(self.obj_info["name"])
+
         logger.info(f"Success to get release pose.\n")
         return release_pose
 
@@ -419,7 +479,6 @@ class GraspManager(ActivityBase):
         if error_pose < err_limit:
             return True
         return False
-
 
     def _check_support(self, obj_pose):
         obj_mesh = deepcopy(self.obj_mesh_for_sup)

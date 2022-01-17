@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pykin.utils.obstacle_utils &mdash; pykin 2.0 documentation</title>
+  <title>pykin.utils.object_utils &mdash; pykin 2.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -51,7 +51,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>pykin.utils.obstacle_utils</li>
+      <li>pykin.utils.object_utils</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -60,7 +60,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for pykin.utils.obstacle_utils</h1><div class="highlight"><pre>
+  <h1>Source code for pykin.utils.object_utils</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
@@ -71,7 +71,7 @@
 
 <span class="kn">from</span> <span class="nn">pykin.utils.error_utils</span> <span class="kn">import</span> <span class="n">NotFoundError</span>
 
-<div class="viewcode-block" id="Obstacle"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.obstacle_utils.Obstacle">[docs]</a><span class="k">class</span> <span class="nc">Obstacle</span><span class="p">():</span>
+<div class="viewcode-block" id="Obstacle"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.object_utils.Obstacle">[docs]</a><span class="k">class</span> <span class="nc">Obstacle</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obstacle class </span>
 <span class="sd">    Obstacles are noe of three types(sphere, box, cylinder)</span>
@@ -94,7 +94,7 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
             <span class="k">yield</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             
-<div class="viewcode-block" id="Obstacle.add_obstacles"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.obstacle_utils.Obstacle.add_obstacles">[docs]</a>    <span class="k">def</span> <span class="nf">add_obstacles</span><span class="p">(</span>
+<div class="viewcode-block" id="Obstacle.add_obstacles"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.object_utils.Obstacle.add_obstacles">[docs]</a>    <span class="k">def</span> <span class="nf">add_obstacles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> 
         <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">gtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
