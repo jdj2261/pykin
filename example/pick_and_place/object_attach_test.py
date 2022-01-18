@@ -114,7 +114,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     
     grasp_object_info = objects.get_info(name)
     support_object_info = objects.get_info(list(objects.support_objects.keys())[0])
-    grasp_waypoints = grasp_man.get_grasp_waypoints(grasp_object_info, 0.05, 20, 20)
+    grasp_waypoints = grasp_man.get_grasp_waypoints(grasp_object_info, limit_angle=0.05, num_grasp=10, n_trials=10)
     release_waypoints = grasp_man.get_release_waypoints(support_object_info, 10, grasp_object_info, 10, 10)
     
     # print(grasp_man.result_object_c_manager)
