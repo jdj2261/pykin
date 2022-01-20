@@ -42,7 +42,7 @@ obj_mesh3.apply_scale(0.01)
 objects = ObjectManager()
 objects.add_object(name="obj_1", gtype="mesh", gparam=obj_mesh1, transform=grasp_obj1_pose.h_mat, for_grasp=True)
 objects.add_object(name="obj_2", gtype="mesh", gparam=obj_mesh1, transform=grasp_obj2_pose.h_mat, for_grasp=True)
-objects.add_object(name="obj_3", gtype="mesh", gparam=obj_mesh1, transform=grasp_obj3_pose.h_mat, for_grasp=True)
+# objects.add_object(name="obj_3", gtype="mesh", gparam=obj_mesh1, transform=grasp_obj3_pose.h_mat, for_grasp=True)
 objects.add_object(name="box", gtype="mesh", gparam=obj_mesh2, transform=obs_pos2.h_mat, for_support=True)
 objects.add_object(name="table", gtype="mesh", gparam=obj_mesh3, transform=obs_pos3.h_mat)
 
@@ -66,58 +66,25 @@ grasp_man = GraspManager(
     release_distance=0.01,
     **configures)
 
-
-####
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-# for i, (name, info) in enumerate(objects.grasp_objects.items()):
-    
-#     grasp_object_info = objects.get_info(name)
-#     support_object_info = objects.get_info(list(objects.support_objects.keys())[0])
-#     grasp_waypoints = grasp_man.get_grasp_waypoints(grasp_object_info, 0.05, 10, 10)
-#     release_waypoints = grasp_man.get_release_waypoints(support_object_info, 10, grasp_object_info, 10, 10)
-
-#     grasp_man.visualize_axis(ax, grasp_waypoints[GraspStatus.grasp_pose], visible_basis=True)
-#     gripper = grasp_man.get_gripper_transformed(grasp_waypoints[GraspStatus.grasp_pose], is_tcp=False)
-#     grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
-    
-#     grasp_man.visualize_axis(ax, release_waypoints[GraspStatus.release_pose], visible_basis=True)
-#     gripper = grasp_man.get_gripper_transformed(release_waypoints[GraspStatus.release_pose], is_tcp=False)
-#     grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
-    
-#     is_grasp = True
-
-#     if is_grasp:
-#         grasp_man.set_transform_object(grasp_object_info)
-
-#     if i%3 == 0:
-#         color = 'red'
-#     elif i%3 == 1:
-#         color = 'blue'
-#     else:
-#         color = 'green'
-
-#     plt.plot_mesh(ax, mesh=info[1], A2B=grasp_man.result_obj_pose, alpha=0.5, color=color)
-#     plt.plot_mesh(ax=ax, mesh=info[1], A2B=info[2], alpha=0.2,color=color)
-
-
-# plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)
-# plt.plot_mesh(ax=ax, mesh=obj_mesh3, A2B=obs_pos3.h_mat, alpha=0.2)
-#     # plt.plot_objects(ax, objects)
-
-# plt.show_figure()
-####
-
-######
+####################################################################################
 #generate_grasps
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 for i, (name, info) in enumerate(objects.grasp_objects.items()):
     
+    if i%3 == 0:
+        color ='red'
+    elif i%3 == 1:
+        color = 'blue'
+    else:
+        color = 'green'
+
+    print(color)
+        
     grasp_object_info = objects.get_info(name)
     support_object_info = objects.get_info(list(objects.support_objects.keys())[0])
     grasp_waypoints = grasp_man.get_grasp_waypoints(grasp_object_info, limit_angle=0.05, num_grasp=10, n_trials=10)
-    release_waypoints = grasp_man.get_release_waypoints(support_object_info, 10, grasp_object_info, 10, 10)
+    release_waypoints = grasp_man.get_release_waypoints(support_object_info, 20, grasp_object_info, 20, 20)
     
-    # print(grasp_man.result_object_c_manager)
     grasp_pose = grasp_waypoints[GraspStatus.grasp_pose]
     pre_grasp_pose = grasp_waypoints[GraspStatus.pre_grasp_pose]
     
@@ -148,10 +115,10 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     gripper = grasp_man.get_gripper_transformed(pre_release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_grasp_pos_transformed, alpha=0.2, color='blue')
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_release_pos_transformed, alpha=0.2, color='red')
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_pre_release_pos_transformed, alpha=0.2, color='red')
-    plt.plot_mesh(ax=ax, mesh=info[1], A2B=info[2], alpha=0.2, color='blue')
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_grasp_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_release_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=obj_pre_release_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=info[1], A2B=info[2], alpha=0.2, color=color)
     # plt.plot_mesh(ax, mesh=info[1], A2B=grasp_man.result_obj_pose, alpha=0.5, color='red')
 
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, A2B=obs_pos2.h_mat, alpha=0.2)

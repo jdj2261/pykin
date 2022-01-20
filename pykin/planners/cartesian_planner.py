@@ -106,7 +106,10 @@ class CartesianPlanner(Planner):
                 is_collision_free = self._collision_free(self._cur_qpos)
 
                 if not is_collision_free:
-                    collision_pose[step] = np.round(target_transform[:3,3], 6)
+                    _, name = self.self_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=True) 
+                    
+                    collision_pose[step] = (name, np.round(target_transform[:3,3], 6))
+
                     continue
 
                 if not self._check_q_in_limits(self._cur_qpos):
@@ -124,8 +127,9 @@ class CartesianPlanner(Planner):
             if collision_pose.keys():
                 logger.error(f"Failed Generate Path.. Collision may occur.")
                 
-                for pose in collision_pose.values():
-                    logger.warning(f"Collision Position : {pose}")
+                for name, pose in collision_pose.values():
+                    logger.warning(f"\n\tCollision Names : {name} \n\tCollision Position : {pose}")
+                    # logger.warning(f"Collision Position : {pose}")
                 raise CollisionError("Conflict confirmed. Check the object position!")
                 
             if err < self._pos_sensitivity:

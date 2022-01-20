@@ -139,6 +139,7 @@ class GraspManager(ActivityBase):
                     post_goal_pose = post_transforms[self.robot.eef_name].h_mat
                     
                     if self.obj_info:
+                        # Attach gripper to object
                         self.T_between_gripper_and_obj = get_relative_transform(grasp_pose, self.obj_info["transform"])
                         obj_post_grasp_pose = np.dot(post_grasp_pose, self.T_between_gripper_and_obj)
 
@@ -362,6 +363,7 @@ class GraspManager(ActivityBase):
 
                     if self.obj_info:
                         self.objects_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
+                        self.robot_c_manager.remove_object(self.obj_info["name"])
 
                     if self._check_ik_solution(post_release_pose, post_goal_pose) and self.collision_free(post_transforms):
                         self.post_release_pose = post_release_pose
@@ -375,7 +377,6 @@ class GraspManager(ActivityBase):
         
         if self.obj_info:
             self.result_object_c_manager.append(self.objects_c_manager)
-            self.robot_c_manager.remove_object(self.obj_info["name"])
 
         logger.info(f"Success to get release pose.\n")
         return release_pose
