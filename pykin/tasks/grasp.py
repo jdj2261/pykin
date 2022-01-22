@@ -363,7 +363,7 @@ class GraspManager(ActivityBase):
 
                     if self.obj_info:
                         self.objects_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
-                        self.robot_c_manager.remove_object(self.obj_info["name"])
+                        # self.robot_c_manager.remove_object(self.obj_info["name"])
 
                     if self._check_ik_solution(post_release_pose, post_goal_pose) and self.collision_free(post_transforms):
                         self.post_release_pose = post_release_pose
@@ -376,6 +376,7 @@ class GraspManager(ActivityBase):
             return None
         
         if self.obj_info:
+            self.robot_c_manager.remove_object(self.obj_info["name"])
             self.result_object_c_manager.append(self.objects_c_manager)
 
         logger.info(f"Success to get release pose.\n")

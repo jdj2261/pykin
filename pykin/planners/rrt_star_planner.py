@@ -63,7 +63,6 @@ class RRTStarPlanner(Planner):
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
     
-
     @logging_time
     def get_path_in_joinst_space(
         self, 
@@ -216,20 +215,6 @@ class RRTStarPlanner(Planner):
         Returns:
             Norm(float or ndarray)
         """
-
-        # Method in OMPL RRT-STAR
-        # theta1 = 0
-        # theta2 = 0
-        # dx, dy, dist = 0, 0, 0
-
-        # for i in range(self.dimension):
-        #     theta1 += pointA[i]
-        #     theta2 += pointB[i]
-        #     dx += np.cos(theta1) - np.cos(theta2)
-        #     dy += np.sin(theta1) - np.sin(theta2)
-        #     dist += np.sqrt(dx * dx + dy * dy)
-
-        # return dist * 1 / self.dimension
         return np.linalg.norm(pointB - pointA)
 
     def new_state(self, nearest_q, random_q):
