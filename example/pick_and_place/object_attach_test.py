@@ -77,8 +77,6 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
         color = 'blue'
     else:
         color = 'green'
-
-    print(color)
         
     grasp_object_info = objects.get_info(name)
     support_object_info = objects.get_info(list(objects.support_objects.keys())[0])
