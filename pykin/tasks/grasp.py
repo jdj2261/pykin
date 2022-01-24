@@ -148,26 +148,13 @@ class GraspManager(ActivityBase):
                         break
 
         if not is_success_filtered:
-            logger.error(f"Failed to filter grasp poses")
+            logger.error(f"Failed to filter Grasp poses")
             return None
 
         # self.robot_c_manager.remove_object(self.obj_info["name"])
-        logger.info(f"Success to get grasp pose.\n")
+        logger.info(f"Success to get Grasp pose.\n")
 
         return grasp_pose
-
-    def _get_goal_pose(self, pose):
-        qpos = self._compute_inverse_kinematics(pose)
-        transforms = self.robot.forward_kin(np.array(qpos))
-        goal_pose = transforms[self.robot.eef_name].h_mat
-        return transforms, goal_pose
-
-    def _attach_gripper2object(self, obj_post_grasp_pose):
-        self.robot_c_manager.add_object(
-            self.obj_info["name"], 
-            gtype="mesh", gparam=self.obj_info["gtype"], transform=obj_post_grasp_pose)
-        self.obj_grasp_pose = self.obj_info["transform"]
-        self.obj_post_grasp_pose = obj_post_grasp_pose
 
     def generate_tcp_poses(
         self,
@@ -259,10 +246,10 @@ class GraspManager(ActivityBase):
         pre_release_pose[:3, 3] = release_pose[:3, 3] + np.array([0, 0, self.retreat_distance])
         return pre_release_pose
 
-    def get_post_release_pose(self, grasp_pose):
+    def get_post_release_pose(self, release_pose):
         post_release_pose = np.eye(4)
-        post_release_pose[:3, :3] = grasp_pose[:3, :3] 
-        post_release_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2]
+        post_release_pose[:3, :3] = release_pose[:3, :3] 
+        post_release_pose[:3, 3] = release_pose[:3, 3] - self.retreat_distance * release_pose[:3,2]
         return post_release_pose
 
     def generate_supports(
@@ -323,7 +310,6 @@ class GraspManager(ActivityBase):
             obj_pose_transformed_for_sup[:3, 3] = obj_pose_for_sup[:3, 3]
 
             point_transformed = np.dot(point_for_sup - obj_pose_for_sup[:3, 3], R_mat) + obj_pose_for_sup[:3, 3]
-            # normal_transformed = np.dot(normal_for_sup, R_mat)
 
             result_obj_pose = np.eye(4)
             result_obj_pose[:3, :3] = obj_pose_transformed_for_sup[:3, :3]
@@ -372,14 +358,14 @@ class GraspManager(ActivityBase):
                         break
 
         if not is_success_filtered:
-            logger.error(f"Failed to filter release poses")
+            logger.error(f"Failed to filter Release poses")
             return None
         
         if self.has_obj:
             self.robot_c_manager.remove_object(self.obj_info["name"])
             self.result_object_c_manager.append(self.objects_c_manager)
 
-        logger.info(f"Success to get release pose.\n")
+        logger.info(f"Success to get Release pose.\n")
         return release_pose
 
     def generate_points_on_support(
@@ -481,6 +467,19 @@ class GraspManager(ActivityBase):
         if error_pose < err_limit:
             return True
         return False
+
+    def _get_goal_pose(self, pose):
+        qpos = self._compute_inverse_kinematics(pose)
+        transforms = self.robot.forward_kin(np.array(qpos))
+        goal_pose = transforms[self.robot.eef_name].h_mat
+        return transforms, goal_pose
+
+    def _attach_gripper2object(self, obj_post_grasp_pose):
+        self.robot_c_manager.add_object(
+            self.obj_info["name"], 
+            gtype="mesh", gparam=self.obj_info["gtype"], transform=obj_post_grasp_pose)
+        self.obj_grasp_pose = self.obj_info["transform"]
+        self.obj_post_grasp_pose = obj_post_grasp_pose
 
     def _check_support(self, obj_pose):
         obj_mesh = deepcopy(self.obj_mesh_for_sup)
