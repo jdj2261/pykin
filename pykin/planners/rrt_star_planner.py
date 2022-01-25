@@ -93,7 +93,7 @@ class RRTStarPlanner(Planner):
             self.T_between_gripper_and_obj = T_between_gripper_and_obj
             self.self_c_manager.add_object(
                 self.obj_info["name"], 
-                gtype="mesh", gparam=self.obj_info["gtype"], transform=self.obj_info["transform"])
+                gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], transform=self.obj_info["transform"])
 
         cnt = 0
         total_cnt = 10

@@ -70,7 +70,8 @@ class ObjectManager():
 
         info = {}
         info["name"] = name
-        info["gtype"] = self._objects[name][1]
+        info["gtype"] = self._objects[name][0]
+        info["gparam"] = self._objects[name][1]
         info["transform"] = self._objects[name][2]
 
         return info
