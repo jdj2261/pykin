@@ -5,6 +5,7 @@ from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
+from pykin.utils.error_utils import CollisionError
 from pykin.utils.transform_utils import get_linear_interpoation
 
 logger = create_logger('RRT Star Planner', "debug")
@@ -15,8 +16,6 @@ class RRTStarPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        self_collision_manager: CollisionManager for robot's self collision check
-        object_collision_manager: CollisionManager for collision check between robot and object
         delta_distance(float): distance between nearest vertex and new vertex
         epsilon(float): 1-epsilon is probability of random sampling
         gamma_RRT_star(int): factor used for search radius
@@ -27,26 +26,21 @@ class RRTStarPlanner(Planner):
     def __init__(
         self, 
         robot,
-        self_collision_manager=None,
-        object_collision_manager=None,
         delta_distance=0.5,
         epsilon=0.2,
-        max_iter=3000,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
         n_step=10
     ):
         super(RRTStarPlanner, self).__init__(
             robot, 
-            self_collision_manager, 
-            object_collision_manager,
             dimension
         )
         self.delta_dis = delta_distance
         self.epsilon = epsilon
-        self._max_iter = max_iter
         self.gamma_RRTs = gamma_RRT_star
         
+        self._max_iter = None
         self._cur_qpos = None
         self._goal_pose = None
         self.T = None
@@ -68,12 +62,14 @@ class RRTStarPlanner(Planner):
         self, 
         cur_q,
         goal_pose, 
-        max_iter=None, 
-        resolution=1, 
+        robot_col_manager=None,
+        object_col_manager=None,
         is_attached=False, 
-        obj_info=None,
+        current_obj_info=None,
+        result_obj_info=None,
         T_between_gripper_and_obj=None,
-        object_collision_manager=None
+        max_iter=1000, 
+        resolution=1, 
     ):
         """
         Get path in joint space
@@ -81,19 +77,36 @@ class RRTStarPlanner(Planner):
         Returns:
             path(list) : result path (from start joints to goal joints)
         """
+        logger.info(f"Start to compute RRT-star Planning")
+
         self._cur_qpos = super()._change_types(cur_q)
         self._goal_pose = super()._change_types(goal_pose)
         
-        if max_iter is not None:
-            self._max_iter = max_iter
+        self._max_iter = max_iter
 
-        if is_attached:
-            self.object_c_manager = object_collision_manager
-            self.obj_info = obj_info
+        if not super()._is_robot_col_mngr(robot_col_manager):
+            logger.warning(f"This Planner does not do collision checking")
+            
+        self.robot_col_mngr = robot_col_manager
+        self.object_col_mngr = object_col_manager
+
+        if current_obj_info is not None and result_obj_info is not None:
+            self.obj_info = current_obj_info
             self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.self_c_manager.add_object(
-                self.obj_info["name"], 
-                gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], transform=self.obj_info["transform"])
+            self.backup_object_transform = result_obj_info["transform"]
+
+            if is_attached:
+                super()._attach_robot2object()
+                print("Object Remove")
+                self.object_col_mngr.remove_object(self.obj_info["name"])
+            else:
+                print("Object Set Transform")
+                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
+            
+            print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
+            for name, info in self.object_col_mngr.get_collision_info().items():
+                print(name, info[:3, 3])
+            print(f"*"*63 + "\n")
 
         cnt = 0
         total_cnt = 10
@@ -143,6 +156,10 @@ class RRTStarPlanner(Planner):
                         q_paths = self.find_path(self.T)
 
             if q_paths is not None:
+                if is_attached:
+                    self._detach_robot2object()
+                    self._recovery_object_collision()
+
                 logger.info(f"Generate Path Successfully!!")  
                 break 
 
@@ -152,7 +169,7 @@ class RRTStarPlanner(Planner):
 
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
-        
+
         result_q_paths = []
         if q_paths is not None:
             for step, joint in enumerate(q_paths):

@@ -56,17 +56,21 @@ for i in range(9):
 
 planner = RRTStarPlanner(
     robot=robot,
-    self_collision_manager=c_manager,
-    object_collision_manager=o_manager,
     delta_distance=0.1,
-    epsilon=0.2, 
-    max_iter=300,
+    epsilon=0.4, 
     gamma_RRT_star=0.1,
-    dimension=7
+    dimension=7,
+    n_step=5
 )
 
-_, joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose)
-
+interpolated_path, joint_path = planner.get_path_in_joinst_space(
+    cur_q=init_qpos, 
+    goal_pose=goal_eef_pose,
+    robot_col_manager=c_manager,
+    object_col_manager=o_manager,
+    max_iter=1000,
+    resolution=1)
+    
 if joint_path is None :
     print("Cannot Visulization Path")
     exit()

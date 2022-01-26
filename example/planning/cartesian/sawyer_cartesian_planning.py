@@ -59,17 +59,17 @@ c_manager.setup_robot_collision(robot, init_fk)
 
 task_plan = CartesianPlanner(
     robot, 
-    self_collision_manager=c_manager,
-    object_collision_manager=None,
     n_step=args.timesteps,
-    dimension=7)
-
-joint_path, target_poses = task_plan.get_path_in_joinst_space(
-    current_q=init_qpos,
-    goal_pose=goal_eef_pose,
-    resolution=args.resolution, 
+    dimension=7,
     damping=args.damping,
     pos_sensitivity=args.pos_sensitivity)
+
+joint_path, target_poses = task_plan.get_path_in_joinst_space(
+    cur_q=init_qpos,
+    goal_pose=goal_eef_pose,
+    robot_col_manager=c_manager,
+    object_col_manager=None,
+    resolution=args.resolution)
 
 if joint_path is None and target_poses is None:
     print("Cannot Visulization Path")

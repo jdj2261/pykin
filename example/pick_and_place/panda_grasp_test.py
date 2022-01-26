@@ -163,7 +163,7 @@ grasp_man = GraspManager(
 # gripper = grasp_man.get_gripper_transformed(release_pose, is_tcp=False)
 # grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='blue')
 
-# plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.result_obj_pose, alpha=0.2, color='orange')
+# plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.obj_post_release_pose, alpha=0.2, color='orange')
 
 # plt.show_figure()
 # ########
@@ -203,5 +203,5 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     grasp_man.visualize_gripper(ax, gripper, alpha=0.5, color='red')
     grasp_man.visualize_axis(ax, grasp_man.get_tcp_h_mat_from_eef(pre_release_pose), axis=[1,1,1], scale=0.1)
 
-    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.result_obj_pose, alpha=0.2, color='blue')
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, A2B=grasp_man.obj_post_release_pose, alpha=0.2, color='blue')
     plt.show_figure()

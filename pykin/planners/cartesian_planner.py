@@ -19,8 +19,6 @@ class CartesianPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        self_collision_manager: CollisionManager for robot's self collision check
-        object_collision_manager: CollisionManager for collision check between robot and object
         n_step(int): Number of waypoints
         dimension(int): robot arm's dof
         waypoint_type(str): Type of waypoint ex) "Linear", "Cubic", "Circular"
@@ -28,22 +26,28 @@ class CartesianPlanner(Planner):
     def __init__(
         self,
         robot,
-        self_collision_manager=None,
-        object_collision_manager=None,
         n_step=500,
         dimension=7,
-        waypoint_type="Linear"
+        damping=0.5,
+        epsilon=1e-12,
+        pos_sensitivity=0.03,
+        waypoint_type="Linear",
+        is_slerp=False
     ):
         super(CartesianPlanner, self).__init__(
             robot, 
-            self_collision_manager, 
-            object_collision_manager,
             dimension)
+            
         self.n_step = n_step
         self.waypoint_type = waypoint_type
         self.eef_name = self.robot.eef_name
-        self.arm = None
         self._dimension = dimension
+        self._damping = damping
+        self._epsilon = epsilon
+        self._pos_sensitivity = pos_sensitivity
+        self._is_slerp = is_slerp
+
+        self.arm = None
 
         super()._setup_q_limits()
         super()._setup_eef_name()
@@ -54,33 +58,55 @@ class CartesianPlanner(Planner):
     @logging_time
     def get_path_in_joinst_space(
         self, 
-        current_q=None,
-        goal_pose=None,
-        waypoints=None,
+        cur_q,
+        goal_pose,
+        robot_col_manager=None,
+        object_col_manager=None,
+        is_attached=False, 
+        current_obj_info=None,
+        result_obj_info=None,
+        T_between_gripper_and_obj=None,
         resolution=1, 
-        damping=0.5,
-        epsilon=1e-12,
-        pos_sensitivity=0.03,
-        is_slerp=False
     ):
-        self._cur_qpos = super()._change_types(current_q)
+        logger.info(f"Start to compute Cartesian Planning")
+
+        self._cur_qpos = super()._change_types(cur_q)
         self._goal_pose = super()._change_types(goal_pose)
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
 
+        if not super()._is_robot_col_mngr(robot_col_manager):
+            logger.warning(f"This Planner does not do collision checking")
+            
+        self.robot_col_mngr = robot_col_manager
+        self.object_col_mngr = object_col_manager
+        self.is_attached = is_attached
+
+        if current_obj_info is not None and result_obj_info is not None:
+            self.obj_info = current_obj_info
+            self.T_between_gripper_and_obj = T_between_gripper_and_obj
+            self.backup_object_transform = result_obj_info["transform"]
+
+            if self.is_attached:
+                super()._attach_robot2object()
+                print("Object Remove")
+                self.object_col_mngr.remove_object(self.obj_info["name"])
+            else:
+                print("Object Set Transform")
+                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
+
+            print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
+            for name, info in self.object_col_mngr.get_collision_info().items():
+                print(name, info[:3, 3])
+            print(f"*"*63 + "\n")
+
         self._resolution = resolution
-        self._damping = damping
-        self._pos_sensitivity = pos_sensitivity
-        self._is_slerp = is_slerp
-
-        if waypoints is None:
-            waypoints = self.generate_waypoints(is_slerp)
-
-        paths, target_positions = self._compute_path_and_target_pose(waypoints, epsilon)
+        waypoints = self.generate_waypoints()
+        paths, target_positions = self._compute_path_and_target_pose(waypoints)
         
         return paths, target_positions
 
-    def _compute_path_and_target_pose(self, waypoints, epsilon):
+    def _compute_path_and_target_pose(self, waypoints):
         cnt = 0
         total_cnt = 10
         while True:
@@ -96,20 +122,18 @@ class CartesianPlanner(Planner):
 
             for step, (pos, ori) in enumerate(waypoints):
                 target_transform = t_utils.get_h_mat(pos, ori)
-                err_pose = k_utils.calc_pose_error(target_transform, current_transform, epsilon) 
+                err_pose = k_utils.calc_pose_error(target_transform, current_transform, self._epsilon) 
                 J = jac.calc_jacobian(self.robot.desired_frames, cur_fk, self._dimension)
                 J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + self._damping**2 * np.identity(6)))
 
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                is_collision_free = self._collision_free(self._cur_qpos)
+                is_collision_free = self._collision_free(self._cur_qpos, self.is_attached)
 
                 if not is_collision_free:
-                    _, name = self.self_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=True) 
-                    
+                    _, name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=True) 
                     collision_pose[step] = (name, np.round(target_transform[:3,3], 6))
-
                     continue
 
                 if not self._check_q_in_limits(self._cur_qpos):
@@ -128,11 +152,14 @@ class CartesianPlanner(Planner):
                 logger.error(f"Failed Generate Path.. Collision may occur.")
                 
                 for name, pose in collision_pose.values():
-                    logger.warning(f"\n\tCollision Names : {name} \n\tCollision Position : {pose}")
-                    # logger.warning(f"Collision Position : {pose}")
+                    logger.warning(f"\n\tCollision Names : {name}")
+                self._recovery_object_collision()
                 raise CollisionError("Conflict confirmed. Check the object position!")
                 
             if err < self._pos_sensitivity:
+                if self.is_attached:
+                    self._detach_robot2object()
+                    self._recovery_object_collision()
                 logger.info(f"Generate Path Successfully!! Error is {err:6f}")
                 break
 
@@ -148,9 +175,9 @@ class CartesianPlanner(Planner):
 
     # TODO
     # generate cubic, circular waypoints
-    def generate_waypoints(self, is_slerp):
+    def generate_waypoints(self):
         if self.waypoint_type == "Linear":
-            waypoints = [path for path in self._get_linear_path(self._cur_pose, self._goal_pose, is_slerp)]
+            waypoints = [path for path in self._get_linear_path(self._cur_pose, self._goal_pose, self._is_slerp)]
         if self.waypoint_type == "Cubic":
             pass
         if self.waypoint_type == "Circular":

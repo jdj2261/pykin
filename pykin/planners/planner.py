@@ -12,28 +12,17 @@ class Planner(metaclass=ABCMeta):
 
     Args:
         robot (SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        self_collision_manager: CollisionManager for robot's self collision check
+        robot_col_manager: CollisionManager for robot's self collision check
         object_collision_manager: CollisionManager for collision check between robot and object
         dimension(int): robot arm's dof
     """
     def __init__(
         self,
         robot,
-        self_collision_manager,
-        object_collision_manager,
         dimension
     ):
         self.robot = robot
         self._dimension = dimension
-        if self_collision_manager is None:
-            logger.warning(f"This Planner does not do collision checking")
-            self.self_c_manager = None
-        else:
-            self.self_c_manager = self_collision_manager
-            check_collision = self.self_c_manager.in_collision_internal()
-            if check_collision:
-                raise CollisionError("Conflict confirmed. Check the joint settings again")
-        self.object_c_manager = object_collision_manager
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
@@ -70,6 +59,36 @@ class Planner(metaclass=ABCMeta):
         """
         return np.all([q_in >= self.q_limits_lower, q_in <= self.q_limits_upper])
 
+    def _is_robot_col_mngr(self, robot_col_manager):
+        if robot_col_manager is None:
+            return False
+        
+        is_self_collision = robot_col_manager.in_collision_internal()
+        
+        if is_self_collision:
+            raise CollisionError("Conflict confirmed. Check the joint settings again")
+        
+        return True
+
+    def _attach_robot2object(self):
+        self.robot_col_mngr.add_object(
+            self.obj_info["name"], 
+            gtype=self.obj_info["gtype"], 
+            gparam=self.obj_info["gparam"], 
+            transform=self.obj_info["transform"])
+    
+    def _detach_robot2object(self):
+        self.robot_col_mngr.remove_object(
+            self.obj_info["name"]
+        )
+
+    def _recovery_object_collision(self):
+        self.object_col_mngr.add_object(
+            self.obj_info["name"], 
+            gtype=self.obj_info["gtype"], 
+            gparam=self.obj_info["gparam"], 
+            transform=self.backup_object_transform)
+
     def _setup_eef_name(self):
         """
         Setup end-effector name
@@ -89,7 +108,7 @@ class Planner(metaclass=ABCMeta):
             names(set of 2-tup): The set of pairwise collisions. 
         """
  
-        if self.self_c_manager is None:
+        if self.robot_col_mngr is None:
             return True
 
         transformations = self._get_transformations(new_q)
@@ -97,16 +116,16 @@ class Planner(metaclass=ABCMeta):
         if is_attached:
             grasp_pose = transformations[self.robot.eef_name].h_mat
             obj_pose = np.dot(grasp_pose, self.T_between_gripper_and_obj)
-            self.self_c_manager.set_transform(self.obj_info["name"], obj_pose)
+            self.robot_col_mngr.set_transform(self.obj_info["name"], obj_pose)
         
         for link, transformations in transformations.items():
-            if link in self.self_c_manager._objs:
+            if link in self.robot_col_mngr._objs:
                 transform = transformations.h_mat
                 A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
-                self.self_c_manager.set_transform(name=link, transform=A2B)
+                self.robot_col_mngr.set_transform(name=link, transform=A2B)
 
-        is_self_collision = self.self_c_manager.in_collision_internal(return_names=False, return_data=False)
-        is_object_collision = self.self_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=False)  
+        is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
+        is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
 
         if is_self_collision or is_object_collision:
             return False

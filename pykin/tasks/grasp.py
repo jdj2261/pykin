@@ -39,10 +39,9 @@ class GraspManager(ActivityBase):
         self.retreat_distance = retreat_distance
         self.release_distance = release_distance
         self.tcp_pose = np.eye(4)
-        self.result_obj_pose = np.eye(4)
+        self.post_release_pose = np.eye(4)
         self.contact_points = None
-        self.result_object_c_manager = []
-        self.result_object_c_manager.append(self.objects_c_manager)
+        
         self.obj_info = None
         self.has_obj = False
 
@@ -136,12 +135,16 @@ class GraspManager(ActivityBase):
                     
                     post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
                     post_transforms, post_goal_pose = self._get_goal_pose(post_grasp_pose)
-                    
+
                     if self.has_obj:
+                        self.obj_pre_grasp_pose = self.obj_info["transform"]
+                        self.obj_grasp_pose = self.obj_info["transform"]
+
                         self.T_between_gripper_and_obj = get_relative_transform(grasp_pose, self.obj_info["transform"])
                         obj_post_grasp_pose = np.dot(post_grasp_pose, self.T_between_gripper_and_obj)
+                        self.obj_post_grasp_pose = obj_post_grasp_pose
                         self._attach_gripper2object(obj_post_grasp_pose)
-                    
+
                     if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self.collision_free(post_transforms):
                         self.post_grasp_pose = post_grasp_pose
                         is_success_filtered = True
@@ -332,7 +335,8 @@ class GraspManager(ActivityBase):
 
             if self.has_obj:
                 self.robot_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
-                
+
+            
             if self._check_ik_solution(release_pose, goal_pose) and self.collision_free(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
                 pre_release_transforms, pre_release_goal_pose = self._get_goal_pose(pre_release_pose)
@@ -349,11 +353,12 @@ class GraspManager(ActivityBase):
                     post_release_transforms, post_release_goal_pose = self._get_goal_pose(post_release_pose)
 
                     if self.has_obj:
-                        self.objects_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
+                        self.object_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
                     if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self.collision_free(post_release_transforms):
                         self.post_release_pose = post_release_pose
-                        self.result_obj_pose = result_obj_pose
+                        self.obj_release_pose = result_obj_pose
+                        self.obj_post_release_pose = result_obj_pose
                         is_success_filtered = True
                         break
 
@@ -363,7 +368,6 @@ class GraspManager(ActivityBase):
         
         if self.has_obj:
             self.robot_c_manager.remove_object(self.obj_info["name"])
-            self.result_object_c_manager.append(self.objects_c_manager)
 
         logger.info(f"Success to get Release pose.\n")
         return release_pose
@@ -478,8 +482,6 @@ class GraspManager(ActivityBase):
         self.robot_c_manager.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], transform=obj_post_grasp_pose)
-        self.obj_grasp_pose = self.obj_info["transform"]
-        self.obj_post_grasp_pose = obj_post_grasp_pose
 
     def _check_support(self, obj_pose):
         obj_mesh = deepcopy(self.obj_mesh_for_sup)

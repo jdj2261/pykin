@@ -290,6 +290,13 @@ class CollisionManager:
         
         return result
 
+    def get_collision_info(self):
+        col_info = {}
+        for name, info in self._objs.items():
+            T = get_h_mat(position=info["obj"].getTranslation(), orientation=info["obj"].getRotation())
+            col_info[name] = T
+        return col_info
+
     @staticmethod
     def _get_returns(return_names, return_data, *args):
         if return_names and return_data:

@@ -79,9 +79,19 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
         color = 'green'
         
     grasp_object_info = objects.get_info(name)
-    support_object_info = objects.get_info(list(objects.support_objects.keys())[0])
-    grasp_waypoints = grasp_man.get_grasp_waypoints(grasp_object_info, limit_angle=0.05, num_grasp=10, n_trials=10)
-    release_waypoints = grasp_man.get_release_waypoints(support_object_info, 20, grasp_object_info, 20, 20)
+    support_obj_info = objects.get_info(list(objects.support_objects.keys())[0])
+    grasp_waypoints = grasp_man.get_grasp_waypoints(
+        obj_info=grasp_object_info, 
+        limit_angle=0.05, 
+        num_grasp=10, 
+        n_trials=10)
+
+    release_waypoints = grasp_man.get_release_waypoints(
+        obj_info_on_sup=support_obj_info, 
+        n_samples_on_sup=20, 
+        obj_info_for_sup=grasp_object_info, 
+        n_samples_for_sup=20, 
+        n_trials=10)
     
     grasp_pose = grasp_waypoints[GraspStatus.grasp_pose]
     pre_grasp_pose = grasp_waypoints[GraspStatus.pre_grasp_pose]

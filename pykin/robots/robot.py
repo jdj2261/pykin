@@ -144,3 +144,6 @@ class Robot(URDFModel):
     def active_joint_names(self):
         raise NotImplementedError
 
+    @property
+    def init_qpos(self):
+        raise NotImplementedError

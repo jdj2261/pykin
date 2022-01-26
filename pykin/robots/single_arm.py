@@ -21,7 +21,8 @@ class SingleArm(Robot):
         self._eef_name  = ""
         self.desired_base_frame = ""
         self._set_joint_limits_upper_and_lower()
-
+        self._init_qpos = np.zeros(self.arm_dof)
+        
     def _set_joint_limits_upper_and_lower(self):
         """
         Set joint limits upper and lower
@@ -208,3 +209,11 @@ class SingleArm(Robot):
     @property
     def arm_dof(self):
         return len([ joint for joint in self.get_revolute_joint_names() if "head" not in joint])
+
+    @property
+    def init_qpos(self):
+        return self._init_qpos
+    
+    @init_qpos.setter
+    def init_qpos(self, init_qpos):
+        self._init_qpos = init_qpos

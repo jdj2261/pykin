@@ -20,9 +20,10 @@ class ActivityBase:
     ):
         self.robot = robot
         self.robot_c_manager = robot_col_manager
-        self.objects_c_manager = objects_col_manager
+        self.object_c_manager = objects_col_manager
         self.gripper_c_manager = CollisionManager()
         self.mesh_path = mesh_path
+
         self.gripper_names = gripper_configures.get("gripper_names", None)
         self.gripper_names.insert(0, self.robot.eef_name)
         self.gripper_max_width = gripper_configures.get("gripper_max_width", 0.0)
@@ -79,13 +80,13 @@ class ActivityBase:
                         self.robot_c_manager.set_transform(name=link, transform=A2B)
         
         if only_gripper:
-            is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.objects_c_manager)
+            is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.object_c_manager)
             if is_object_collision:
                 return False
             return True
         else:
             is_self_collision = self.robot_c_manager.in_collision_internal()
-            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.objects_c_manager)
+            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.object_c_manager)
             if is_self_collision or is_object_collision:
                 return False
             return True

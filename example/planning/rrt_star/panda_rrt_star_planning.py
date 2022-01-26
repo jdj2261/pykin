@@ -47,20 +47,23 @@ for i in range(6):
     objs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
 ##################################################################
 
-objs.remove_object("milk_1")
+# objs.remove_object("milk_1")
 planner = RRTStarPlanner(
     robot=robot,
-    self_collision_manager=robot_c_manager,
-    object_collision_manager=obj_c_manager,
     delta_distance=0.1,
     epsilon=0.4, 
-    max_iter=1000,
     gamma_RRT_star=0.1,
     dimension=7,
     n_step=5
 )
 
-interpolated_path, joint_path = planner.get_path_in_joinst_space(cur_q=init_qpos, goal_pose=goal_eef_pose, resolution=0.3)
+interpolated_path, joint_path = planner.get_path_in_joinst_space(
+    cur_q=init_qpos, 
+    goal_pose=goal_eef_pose,
+    robot_col_manager=robot_c_manager,
+    object_col_manager=obj_c_manager,
+    max_iter=1000,
+    resolution=0.3)
 
 if joint_path is None :
     print("Cannot Visulization Path")
