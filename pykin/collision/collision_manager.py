@@ -217,7 +217,7 @@ class CollisionManager:
 
         return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
 
-    def in_collision_other(self, other_manager=None, return_names=False, return_data=False):
+    def in_collision_other(self, other_manager=None, return_names=False, return_data=False): 
         if other_manager is None:
             return 
             
@@ -237,6 +237,14 @@ class CollisionManager:
             for contact in cdata.result.contacts:
                 reverse = False
                 coll_names = (self._extract_name(contact.o1), other_manager._extract_name(contact.o2))
+
+                if coll_names[0] == coll_names[1]:
+                    # print(coll_names)
+                    # print(self._objs)
+                    # print(other_manager._objs)
+                    # print(coll_names[0], coll_names[1])
+                    # print("Same name!!!!")
+                    continue
 
                 if (coll_names[0], coll_names[1]) in self._filter_names:
                     continue

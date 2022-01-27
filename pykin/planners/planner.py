@@ -82,12 +82,12 @@ class Planner(metaclass=ABCMeta):
             self.obj_info["name"]
         )
 
-    def _recovery_object_collision(self):
+    def _recovery_object_collision(self, T):
         self.object_col_mngr.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
             gparam=self.obj_info["gparam"], 
-            transform=self.backup_object_transform)
+            transform=T)
 
     def _setup_eef_name(self):
         """
@@ -96,7 +96,7 @@ class Planner(metaclass=ABCMeta):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
-    def _collision_free(self, new_q, is_attached=False):
+    def _collision_free(self, new_q, is_attached=False, visible_name=False):
         """
         Check collision free between robot and objects
 
@@ -125,7 +125,19 @@ class Planner(metaclass=ABCMeta):
                 self.robot_col_mngr.set_transform(name=link, transform=A2B)
 
         is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
-        is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
+        
+        # is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
+
+        if visible_name:
+            is_object_collision, col_name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=visible_name)  
+            if is_self_collision or is_object_collision:
+                print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
+                for name, info in self.object_col_mngr.get_collision_info().items():
+                    print(name, info[:3, 3])
+                return False, col_name
+            return True, col_name
+        else:
+            is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
 
         if is_self_collision or is_object_collision:
             return False

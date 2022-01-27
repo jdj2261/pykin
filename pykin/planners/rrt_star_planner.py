@@ -93,16 +93,19 @@ class RRTStarPlanner(Planner):
         if current_obj_info is not None and result_obj_info is not None:
             self.obj_info = current_obj_info
             self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.backup_object_transform = result_obj_info["transform"]
+            self.result_object_transform = result_obj_info["transform"]
 
             if is_attached:
                 super()._attach_robot2object()
-                print("Object Remove")
                 self.object_col_mngr.remove_object(self.obj_info["name"])
             else:
-                print("Object Set Transform")
                 self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
             
+            print(f"*"*20 + f" Robot Collision Info "+ f"*"*20)
+            for name, info in self.robot_col_mngr.get_collision_info().items():
+                print(name, info[:3, 3])
+            print(f"*"*63 + "\n")
+
             print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
             for name, info in self.object_col_mngr.get_collision_info().items():
                 print(name, info[:3, 3])
@@ -157,8 +160,8 @@ class RRTStarPlanner(Planner):
 
             if q_paths is not None:
                 if is_attached:
-                    self._detach_robot2object()
-                    self._recovery_object_collision()
+                    super()._detach_robot2object()
+                    super()._recovery_object_collision(self.result_object_transform)
 
                 logger.info(f"Generate Path Successfully!!")  
                 break 
