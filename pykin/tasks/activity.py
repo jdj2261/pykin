@@ -70,13 +70,22 @@ class ActivityBase:
     def collision_free(self, transformations, only_gripper=False) -> bool:
         for link, transform in transformations.items():
             if only_gripper:
-                if self.robot.links[link].collision.gtype == "mesh":
-                    A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                    self.gripper_c_manager.set_transform(link, A2B)
+                if self.robot_c_manager.geom == "visual":
+                    if self.robot.links[link].visual.gtype == "mesh":
+                        A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                        self.gripper_c_manager.set_transform(link, A2B)
+                else:
+                    if self.robot.links[link].collision.gtype == "mesh":
+                        A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                        self.gripper_c_manager.set_transform(link, A2B)
             else:
-                for link, transform in transformations.items():
-                    if link in self.robot_c_manager._objs:
+                if link in self.robot_c_manager._objs:
+                    if self.robot_c_manager.geom == "visual":
+                        A2B = np.dot(transform.h_mat, self.robot.links[link].visual.offset.h_mat)
+                        self.robot_c_manager.set_transform(name=link, transform=A2B)
+                    else:
                         A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                    # print(link, A2B)
                         self.robot_c_manager.set_transform(name=link, transform=A2B)
         
         if only_gripper:
@@ -85,8 +94,8 @@ class ActivityBase:
                 return False
             return True
         else:
-            is_self_collision = self.robot_c_manager.in_collision_internal()
-            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.object_c_manager)
+            is_self_collision = self.robot_c_manager.in_collision_internal(return_names=False)
+            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=False)
             if is_self_collision or is_object_collision:
                 return False
             return True

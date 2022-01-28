@@ -23,9 +23,69 @@ class Planner(metaclass=ABCMeta):
     ):
         self.robot = robot
         self._dimension = dimension
+        
+        self.robot_col_mngr = None
+        self.object_col_mngr = None
+        self.is_attached = None
+        self.obj_info = None
+        self.T_between_grippper_and_obj = None
+        self.result_object_pose = None
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
+
+    def attach_object_on_robot(self):
+        self.robot_col_mngr.add_object(
+            self.obj_info["name"], 
+            gtype=self.obj_info["gtype"], 
+            gparam=self.obj_info["gparam"], 
+            transform=self.obj_info["transform"])
+        self.object_col_mngr.remove_object(self.obj_info["name"])
+
+    def detach_object_from_robot(self):
+        self.robot_col_mngr.remove_object(
+            self.obj_info["name"]
+        )
+        self.object_col_mngr.add_object(
+            self.obj_info["name"], 
+            gtype=self.obj_info["gtype"], 
+            gparam=self.obj_info["gparam"], 
+            transform=self.result_object_pose)
+
+    @abstractclassmethod
+    def get_path_in_joinst_space(self):
+        """
+        write planner algorithm you want 
+        """
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def _get_linear_path(self, init_pose, goal_pose):
+        raise NotImplementedError
+
+    def _setup_collision_manager(
+        self, 
+        robot_col_manager,
+        object_col_manager,
+        is_attached,
+        current_obj_info,
+        result_obj_info,
+        T_between_gripper_and_obj
+    ):
+        self.robot_col_mngr = robot_col_manager
+        self.object_col_mngr = object_col_manager
+        self.is_attached = is_attached
+
+        if current_obj_info is not None and result_obj_info is not None:
+            self.obj_info = current_obj_info
+            self.T_between_gripper_and_obj = T_between_gripper_and_obj
+            self.result_object_pose = result_obj_info["transform"]
+
+            if not self.is_attached:
+                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
+
+            self.robot_col_mngr.show_collision_info(name="Robot")
+            self.object_col_mngr.show_collision_info(name="Object")
 
     @staticmethod
     def _change_types(datas):
@@ -59,7 +119,7 @@ class Planner(metaclass=ABCMeta):
         """
         return np.all([q_in >= self.q_limits_lower, q_in <= self.q_limits_upper])
 
-    def _is_robot_col_mngr(self, robot_col_manager):
+    def _check_robot_col_mngr(self, robot_col_manager):
         if robot_col_manager is None:
             return False
         
@@ -69,25 +129,6 @@ class Planner(metaclass=ABCMeta):
             raise CollisionError("Conflict confirmed. Check the joint settings again")
         
         return True
-
-    def _attach_robot2object(self):
-        self.robot_col_mngr.add_object(
-            self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], 
-            gparam=self.obj_info["gparam"], 
-            transform=self.obj_info["transform"])
-    
-    def _detach_robot2object(self):
-        self.robot_col_mngr.remove_object(
-            self.obj_info["name"]
-        )
-
-    def _recovery_object_collision(self, T):
-        self.object_col_mngr.add_object(
-            self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], 
-            gparam=self.obj_info["gparam"], 
-            transform=T)
 
     def _setup_eef_name(self):
         """
@@ -121,38 +162,25 @@ class Planner(metaclass=ABCMeta):
         for link, transformations in transformations.items():
             if link in self.robot_col_mngr._objs:
                 transform = transformations.h_mat
-                A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                if self.robot_col_mngr.geom == "visual":
+                    A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                else:
+                    A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                # print(link, A2B)
                 self.robot_col_mngr.set_transform(name=link, transform=A2B)
-
+        
         is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
         
-        # is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
-
         if visible_name:
             is_object_collision, col_name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=visible_name)  
             if is_self_collision or is_object_collision:
-                print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
-                for name, info in self.object_col_mngr.get_collision_info().items():
-                    print(name, info[:3, 3])
                 return False, col_name
             return True, col_name
-        else:
-            is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
 
+        is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
         if is_self_collision or is_object_collision:
             return False
         return True
-
-    @abstractclassmethod
-    def get_path_in_joinst_space(self):
-        """
-        write planner algorithm you want 
-        """
-        raise NotImplementedError
-
-    @abstractclassmethod
-    def _get_linear_path(self, init_pose, goal_pose):
-        raise NotImplementedError
 
     def _get_transformations(self, q_in):
         """

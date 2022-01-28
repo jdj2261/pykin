@@ -77,12 +77,10 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-resolution = 0.5
-for step, joint in enumerate(joint_path):
-    if step % (1/resolution) == 0 or step == len(joint_path)-1:
-        transformations = robot.forward_kin(joint)
-        joint_trajectory.append(transformations)
-        eef_poses.append(transformations[robot.eef_name].pos)
+for step, joint in enumerate(interpolated_path):
+    transformations = robot.forward_kin(joint)
+    joint_trajectory.append(transformations)
+    eef_poses.append(transformations[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,

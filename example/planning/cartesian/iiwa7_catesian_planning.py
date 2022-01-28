@@ -26,8 +26,8 @@ parser.add_argument("--pos-sensitivity", type=float, default=0.05)
 args = parser.parse_args()
 
 file_path = pykin_path+'asset/urdf/iiwa7/iiwa7.urdf'
-mesh_path = pykin_path+"/asset/urdf/iiwa7/"
-yaml_path = pykin_path+'asset/config/iiwa14_init_params.yaml'
+mesh_path = pykin_path+"asset/urdf/iiwa7/"
+yaml_path = pykin_path+'asset/config/iiwa7_init_params.yaml'
 
 with open(yaml_path) as f:
     controller_config = yaml.safe_load(f)
@@ -36,27 +36,12 @@ init_qpos = controller_config["init_qpos"]
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0], pos=[0, 0, 0]))
 robot.setup_link_name("iiwa7_link_0", "iiwa7_right_hand")
 
-##################################################################
 init_fk = robot.forward_kin(init_qpos)
-
-# target_joints = [0.0, 1.2, 0.0, -1.89, 0.0, 0.6, 0.0]
-# robot.offset.pos = [1, 0, 0]
-# goal_transformations = robot.forward_kin(target_joints)
-
-# scene = trimesh.Scene()
-# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=init_fk)
-# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=goal_transformations)
-# scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
-
-# scene.show()
-
 init_eef_pose = robot.get_eef_pose(init_fk)
-# goal_eef_pose = robot.get_eef_pose(goal_transformations)
 goal_eef_pose = controller_config["goal_pos"]
-##################################################################
 
 c_manager = CollisionManager(mesh_path)
-c_manager.setup_robot_collision(robot, init_fk)
+c_manager.setup_robot_collision(robot, init_fk, geom="collision")
 
 task_plan = CartesianPlanner(
     robot, 

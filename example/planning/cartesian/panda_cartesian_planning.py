@@ -43,7 +43,9 @@ goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
 c_manager = CollisionManager(mesh_path)
-c_manager.setup_robot_collision(robot, fk)
+c_manager.setup_robot_collision(robot, fk, geom="collision")
+
+c_manager.show_collision_info()
 
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)

@@ -32,7 +32,8 @@ init_fk = robot.forward_kin(init_qpos)
 goal_eef_pose = controller_config["goal_pose"]
 
 robot_c_manager = CollisionManager(mesh_path)
-robot_c_manager.setup_robot_collision(robot, init_fk)
+robot_c_manager.setup_robot_collision(robot, init_fk, "visual")
+robot_c_manager.show_collision_info()
 
 milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 milk_mesh = trimesh.load_mesh(milk_path)
@@ -62,8 +63,10 @@ interpolated_path, joint_path = planner.get_path_in_joinst_space(
     goal_pose=goal_eef_pose,
     robot_col_manager=robot_c_manager,
     object_col_manager=obj_c_manager,
-    max_iter=1000,
+    max_iter=600,
     resolution=0.3)
+
+planner.robot_col_mngr.show_collision_info()
 
 if joint_path is None :
     print("Cannot Visulization Path")

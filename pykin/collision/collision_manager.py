@@ -10,11 +10,10 @@ except BaseException:
     fcl = None
     trimesh = None
 
-from pykin.utils.error_utils import CollisionError
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
 from pykin.collision.contact_data import ContactData
-logger = create_logger('Collision Manager', "debug",)
+logger = create_logger('Collision Manager', "debug")
 
 class CollisionManager:
     """
@@ -28,6 +27,7 @@ class CollisionManager:
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
         self._filter_names = set()
+        self.geom = "visual"
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
@@ -35,6 +35,7 @@ class CollisionManager:
     def setup_robot_collision(self, robot, fk=None, geom="visual"):
         if fk is None:
             fk = robot.init_transformations
+        self.geom = geom
         self._filter_contact_names(robot, fk, geom)
 
     def setup_object_collision(self, objects):
@@ -42,54 +43,51 @@ class CollisionManager:
             self.add_object(name, info[0], info[1], info[2])
 
     def _filter_contact_names(self, robot, fk, geom):            
-        is_collision = False
-
-        def _get_collision_datas():
-            nonlocal is_collision
-            result = []
-            for (name1, name2) in self._filter_names:
-                index_name1 = list(self._objs.keys()).index(name1)
-                index_name2 = list(self._objs.keys()).index(name2)
-
-                if abs(index_name1-index_name2) > 1:
-                    for joint in robot.joints.values():
-                        if name1 == joint.parent:
-                            if joint.dtype == "revolute":
-                                print(name1, name2)
-                                print(index_name1, index_name2)
-                                is_collision = True
-                                result.append((name1, name2))
-            return result
-
         for link, transformation in fk.items():
             if geom == "visual":
-                if robot.links[link].visual.gtype == "mesh":
-                    mesh_name = robot.links[link].visual.gparam.get('filename')
-                    file_name = self.mesh_path + mesh_name
-                    mesh = trimesh.load_mesh(file_name)
-                    A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
-                    self.add_object(robot.links[link].name, "mesh", mesh, A2B)
-
-            if geom == "collision":
-                if robot.links[link].collision.gtype == "mesh":
-                    mesh_name = robot.links[link].collision.gparam.get('filename')
-                    file_name = self.mesh_path + mesh_name
-                    mesh = trimesh.load_mesh(file_name)
-                    A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
-                    self.add_object(robot.links[link].name, "mesh", mesh, A2B)
+                robot_gtype = robot.links[link].visual.gtype
+                A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                if robot_gtype is None:
+                    continue
+                if robot_gtype == "mesh":
+                    mesh_name = self.mesh_path + robot.links[link].visual.gparam.get('filename')
+                    gparam = trimesh.load_mesh(mesh_name)
+                elif robot_gtype == 'cylinder':
+                    radius = float(robot.links[link].visual.gparam.get('radius'))
+                    length = float(robot.links[link].visual.gparam.get('length'))
+                    gparam = (radius, length)
+                elif robot_gtype == 'sphere':
+                    radius = float(robot.links[link].visual.gparam.get('radius'))
+                    gparam = radius
+                elif robot_gtype == 'box':
+                    size = robot.links[link].visual.gparam.get('size')
+                    gparam = size
+            else:
+                robot_gtype = robot.links[link].collision.gtype
+                if robot_gtype is None:
+                    continue
+                A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+                if robot_gtype == "mesh":
+                    mesh_name = self.mesh_path + robot.links[link].collision.gparam.get('filename')
+                    gparam = trimesh.load_mesh(mesh_name)
+                elif robot_gtype == 'cylinder':
+                    radius = float(robot.links[link].collision.gparam.get('radius'))
+                    length = float(robot.links[link].collision.gparam.get('length'))
+                    gparam = (radius, length)
+                elif robot_gtype == 'sphere':
+                    radius = float(robot.links[link].collision.gparam.get('radius'))
+                    gparam = radius
+                elif robot_gtype == 'box':
+                    size = robot.links[link].collision.gparam.get('size')
+                    gparam = size
+            self.add_object(robot.links[link].name, robot_gtype, gparam, A2B)
+            
+            if robot_gtype is None:
+                continue
 
         _, names = self.in_collision_internal(return_names=True)
         self._filter_names = copy.deepcopy(names)
 
-        if robot.robot_name == "ur5e":
-            return
-
-        collision_datas = _get_collision_datas()
-        if is_collision:
-            for name1, name2 in collision_datas:
-                logger.error(f"{name1} and {name2} is Collision..")
-            raise CollisionError(f"Conflict confirmed. Check the joint settings again") 
-    
     def add_object(self, 
                    name, 
                    gtype=None,
@@ -186,7 +184,7 @@ class CollisionManager:
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
-                num_max_contacts=100000, enable_contact=False))
+                    num_max_contacts=100000, enable_contact=True))
 
         self._manager.collide(cdata, fcl.defaultCollisionCallback)
 
@@ -194,80 +192,79 @@ class CollisionManager:
 
         objs_in_collision = set()
         contact_data = []
-
-        if return_names or return_data:
-            for contact in cdata.result.contacts:
-                coll_names = (self._extract_name(contact.o1),self._extract_name(contact.o2))
-                coll_names = tuple(sorted(coll_names))
-
-                if (coll_names[0], coll_names[1]) in self._filter_names:
-                    continue
-
-                if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
-                    continue
-
-                if return_names:
-                    objs_in_collision.add(coll_names)
-                if return_data:
-                    contact_data.append(ContactData(coll_names, contact))
-
+        for contact in cdata.result.contacts:
+            names = (self._extract_name(contact.o1),
+                        self._extract_name(contact.o2))
+            names = tuple(sorted(names))
+            if (names[0], names[1]) in self._filter_names:
+                continue
+            if return_names:
+                objs_in_collision.add(tuple(sorted(names)))
+            if return_data:
+                contact_data.append(ContactData(names, contact))
+                
         if not objs_in_collision:
             result = False
             objs_in_collision = "No object collided.."
 
-        return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
+        if return_names and return_data:
+            return result, objs_in_collision, contact_data
+        elif return_names:
+            return result, objs_in_collision
+        elif return_data:
+            return result, contact_data
+        else:
+            return result
 
     def in_collision_other(self, other_manager=None, return_names=False, return_data=False): 
         if other_manager is None:
-            return 
+            if return_names:
+                return None, None
+            return None
             
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
                 num_max_contacts=100000, enable_contact=False))
 
-        self._manager.collide(other_manager._manager, cdata, fcl.defaultCollisionCallback)
-
+        self._manager.collide(other_manager._manager,
+                              cdata,
+                              fcl.defaultCollisionCallback)
+        
         result = cdata.result.is_collision
 
         objs_in_collision = set()
         contact_data = []
 
-        if return_names or return_data:
-            for contact in cdata.result.contacts:
-                reverse = False
-                coll_names = (self._extract_name(contact.o1), other_manager._extract_name(contact.o2))
+        for contact in cdata.result.contacts:
+            reverse = False
+            coll_names = (self._extract_name(contact.o1), other_manager._extract_name(contact.o2))
+            if (coll_names[0], coll_names[1]) in self._filter_names:
+                continue
+            if coll_names[0] is None:
+                coll_names = (self._extract_name(contact.o2), other_manager._extract_name(contact.o1))
+                reverse = True
 
-                if coll_names[0] == coll_names[1]:
-                    # print(coll_names)
-                    # print(self._objs)
-                    # print(other_manager._objs)
-                    # print(coll_names[0], coll_names[1])
-                    # print("Same name!!!!")
-                    continue
+            if return_names:
+                objs_in_collision.add(coll_names)
+            if return_data:
+                if reverse:
+                    coll_names = reversed(coll_names)
+                contact_data.append(ContactData(coll_names, contact))
 
-                if (coll_names[0], coll_names[1]) in self._filter_names:
-                    continue
-
-                if ("obstacle" in coll_names[0] and "obstacle" in coll_names[1]):
-                    continue
-
-                if coll_names[0] is None:
-                    coll_names = (self._extract_name(contact.o2), other_manager._extract_name(contact.o1))
-                    reverse = True
-
-                if return_names:
-                    objs_in_collision.add(coll_names)
-                if return_data:
-                    if reverse:
-                        coll_names = reversed(coll_names)
-                    contact_data.append(ContactData(coll_names, contact))
-
+        if return_names:
             if not objs_in_collision:
                 result = False
                 objs_in_collision = "No object collided.."
 
-        return self._get_returns(return_names, return_data, result, objs_in_collision, contact_data)
+        if return_names and return_data:
+            return result, objs_in_collision, contact_data
+        elif return_names:
+            return result, objs_in_collision
+        elif return_data:
+            return result, contact_data
+        else:
+            return result
 
     def get_distances_internal(self):
         req = fcl.DistanceRequest()
@@ -305,16 +302,11 @@ class CollisionManager:
             col_info[name] = T
         return col_info
 
-    @staticmethod
-    def _get_returns(return_names, return_data, *args):
-        if return_names and return_data:
-            return args[0], args[1], args[2]
-        elif return_names:
-            return args[0], args[1]
-        elif return_data:
-            return args[0], args[2]
-        else:
-            return args[0]
+    def show_collision_info(self, name="Robot"):
+        print(f"*"*20 + f" {name} Collision Info "+ f"*"*20)
+        for name, info in self.get_collision_info().items():
+            print(name, info[:3, 3])
+        print(f"*"*63 + "\n")
 
     def _get_BVH(self, mesh):
         """

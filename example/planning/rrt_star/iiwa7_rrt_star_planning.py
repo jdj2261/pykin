@@ -56,10 +56,10 @@ for i in range(9):
 planner = RRTStarPlanner(
     robot=robot,
     delta_distance=0.1,
-    epsilon=0.4, 
+    epsilon=0.2, 
     gamma_RRT_star=0.1,
     dimension=7,
-    n_step=5
+    n_step=3
 )
 
 interpolated_path, joint_path = planner.get_path_in_joinst_space(
@@ -76,13 +76,11 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-resolution = 0.5
-print(len(joint_path))
-for step, joint in enumerate(joint_path):
-    if step % (1/resolution) == 0 or step == len(joint_path)-1:
-        transformations = robot.forward_kin(joint)
-        joint_trajectory.append(transformations)
-        eef_poses.append(transformations[robot.eef_name].pos)
+print(len(interpolated_path))
+for step, joint in enumerate(interpolated_path):
+    transformations = robot.forward_kin(joint)
+    joint_trajectory.append(transformations)
+    eef_poses.append(transformations[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,

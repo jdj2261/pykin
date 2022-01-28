@@ -129,7 +129,7 @@ class GraspManager(ActivityBase):
             if self._check_ik_solution(grasp_pose, goal_eef_pose) and self.collision_free(grasp_transforms):
                 pre_grasp_pose = self.get_pre_grasp_pose(grasp_pose)
                 pre_transforms, pre_goal_pose = self._get_goal_pose(pre_grasp_pose)
-
+        
                 if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self.collision_free(pre_transforms):
                     self.pre_grasp_pose = pre_grasp_pose
                     
@@ -336,7 +336,6 @@ class GraspManager(ActivityBase):
             if self.has_obj:
                 self.robot_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
-            
             if self._check_ik_solution(release_pose, goal_pose) and self.collision_free(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
                 pre_release_transforms, pre_release_goal_pose = self._get_goal_pose(pre_release_pose)

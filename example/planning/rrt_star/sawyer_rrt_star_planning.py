@@ -77,7 +77,7 @@ if joint_path is None :
 
 joint_trajectory = []
 eef_poses = []
-for step, joint in enumerate(joint_path):
+for step, joint in enumerate(interpolated_path):
     transformations = robot.forward_kin(np.concatenate((np.zeros(1),joint)))
     joint_trajectory.append(transformations)
     eef_poses.append(transformations[robot.eef_name].pos)

@@ -60,13 +60,13 @@ class CartesianPlanner(Planner):
         self, 
         cur_q,
         goal_pose,
+        resolution=1, 
         robot_col_manager=None,
         object_col_manager=None,
         is_attached=False, 
         current_obj_info=None,
         result_obj_info=None,
         T_between_gripper_and_obj=None,
-        resolution=1, 
     ):
         logger.info(f"Start to compute Cartesian Planning")
 
@@ -74,36 +74,20 @@ class CartesianPlanner(Planner):
         self._goal_pose = super()._change_types(goal_pose)
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
+        self._resolution = resolution
 
-        if not super()._is_robot_col_mngr(robot_col_manager):
+        if not super()._check_robot_col_mngr(robot_col_manager):
             logger.warning(f"This Planner does not do collision checking")
             
-        self.robot_col_mngr = robot_col_manager
-        self.object_col_mngr = object_col_manager
-        self.is_attached = is_attached
-
-        if current_obj_info is not None and result_obj_info is not None:
-            self.obj_info = current_obj_info
-            self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.result_object_transform = result_obj_info["transform"]
-
-            if self.is_attached:
-                super()._attach_robot2object()
-                self.object_col_mngr.remove_object(self.obj_info["name"])
-            else:
-                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
-
-            print(f"*"*20 + f" Robot Collision Info "+ f"*"*20)
-            for name, info in self.robot_col_mngr.get_collision_info().items():
-                print(name, info[:3, 3])
-            print(f"*"*63 + "\n")
-
-            print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
-            for name, info in self.object_col_mngr.get_collision_info().items():
-                print(name, info[:3, 3])
-            print(f"*"*63 + "\n")
-
-        self._resolution = resolution
+        super()._setup_collision_manager(
+            robot_col_manager,
+            object_col_manager,
+            is_attached,
+            current_obj_info,
+            result_obj_info,
+            T_between_gripper_and_obj
+        )
+        
         waypoints = self.generate_waypoints()
         paths, target_positions = self._compute_path_and_target_pose(waypoints)
         
@@ -132,12 +116,10 @@ class CartesianPlanner(Planner):
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
 
-                is_collision_free, name = self._collision_free(self._cur_qpos, self.is_attached, visible_name=True)
+                is_collision_free, col_name = self._collision_free(self._cur_qpos, self.is_attached, visible_name=True)
                 
                 if not is_collision_free:
-                    print(name)
-                    # _, col_name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=True) 
-                    # collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
+                    collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
                     continue
 
                 if not self._check_q_in_limits(self._cur_qpos):
@@ -152,40 +134,24 @@ class CartesianPlanner(Planner):
 
             err = t_utils.compute_pose_error(self._goal_pose[:3], cur_fk[self.eef_name].pos)
             
-            # if collision_pose.keys():
-            #     logger.error(f"Failed Generate Path.. Collision may occur.")
-                
-            #     for col_name, _ in collision_pose.values():
-            #         logger.warning(f"\n\tCollision Names : {col_name}")
-                    
-            #     print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
-            #     for name, info in self.object_col_mngr.get_collision_info().items():
-            #         print(name, info[:3, 3])
-            #     print(f"*"*63 + "\n")
-            #     self._recovery_object_collision()
-
-            #     raise CollisionError("Conflict confirmed. Check the object position!")
-                
-            if err < self._pos_sensitivity:
-                if self.is_attached:
-                    super()._detach_robot2object()
-                    super()._recovery_object_collision(self.result_object_transform)
-                    
-                logger.info(f"Generate Path Successfully!! Error is {err:6f}")
+            if collision_pose.keys():
+                logger.error(f"Failed Generate Path.. Collision may occur.")
+                for col_name, _ in collision_pose.values():
+                    logger.warning(f"\n\tCollision Names : {col_name}")
+                paths, target_positions = None, None
                 break
 
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
                 paths, target_positions = None, None
-                
-                if self.is_attached:
-                    super()._detach_robot2object()
-                    super()._recovery_object_collision(self.obj_info["transform"])
                 break
             
+            if err < self._pos_sensitivity:
+                logger.info(f"Generate Path Successfully!! Error is {err:6f}")
+                break
+
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
-            
         return paths, target_positions
 
     # TODO

@@ -62,14 +62,14 @@ class RRTStarPlanner(Planner):
         self, 
         cur_q,
         goal_pose, 
+        max_iter=1000, 
+        resolution=1, 
         robot_col_manager=None,
         object_col_manager=None,
         is_attached=False, 
         current_obj_info=None,
         result_obj_info=None,
         T_between_gripper_and_obj=None,
-        max_iter=1000, 
-        resolution=1, 
     ):
         """
         Get path in joint space
@@ -84,32 +84,17 @@ class RRTStarPlanner(Planner):
         
         self._max_iter = max_iter
 
-        if not super()._is_robot_col_mngr(robot_col_manager):
+        if not super()._check_robot_col_mngr(robot_col_manager):
             logger.warning(f"This Planner does not do collision checking")
-            
-        self.robot_col_mngr = robot_col_manager
-        self.object_col_mngr = object_col_manager
-
-        if current_obj_info is not None and result_obj_info is not None:
-            self.obj_info = current_obj_info
-            self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.result_object_transform = result_obj_info["transform"]
-
-            if is_attached:
-                super()._attach_robot2object()
-                self.object_col_mngr.remove_object(self.obj_info["name"])
-            else:
-                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
-            
-            print(f"*"*20 + f" Robot Collision Info "+ f"*"*20)
-            for name, info in self.robot_col_mngr.get_collision_info().items():
-                print(name, info[:3, 3])
-            print(f"*"*63 + "\n")
-
-            print(f"*"*20 + f" Object Collision Info "+ f"*"*20)
-            for name, info in self.object_col_mngr.get_collision_info().items():
-                print(name, info[:3, 3])
-            print(f"*"*63 + "\n")
+        
+        super()._setup_collision_manager(
+            robot_col_manager,
+            object_col_manager,
+            is_attached,
+            current_obj_info,
+            result_obj_info,
+            T_between_gripper_and_obj
+        )
 
         cnt = 0
         total_cnt = 10
@@ -159,10 +144,6 @@ class RRTStarPlanner(Planner):
                         q_paths = self.find_path(self.T)
 
             if q_paths is not None:
-                if is_attached:
-                    super()._detach_robot2object()
-                    super()._recovery_object_collision(self.result_object_transform)
-
                 logger.info(f"Generate Path Successfully!!")  
                 break 
 

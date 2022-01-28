@@ -38,20 +38,7 @@ robot.setup_link_name("iiwa14_link_0", "iiwa14_right_hand")
 
 ##################################################################
 init_fk = robot.forward_kin(init_qpos)
-
-# target_joints = [0.0, 1.2, 0.0, -1.89, 0.0, 0.6, 0.0]
-# robot.offset.pos = [1, 0, 0]
-# goal_transformations = robot.forward_kin(target_joints)
-
-# scene = trimesh.Scene()
-# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=init_fk)
-# scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=goal_transformations)
-# scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
-
-# scene.show()
-
 init_eef_pose = robot.get_eef_pose(init_fk)
-# goal_eef_pose = robot.get_eef_pose(goal_transformations)
 goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
