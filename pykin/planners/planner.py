@@ -46,11 +46,14 @@ class Planner(metaclass=ABCMeta):
         self.robot_col_mngr.remove_object(
             self.obj_info["name"]
         )
+        self.reattach_object(self.result_object_pose)
+
+    def reattach_object(self, T):
         self.object_col_mngr.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
             gparam=self.obj_info["gparam"], 
-            transform=self.result_object_pose)
+            transform=T)
 
     @abstractclassmethod
     def get_path_in_joinst_space(self):
