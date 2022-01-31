@@ -12,8 +12,6 @@ from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.collision_utils import apply_robot_to_collision_manager, apply_robot_to_scene
-
 
 help_str = "python iiwa7_cartesian_planning.py"\
             " --timesteps 500 --damping 0.03 --resolution 0.2 --pos-sensitivity 0.03"

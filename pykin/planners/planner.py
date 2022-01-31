@@ -11,9 +11,7 @@ class Planner(metaclass=ABCMeta):
     Base Planner class 
 
     Args:
-        robot (SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
-        robot_col_manager: CollisionManager for robot's self collision check
-        object_collision_manager: CollisionManager for collision check between robot and object
+        robot (SingleArm or Bimanual): manipulator type
         dimension(int): robot arm's dof
     """
     def __init__(
@@ -35,6 +33,9 @@ class Planner(metaclass=ABCMeta):
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
 
     def attach_object_on_robot(self):
+        """
+        Attach object collision on robot collision
+        """
         self.robot_col_mngr.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
@@ -43,12 +44,18 @@ class Planner(metaclass=ABCMeta):
         self.object_col_mngr.remove_object(self.obj_info["name"])
 
     def detach_object_from_robot(self):
+        """
+        Detach object collision from robot collision
+        """
         self.robot_col_mngr.remove_object(
             self.obj_info["name"]
         )
         self.reattach_object(self.result_object_pose)
 
     def reattach_object(self, T):
+        """
+        Reattach object collision
+        """
         self.object_col_mngr.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
@@ -64,6 +71,13 @@ class Planner(metaclass=ABCMeta):
 
     @abstractclassmethod
     def _get_linear_path(self, init_pose, goal_pose):
+        """
+        Base Planner class 
+
+        Args:
+            robot (SingleArm or Bimanual): manipulator type
+            dimension(int): robot arm's dof
+        """
         raise NotImplementedError
 
     def _setup_collision_manager(
@@ -166,11 +180,11 @@ class Planner(metaclass=ABCMeta):
             if link in self.robot_col_mngr._objs:
                 transform = transformations.h_mat
                 if self.robot_col_mngr.geom == "visual":
-                    A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                    h_mat = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
                 else:
-                    A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                # print(link, A2B)
-                self.robot_col_mngr.set_transform(name=link, transform=A2B)
+                    h_mat = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                # print(link, h_mat)
+                self.robot_col_mngr.set_transform(name=link, h_mat=h_mat)
         
         is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
         

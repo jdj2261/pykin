@@ -35,10 +35,10 @@ for link, transform in goal_fk.items():
     if link in c_manager._objs:
         transform = transform.h_mat
         if c_manager.geom == "visual":
-            A2B = np.dot(transform, robot.links[link].visual.offset.h_mat)
+            h_mat = np.dot(transform, robot.links[link].visual.offset.h_mat)
         else:
-            A2B = np.dot(transform, robot.links[link].collision.offset.h_mat)
-        c_manager.set_transform(name=link, transform=A2B)
+            h_mat = np.dot(transform, robot.links[link].collision.offset.h_mat)
+        c_manager.set_transform(name=link, transform=h_mat)
 
 result, name = c_manager.in_collision_internal(return_names=True, return_data=False)
 print(result, name)
@@ -54,7 +54,7 @@ scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
 scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 
-scene.add_geometry(test_mesh, node_name="milk1", transform=Transform(pos=[0.1, 0, 0.4]).h_mat)
-scene.add_geometry(test_mesh, node_name="milk2", transform=Transform(pos=[0.4, 0, 0.4]).h_mat)
+scene.add_geometry(test_mesh, node_name="milk1", h_mat=Transform(pos=[0.1, 0, 0.4]).h_mat)
+scene.add_geometry(test_mesh, node_name="milk2", h_mat=Transform(pos=[0.4, 0, 0.4]).h_mat)
 
 scene.show()

@@ -115,7 +115,7 @@ class Bimanual(Robot):
         self._revolute_joint_names[arm] = super().get_revolute_joint_names(self._frames[arm])
         self._target_pose[arm] = np.zeros(len(self._revolute_joint_names[arm]))
 
-    def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
+    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=1000):
         """
         Returns joint angles obtained by computing IK
         
@@ -123,7 +123,7 @@ class Bimanual(Robot):
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
-            maxIter (int): Maximum number of calculation iterations
+            max_iter (int): Maximum number of calculation iterations
 
         Returns:
             joints (np.array): target joint angles
@@ -144,7 +144,7 @@ class Bimanual(Robot):
                     current_joints,
                     self._target_pose[arm],
                     method,
-                    maxIter)
+                    max_iter)
         return joints
 
     def _convert_target_pose_type_to_npy(self, value):

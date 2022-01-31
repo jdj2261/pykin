@@ -34,7 +34,7 @@ class ObjectManager():
         name=None, 
         gtype=None, 
         gparam=None, 
-        transform=np.eye(4),
+        h_mat=np.eye(4),
         for_grasp=False,
         for_support=False):
         """
@@ -44,18 +44,18 @@ class ObjectManager():
             name (str): An identifier for the object
             gtype (str): object type (cylinder, sphere, box)
             gparam (float or tuple): object parameter (radius, length, size)
-            transform (np.array): Homogeneous transform matrix for the object
+            h_mat (np.array): Homogeneous transform matrix for the object
         """
         obs_name = self._convert_name(name)
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)
-        self._objects[obs_name] = (gtype, gparam, transform)
+        self._objects[obs_name] = (gtype, gparam, h_mat)
 
         if for_grasp:
-            self.grasp_objects[obs_name] = (gtype, gparam, transform)
+            self.grasp_objects[obs_name] = (gtype, gparam, h_mat)
         
         if for_support:
-            self.support_objects[obs_name] = (gtype, gparam, transform)
+            self.support_objects[obs_name] = (gtype, gparam, h_mat)
 
     def remove_object(self, name):
         name = self._convert_name(name)

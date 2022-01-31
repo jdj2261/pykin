@@ -226,13 +226,13 @@ $ git submodule update
       init_thetas, 
       target_pose, 
       method="LM", 
-      maxIter=100)
+      max_iter=100)
   
   ik_NR_result = robot.inverse_kin(
       init_thetas, 
       target_pose, 
       method="NR", 
-      maxIter=100)
+      max_iter=100)
   
   print(ik_LM_result, ik_NR_result)
   ~~~

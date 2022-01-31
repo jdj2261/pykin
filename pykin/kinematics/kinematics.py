@@ -38,16 +38,23 @@ class Kinematics:
             thetas (sequence of float): input joint angles
 
         Returns:
-            transformations (OrderedDict): transformations
+            fk (OrderedDict): transformations
         """
 
         if not isinstance(frames, (list, dict)) :
             thetas = convert_thetas_to_dict(self.active_joint_names, thetas)
-        transformations = self._compute_FK(frames, self.offset, thetas)
-        return transformations
+        fk = self._compute_FK(frames, self.offset, thetas)
+        return fk
     
     @logging_time
-    def inverse_kinematics(self, frames, current_joints, target_pose, method="LM", maxIter=1000):
+    def inverse_kinematics(
+        self, 
+        frames, 
+        current_joints, 
+        target_pose, 
+        method="LM", 
+        max_iter=1000
+    ):
         """
         Returns joint angles obtained by computing IK
         
@@ -56,7 +63,7 @@ class Kinematics:
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
-            maxIter (int): Maximum number of calculation iterations
+            max_iter (int): Maximum number of calculation iterations
 
         Returns:
             joints (np.array): target joint angles
@@ -66,14 +73,14 @@ class Kinematics:
                 frames,
                 current_joints, 
                 target_pose, 
-                maxIter=maxIter
+                max_iter=max_iter
             )
         if method == "LM":
             joints = self._compute_IK_LM(
                 frames,
                 current_joints, 
                 target_pose, 
-                maxIter=maxIter
+                max_iter=max_iter
             )
         return joints
 
@@ -87,21 +94,21 @@ class Kinematics:
             thetas (sequence of float): input joint angles
 
         Returns:
-            transformations (OrderedDict): transformations
+            fk (OrderedDict): transformations
         """
-        transformations = OrderedDict()
+        fk = OrderedDict()
         if not isinstance(frames, list):
             trans = offset * frames.get_transform(thetas.get(frames.joint.name, 0.0))
-            transformations[frames.link.name] = trans * frames.link.offset
+            fk[frames.link.name] = trans * frames.link.offset
             for child in frames.children:
-                transformations.update(self._compute_FK(child, trans, thetas))
+                fk.update(self._compute_FK(child, trans, thetas))
         else:
             # To compute IK
             cnt = 0
             trans = offset
             for frame in frames:
                 trans = trans * frame.get_transform(thetas[cnt])
-                transformations[frame.link.name] = trans * frame.link.offset
+                fk[frame.link.name] = trans * frame.link.offset
                 
                 if frame.joint.dtype != "fixed":
                     cnt += 1
@@ -110,11 +117,17 @@ class Kinematics:
                     cnt -= 1     
                 
                 if self.robot_name == "baxter":
-                    Baxter.add_visual_link(transformations, frame)
+                    Baxter.add_visual_link(fk, frame)
 
-        return transformations
+        return fk
 
-    def _compute_IK_NR(self, frames, current_joints, target_pose, maxIter):
+    def _compute_IK_NR(
+        self, 
+        frames, 
+        current_joints, 
+        target_pose, 
+        max_iter
+    ):
         """
         Computes inverse kinematics using Newton Raphson method
 
@@ -122,7 +135,7 @@ class Kinematics:
             frames (list or Frame()): robot's frame for inverse kinematics
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
-            maxIter (int): Maximum number of calculation iterations
+            max_iter (int): Maximum number of calculation iterations
 
         Returns:
             joints (np.array): target joint angles
@@ -143,7 +156,7 @@ class Kinematics:
         while err > EPS:
 
             iterator += 1
-            if iterator > maxIter:
+            if iterator > max_iter:
                 break
             
             J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
@@ -159,7 +172,13 @@ class Kinematics:
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
 
-    def _compute_IK_LM(self, frames, current_joints, target, maxIter):
+    def _compute_IK_LM(
+        self, 
+        frames, 
+        current_joints, 
+        target_pose, 
+        max_iter
+    ):
         """
         Computes inverse kinematics using Levenberg-Marquatdt method
 
@@ -167,7 +186,7 @@ class Kinematics:
             frames (list or Frame()): robot's frame for inverse kinematics
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
-            maxIter (int): Maximum number of calculation iterations
+            max_iter (int): Maximum number of calculation iterations
 
         Returns:
             joints (np.array): target joint angles
@@ -180,7 +199,7 @@ class Kinematics:
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
         Wn = np.eye(dof)
 
-        target_pose = tf.get_h_mat(target[:3], target[3:])
+        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].h_mat
@@ -190,7 +209,7 @@ class Kinematics:
 
         while Ek > EPS:
             iterator += 1
-            if iterator > maxIter:
+            if iterator > max_iter:
                 break
             
             lamb = Ek + 0.002

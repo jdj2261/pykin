@@ -99,7 +99,7 @@ class SingleArm(Robot):
         self.desired_frames = super().generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
         self._revolute_joint_names = sorted(self.get_revolute_joint_names(self.desired_frames))
 
-    def inverse_kin(self, current_joints, target_pose, method="LM", maxIter=1000):
+    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=1000):
         """
         Returns joint angles obtained by computing IK
         
@@ -107,7 +107,7 @@ class SingleArm(Robot):
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
             method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
-            maxIter (int): Maximum number of calculation iterations
+            max_iter (int): Maximum number of calculation iterations
 
         Returns:
             joints (np.array): target joint angles
@@ -117,7 +117,7 @@ class SingleArm(Robot):
             current_joints,
             target_pose,
             method,
-            maxIter)
+            max_iter)
         return joints
 
     def get_eef_pose(self, transformations=None):

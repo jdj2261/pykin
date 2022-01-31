@@ -44,8 +44,8 @@ for i in range(6):
     name = "milk_" + str(i)
     obs_pos = [0.5, -0.2+i*0.1, 0.3]
 
-    obj_c_manager.add_object(name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-    objs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
+    obj_c_manager.add_object(name, gtype="mesh", gparam=milk_mesh, h_mat=Transform(pos=obs_pos).h_mat)
+    objs(name=name, gtype="mesh", gparam=milk_mesh, h_mat=Transform(pos=obs_pos).h_mat)
 ##################################################################
 
 # objs.remove_object("milk_1")

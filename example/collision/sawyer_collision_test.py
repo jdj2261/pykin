@@ -41,8 +41,8 @@ scene.add_geometry(test_mesh, node_name="milk1", transform=Transform(pos=[0.0, 0
 scene.add_geometry(test_mesh, node_name="milk2", transform=Transform(pos=[0.1, 0, 0.1]).h_mat)
 
 o_manager = CollisionManager(milk_path)
-o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.0, 0, 0.1]).h_mat)
-o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.1, 0, 0.1]).h_mat)
+o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.0, 0, 0.1]).h_mat)
+o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.1, 0, 0.1]).h_mat)
 test, name, data = o_manager.in_collision_internal(return_names=True, return_data=True)
 
 result = o_manager.get_distances_other(c_manager)

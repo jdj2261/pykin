@@ -110,7 +110,7 @@
         <span class="k">return</span> <span class="n">transformations</span></div>
     
     <span class="nd">@logging_time</span>
-    <span class="k">def</span> <span class="nf">inverse_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">inverse_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns joint angles obtained by computing IK</span>
 <span class="sd">        </span>
@@ -119,7 +119,7 @@
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
 <span class="sd">            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</span>
-<span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
+<span class="sd">            max_iter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            joints (np.array): target joint angles</span>
@@ -129,14 +129,14 @@
                 <span class="n">frames</span><span class="p">,</span>
                 <span class="n">current_joints</span><span class="p">,</span> 
                 <span class="n">target_pose</span><span class="p">,</span> 
-                <span class="n">maxIter</span><span class="o">=</span><span class="n">maxIter</span>
+                <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;LM&quot;</span><span class="p">:</span>
             <span class="n">joints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_IK_LM</span><span class="p">(</span>
                 <span class="n">frames</span><span class="p">,</span>
                 <span class="n">current_joints</span><span class="p">,</span> 
                 <span class="n">target_pose</span><span class="p">,</span> 
-                <span class="n">maxIter</span><span class="o">=</span><span class="n">maxIter</span>
+                <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">joints</span>
 
@@ -174,7 +174,7 @@
 
         <span class="k">return</span> <span class="n">transformations</span>
 
-    <span class="k">def</span> <span class="nf">_compute_IK_NR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_IK_NR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes inverse kinematics using newton raphson method</span>
 
@@ -182,7 +182,7 @@
 <span class="sd">            frames (list or Frame()): robot&#39;s frame for inverse kinematics</span>
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
-<span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
+<span class="sd">            max_iter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            joints (np.array): target joint angles</span>
@@ -212,7 +212,7 @@
         <span class="k">while</span> <span class="n">err</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
 
             <span class="n">iterator</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">maxIter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">max_iter</span><span class="p">:</span>
                 <span class="k">break</span>
             
             <span class="n">J</span> <span class="o">=</span> <span class="n">jac</span><span class="o">.</span><span class="n">calc_jacobian</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">cur_fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_joints</span><span class="p">))</span>
@@ -230,7 +230,7 @@
         <span class="n">current_joints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">current_joint</span><span class="p">)</span> <span class="k">for</span> <span class="n">current_joint</span> <span class="ow">in</span> <span class="n">current_joints</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">current_joints</span>
 
-    <span class="k">def</span> <span class="nf">_compute_IK_LM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">maxIter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_compute_IK_LM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes inverse kinematics using Levenberg-Marquatdt method</span>
 
@@ -238,7 +238,7 @@
 <span class="sd">            frames (list or Frame()): robot&#39;s frame for inverse kinematics</span>
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
-<span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
+<span class="sd">            max_iter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            joints (np.array): target joint angles</span>
@@ -270,7 +270,7 @@
 
         <span class="k">while</span> <span class="n">Ek</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
             <span class="n">iterator</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">maxIter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">iterator</span> <span class="o">&gt;</span> <span class="n">max_iter</span><span class="p">:</span>
                 <span class="k">break</span>
             
             <span class="n">lamb</span> <span class="o">=</span> <span class="n">Ek</span> <span class="o">+</span> <span class="mf">0.002</span>

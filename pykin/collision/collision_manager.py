@@ -4,23 +4,32 @@ import itertools
 import copy
 
 try:
+    # pip install python-fcl
+    # pip install trimesh[easy]
     import fcl
     import trimesh
 except BaseException:
     fcl = None
     trimesh = None
 
+from pykin.collision.contact_data import ContactData
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
-from pykin.collision.contact_data import ContactData
+
 logger = create_logger('Collision Manager', "debug")
 
 class CollisionManager:
     """
     A rigid body collision manager.
+
+    Args:
+        mesh_path (str): absolute path of mesh
     """
 
     def __init__(self, mesh_path=None):
+        if fcl is None:
+            raise ValueError('No FCL Available! Please install the python-fcl library')
+        
         self.mesh_path = mesh_path
         self._objs = {}
         self._names = collections.defaultdict(lambda: None)
@@ -33,22 +42,47 @@ class CollisionManager:
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
 
     def setup_robot_collision(self, robot, fk=None, geom="visual"):
+        """
+        Setup robots' collision
+
+        Args:
+            robot (SingleArm or Bimanual): pykin robot
+            fk (OrderedDict): result(transformations) of computing robots' forward kinematics
+            geom (str): robot's geometry type name ("visual" or "collision")
+        """
         if fk is None:
             fk = robot.init_transformations
         self.geom = geom
         self._filter_contact_names(robot, fk, geom)
 
     def setup_object_collision(self, objects):
+        """
+        Setup object' collision
+
+        Args:
+            objects (defaultdict): pykin objects
+        """
+        print(type(objects))
         for name, info in objects:
             self.add_object(name, info[0], info[1], info[2])
 
-    def _filter_contact_names(self, robot, fk, geom):            
+    def _filter_contact_names(self, robot, fk, geom):      
+        """
+        Filter contact names in the beginning
+
+        Args:
+            robot (SingleArm or Binmanul): pykin robot
+            fk (OrderedDict): result(transformations) of computing robots' forward kinematics
+            geom (str): robot's geometry type name ("visual" or "collision")
+        """
         for link, transformation in fk.items():
             if geom == "visual":
                 robot_gtype = robot.links[link].visual.gtype
-                A2B = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                h_mat = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                
                 if robot_gtype is None:
                     continue
+
                 if robot_gtype == "mesh":
                     mesh_name = self.mesh_path + robot.links[link].visual.gparam.get('filename')
                     gparam = trimesh.load_mesh(mesh_name)
@@ -64,9 +98,11 @@ class CollisionManager:
                     gparam = size
             else:
                 robot_gtype = robot.links[link].collision.gtype
+                h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+
                 if robot_gtype is None:
                     continue
-                A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+                
                 if robot_gtype == "mesh":
                     mesh_name = self.mesh_path + robot.links[link].collision.gparam.get('filename')
                     gparam = trimesh.load_mesh(mesh_name)
@@ -80,10 +116,8 @@ class CollisionManager:
                 elif robot_gtype == 'box':
                     size = robot.links[link].collision.gparam.get('size')
                     gparam = size
-            self.add_object(robot.links[link].name, robot_gtype, gparam, A2B)
-            
-            if robot_gtype is None:
-                continue
+
+            self.add_object(robot.links[link].name, robot_gtype, gparam, h_mat)
 
         _, names = self.in_collision_internal(return_names=True)
         self._filter_names = copy.deepcopy(names)
@@ -92,7 +126,7 @@ class CollisionManager:
                    name, 
                    gtype=None,
                    gparam=None,
-                   transform=None):
+                   h_mat=None):
         """
         Add an object to the collision manager.
         If an object with the given name is already in the manager, replace it.
@@ -101,17 +135,17 @@ class CollisionManager:
             name (str): An identifier for the object
             gtype (str): object type (cylinder, sphere, box)
             gparam (float or tuple): object parameter (radius, length, size)
-            transform (np.array): Homogeneous transform matrix for the object
+            h_mat (np.array): Homogeneous transform matrix for the object
         """
         if gtype is None:
             return
 
-        if transform is None:
-            transform = np.eye(4)
-        transform = np.asanyarray(transform, dtype=np.float32)
-        if transform.shape != (4, 4):
-            if transform.shape == (3,):
-                transform = get_h_mat(position=transform)
+        if h_mat is None:
+            h_mat = np.eye(4)
+        h_mat = np.asanyarray(h_mat, dtype=np.float32)
+        if h_mat.shape != (4, 4):
+            if h_mat.shape == (3,):
+                h_mat = get_h_mat(position=h_mat)
             else:
                 raise ValueError('transform must be (4,4)!')
 
@@ -120,7 +154,7 @@ class CollisionManager:
         else:
             geom = self._get_geom(gtype, gparam)
         
-        t = fcl.Transform(transform[:3, :3], transform[:3, 3])
+        t = fcl.Transform(h_mat[:3, :3], h_mat[:3, 3])
         o = fcl.CollisionObject(geom, t)
 
         # Add collision object to set
@@ -134,22 +168,22 @@ class CollisionManager:
         self._manager.registerObject(o)
         self._manager.update()
 
-    def set_transform(self, name=None, transform=np.eye(4)):
+    def set_transform(self, name=None, h_mat=np.eye(4)):
         """
         Set the transform for one of the manager's objects.
         This replaces the prior transform.
         
         Args:
             name (str): An identifier for the object already in the manager
-            transform (np.array): A new homogeneous transform matrix for the object
+            h_mat (np.array): A new homogeneous transform matrix for the object
         """
         if name is None:
             return
             
         if name in self._objs:
             o = self._objs[name]['obj']
-            o.setRotation(transform[:3, :3])
-            o.setTranslation(transform[:3, 3])
+            o.setRotation(h_mat[:3, :3])
+            o.setTranslation(h_mat[:3, 3])
             self._manager.update(o)
         else:
             raise ValueError('{} not in collision manager!'.format(name))
@@ -181,6 +215,21 @@ class CollisionManager:
         self._manager.setup()
 
     def in_collision_internal(self, return_names=False, return_data=False):
+        """
+        Check if any pair of objects in the manager collide with one another.
+
+        Args:
+            return_names (bool): If true, a set is returned containing the names 
+                                 of all pairs of objects in collision.
+            return_data (bool): If true, a list of ContactData is returned as well
+        
+        Returns:
+            is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
+            names (set of 2-tup): The set of pairwise collisions. Each tuple
+                                  contains two names in alphabetical order indicating
+                                  that the two corresponding objects are in collision.
+            contacts (list of ContactData): All contacts detected
+        """
         cdata = fcl.CollisionData()
         if return_names or return_data:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
@@ -217,6 +266,25 @@ class CollisionManager:
             return result
 
     def in_collision_other(self, other_manager=None, return_names=False, return_data=False): 
+        """
+        Check if any object from this manager collides with any object
+        from another manager.
+
+        Args:
+            other_manager (CollisionManager): Another collision manager object
+            return_names (bool): If true, a set is returned containing the names 
+                                 of all pairs of objects in collision.
+            return_data (bool): If true, a list of ContactData is returned as well
+        
+        Returns:
+            is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
+            names (set of 2-tup): The set of pairwise collisions. Each tuple
+                                  contains two names (first from this manager,
+                                  second from the other_manager) indicating
+                                  that the two corresponding objects are in collision.
+            contacts (list of ContactData): All contacts detected
+        """
+        
         if other_manager is None:
             if return_names:
                 return None, None
@@ -280,6 +348,16 @@ class CollisionManager:
         return result
 
     def get_distances_other(self, other_manager):
+        """
+        Get the minimum distance between any pair of objects, one in each manager.
+        
+        Args:
+            other_manager (CollisionManager): Another collision manager object
+
+        Returns:
+            distance (float): The min distance between a pair of objects, one from each manager.
+        """
+        
         def _mix_objects():
             for o1 in self._objs:
                 for o2 in other_manager._objs:
@@ -296,6 +374,12 @@ class CollisionManager:
         return result
 
     def get_collision_info(self):
+        """
+        Get CollisionManager info (name, transform)
+
+        Returns:
+            col_info (dictionary): Collision Info
+        """
         col_info = {}
         for name, info in self._objs.items():
             T = get_h_mat(position=info["obj"].getTranslation(), orientation=info["obj"].getRotation())
@@ -303,6 +387,12 @@ class CollisionManager:
         return col_info
 
     def show_collision_info(self, name="Robot"):
+        """
+        Show CollisionManager info (name, transform)
+
+        Args:
+            name (str)
+        """
         print(f"*"*20 + f" {name} Collision Info "+ f"*"*20)
         for name, info in self.get_collision_info().items():
             print(name, info[:3, 3])
@@ -312,15 +402,11 @@ class CollisionManager:
         """
         Get a BVH for a mesh.
 
-        Parameters
-        -------------
-        mesh : Trimesh
-          Mesh to create BVH for
+        Args:
+            mesh (Trimesh): Mesh to create BVH for
 
-        Returns
-        --------------
-        bvh : fcl.BVHModel
-          BVH object of source mesh
+        Returns:
+            bvh (fcl.BVHModel): BVH object of source mesh
         """
         bvh = self.mesh_to_BVH(mesh)
         return bvh
@@ -330,15 +416,11 @@ class CollisionManager:
         """
         Create a BVHModel object from a Trimesh object
 
-        Parameters
-        -----------
-        mesh : Trimesh
-        Input geometry
+        Args:
+            mesh (Trimesh): Input geometry
 
-        Returns
-        ------------
-        bvh : fcl.BVHModel
-        BVH of input geometry
+        Returns:
+            bvh (fcl.BVHModel): BVH of input geometry
         """
         bvh = fcl.BVHModel()
         bvh.beginModel(num_tris_=len(mesh.faces),

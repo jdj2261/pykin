@@ -47,8 +47,8 @@ class ActivityBase:
                     mesh_name = self.robot.links[link].collision.gparam.get('filename')
                     file_name = self.mesh_path + mesh_name
                     mesh = trimesh.load_mesh(file_name)
-                    A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
-                    self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, transform=A2B)
+                    h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                    self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, h_mat=h_mat)
         return gripper
 
     def get_gripper(self):
@@ -72,21 +72,20 @@ class ActivityBase:
             if only_gripper:
                 if self.robot_c_manager.geom == "visual":
                     if self.robot.links[link].visual.gtype == "mesh":
-                        A2B = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
-                        self.gripper_c_manager.set_transform(link, A2B)
+                        h_mat = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+                        self.gripper_c_manager.set_transform(link, h_mat)
                 else:
                     if self.robot.links[link].collision.gtype == "mesh":
-                        A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                        self.gripper_c_manager.set_transform(link, A2B)
+                        h_mat = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                        self.gripper_c_manager.set_transform(link, h_mat)
             else:
                 if link in self.robot_c_manager._objs:
                     if self.robot_c_manager.geom == "visual":
-                        A2B = np.dot(transform.h_mat, self.robot.links[link].visual.offset.h_mat)
-                        self.robot_c_manager.set_transform(name=link, transform=A2B)
+                        h_mat = np.dot(transform.h_mat, self.robot.links[link].visual.offset.h_mat)
+                        self.robot_c_manager.set_transform(name=link, h_mat=h_mat)
                     else:
-                        A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
-                    # print(link, A2B)
-                        self.robot_c_manager.set_transform(name=link, transform=A2B)
+                        h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                        self.robot_c_manager.set_transform(name=link, h_mat=h_mat)
         
         if only_gripper:
             is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.object_c_manager)
@@ -129,16 +128,16 @@ class ActivityBase:
             if self.robot.links[link].collision.gtype == "mesh":
                 mesh_name = self.mesh_path + self.robot.links[link].collision.gparam.get('filename')
                 mesh = trimesh.load_mesh(mesh_name)
-                A2B = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+                h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
                 color = self.robot.links[link].collision.gparam.get('color')
                 color = np.array([color for color in color.values()]).flatten()
                 mesh.visual.face_colors = color
                 
                 if only_gripper:
                     if link in self.gripper_names:
-                        plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+                        plt.plot_mesh(ax=ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=color)
                 else:
-                    plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=color)
+                    plt.plot_mesh(ax=ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=color)
 
     def visualize_gripper(
         self,
@@ -154,7 +153,7 @@ class ActivityBase:
             if self.robot.links[link].collision.gtype == "mesh":
                 mesh_name = self.mesh_path + self.robot.links[link].collision.gparam.get('filename')
                 mesh = trimesh.load_mesh(mesh_name)
-                A2B = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
+                h_mat = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
 
                 mesh_color = color
                 if color is None:
@@ -162,7 +161,7 @@ class ActivityBase:
                     mesh_color = np.array([color for color in mesh_color.values()]).flatten()
                 if "finger" in link:
                     alpha = 1
-                plt.plot_mesh(ax=ax, mesh=mesh, A2B=A2B, alpha=alpha, color=mesh_color)
+                plt.plot_mesh(ax=ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
 
     def visualize_axis(
         self,

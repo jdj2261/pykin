@@ -6,9 +6,9 @@ from pykin.models.robot_model import RobotModel
 from pykin.geometry.frame import Joint, Link, Frame
 from pykin.geometry.geometry import Visual, Collision
 from pykin.kinematics.transform import Transform
-from pykin.utils.kin_utils import convert_transform, JOINT_TYPE_MAP
 from pykin.models.urdf_joint import URDF_Joint
 from pykin.models.urdf_link import URDF_Link
+from pykin.utils.kin_utils import convert_transform, JOINT_TYPE_MAP
 
 class URDFModel(RobotModel):
     """
@@ -202,8 +202,8 @@ class URDFModel(RobotModel):
                            visual=Visual(), 
                            collision=Collision()))
 
-        URDF_Link.set_visual(elem_link, link_frame)
-        URDF_Link.set_collision(elem_link, link_frame)
+        URDF_Link._set_visual(elem_link, link_frame)
+        URDF_Link._set_collision(elem_link, link_frame)
         
         return link_frame
 
@@ -233,9 +233,9 @@ class URDFModel(RobotModel):
         child_tag = elem_joint.find('child')
         joint_frame.joint.child = child_tag.attrib['link']
 
-        URDF_Joint.set_origin(elem_joint, joint_frame)
-        URDF_Joint.set_axis(elem_joint, joint_frame)
-        URDF_Joint.set_limit(elem_joint, joint_frame)
+        URDF_Joint._set_origin(elem_joint, joint_frame)
+        URDF_Joint._set_axis(elem_joint, joint_frame)
+        URDF_Joint._set_limit(elem_joint, joint_frame)
 
         return joint_frame
     
@@ -245,7 +245,7 @@ class URDFModel(RobotModel):
         Generates child frame recursive from current joint
 
         Args:
-            root (Link): 
+            root_link (Link): root link
             links (OrderedDict): element of joint parsed from urdf file
             joints (OrderedDict): element of joint parsed from urdf file
 
@@ -311,28 +311,28 @@ class URDFModel(RobotModel):
         """
         if not isinstance(frame, list):
             joint_names = []
-            joint_names =  self._get_all_revolute_joint_names_recursive(joint_names, frame)
+            joint_names =  self._get_all_revolute_joint_names_recursive(frame, joint_names)
         else:
             joint_names = self._get_desired_revolute_joint_names(frame)
 
         return joint_names
 
     @staticmethod
-    def _get_all_revolute_joint_names_recursive(joint_names, root_frame):
+    def _get_all_revolute_joint_names_recursive(root_frame, joint_names):
         """
         Return the name of all revolute joint
 
         Args:
-            joint_names (list): all actuated joint names
             root_frame (Frame): root frame
-
+            joint_names (list): all actuated joint names
+            
         Returns:
             list: Append joint if joint's dof is not zero
         """
         if root_frame.joint.dtype == 'revolute':
             joint_names.append(root_frame.joint.name)
         for child in root_frame.children:
-            URDFModel._get_all_revolute_joint_names_recursive(joint_names, child)
+            URDFModel._get_all_revolute_joint_names_recursive(child, joint_names)
         return joint_names
 
     @staticmethod
@@ -347,9 +347,9 @@ class URDFModel(RobotModel):
             list: Append joint if joint's dof is not zero
         """
         joint_names = []
-        for f in desired_frames:
-            if f.joint.dtype == 'revolute':
-                joint_names.append(f.joint.name)
+        for frame in desired_frames:
+            if frame.joint.dtype == 'revolute':
+                joint_names.append(frame.joint.name)
         return joint_names
 
     @property

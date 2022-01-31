@@ -247,15 +247,15 @@ def plot_objects(ax, objects):
         o_pose = value[2]
 
         if o_type == "mesh":
-            plot_mesh(ax, mesh=o_param, A2B=o_pose, alpha=0.3)
+            plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=0.3)
         if o_type == "sphere":
-            plot_sphere(ax, radius=o_param, p=o_pose, alpha=0.8, color='g')
+            plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=0.8, color='g')
         if o_type == "box":
-            A2B = tf.get_h_mat(o_pose)
-            plot_box(ax, size=o_param, A2B=A2B, alpha=0.8, color='b')
+            h_mat = tf.get_h_mat(o_pose)
+            plot_box(ax, size=o_param, h_mat=h_mat, alpha=0.8, color='b')
         if o_type == "cylinder":
-            A2B = tf.get_h_mat(o_pose)
-            plot_cylinder(ax, radius=o_param[0], length=o_param[1], A2B=A2B, n_steps=100, alpha=0.8, color='r')
+            h_mat = tf.get_h_mat(o_pose)
+            plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=0.8, color='r')
 
 def plot_collision(robot, transformations, ax, alpha=0.8):
     """
@@ -270,33 +270,39 @@ def plot_collision(robot, transformations, ax, alpha=0.8):
         return color
 
     for link, transformation in transformations.items():
-        A2B = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+        h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
         color = _get_color(robot.links[link].visual.gparam)
 
         if robot.links[link].collision.gtype == 'cylinder':
             length = float(robot.links[link].collision.gparam.get('length'))
             radius = float(robot.links[link].collision.gparam.get('radius'))
-            plot_cylinder(ax, length=length, radius=radius, A2B=A2B, alpha=alpha, color=color)
+            plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=color)
 
         if robot.links[link].collision.gtype == 'sphere':
             radius = float(robot.links[link].collision.gparam.get('radius'))
-            pos = A2B[:3,-1]
-            plot_sphere(ax, radius=radius, p=pos, n_steps=20, alpha=alpha, color=color)
+            pos = h_mat[:3,-1]
+            plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=color)
     
         if robot.links[link].collision.gtype == 'box':
             size = robot.links[link].collision.gparam.get('size')
-            plot_box(ax, size, A2B=A2B, alpha=alpha, color=color)
+            plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=color)
 
 
-def plot_cylinder(ax=None, length=1.0, radius=1.0,
-                  A2B=np.eye(4), n_steps=100,
-                  alpha=1.0, color="k"):
+def plot_cylinder(
+    ax=None, 
+    length=1.0, 
+    radius=1.0,
+    h_mat=np.eye(4), 
+    n_steps=100,
+    alpha=1.0, 
+    color="k"
+):
     """
     Plot cylinder
     """
     color = _check_color_type(color)
-    axis_start = A2B.dot(np.array([0, 0, -length/2, 1]))[:3]
-    axis_end =  A2B.dot(np.array([0, 0, length/2, 1]))[:3]
+    axis_start = h_mat.dot(np.array([0, 0, -length/2, 1]))[:3]
+    axis_end =  h_mat.dot(np.array([0, 0, length/2, 1]))[:3]
 
     axis = axis_end - axis_start
     axis /= length
@@ -320,20 +326,27 @@ def plot_cylinder(ax=None, length=1.0, radius=1.0,
     ax.plot_surface(X, Y, Z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_sphere(ax=None, radius=1.0, p=np.zeros(3), n_steps=20, alpha=1.0, color="k"):
+def plot_sphere(
+    ax=None, 
+    radius=1.0, 
+    center_point=np.zeros(3), 
+    n_steps=20, 
+    alpha=1.0, 
+    color="k"
+):
     """
     Plot sphere
     """
     color = _check_color_type(color)
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
-    x = p[0] + radius * np.sin(phi) * np.cos(theta)
-    y = p[1] + radius * np.sin(phi) * np.sin(theta)
-    z = p[2] + radius * np.cos(phi)
+    x = center_point[0] + radius * np.sin(phi) * np.cos(theta)
+    y = center_point[1] + radius * np.sin(phi) * np.sin(theta)
+    z = center_point[2] + radius * np.cos(phi)
 
     ax.plot_surface(x, y, z, color=color, alpha=alpha, linewidth=0)
 
 
-def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
+def plot_box(ax=None, size=np.ones(3), alpha=1.0, h_mat=np.eye(4), color="k"):
     """
     Plot box
     """
@@ -356,7 +369,7 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, A2B=np.eye(4), color="k"):
     PA = np.hstack(
         (corners, np.ones((len(corners), 1))))
 
-    corners = np.dot(PA, A2B.T)[:, :3]
+    corners = np.dot(PA, h_mat.T)[:, :3]
     p3c = Poly3DCollection(np.array([
         [corners[0], corners[1], corners[2]],
         [corners[1], corners[2], corners[3]],
@@ -396,12 +409,16 @@ def plot_path_planner(path, ax):
     ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
 
 
-def plot_mesh(ax=None, mesh=None, A2B=np.eye(4),
-              s=np.array([1.0, 1.0, 1.0]), ax_s=1, wireframe=False,
-              convex_hull=False, alpha=1.0, color="k"):
+def plot_mesh(
+    ax=None, 
+    mesh=None, 
+    h_mat=np.eye(4),
+    s=np.array([1.0, 1.0, 1.0]),
+    alpha=1.0, 
+    color="k"):
     vertices = mesh.vertices * s
     vertices = np.hstack((vertices, np.ones((len(vertices), 1))))
-    vertices = np.dot(vertices, A2B.T)[:, :3]
+    vertices = np.dot(vertices, h_mat.T)[:, :3]
     vectors = np.array([vertices[[i, j, k]] for i, j, k in mesh.faces])
 
     surface = Poly3DCollection(vectors)

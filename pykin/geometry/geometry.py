@@ -35,6 +35,12 @@ class Visual:
 
     @offset.setter
     def offset(self, offset):
+        """
+        Set visual's offset
+
+        Args:
+            offset (Transform)
+        """
         self._offset = Transform(offset.pos, offset.rot)
 
 
@@ -72,4 +78,10 @@ class Collision:
 
     @offset.setter
     def offset(self, offset):
+        """
+        Set collision's offset
+
+        Args:
+            offset (Transform)
+        """
         self._offset = Transform(offset.pos, offset.rot)

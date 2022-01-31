@@ -46,13 +46,13 @@ ik_LM_result = robot.inverse_kin(
     init_thetas, 
     target_pose, 
     method="LM", 
-    maxIter=100)
+    max_iter=100)
 
 ik_NR_result = robot.inverse_kin(
     init_thetas, 
     target_pose, 
     method="NR", 
-    maxIter=100)
+    max_iter=100)
 
 thetas_LM = np.concatenate((head_thetas, ik_LM_result["right"], ik_LM_result["left"]))
 result_fk_LM = robot.forward_kin(thetas_LM)

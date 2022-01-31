@@ -152,7 +152,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_desired_frame_recursive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_base_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eef_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_revolute_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frames</span><span class="p">))</span>
 
-<div class="viewcode-block" id="SingleArm.inverse_kin"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.single_arm.SingleArm.inverse_kin">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_kin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<div class="viewcode-block" id="SingleArm.inverse_kin"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.single_arm.SingleArm.inverse_kin">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_kin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_joints</span><span class="p">,</span> <span class="n">target_pose</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns joint angles obtained by computing IK</span>
 <span class="sd">        </span>
@@ -160,7 +160,7 @@
 <span class="sd">            current_joints (sequence of float): input joint angles</span>
 <span class="sd">            target_pose (np.array): goal pose to achieve</span>
 <span class="sd">            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</span>
-<span class="sd">            maxIter (int): Maximum number of calculation iterations</span>
+<span class="sd">            max_iter (int): Maximum number of calculation iterations</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            joints (np.array): target joint angles</span>
@@ -171,7 +171,7 @@
             <span class="n">current_joints</span><span class="p">,</span>
             <span class="n">target_pose</span><span class="p">,</span>
             <span class="n">method</span><span class="p">,</span>
-            <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">joints</span></div>
 
 <div class="viewcode-block" id="SingleArm.compute_eef_pose"><a class="viewcode-back" href="../../../pykin.robots.html#pykin.robots.single_arm.SingleArm.compute_eef_pose">[docs]</a>    <span class="k">def</span> <span class="nf">compute_eef_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformations</span><span class="p">):</span>

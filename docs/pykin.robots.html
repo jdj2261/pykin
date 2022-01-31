@@ -135,7 +135,7 @@ otherwise, return list type([“right] or [“left”])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pykin.robots.bimanual.Bimanual.inverse_kin">
-<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/bimanual.html#Bimanual.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.bimanual.Bimanual.inverse_kin" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/bimanual.html#Bimanual.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.bimanual.Bimanual.inverse_kin" title="Permalink to this definition"></a></dt>
 <dd><p>Returns joint angles obtained by computing IK</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -143,7 +143,7 @@ otherwise, return list type([“right] or [“left”])</p>
 <li><p><strong>current_joints</strong> (<em>sequence of float</em>) – input joint angles</p></li>
 <li><p><strong>target_pose</strong> (<em>np.array</em>) – goal pose to achieve</p></li>
 <li><p><strong>method</strong> (<em>str</em>) – two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</p></li>
-<li><p><strong>maxIter</strong> (<em>int</em>) – Maximum number of calculation iterations</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of calculation iterations</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -231,7 +231,7 @@ otherwise, return list type([“right] or [“left”])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pykin.robots.robot.Robot.inverse_kin">
-<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/robot.html#Robot.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.robot.Robot.inverse_kin" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/robot.html#Robot.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.robot.Robot.inverse_kin" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -308,7 +308,7 @@ otherwise, return list type([“right] or [“left”])</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pykin.robots.single_arm.SingleArm.inverse_kin">
-<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxIter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/single_arm.html#SingleArm.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.single_arm.SingleArm.inverse_kin" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">inverse_kin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_joints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/robots/single_arm.html#SingleArm.inverse_kin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.robots.single_arm.SingleArm.inverse_kin" title="Permalink to this definition"></a></dt>
 <dd><p>Returns joint angles obtained by computing IK</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -316,7 +316,7 @@ otherwise, return list type([“right] or [“left”])</p>
 <li><p><strong>current_joints</strong> (<em>sequence of float</em>) – input joint angles</p></li>
 <li><p><strong>target_pose</strong> (<em>np.array</em>) – goal pose to achieve</p></li>
 <li><p><strong>method</strong> (<em>str</em>) – two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)</p></li>
-<li><p><strong>maxIter</strong> (<em>int</em>) – Maximum number of calculation iterations</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of calculation iterations</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

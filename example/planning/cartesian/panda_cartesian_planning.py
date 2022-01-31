@@ -55,8 +55,8 @@ o_manager = CollisionManager(milk_path)
 name="milk1"
 obs_pos=[3.73820701e-01, -2.51826813e-01,  2.71833382e-01]
 
-obs(name=name, gtype="mesh", gparam=milk_mesh, transform=Transform(pos=obs_pos).h_mat)
-obs(name="milk2", gtype="mesh", gparam=milk_mesh, transform=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
+obs(name=name, gtype="mesh", gparam=milk_mesh, h_mat=Transform(pos=obs_pos).h_mat)
+obs(name="milk2", gtype="mesh", gparam=milk_mesh, h_mat=Transform(pos=[4.18720325e-01, -5.76662613e-02,  2.94687778e-01]).h_mat)
 # o_manager.setup_object_collision(obs)
 
 task_plan = CartesianPlanner(

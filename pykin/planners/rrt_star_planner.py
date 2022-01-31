@@ -15,7 +15,7 @@ class RRTStarPlanner(Planner):
     RRT star path planner
 
     Args:
-        robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
+        robot(SingleArm or Bimanual): manipulator type
         delta_distance(float): distance between nearest vertex and new vertex
         epsilon(float): 1-epsilon is probability of random sampling
         gamma_RRT_star(int): factor used for search radius

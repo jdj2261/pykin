@@ -111,7 +111,7 @@ class Robot(URDFModel):
         transformation = self.kin.forward_kinematics(self._frames, thetas)
         return transformation
 
-    def inverse_kin(self, current_joints, target_pose, method, maxIter):
+    def inverse_kin(self, current_joints, target_pose, method, max_iter):
         raise NotImplementedError
 
     def _set_joint_limits_upper_and_lower(self):

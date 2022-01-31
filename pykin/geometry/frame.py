@@ -110,6 +110,9 @@ class Joint:
 
     @num_dof.setter
     def num_dof(self, dof):
+        """
+        Number of dof
+        """
         self._num_dof = int(dof)
 
 

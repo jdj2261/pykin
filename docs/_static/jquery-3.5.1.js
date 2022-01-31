@@ -4737,7 +4737,7 @@ var isHiddenWithinTree = function( elem, el ) {
 
 function adjustCSS( elem, prop, valueParts, tween ) {
 	var adjusted, scale,
-		maxIterations = 20,
+		max_iterations = 20,
 		currentValue = tween ?
 			function() {
 				return tween.cur();
@@ -4765,13 +4765,13 @@ function adjustCSS( elem, prop, valueParts, tween ) {
 		// Iteratively approximate from a nonzero starting point
 		initialInUnit = +initial || 1;
 
-		while ( maxIterations-- ) {
+		while ( max_iterations-- ) {
 
 			// Evaluate and update our best guess (doubling guesses that zero out).
 			// Finish if the scale equals or crosses 1 (making the old*new product non-positive).
 			jQuery.style( elem, prop, initialInUnit + unit );
 			if ( ( 1 - scale ) * ( 1 - ( scale = currentValue() / initial || 0.5 ) ) <= 0 ) {
-				maxIterations = 0;
+				max_iterations = 0;
 			}
 			initialInUnit = initialInUnit / scale;
 

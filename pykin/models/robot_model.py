@@ -9,21 +9,33 @@ class RobotModel:
         self._links = OrderedDict()
         self._joints = OrderedDict()
 
-    def find_frame(self):
+    def find_frame(self, frame_name):
         """
-        Find robot's frame
+        Args:
+            frame_name (str): frame's name
+
+        Returns:
+            Frame: frame with child frames
         """
         raise NotImplementedError
 
-    def find_link(self):
+    def find_link(self, link_name):
         """
-        Find robot's link
+        Args:
+            link_name (str): link's name
+
+        Returns:
+            Link: desired robot's link
         """
         raise NotImplementedError
 
     def find_joint(self):
         """
-        Find robot's joint
+        Args:
+            joint_name (str): joint's name
+
+        Returns:
+            Joint: desired robot's joint
         """
         raise NotImplementedError
 

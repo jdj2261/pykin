@@ -411,7 +411,7 @@ class GraspManager(ActivityBase):
 
     def _compute_inverse_kinematics(self, grasp_pose):
         eef_pose = get_pose_from_homogeneous(grasp_pose)
-        qpos = self.robot.inverse_kin(np.random.randn(7), eef_pose, maxIter=500)
+        qpos = self.robot.inverse_kin(np.random.randn(7), eef_pose, max_iter=500)
         return qpos
 
     def _generate_contact_points(
@@ -480,7 +480,7 @@ class GraspManager(ActivityBase):
     def _attach_gripper2object(self, obj_post_grasp_pose):
         self.robot_c_manager.add_object(
             self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], transform=obj_post_grasp_pose)
+            gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], h_mat=obj_post_grasp_pose)
 
     def _check_support(self, obj_pose):
         obj_mesh = deepcopy(self.obj_mesh_for_sup)
