@@ -74,13 +74,25 @@ class RRTStarPlanner(Planner):
         """
         Get path in joint space
 
+        Args:
+            cur_q (sequence of float): current joints
+            goal_pose (sequence of float): goal pose
+            max_iter(int): maximum number of iterations
+            resolution (float): Get number of waypoints * resolution
+            robot_col_manager (CollisionManager): robot's CollisionManager
+            object_col_manager (CollisionManager): object's CollisionManager
+            is_attached (bool): if the object is attached or not
+            current_obj_info (dict): current object info
+            result_obj_info (dict): result object info
+            T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object
+        
         Returns:
-            path(list) : result path (from start joints to goal joints)
+            interpolate_paths(list) : interpoated paths from start joint pose to goal joint
         """
         logger.info(f"Start to compute RRT-star Planning")
 
-        self._cur_qpos = super()._change_types(cur_q)
-        self._goal_pose = super()._change_types(goal_pose)
+        self._cur_qpos = super()._convert_numpy_type(cur_q)
+        self._goal_pose = super()._convert_numpy_type(goal_pose)
         
         self._max_iter = max_iter
 
@@ -110,7 +122,7 @@ class RRTStarPlanner(Planner):
                     break
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
-            q_paths = None
+            q_paths = []
             self.T = Tree()
             self.cost = {}
 
@@ -143,7 +155,7 @@ class RRTStarPlanner(Planner):
                     if self.reach_to_goal(new_q):        
                         q_paths = self.find_path(self.T)
 
-            if q_paths is not None:
+            if q_paths:
                 logger.info(f"Generate Path Successfully!!")  
                 break 
 
@@ -155,7 +167,7 @@ class RRTStarPlanner(Planner):
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
 
         result_q_paths = []
-        if q_paths is not None:
+        if q_paths:
             for step, joint in enumerate(q_paths):
                 if step % round(1/resolution) == 0 or step == len(q_paths)-1:
                     result_q_paths.append(joint)
@@ -167,7 +179,7 @@ class RRTStarPlanner(Planner):
                 interpolate_path = [path.tolist() for path in self._get_linear_path(result_q_paths[i], result_q_paths[i+1])]
                 interpolate_paths.extend(interpolate_path)
 
-        return interpolate_paths, result_q_paths
+        return interpolate_paths
 
     def random_state(self):
         """
@@ -176,7 +188,7 @@ class RRTStarPlanner(Planner):
         oterwise, return goal joint angles
 
         Returns:
-            q_outs(np.array) : 
+            q_outs(np.array)
         """
         q_outs = np.zeros(self.dimension)
         
@@ -268,8 +280,8 @@ class RRTStarPlanner(Planner):
 
         Args:
             idx(int): neighbor vertex's index
-            A(np.array)
-            B(np.array)
+            A(np.array): vector A
+            B(np.array): vector B
 
         Returns:
             cost(float)
@@ -369,10 +381,20 @@ class RRTStarPlanner(Planner):
         return vertices
 
     def _get_linear_path(self, init_pose, goal_pose):
+        """
+        Get linear path (only qpos)
+
+        Args:
+            init_pose (np.array): init robots' eef pose
+            goal_pose (np.array): goal robots' eef pose  
+        
+        Return:
+            pos (np.array): position
+        """
         for step in range(1, self.n_step + 1):
             delta_t = step / self.n_step
-            qpos = get_linear_interpoation(init_pose, goal_pose, delta_t)
-            yield qpos
+            pos = get_linear_interpoation(init_pose, goal_pose, delta_t)
+            yield pos
 
     @property
     def max_iter(self):

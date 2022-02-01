@@ -11,6 +11,9 @@ from pykin.utils.log_utils import create_logger
 logger = create_logger('Grasp', "debug")
 
 class GraspStatus(Enum):
+    """
+    Grasp Status Enum class
+    """
     pre_grasp_pose = auto()
     grasp_pose = auto()
     post_grasp_pose = auto()
@@ -19,6 +22,19 @@ class GraspStatus(Enum):
     post_release_pose = auto()
 
 class GraspManager(ActivityBase):
+    """
+    Grasp Manager class
+
+    Args:
+        robot (SingleArm or Bimanual): manipulator type
+        robot_col_manager (CollisionManager): robot's CollisionManager
+        object_col_manager (CollisionManager): object's CollisionManager
+        mesh_path (str): absolute path of mesh
+        retreat_distance (float): retreat distance
+        release_distance (float): release distance
+        gripper_configures (dict): configurations of gripper
+                                   (gripper's name, max width, max depth, tcp position)
+    """
     def __init__(
         self,
         robot,
@@ -109,7 +125,7 @@ class GraspManager(ActivityBase):
             for tcp_pose, contact_points, _ in tcp_poses:
                 gripper_transformed = self.get_gripper_transformed(tcp_pose)
 
-                if self.collision_free(gripper_transformed, only_gripper=True):
+                if self._collision_free(gripper_transformed, only_gripper=True):
                     self.tcp_pose = tcp_pose
                     self.contact_points = contact_points
                     eef_pose = self.get_eef_h_mat_from_tcp(tcp_pose)
@@ -126,11 +142,11 @@ class GraspManager(ActivityBase):
             grasp_transforms = self.robot.forward_kin(np.array(qpos))
             goal_eef_pose = grasp_transforms[self.robot.eef_name].h_mat
  
-            if self._check_ik_solution(grasp_pose, goal_eef_pose) and self.collision_free(grasp_transforms):
+            if self._check_ik_solution(grasp_pose, goal_eef_pose) and self._collision_free(grasp_transforms):
                 pre_grasp_pose = self.get_pre_grasp_pose(grasp_pose)
                 pre_transforms, pre_goal_pose = self._get_goal_pose(pre_grasp_pose)
         
-                if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self.collision_free(pre_transforms):
+                if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self._collision_free(pre_transforms):
                     self.pre_grasp_pose = pre_grasp_pose
                     
                     post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
@@ -145,7 +161,7 @@ class GraspManager(ActivityBase):
                         self.obj_post_grasp_pose = obj_post_grasp_pose
                         self._attach_gripper2object(obj_post_grasp_pose)
 
-                    if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self.collision_free(post_transforms):
+                    if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self._collision_free(post_transforms):
                         self.post_grasp_pose = post_grasp_pose
                         is_success_filtered = True
                         break
@@ -154,9 +170,7 @@ class GraspManager(ActivityBase):
             logger.error(f"Failed to filter Grasp poses")
             return None
 
-        # self.robot_c_manager.remove_object(self.obj_info["name"])
         logger.info(f"Success to get Grasp pose.\n")
-
         return grasp_pose
 
     def generate_tcp_poses(
@@ -171,7 +185,7 @@ class GraspManager(ActivityBase):
         center_point = (p1 + p2) /2
         line = p2 - p1
 
-        for i, grasp_dir in enumerate(self._generate_grasp_directions(line, n_trials)):
+        for _, grasp_dir in enumerate(self._generate_grasp_directions(line, n_trials)):
             y = normalize(line)
             z = grasp_dir
             x = np.cross(y, z)
@@ -282,7 +296,7 @@ class GraspManager(ActivityBase):
                 result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed) + np.array([0, 0, self.release_distance])
 
                 gripper_transformed = self.get_gripper_transformed(result_gripper_pose)
-                if self.collision_free(gripper_transformed, only_gripper=True):
+                if self._collision_free(gripper_transformed, only_gripper=True):
                     release_pose = gripper_transformed[self.robot.eef_name]
                     yield release_pose, result_obj_pose
             cnt += 1
@@ -336,7 +350,7 @@ class GraspManager(ActivityBase):
             if self.has_obj:
                 self.robot_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
-            if self._check_ik_solution(release_pose, goal_pose) and self.collision_free(transforms):
+            if self._check_ik_solution(release_pose, goal_pose) and self._collision_free(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
                 pre_release_transforms, pre_release_goal_pose = self._get_goal_pose(pre_release_pose)
 
@@ -345,7 +359,7 @@ class GraspManager(ActivityBase):
                     self.robot_c_manager.set_transform(self.obj_info["name"], obj_pre_release_pose)
                     self.obj_pre_release_pose = obj_pre_release_pose
 
-                if self._check_ik_solution(pre_release_pose, pre_release_goal_pose) and self.collision_free(pre_release_transforms):
+                if self._check_ik_solution(pre_release_pose, pre_release_goal_pose) and self._collision_free(pre_release_transforms):
                     self.pre_release_pose = pre_release_pose
                     
                     post_release_pose = self.get_post_release_pose(release_pose)
@@ -354,7 +368,7 @@ class GraspManager(ActivityBase):
                     if self.has_obj:
                         self.object_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
-                    if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self.collision_free(post_release_transforms):
+                    if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self._collision_free(post_release_transforms):
                         self.post_release_pose = post_release_pose
                         self.obj_release_pose = result_obj_pose
                         self.obj_post_release_pose = result_obj_pose
@@ -386,7 +400,7 @@ class GraspManager(ActivityBase):
             if np.all(vertex[:,2] >= copied_mesh.bounds[1][2] * 0.98):                
                 weights[idx] = 1.0
 
-        support_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
+        support_points, _, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(support_points, normal_vectors):
             yield point, normal_vector
 
@@ -405,7 +419,7 @@ class GraspManager(ActivityBase):
             if np.all(vertex[:,2] <= copied_mesh.bounds[0][2] * 1.02):                
                 weights[idx] = 0.6
   
-        support_points, face_ind, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
+        support_points, _, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(support_points, normal_vectors):
             yield point, normal_vector
 
@@ -464,12 +478,6 @@ class GraspManager(ActivityBase):
         for theta in np.linspace(-np.pi, np.pi, n_trials):
             normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
             yield normal_dir
-
-    def _check_ik_solution(self, eef_pose, goal_pose, err_limit=1e-2) -> bool:
-        error_pose = self.robot.get_pose_error(eef_pose, goal_pose)
-        if error_pose < err_limit:
-            return True
-        return False
 
     def _get_goal_pose(self, pose):
         qpos = self._compute_inverse_kinematics(pose)

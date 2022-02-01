@@ -40,7 +40,7 @@ class Planner(metaclass=ABCMeta):
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
             gparam=self.obj_info["gparam"], 
-            transform=self.obj_info["transform"])
+            h_mat=self.obj_info["transform"])
         self.object_col_mngr.remove_object(self.obj_info["name"])
 
     def detach_object_from_robot(self):
@@ -52,7 +52,7 @@ class Planner(metaclass=ABCMeta):
         )
         self.reattach_object(self.result_object_pose)
 
-    def reattach_object(self, T):
+    def reattach_object(self, transform):
         """
         Reattach object collision
         """
@@ -60,7 +60,7 @@ class Planner(metaclass=ABCMeta):
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
             gparam=self.obj_info["gparam"], 
-            transform=T)
+            h_mat=transform)
 
     @abstractclassmethod
     def get_path_in_joinst_space(self):
@@ -75,8 +75,8 @@ class Planner(metaclass=ABCMeta):
         Base Planner class 
 
         Args:
-            robot (SingleArm or Bimanual): manipulator type
-            dimension(int): robot arm's dof
+            init_pose (np.array): init robots' eef pose
+            goal_pose (np.array): goal robots' eef pose        
         """
         raise NotImplementedError
 
@@ -89,6 +89,18 @@ class Planner(metaclass=ABCMeta):
         result_obj_info,
         T_between_gripper_and_obj
     ):
+        """
+        Setup Robot, Object Collision Manager
+
+        Args:
+            robot_col_manager (CollisionManager): robot's CollisionManager
+            object_col_manager (CollisionManager): object's CollisionManager
+            is_attached (bool): if the object is attached or not
+            current_obj_info (dict): current object info
+            result_obj_info (dict): result object info
+            T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object.
+        """
+
         self.robot_col_mngr = robot_col_manager
         self.object_col_mngr = object_col_manager
         self.is_attached = is_attached
@@ -105,14 +117,21 @@ class Planner(metaclass=ABCMeta):
             self.object_col_mngr.show_collision_info(name="Object")
 
     @staticmethod
-    def _change_types(datas):
+    def _convert_numpy_type(data):
         """
+        Convert input data type to numpy type
+
+        Args:
+            data (sequence of float): input data
+
+        Returns:
+            data (np.array)
         """
-        if not isinstance(datas, (np.ndarray)):
-            datas = np.array(datas)
-            if datas.size == 0:
+        if not isinstance(data, (np.ndarray)):
+            data = np.array(data)
+            if data.size == 0:
                 raise NotFoundError("Make sure set current or goal joints..")
-        return datas
+        return data
 
     def _setup_q_limits(self):
         """
@@ -132,7 +151,7 @@ class Planner(metaclass=ABCMeta):
         otherwise, return False
 
         Returns:
-            bool(True or False)
+            bool (True or False)
         """
         return np.all([q_in >= self.q_limits_lower, q_in <= self.q_limits_upper])
 
@@ -154,16 +173,24 @@ class Planner(metaclass=ABCMeta):
         if self.arm is not None:
             self.eef_name = self.robot.eef_name[self.arm]
 
-    def _collision_free(self, new_q, is_attached=False, visible_name=False):
+    def _collision_free(
+        self, 
+        new_q, 
+        is_attached=False, 
+        visible_name=False
+    ):
         """
         Check collision free between robot and objects
 
         Args:
-            new_q(np.array): new joint angles
+            new_q (np.array): new joint angles
+            is_attached (bool): if the object is attached or not
+            visible_name (bool): If it's true, the result of the collision and the name will come out. 
+                                 Otherwise, only the collision results will come out.
 
         Returns:
-            result(bool): If collision free, return True
-            names(set of 2-tup): The set of pairwise collisions. 
+            result (bool): If collision free, return True
+            names (set of 2-tup): The set of pairwise collisions. 
         """
  
         if self.robot_col_mngr is None:
@@ -183,7 +210,6 @@ class Planner(metaclass=ABCMeta):
                     h_mat = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
                 else:
                     h_mat = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                # print(link, h_mat)
                 self.robot_col_mngr.set_transform(name=link, h_mat=h_mat)
         
         is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
@@ -204,10 +230,10 @@ class Planner(metaclass=ABCMeta):
         Get transformations corresponding to q_in
 
         Args:
-            q_in(np.array): joint angles
+            q_in (np.array): joint angles
 
         Returns:
-            transformations(OrderedDict)
+            transformations (OrderedDict)
         """
         if self.robot.robot_name == "sawyer":
             q_in = np.concatenate((np.zeros(1), q_in))

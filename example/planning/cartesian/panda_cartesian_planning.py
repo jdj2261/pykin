@@ -73,7 +73,7 @@ joint_path, target_poses = task_plan.get_path_in_joinst_space(
     object_col_manager=o_manager,
     resolution=args.resolution)
 
-if joint_path is None and target_poses is None:
+if not joint_path and not target_poses:
     print("Cannot Visulization Path")
     exit()
 

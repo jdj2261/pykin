@@ -378,7 +378,7 @@ class CollisionManager:
         Get CollisionManager info (name, transform)
 
         Returns:
-            col_info (dictionary): Collision Info
+            col_info (dict): Collision Info
         """
         col_info = {}
         for name, info in self._objs.items():

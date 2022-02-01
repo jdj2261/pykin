@@ -104,6 +104,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     obj_pre_release_pos_transformed = np.dot(pre_release_pose, T)
     obj_release_pos_transformed = np.dot(release_pose, T)
 
+    
     grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
     grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
 

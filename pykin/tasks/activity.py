@@ -2,14 +2,23 @@ import numpy as np
 import trimesh
 from abc import abstractclassmethod
 
-# import pykin.utils.pnp_utils
-
 import pykin.utils.plot_utils as plt
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.task_utils import get_absolute_transform
 
 
 class ActivityBase:
+    """
+    Activity Base class
+
+    Args:
+        robot (SingleArm or Bimanual): manipulator type
+        robot_col_manager (CollisionManager): robot's CollisionManager
+        object_col_manager (CollisionManager): object's CollisionManager
+        mesh_path (str): absolute path of mesh
+        gripper_configures (dict): configurations of gripper
+                                   (gripper's name, max width, max depth, tcp position)
+    """
     def __init__(
         self,
         robot,
@@ -29,33 +38,60 @@ class ActivityBase:
         self.gripper_max_width = gripper_configures.get("gripper_max_width", 0.0)
         self.gripper_max_depth = gripper_configures.get("gripper_max_depth", 0.0)
         self.tcp_position = gripper_configures.get("tcp_position", np.zeros(3))
-        self.gripper = self._generate_gripper()
+        self.gripper = self._create_gripper()
 
     def __repr__(self) -> str:
         return 'pykin.tasks.activity.{}()'.format(type(self).__name__)
 
-    @abstractclassmethod
-    def generate_tcp_poses(self):
-        pass
+    def _create_gripper(self):
+        """
+        Create only gripper and setup gripper collision manager
 
-    def _generate_gripper(self):
+        Returns:
+            gripper (dict)
+        """
         gripper = {}
         for link, transform in self.robot.init_transformations.items():
             if link in self.gripper_names:
                 gripper[link] = transform.h_mat
-                if self.robot.links[link].collision.gtype == "mesh":
-                    mesh_name = self.robot.links[link].collision.gparam.get('filename')
-                    file_name = self.mesh_path + mesh_name
-                    mesh = trimesh.load_mesh(file_name)
-                    h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
-                    self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, h_mat=h_mat)
+                self._setup_gripper_col_manager(link, transform)
         return gripper
 
-    def get_gripper(self):
-        return self.gripper
+    def _setup_gripper_col_manager(self, link, transform):
+        """
+        Setup Gripper Collision Manager
+
+        Args:
+            link (str): link name
+            transform (np.array): transformation matrix
+        """
+        if self.robot.links[link].collision.gtype == "mesh":
+            mesh_name = self.robot.links[link].collision.gparam.get('filename')
+            file_name = self.mesh_path + mesh_name
+            mesh = trimesh.load_mesh(file_name)
+            h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
+            self.gripper_c_manager.add_object(link, gtype="mesh", gparam=mesh, h_mat=h_mat)
+
+    @abstractclassmethod
+    def generate_tcp_poses(self):
+        """
+        Generate tcp poses
+        """
+        pass
 
     def get_gripper_transformed(self, pose, is_tcp=True):
-        transform_gripper = {}
+        """
+        Get transformed gripper
+
+        Args:
+            pose (np.array): eef pose or tcp pose
+            is_tcp (bool): If True, pose is tcp pose
+                           Otherwise, pose is eef pose
+        
+        Returns:
+            gripper_transformed (dict)
+        """
+        gripper_transformed = {}
         gripper = self.get_gripper()
         tcp_pose = pose
 
@@ -64,10 +100,42 @@ class ActivityBase:
 
         for link, transform in gripper.items():
             T = get_absolute_transform(gripper[self.gripper_names[-1]], tcp_pose)
-            transform_gripper[link] = np.dot(T, transform)
-        return transform_gripper
+            gripper_transformed[link] = np.dot(T, transform)
+        return gripper_transformed
 
-    def collision_free(self, transformations, only_gripper=False) -> bool:
+    def _collision_free(self, transformations, only_gripper=False):
+        """
+        Check collision free or not
+
+        Args:
+            transformations (OrderedDict)
+            only_gripper (bool): if only gripper or not
+
+        Returns:
+            bool: If collision free, then true 
+                  Otherwise, then false
+        """
+        self._set_transform_col_manager(transformations, only_gripper)
+        if only_gripper:
+            is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.object_c_manager)
+            if is_object_collision:
+                return False
+            return True
+        else:
+            is_self_collision = self.robot_c_manager.in_collision_internal(return_names=False)
+            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=False)
+            if is_self_collision or is_object_collision:
+                return False
+            return True
+
+    def _set_transform_col_manager(self, transformations, only_gripper):
+        """
+        Set transform collision manager
+
+        Args:
+            transformations (OrderedDict)
+            only_gripper (bool): if only gripper or not
+        """
         for link, transform in transformations.items():
             if only_gripper:
                 if self.robot_c_manager.geom == "visual":
@@ -87,28 +155,55 @@ class ActivityBase:
                         h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
                         self.robot_c_manager.set_transform(name=link, h_mat=h_mat)
         
-        if only_gripper:
-            is_object_collision = self.gripper_c_manager.in_collision_other(other_manager=self.object_c_manager)
-            if is_object_collision:
-                return False
-            return True
-        else:
-            is_self_collision = self.robot_c_manager.in_collision_internal(return_names=False)
-            is_object_collision = self.robot_c_manager.in_collision_other(other_manager=self.object_c_manager, return_names=False)
-            if is_self_collision or is_object_collision:
-                return False
-            return True
+    def _check_ik_solution(self, eef_pose, goal_pose, eps=1e-2):
+        """
+        Check ik solution's error
 
-    def get_tcp_pose(self, transformations):
-        return transformations["tcp"]
+        Args:
+            eef_pose (np.array): eef pose
+            goal_pose (np.array): goal pose
+            eps (float): Threshold of pose error
+
+        Returns:
+            bool: If the pose error is less than eps, then true
+                  Otherwise, then false
+        """
+        error_pose = self.robot.get_pose_error(eef_pose, goal_pose)
+        if error_pose < eps:
+            return True
+        return False
+
+    def get_gripper(self):
+        """
+        Get gripper
+        """
+        return self.gripper
 
     def get_eef_h_mat_from_tcp(self, tcp_pose):
+        """
+        Get eef transformation matrix from tcp pose
+
+        Args:
+            tcp_pose (np.array): tcp pose
+        
+        Returns:
+            eef_pose (np.array): eef pose
+        """
         eef_pose = np.eye(4)
         eef_pose[:3, :3] = tcp_pose[:3, :3]
         eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(self.tcp_position[-1], tcp_pose[:3, 2])
         return eef_pose
 
     def get_tcp_h_mat_from_eef(self, eef_pose):
+        """
+        Get tcp transformation matrix from eef pose
+
+        Args:
+            eef_pose (np.array): eef pose
+        
+        Returns:
+            tcp_pose (np.array): tcp pose
+        """
         tcp_pose = np.eye(4)
         tcp_pose[:3, :3] = eef_pose[:3, :3]
         tcp_pose[:3, 3] = eef_pose[:3, 3] + np.dot(self.tcp_position[-1], eef_pose[:3, 2])
@@ -121,6 +216,16 @@ class ActivityBase:
         alpha=1.0,
         only_gripper=False
     ):
+        """
+        Visualize robot
+
+        Args:
+            ax (Axes3DSubplot)
+            transformations (np.array)
+            alpha (float): transparency(투명도)
+            only_gripper (bool): If True, then visualize only gripper
+                                 Otherwise, visualize robot
+        """
         plt.plot_basis(self.robot, ax)
         for link, transform in transformations.items():
             if "pedestal" in link:
@@ -147,6 +252,16 @@ class ActivityBase:
         color=None,
         visible_basis=False
     ):
+        """
+        Visualize gripper
+
+        Args:
+            ax (Axes3DSubplot)
+            transformations (np.array)
+            alpha (float): transparency(투명도)
+            color (str): name of color (blue, red, green etc..)
+            visible_basis (bool): If visible basis, then plot basis from robot base pose
+        """
         if visible_basis:
             plt.plot_basis(self.robot, ax)
         for link, transform in gripper.items():
@@ -167,32 +282,26 @@ class ActivityBase:
         self,
         ax,
         transformation,
-        link=None,
         axis=[1, 1, 1],
         scale=0.1,
         visible_basis=False
     ):
+        """
+        Visualize gripper
+
+        Args:
+            ax (Axes3DSubplot)
+            transformations (np.array)
+            axis (np.array): As for the axis(x, y, z) you want to see, 1 or 0.
+            scale (float): scale of axis
+            visible_basis (bool): If visible basis, then plot basis from robot base pose
+        """
         if visible_basis:
             plt.plot_basis(self.robot, ax)
         pose = transformation
-        if link is not None:
-            pose = transformation[link].h_mat
         if axis[0]:
             plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 0], scale=scale, edgecolor="red")
         if axis[1]:
             plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 1], scale=scale, edgecolor="green")
         if axis[2]:
             plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
-
-    def visualize_point(
-        self,
-        ax,
-        transformation,
-        link=None
-    ):
-        pose = transformation
-        if link is not None:
-            pose = transformation[link].h_mat
-
-        plt.plot_basis(self.robot, ax)
-        plt.plot_vertices(ax, pose[:3, 3])   

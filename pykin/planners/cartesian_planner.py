@@ -11,7 +11,7 @@ from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.log_utils import create_logger
 from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp
 
-logger = create_logger('Cartesian Planner', "debug",)
+logger = create_logger('Cartesian Planner', "debug")
 
 class CartesianPlanner(Planner):
     """
@@ -21,7 +21,11 @@ class CartesianPlanner(Planner):
         robot(SingleArm or Bimanual): The manipulator robot type is SingleArm or Bimanual
         n_step(int): Number of waypoints
         dimension(int): robot arm's dof
+        damping(float): Value using DLS(Damped Least Squares)
+        epsilon(float): Threshold of pose error
+        pos_sensitivity(float): Error reference value between the target pose and the current pose
         waypoint_type(str): Type of waypoint ex) "Linear", "Cubic", "Circular"
+        is_slerp(bool): flag of quaternion slerp
     """
     def __init__(
         self,
@@ -68,10 +72,24 @@ class CartesianPlanner(Planner):
         result_obj_info=None,
         T_between_gripper_and_obj=None,
     ):
+        """
+        Get joint paths in joint space
+
+        Args:
+            cur_q (sequence of float): current joints
+            goal_pose (sequence of float): goal pose
+            resolution (float): Get number of waypoints * resolution
+            robot_col_manager (CollisionManager): robot's CollisionManager
+            object_col_manager (CollisionManager): object's CollisionManager
+            is_attached (bool): if the object is attached or not
+            current_obj_info (dict): current object info
+            result_obj_info (dict): result object info
+            T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object
+        """
         logger.info(f"Start to compute Cartesian Planning")
 
-        self._cur_qpos = super()._change_types(cur_q)
-        self._goal_pose = super()._change_types(goal_pose)
+        self._cur_qpos = super()._convert_numpy_type(cur_q)
+        self._goal_pose = super()._convert_numpy_type(goal_pose)
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
         self._cur_pose = self.robot.get_eef_pose(init_fk)
         self._resolution = resolution
@@ -89,11 +107,21 @@ class CartesianPlanner(Planner):
         )
         
         waypoints = self.generate_waypoints()
-        paths, target_positions = self._compute_path_and_target_pose(waypoints)
+        paths, target_positions = self._compute_paths_and_target_positions(waypoints)
         
         return paths, target_positions
 
-    def _compute_path_and_target_pose(self, waypoints):
+    def _compute_paths_and_target_positions(self, waypoints):
+        """
+        Compute joint paths and target positions
+
+        Args:
+            waypoints (list): waypoints of eef's target pose 
+
+        Returns:
+            paths (list): list of joint position
+            target_positions (list): list of eef's target position
+        """
         cnt = 0
         total_cnt = 10
         while True:
@@ -115,14 +143,12 @@ class CartesianPlanner(Planner):
 
                 dq = np.dot(J_dls, err_pose)
                 self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
-
-                is_collision_free, col_name = self._collision_free(self._cur_qpos, self.is_attached, visible_name=True)
+                if not self._check_q_in_limits(self._cur_qpos):
+                    continue
                 
+                is_collision_free, col_name = self._collision_free(self._cur_qpos, self.is_attached, visible_name=True)
                 if not is_collision_free:
                     collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
-                    continue
-
-                if not self._check_q_in_limits(self._cur_qpos):
                     continue
 
                 cur_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
@@ -138,12 +164,12 @@ class CartesianPlanner(Planner):
                 logger.error(f"Failed Generate Path.. Collision may occur.")
                 for col_name, _ in collision_pose.values():
                     logger.warning(f"\n\tCollision Names : {col_name}")
-                paths, target_positions = None, None
+                paths, target_positions = [], []
                 break
 
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
-                paths, target_positions = None, None
+                paths, target_positions = [], []
                 break
             
             if err < self._pos_sensitivity:
@@ -157,6 +183,12 @@ class CartesianPlanner(Planner):
     # TODO
     # generate cubic, circular waypoints
     def generate_waypoints(self):
+        """
+        Generate waypoints of eef's target pose
+
+        Returns:
+            waypoints (list): waypoints of eef's target pose 
+        """
         if self.waypoint_type == "Linear":
             waypoints = [path for path in self._get_linear_path(self._cur_pose, self._goal_pose, self._is_slerp)]
         if self.waypoint_type == "Cubic":
@@ -165,28 +197,18 @@ class CartesianPlanner(Planner):
             pass
         return waypoints
 
-    def get_waypoints(self):
-        return self.waypoints
-
-    def _change_pose_type(self, pose):
-        ret = np.zeros(7)
-        ret[:3] = pose[:3]
-        
-        if isinstance(pose, (list, tuple)):
-            pose = np.asarray(pose)
-        ori = pose[3:]
-
-        if ori.shape == (3,):
-            ori = t_utils.get_quaternion_from_rpy(ori)
-            ret[3:] = ori
-        elif ori.shape == (4,):
-            ret[3:] = ori
-        else:
-            raise OriValueError(ori.shape)
-
-        return ret
-
     def _get_linear_path(self, init_pose, goal_pose, is_slerp):
+        """
+        Get linear path
+
+        Args:
+            init_pose (np.array): init robots' eef pose
+            goal_pose (np.array): goal robots' eef pose 
+            is_slerp (bool): flag of quaternion slerp      
+        
+        Return:
+            pos, ori (tuple): position, orientation
+        """
         for step in range(1, self.n_step + 1):
             delta_t = step / self.n_step
             pos = get_linear_interpoation(init_pose[:3], goal_pose[:3], delta_t)
