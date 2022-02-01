@@ -62,7 +62,6 @@ class CollisionManager:
         Args:
             objects (defaultdict): pykin objects
         """
-        print(type(objects))
         for name, info in objects:
             self.add_object(name, info[0], info[1], info[2])
 

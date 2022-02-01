@@ -70,6 +70,20 @@ class GraspManager(ActivityBase):
         num_grasp=1,
         n_trials=1,
     ):
+        """
+        Get grasp waypoints(pre grasp pose, grasp pose, post grasp pose)
+
+        Args:
+            obj_info (dict): object info (name, gtype, gparam, transform) 
+            obj_mesh (trimesh.base.Trimesh): object mesh
+            obj_pose (np.array): object pose
+            limit_angle (float): angle to satisfy force closure
+            num_grasp (int): number of sampling contact points
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+        
+        Returns:
+            waypoints (OrderedDict): pre grasp pose, grasp pose, post grasp pose
+        """
         waypoints = OrderedDict()
 
         if obj_info:
@@ -93,11 +107,33 @@ class GraspManager(ActivityBase):
         num_grasp=1,
         n_trials=1,
     ):
+        """
+        Get grasp pose
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): object mesh
+            obj_pose (np.array): object pose
+            limit_angle (float): angle to satisfy force closure
+            num_grasp (int): number of sampling contact points
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+        
+        Returns:
+            grasp_pose (np.array)
+        """
         grasp_poses = self.generate_grasps(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials)
         grasp_pose = self.filter_grasps(grasp_poses)     
         return grasp_pose
 
     def get_pre_grasp_pose(self, grasp_pose):
+        """
+        Get pre grasp pose
+
+        Args:
+            grasp_pose (np.array): grasp pose
+
+        Returns:
+            pre_grasp_pose (np.array)
+        """
         pre_grasp_pose = np.eye(4)
         pre_grasp_pose[:3, :3] = grasp_pose[:3, :3]
         pre_grasp_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2]    
@@ -105,6 +141,15 @@ class GraspManager(ActivityBase):
         return pre_grasp_pose
 
     def get_post_grasp_pose(self, grasp_pose):
+        """
+        Get post grasp pose
+
+        Args:
+            grasp_pose (np.array): grasp pose
+
+        Returns:
+            post_grasp_pose (np.array)
+        """
         post_grasp_pose = np.eye(4)
         post_grasp_pose[:3, :3] = grasp_pose[:3, :3] 
         post_grasp_pose[:3, 3] = grasp_pose[:3, 3] - self.retreat_distance * grasp_pose[:3,2] 
@@ -119,6 +164,19 @@ class GraspManager(ActivityBase):
         num_grasp=1,
         n_trials=1
     ):
+        """
+        Generate grasp poses
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): object mesh
+            obj_pose (np.array): object pose
+            limit_angle (float): angle to satisfy force closure
+            num_grasp (int): number of sampling contact points
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+        
+        Returns:
+            eef_pose, gripper_transformed (tuple): eef pose, gripper
+        """
         cnt = 0
         while cnt < num_grasp * n_trials:
             tcp_poses = self.generate_tcp_poses(obj_mesh, obj_pose, limit_angle, n_trials)
@@ -133,12 +191,18 @@ class GraspManager(ActivityBase):
                     yield (eef_pose, gripper_transformed)
     
     def filter_grasps(self, grasp_poses):
+        """
+        Filter grasp pose
+
+        Args:
+            grasp_poses (tuple): eef pose, gripper transformed
+        
+        Returns:
+            grasp_pose (np.array): eef pose
+        """
         is_success_filtered = False
         for grasp_pose, _ in grasp_poses:
             qpos = self._compute_inverse_kinematics(grasp_pose)
-            if qpos is None:
-                continue
-
             grasp_transforms = self.robot.forward_kin(np.array(qpos))
             goal_eef_pose = grasp_transforms[self.robot.eef_name].h_mat
  
@@ -173,6 +237,17 @@ class GraspManager(ActivityBase):
         logger.info(f"Success to get Grasp pose.\n")
         return grasp_pose
 
+    def _attach_gripper2object(self, obj_post_grasp_pose):
+        """
+        Attach object collision on robot collision
+
+        Args:
+            obj_post_grasp_pose (np.array): pose grasp pose of object
+        """
+        self.robot_c_manager.add_object(
+            self.obj_info["name"], 
+            gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], h_mat=obj_post_grasp_pose)
+
     def generate_tcp_poses(
         self,
         obj_mesh,
@@ -180,6 +255,18 @@ class GraspManager(ActivityBase):
         limit_angle,
         n_trials
     ):
+        """
+        Generate grasp poses
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): object mesh
+            obj_pose (np.array): object pose
+            limit_angle (float): angle to satisfy force closure
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+        
+        Returns:
+            tcp_pose, contact_points, normals (tuple)
+        """
         contact_points, normals = self._generate_contact_points(obj_mesh, obj_pose, limit_angle)
         p1, p2 = contact_points
         center_point = (p1 + p2) /2
@@ -198,6 +285,90 @@ class GraspManager(ActivityBase):
 
             yield (tcp_pose, contact_points, normals)
 
+    def _generate_contact_points(
+        self,
+        obj_mesh,
+        obj_pose,
+        limit_angle
+    ):
+        """
+        Generate contact points
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): object mesh
+            obj_pose (np.array): object pose
+            limit_angle (float): angle to satisfy force closure            
+        
+        Returns:
+            contact_points, normals (tuple)
+        """
+        copied_mesh = deepcopy(obj_mesh)
+        copied_mesh.apply_transform(obj_pose)
+
+        while True:
+            contact_points, _, normals = surface_sampling(copied_mesh, n_samples=2)
+            if self._is_force_closure(contact_points, normals, limit_angle):
+                break
+        return (contact_points, normals)
+
+    def _generate_grasp_directions(self, line, n_trials):
+        """
+        Generate grasp dicrections
+
+        Args:
+            line (np.array): line from vectorA to vector B
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+
+        Returns:
+            normal_dir (float): grasp direction
+        """
+        norm_vector = normalize(line)
+        e1, e2 = np.eye(3)[:2]
+        v1 = e1 - projection(e1, norm_vector)
+        v1 = normalize(v1)
+        v2 = e2 - projection(e2, norm_vector) - projection(e2, v1)
+        v2 = normalize(v2)
+
+        for theta in np.linspace(-np.pi, np.pi, n_trials):
+            normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
+            yield normal_dir
+
+    def _is_force_closure(self, vertices, normals, limit_angle):
+        """
+        Check force closure
+
+        Args:
+            vertices (np.array): contact points
+            normals (np.array): normal vector of contact points
+            limit_angle (float): angle to satisfy force closure 
+
+        Returns:
+            bool: If satisfy force closure, then true
+                  Otherwise, then false
+        """
+        vectorA = vertices[0]
+        vectorB = vertices[1]
+
+        normalA = -normals[0]
+        normalB = -normals[1]
+
+        vectorAB = vectorB - vectorA
+        distance = np.linalg.norm(vectorAB)
+
+        unit_vectorAB = normalize(vectorAB)
+        angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
+
+        unit_vectorBA = -1 * unit_vectorAB
+        angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
+
+        if distance > self.gripper_max_width:
+            return False
+
+        if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
+            return False
+        
+        return True
+
     def get_release_waypoints(
         self,
         obj_info_on_sup=None,
@@ -210,6 +381,23 @@ class GraspManager(ActivityBase):
         obj_mesh_for_sup=None,
         obj_pose_for_sup=None,
     ):
+        """
+        Get release waypoints(pre release pose, release pose, post release pose)
+
+        Args:
+            obj_info_on_sup (dict): info of support object(name, gtype, gparam, transform) 
+            n_samples_on_sup (int): number of sampling points on support object
+            obj_info_for_sup (dict): info of grasp object(name, gtype, gparam, transform) 
+            n_samples_for_sup (int): number of sampling points on grasp object
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
+            obj_mesh_on_sup (trimesh.base.Trimesh): mesh of support object
+            obj_pose_on_sup (np.array): pose of support object
+            obj_mesh_for_sup (trimesh.base.Trimesh): mesh of grasp object
+            obj_pose_for_sup (np.array): pose of grasp object
+        
+        Returns:
+            waypoints (OrderedDict): pre release pose, release pose, post release pose
+        """
         waypoints = OrderedDict()
 
         if obj_info_on_sup:
@@ -245,6 +433,21 @@ class GraspManager(ActivityBase):
         n_samples_for_sup,
         n_trials
     ):
+        """
+        Get release pose
+
+        Args:
+            obj_mesh_on_sup (trimesh.base.Trimesh): mesh of support object
+            obj_pose_on_sup (np.array): pose of support object
+            n_samples_on_sup (int): number of sampling points on support object
+            obj_mesh_for_sup (trimesh.base.Trimesh): mesh of grasp object
+            obj_pose_for_sup (np.array): pose of grasp object            
+            n_samples_for_sup (int): number of sampling points on grasp object
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points        
+        
+        Returns:
+            release_pose (np.array)
+        """
         support_poses = self.generate_supports(
             obj_mesh_on_sup,
             obj_pose_on_sup,
@@ -258,12 +461,30 @@ class GraspManager(ActivityBase):
         return release_pose
 
     def get_pre_release_pose(self, release_pose):
+        """
+        Get pre release pose
+
+        Args:
+            release_pose (np.array)
+        
+        Returns:
+            pre_release_pose (np.array)
+        """
         pre_release_pose = np.eye(4)
         pre_release_pose[:3, :3] = release_pose[:3, :3]
         pre_release_pose[:3, 3] = release_pose[:3, 3] + np.array([0, 0, self.retreat_distance])
         return pre_release_pose
 
     def get_post_release_pose(self, release_pose):
+        """
+        Get post release pose
+
+        Args:
+            release_pose (np.array)
+        
+        Returns:
+            post_release_pose (np.array)
+        """
         post_release_pose = np.eye(4)
         post_release_pose[:3, :3] = release_pose[:3, :3] 
         post_release_pose[:3, 3] = release_pose[:3, 3] - self.retreat_distance * release_pose[:3,2]
@@ -279,6 +500,21 @@ class GraspManager(ActivityBase):
         n_samples_for_sup,
         n_trials=1
     ):
+        """
+        Generate support poses
+
+        Args:
+            obj_mesh_on_sup (trimesh.base.Trimesh): mesh of support object
+            obj_pose_on_sup (np.array): pose of support object
+            n_samples_on_sup (int): number of sampling points on support object
+            obj_mesh_for_sup (trimesh.base.Trimesh): mesh of grasp object
+            obj_pose_for_sup (np.array): pose of grasp object            
+            n_samples_for_sup (int): number of sampling points on grasp object
+            n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points        
+        
+        Returns:
+            release_pose, result_obj_pose (tuple): release pose, release pose of object
+        """
         cnt = 0
         self.obj_mesh_for_sup = deepcopy(obj_mesh_for_sup)
         self.obj_mesh_on_sup = deepcopy(obj_mesh_on_sup)
@@ -310,6 +546,20 @@ class GraspManager(ActivityBase):
         obj_pose_for_sup,
         n_samples_for_sup,
     ):
+        """
+        sampling support poses
+
+        Args:
+            obj_mesh_on_sup (trimesh.base.Trimesh): mesh of support object
+            obj_pose_on_sup (np.array): pose of support object
+            n_samples_on_sup (int): number of sampling points on support object
+            obj_mesh_for_sup (trimesh.base.Trimesh): mesh of grasp object
+            obj_pose_for_sup (np.array): pose of grasp object            
+            n_samples_for_sup (int): number of sampling points on grasp object
+
+        Returns:
+            point_on_support, normal_on_support, point_for_support, normal_for_support (tuple)
+        """
         sample_points_on_support = self.generate_points_on_support(obj_mesh_on_sup, obj_pose_on_sup, n_samples_on_sup)
         sample_points_for_support = list(self.generate_points_for_support(obj_mesh_for_sup, obj_pose_for_sup, n_samples_for_sup))
 
@@ -318,15 +568,25 @@ class GraspManager(ActivityBase):
                 yield point_on_support, normal_on_support, point_for_support, normal_for_support
 
     def _transform_points_on_support(self, support_points, obj_pose_for_sup):
+        """
+        Transform from grasp object points to support object points
+        
+        Args:
+            point_on_support, normal_on_support, point_for_support, normal_for_support (tuple)
+            obj_pose_for_sup (np.array): pose of grasp object
+
+        Returns:
+            result_obj_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed (tuple)
+        """
         for point_on_sup, normal_on_sup, point_for_sup, normal_for_sup in support_points:
             normal_on_sup = -normal_on_sup
-            R_mat = get_rotation_from_vectors(normal_for_sup, normal_on_sup)
+            rot_mat = get_rotation_from_vectors(normal_for_sup, normal_on_sup)
             
             obj_pose_transformed_for_sup = np.eye(4)
-            obj_pose_transformed_for_sup[:3, :3] = np.dot(R_mat, obj_pose_for_sup[:3, :3])
+            obj_pose_transformed_for_sup[:3, :3] = np.dot(rot_mat, obj_pose_for_sup[:3, :3])
             obj_pose_transformed_for_sup[:3, 3] = obj_pose_for_sup[:3, 3]
 
-            point_transformed = np.dot(point_for_sup - obj_pose_for_sup[:3, 3], R_mat) + obj_pose_for_sup[:3, 3]
+            point_transformed = np.dot(point_for_sup - obj_pose_for_sup[:3, 3], rot_mat) + obj_pose_for_sup[:3, 3]
 
             result_obj_pose = np.eye(4)
             result_obj_pose[:3, :3] = obj_pose_transformed_for_sup[:3, :3]
@@ -335,15 +595,21 @@ class GraspManager(ActivityBase):
             yield result_obj_pose, obj_pose_transformed_for_sup, point_on_sup, point_transformed
 
     def filter_supports(self, support_poses):
+        """
+        Filter support poses
+
+        Args:
+            support_poses (tuple): release_pose, result_obj_pose
+        
+        Returns:
+            release_pose (np.array): release pose
+        """
         is_success_filtered = False
         for release_pose, result_obj_pose in support_poses:
             if not self._check_support(result_obj_pose):
                 continue
 
             qpos = self._compute_inverse_kinematics(release_pose)
-            if qpos is None:
-                continue
-
             transforms = self.robot.forward_kin(np.array(qpos))
             goal_pose = transforms[self.robot.eef_name].h_mat
 
@@ -391,6 +657,17 @@ class GraspManager(ActivityBase):
         obj_pose,
         n_samples
     ):
+        """
+        Generate support points
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): mesh of support object
+            obj_pose (np.array): pose of support object
+            n_samples (int): number of sampling points on support object
+           
+        Returns:
+            point, normal_vector (tuple)
+        """
         copied_mesh = deepcopy(obj_mesh)
         copied_mesh.apply_transform(obj_pose)
 
@@ -410,6 +687,17 @@ class GraspManager(ActivityBase):
         obj_pose,
         n_samples
     ):
+        """
+        Generate grasp object point placed in support pose
+
+        Args:
+            obj_mesh (trimesh.base.Trimesh): mesh of grasp object
+            obj_pose (np.array): pose of grasp object            
+            n_samples (int): number of sampling points on grasp object
+
+        Returns:
+            point, normal_vector (tuple)
+        """
         copied_mesh = deepcopy(obj_mesh)
         copied_mesh.apply_transform(obj_pose)
     
@@ -424,73 +712,45 @@ class GraspManager(ActivityBase):
             yield point, normal_vector
 
     def _compute_inverse_kinematics(self, grasp_pose):
+        """
+        Compute inverse kinematics
+
+        Args:
+            grasp_pose (np.array): grasp pose
+
+        Returns:
+            qpos (np.array): joint positions 
+        """
         eef_pose = get_pose_from_homogeneous(grasp_pose)
         qpos = self.robot.inverse_kin(np.random.randn(7), eef_pose, max_iter=500)
         return qpos
 
-    def _generate_contact_points(
-        self,
-        obj_mesh,
-        obj_pose,
-        limit_angle
-    ):
-        copied_mesh = deepcopy(obj_mesh)
-        copied_mesh.apply_transform(obj_pose)
-
-        while True:
-            contact_points, _, normals = surface_sampling(copied_mesh, n_samples=2)
-            if self._is_force_closure(contact_points, normals, limit_angle):
-                break
-        return (contact_points, normals)
-
-    def _is_force_closure(self, vertices, normals, limit_angle):
-        vectorA = vertices[0]
-        vectorB = vertices[1]
-
-        normalA = -normals[0]
-        normalB = -normals[1]
-
-        vectorAB = vectorB - vectorA
-        distance = np.linalg.norm(vectorAB)
-
-        unit_vectorAB = normalize(vectorAB)
-        angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
-
-        unit_vectorBA = -1 * unit_vectorAB
-        angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
-
-        if distance > self.gripper_max_width:
-            return False
-
-        if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
-            return False
-        
-        return True
-
-    def _generate_grasp_directions(self, vector, n_trials):
-        norm_vector = normalize(vector)
-        e1, e2 = np.eye(3)[:2]
-        v1 = e1 - projection(e1, norm_vector)
-        v1 = normalize(v1)
-        v2 = e2 - projection(e2, norm_vector) - projection(e2, v1)
-        v2 = normalize(v2)
-
-        for theta in np.linspace(-np.pi, np.pi, n_trials):
-            normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
-            yield normal_dir
-
     def _get_goal_pose(self, pose):
+        """
+        Get goal pose
+
+        Args:
+            pose (np.array): current eef pose
+        
+        Returns:
+            trasforms, goal_pose (tuple): transformations, goal eef pose 
+        """
         qpos = self._compute_inverse_kinematics(pose)
         transforms = self.robot.forward_kin(np.array(qpos))
         goal_pose = transforms[self.robot.eef_name].h_mat
         return transforms, goal_pose
 
-    def _attach_gripper2object(self, obj_post_grasp_pose):
-        self.robot_c_manager.add_object(
-            self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], h_mat=obj_post_grasp_pose)
-
     def _check_support(self, obj_pose):
+        """
+        Check support pose
+
+        Args:
+            obj_pose (np.array): pose of support object
+        
+        Returns:
+            bool: If satisfy support pose, then true
+                  Otherwise then false
+        """
         obj_mesh = deepcopy(self.obj_mesh_for_sup)
         obj_mesh.apply_transform(obj_pose)
         self.obj_center_point = obj_mesh.center_mass
