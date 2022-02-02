@@ -42,7 +42,7 @@ class Robot(URDFModel):
         self._setup_kinematics()
         self._setup_init_transform()
 
-        self.joint_limits = self._get_limited_joint_names()
+        self.joint_limits = self._get_limited_joints()
 
     def __str__(self):
         return f"""ROBOT : {self.robot_name} 
@@ -88,7 +88,13 @@ class Robot(URDFModel):
         transformations = self.kin.forward_kinematics(self.root, thetas)
         self.init_transformations = transformations
 
-    def _get_limited_joint_names(self):
+    def _get_limited_joints(self):
+        """
+        Get limit joint
+
+        Returns:
+            result (dict): joint_name: (limit joint lower, limit joint upper)
+        """
         result = {}
         for joint, value in self.joints.items():
             for active_joint in super().get_revolute_joint_names():
@@ -107,17 +113,51 @@ class Robot(URDFModel):
         raise NotImplementedError
 
     def forward_kin(self, thetas):
+        """
+        Sets robot's link name
+
+        Args:
+            thetas (sequence of float): input joint angles
+
+        Returns:
+            fk (OrderedDict): transformations
+        """
         self._frames = self.root
-        transformation = self.kin.forward_kinematics(self._frames, thetas)
-        return transformation
+        fk = self.kin.forward_kinematics(self._frames, thetas)
+        return fk
 
     def inverse_kin(self, current_joints, target_pose, method, max_iter):
+        """
+        Returns joint angles obtained by computing IK
+        
+        Args:
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            method (str): two methods to calculate IK (LM: Levenberg-marquardt, NR: Newton-raphson)
+            max_iter (int): Maximum number of calculation iterations
+
+        Returns:
+            joints (np.array): target joint angles
+        """
         raise NotImplementedError
 
     def _set_joint_limits_upper_and_lower(self):
+        """
+        Set joint limits upper and lower
+        """
         raise NotImplementedError
 
     def get_pose_error(self, target=np.eye(4), result=np.eye(4)):
+        """
+        Get pose(homogeneous transform) error 
+
+        Args:
+            target (np.array): target homogeneous transform
+            result (np.array): result homogeneous transform 
+
+        Returns:
+            error (np.array)
+        """
         return compute_pose_error(target, result)
 
     @property

@@ -368,8 +368,8 @@ def compute_pose_error(target=np.eye(4), result=np.eye(4)):
     Computes pose(homogeneous transform) error 
 
     Args:
-        target_HT (np.array): target homogeneous transform
-        result_HT (np.array): result homogeneous transform 
+        target (np.array): target homogeneous transform
+        result (np.array): result homogeneous transform 
 
     Returns:
         error (np.array)

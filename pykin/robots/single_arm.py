@@ -180,20 +180,6 @@ class SingleArm(Robot):
 
         return transformations[self.eef_name].rot
 
-    def get_result_qpos(self, init_qpos, eef_pose, n_trials=5):
-        cnt = 0
-        is_limit_qpos = False
-        while cnt <= n_trials:
-            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pose, "LM", 500)
-            is_limit_qpos = self.check_limit_joint(result_qpos)
-            if is_limit_qpos:
-                break
-            cnt += 1
-
-        if not is_limit_qpos:
-            return None
-        return result_qpos
-
     @property
     def base_name(self):
         return self._base_name
