@@ -28,19 +28,19 @@ robot.setup_link_name("base", "left_wrist")
 #################################################################################
 #                                Set target pose                                #
 #################################################################################
-target_transformations = robot.forward_kin(thetas)
+target_fk = robot.forward_kin(thetas)
 _, ax = plt.init_3d_figure("Target Pose")
 plt.plot_robot(robot, 
                ax=ax,
-               transformations=target_transformations, 
+               fk=target_fk, 
                visible_collision=visible_collision)
 
 #################################################################################
 #                                Inverse Kinematics                             #
 #################################################################################
 init_thetas = np.random.randn(7)
-target_pose = { "right": robot.get_eef_pose(target_transformations)["right"], 
-                "left" : robot.get_eef_pose(target_transformations)["left"]}
+target_pose = { "right": robot.get_eef_pose(target_fk)["right"], 
+                "left" : robot.get_eef_pose(target_fk)["left"]}
 
 ik_LM_result = robot.inverse_kin(
     init_thetas, 
@@ -69,11 +69,11 @@ plt.plot_robot(robot, ax, result_fk_NR,
 err = {}
 for arm in robot.arm_type:
     err[arm+"_NR_error"] = compute_pose_error(
-        target_transformations[robot.eef_name[arm]].h_mat,
+        target_fk[robot.eef_name[arm]].h_mat,
         result_fk_NR[robot.eef_name[arm]].h_mat)
 
     err[arm+"_LM_error"] = compute_pose_error(
-        target_transformations[robot.eef_name[arm]].h_mat,
+        target_fk[robot.eef_name[arm]].h_mat,
         result_fk_LM[robot.eef_name[arm]].h_mat)
 
 print(err)

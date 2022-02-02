@@ -24,7 +24,7 @@ _, ax = plt.init_3d_figure()
 plt.plot_robot(
     robot,
     ax=ax,
-    transformations=fk
+    fk=fk
 )
 plt.show_figure()
 

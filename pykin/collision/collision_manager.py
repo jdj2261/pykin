@@ -47,11 +47,11 @@ class CollisionManager:
 
         Args:
             robot (SingleArm or Bimanual): pykin robot
-            fk (OrderedDict): result(transformations) of computing robots' forward kinematics
+            fk (OrderedDict): result(forward kinematics) of computing robots' forward kinematics
             geom (str): robot's geometry type name ("visual" or "collision")
         """
         if fk is None:
-            fk = robot.init_transformations
+            fk = robot.init_fk
         self.geom = geom
         self._filter_contact_names(robot, fk, geom)
 
@@ -71,7 +71,7 @@ class CollisionManager:
 
         Args:
             robot (SingleArm or Binmanul): pykin robot
-            fk (OrderedDict): result(transformations) of computing robots' forward kinematics
+            fk (OrderedDict): result(forward kinematics) of computing robots' forward kinematics
             geom (str): robot's geometry type name ("visual" or "collision")
         """
         for link, transformation in fk.items():

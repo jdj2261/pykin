@@ -78,9 +78,9 @@ joint_trajectory = []
 eef_poses = []
 
 for step, joint in enumerate(interpolated_path):
-    transformations = robot.forward_kin(joint)
-    joint_trajectory.append(transformations)
-    eef_poses.append(transformations[robot.eef_name].pos)
+    fk = robot.forward_kin(joint)
+    joint_trajectory.append(fk)
+    eef_poses.append(fk[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,

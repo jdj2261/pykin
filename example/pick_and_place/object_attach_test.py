@@ -109,19 +109,19 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
 
     grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
-    gripper = grasp_man.get_gripper_transformed(grasp_pose, is_tcp=False)
+    gripper = grasp_man.get_transformed_gripper_fk(grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
     
     grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
-    gripper = grasp_man.get_gripper_transformed(pre_grasp_pose, is_tcp=False)
+    gripper = grasp_man.get_transformed_gripper_fk(pre_grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
     grasp_man.visualize_axis(ax, release_pose, visible_basis=True)
-    gripper = grasp_man.get_gripper_transformed(release_pose, is_tcp=False)
+    gripper = grasp_man.get_transformed_gripper_fk(release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
     grasp_man.visualize_axis(ax, pre_release_pose, visible_basis=True)
-    gripper = grasp_man.get_gripper_transformed(pre_release_pose, is_tcp=False)
+    gripper = grasp_man.get_transformed_gripper_fk(pre_release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
     plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)

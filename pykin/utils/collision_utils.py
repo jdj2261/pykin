@@ -4,7 +4,7 @@ import numpy as np
 
 def apply_robot_to_collision_manager(c_manager, robot, fk=None, geom="visual"):
     if fk is None:
-        fk = robot.init_transformations
+        fk = robot.init_fk
 
     for link, transformation in fk.items():
         if geom == "visual":
@@ -44,7 +44,7 @@ def apply_robot_to_scene(mesh_path=None, scene=None, robot=None, fk=None, geom="
         scene = trimesh.Scene()
 
     if fk is None:
-        fk = robot.init_transformations
+        fk = robot.init_fk
 
     for link, transformation in fk.items():
         if geom == "visual":

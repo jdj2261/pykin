@@ -83,7 +83,7 @@ def plot_basis(ax=None, robot=None):
 def plot_robot(
     robot, 
     ax=None, 
-    transformations=None, 
+    fk=None, 
     visible_collision=False, 
     visible_text=True,
     visible_scatter=True,
@@ -92,8 +92,8 @@ def plot_robot(
     """
     Plot robot
     """
-    if transformations is None:
-        transformations = robot.init_transformations
+    if fk is None:
+        fk = robot.init_fk
 
     name = robot.robot_name
 
@@ -104,7 +104,7 @@ def plot_robot(
     nodes = []
     transformation_matrix = []
 
-    for i, (link, transformation) in enumerate(transformations.items()):
+    for i, (link, transformation) in enumerate(fk.items()):
         links.append(link)
         transformation_matrix.append(transformation.h_mat)
 
@@ -134,7 +134,7 @@ def plot_robot(
     
 
     if visible_collision:
-        plot_collision(robot, transformations, ax)
+        plot_collision(ax, robot, fk)
 
     ax.legend()
 
@@ -230,7 +230,7 @@ def plot_animation(
           
         plot_robot(
             robot, 
-            transformations=trajectory[i], 
+            fk=trajectory[i], 
             ax=ax, 
             visible_collision=visible_collision,
             visible_text=visible_text,
@@ -261,7 +261,7 @@ def plot_objects(ax, objects, alpha=0.5, color='k'):
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=color)
 
 
-def plot_collision(ax, robot, transformations, alpha=0.8):
+def plot_collision(ax, robot, fk, alpha=0.8):
     """
     Plot robot's collision
     """
@@ -273,7 +273,7 @@ def plot_collision(ax, robot, transformations, alpha=0.8):
                 color = list(visual_color.keys())
         return color
 
-    for link, transformation in transformations.items():
+    for link, transformation in fk.items():
         h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
         color = _get_color(robot.links[link].visual.gparam)
 

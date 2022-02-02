@@ -181,7 +181,7 @@ class GraspManager(ActivityBase):
         while cnt < num_grasp * n_trials:
             tcp_poses = self.generate_tcp_poses(obj_mesh, obj_pose, limit_angle, n_trials)
             for tcp_pose, contact_points, _ in tcp_poses:
-                gripper_transformed = self.get_gripper_transformed(tcp_pose)
+                gripper_transformed = self.get_transformed_gripper_fk(tcp_pose)
 
                 if self._collision_free(gripper_transformed, only_gripper=True):
                     self.tcp_pose = tcp_pose
@@ -531,7 +531,7 @@ class GraspManager(ActivityBase):
                 result_gripper_pose[:3, :3] = gripper_pose_transformed[:3, :3]
                 result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed) + np.array([0, 0, self.release_distance])
 
-                gripper_transformed = self.get_gripper_transformed(result_gripper_pose)
+                gripper_transformed = self.get_transformed_gripper_fk(result_gripper_pose)
                 if self._collision_free(gripper_transformed, only_gripper=True):
                     release_pose = gripper_transformed[self.robot.eef_name]
                     yield release_pose, result_obj_pose
@@ -733,12 +733,12 @@ class GraspManager(ActivityBase):
             pose (np.array): current eef pose
         
         Returns:
-            trasforms, goal_pose (tuple): transformations, goal eef pose 
+            fk, goal_pose (tuple): forward kinematics, goal eef pose 
         """
         qpos = self._compute_inverse_kinematics(pose)
-        transforms = self.robot.forward_kin(np.array(qpos))
-        goal_pose = transforms[self.robot.eef_name].h_mat
-        return transforms, goal_pose
+        fk = self.robot.forward_kin(np.array(qpos))
+        goal_pose = fk[self.robot.eef_name].h_mat
+        return fk, goal_pose
 
     def _check_support(self, obj_pose):
         """

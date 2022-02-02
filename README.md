@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-Python Interface for the Robot Kinematics Library <a href="https://jdj2261.github.io/pykin/" target="_blank">pykin</a>
+Python Interface for the Robot Kinematics Library pykin
 
 This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a>
 
@@ -206,11 +206,11 @@ $ git submodule update
   #################################################################################
   #                                Set target pose                                #
   #################################################################################
-  target_transformations = robot.forward_kin(thetas)
+  target_fk = robot.forward_kin(thetas)
   _, ax = plt.init_3d_figure("Target Pose")
   plt.plot_robot(robot, 
                  ax=ax,
-                 transformations=target_transformations,
+                 fk=target_fk,
                  visible_visual=visible_visual, 
                  visible_collision=visible_collision,
                  mesh_path='../../asset/urdf/baxter/')
@@ -219,8 +219,8 @@ $ git submodule update
   #                                Inverse Kinematics                             #
   #################################################################################
   init_thetas = np.random.randn(7)
-  target_pose = { "right": robot.get_eef_pose(target_transformations)["right"], 
-                  "left" : robot.get_eef_pose(target_transformations)["left"]}
+  target_pose = { "right": robot.get_eef_pose(target_fk)["right"], 
+                  "left" : robot.get_eef_pose(target_fk)["left"]}
   
   ik_LM_result = robot.inverse_kin(
       init_thetas, 

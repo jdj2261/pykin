@@ -40,7 +40,7 @@ class Robot(URDFModel):
         self.joint_limits_upper = []
 
         self._setup_kinematics()
-        self._setup_init_transform()
+        self._setup_init_fk()
 
         self.joint_limits = self._get_limited_joints()
 
@@ -80,13 +80,13 @@ class Robot(URDFModel):
                               eef_name=None
                               )
     
-    def _setup_init_transform(self):
+    def _setup_init_fk(self):
         """
-        Initializes robot's transformation
+        Initializes robot's forward kinematics
         """
         thetas = np.zeros(len(super().get_revolute_joint_names()))
-        transformations = self.kin.forward_kinematics(self.root, thetas)
-        self.init_transformations = transformations
+        fk = self.kin.forward_kinematics(self.root, thetas)
+        self.init_fk = fk
 
     def _get_limited_joints(self):
         """

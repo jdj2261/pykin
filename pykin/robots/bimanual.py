@@ -161,12 +161,12 @@ class Bimanual(Robot):
             value = np.array(value)
         return value.flatten()
 
-    def get_eef_pose(self, transformations):
+    def get_eef_pose(self, fk):
         """
         Compute end effector's pose
 
         Args:
-            transformations(OrderedDict)
+            fk(OrderedDict)
         
         Returns:
             vals(dict)
@@ -174,7 +174,7 @@ class Bimanual(Robot):
         vals = {}
         for arm in self.arm_type:
             if self.eef_name[arm]:
-                vals[arm] = np.concatenate((transformations[self.eef_name[arm]].pos, transformations[self.eef_name[arm]].rot))
+                vals[arm] = np.concatenate((fk[self.eef_name[arm]].pos, fk[self.eef_name[arm]].rot))
         return vals
 
     @property

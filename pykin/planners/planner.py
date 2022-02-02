@@ -196,16 +196,16 @@ class Planner(metaclass=ABCMeta):
         if self.robot_col_mngr is None:
             return True
 
-        transformations = self._get_transformations(new_q)
+        fk = self._get_fk(new_q)
         
         if is_attached:
-            grasp_pose = transformations[self.robot.eef_name].h_mat
+            grasp_pose = fk[self.robot.eef_name].h_mat
             obj_pose = np.dot(grasp_pose, self.T_between_gripper_and_obj)
             self.robot_col_mngr.set_transform(self.obj_info["name"], obj_pose)
         
-        for link, transformations in transformations.items():
+        for link, transformation in fk.items():
             if link in self.robot_col_mngr._objs:
-                transform = transformations.h_mat
+                transform = transformation.h_mat
                 if self.robot_col_mngr.geom == "visual":
                     h_mat = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
                 else:
@@ -225,24 +225,24 @@ class Planner(metaclass=ABCMeta):
             return False
         return True
 
-    def _get_transformations(self, q_in):
+    def _get_fk(self, q_in):
         """
-        Get transformations corresponding to q_in
+        Get forward kinematics corresponding to q_in
 
         Args:
             q_in (np.array): joint angles
 
         Returns:
-            transformations (OrderedDict)
+            fk (OrderedDict)
         """
         if self.robot.robot_name == "sawyer":
             q_in = np.concatenate((np.zeros(1), q_in))
 
         if self.arm is not None:
-            transformations = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
+            fk = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
         else:
-            transformations = self.robot.forward_kin(q_in)
-        return transformations
+            fk = self.robot.forward_kin(q_in)
+        return fk
 
     @property
     def dimension(self):

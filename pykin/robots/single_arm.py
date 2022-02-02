@@ -120,65 +120,65 @@ class SingleArm(Robot):
             max_iter)
         return joints
 
-    def get_eef_pose(self, transformations=None):
+    def get_eef_pose(self, fk=None):
         """
         Get end effector's pose
 
         Args:
-            transformations(OrderedDict)
+            fk(OrderedDict)
         
         Returns:
             vals(dict)
         """
-        if transformations is None:
-            transformations = self.init_transformations
+        if fk is None:
+            fk = self.init_fk
 
-        return np.concatenate((transformations[self.eef_name].pos, transformations[self.eef_name].rot))
+        return np.concatenate((fk[self.eef_name].pos, fk[self.eef_name].rot))
 
-    def get_eef_h_mat(self, transformations=None):
+    def get_eef_h_mat(self, fk=None):
         """
         Get end effector's homogeneous marix
 
         Args:
-            transformations(OrderedDict)
+            fk(OrderedDict)
         
         Returns:
             vals(dict)
         """
-        if transformations is None:
-            transformations = self.init_transformations
+        if fk is None:
+            fk = self.init_fk
 
-        return transformations[self.eef_name].h_mat
+        return fk[self.eef_name].h_mat
 
-    def get_eef_pos(self, transformations=None):
+    def get_eef_pos(self, fk=None):
         """
         Get end effector's position
 
         Args:
-            transformations(OrderedDict)
+            fk(OrderedDict)
         
         Returns:
             vals(dict)
         """
-        if transformations is None:
-            transformations = self.init_transformations
+        if fk is None:
+            fk = self.init_fk
 
-        return transformations[self.eef_name].pos
+        return fk[self.eef_name].pos
 
-    def get_eef_ori(self, transformations=None):
+    def get_eef_ori(self, fk=None):
         """
         Get end effector's orientation
 
         Args:
-            transformations(OrderedDict)
+            fk(OrderedDict)
         
         Returns:
             vals(dict)
         """
-        if transformations is None:
-            transformations = self.init_transformations
+        if fk is None:
+            fk = self.init_fk
 
-        return transformations[self.eef_name].rot
+        return fk[self.eef_name].rot
 
     @property
     def base_name(self):

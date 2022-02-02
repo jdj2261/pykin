@@ -63,7 +63,7 @@ interpolated_path = planner.get_path_in_joinst_space(
     goal_pose=goal_eef_pose,
     robot_col_manager=robot_c_manager,
     object_col_manager=obj_c_manager,
-    max_iter=600,
+    max_iter=1000,
     resolution=0.3)
 
 planner.robot_col_mngr.show_collision_info()
@@ -76,9 +76,9 @@ joint_trajectory = []
 eef_poses = []
 
 for step, joint in enumerate(interpolated_path):
-    transformations = robot.forward_kin(joint)
-    joint_trajectory.append(transformations)
-    eef_poses.append(transformations[robot.eef_name].pos)
+    fk = robot.forward_kin(joint)
+    joint_trajectory.append(fk)
+    eef_poses.append(fk[robot.eef_name].pos)
 
 plt.plot_animation(
     robot,
