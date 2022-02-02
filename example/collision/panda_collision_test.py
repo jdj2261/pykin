@@ -38,7 +38,7 @@ for link, transform in goal_fk.items():
             h_mat = np.dot(transform, robot.links[link].visual.offset.h_mat)
         else:
             h_mat = np.dot(transform, robot.links[link].collision.offset.h_mat)
-        c_manager.set_transform(name=link, transform=h_mat)
+        c_manager.set_transform(name=link, h_mat=h_mat)
 
 result, name = c_manager.in_collision_internal(return_names=True, return_data=False)
 print(result, name)
@@ -47,14 +47,14 @@ milk_path = pykin_path+"/asset/objects/meshes/milk.stl"
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager(milk_path)
-o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.1, 0, 0.4]).h_mat)
-o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, transform=Transform(pos=[0.4, 0, 0.4]).h_mat)
+o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.1, 0, 0.4]).h_mat)
+o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.4, 0, 0.4]).h_mat)
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
 scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
 
-scene.add_geometry(test_mesh, node_name="milk1", h_mat=Transform(pos=[0.1, 0, 0.4]).h_mat)
-scene.add_geometry(test_mesh, node_name="milk2", h_mat=Transform(pos=[0.4, 0, 0.4]).h_mat)
+scene.add_geometry(test_mesh, node_name="milk1", transform=Transform(pos=[0.1, 0, 0.4]).h_mat)
+scene.add_geometry(test_mesh, node_name="milk2", transform=Transform(pos=[0.4, 0, 0.4]).h_mat)
 
 scene.show()

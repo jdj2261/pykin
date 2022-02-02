@@ -14,7 +14,7 @@ def apply_robot_to_collision_manager(c_manager, robot, fk=None, geom="visual"):
                 mesh = trimesh.load_mesh(file_name)
                 h_mat = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
                 if c_manager._filter_names:
-                    c_manager.set_transform(name=robot.links[link].name, transform=h_mat)
+                    c_manager.set_transform(name=robot.links[link].name, h_mat=h_mat)
                 else:
                     c_manager.add_object(
                         name=robot.links[link].name, 
@@ -29,7 +29,7 @@ def apply_robot_to_collision_manager(c_manager, robot, fk=None, geom="visual"):
                 mesh = trimesh.load_mesh(file_name)
                 h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
                 if c_manager._filter_names:
-                    c_manager.set_transform(name=robot.links[link].name, transform=h_mat)
+                    c_manager.set_transform(name=robot.links[link].name, h_mat=h_mat)
                 else:
                     c_manager.add_object(
                         name=robot.links[link].name, 

@@ -50,7 +50,7 @@ def _check_color_type(color):
     return color
 
 
-def plot_basis(robot=None, ax=None):
+def plot_basis(ax=None, robot=None):
     """
     Plot a frame fitted to the robot size
     """
@@ -79,6 +79,7 @@ def plot_basis(robot=None, ax=None):
     ax.plot([0, 0], [0, 0], [0, offset * 1.5],
             c=directions_colors[2], label="Z")
 
+
 def plot_robot(
     robot, 
     ax=None, 
@@ -97,7 +98,7 @@ def plot_robot(
     name = robot.robot_name
 
     if visible_basis:
-        plot_basis(robot, ax)
+        plot_basis(ax, robot)
     
     links = []
     nodes = []
@@ -115,7 +116,7 @@ def plot_robot(
             eef_idx=i
 
     if name == "baxter":
-        plot_baxter(nodes, ax, visible_text, visible_scatter)
+        plot_baxter(ax, nodes, visible_text, visible_scatter)
     else:
         lines = ax.plot([x[0] for x in nodes], [x[1] for x in nodes], [
             x[2] for x in nodes], linewidth=2, label=name)
@@ -138,8 +139,7 @@ def plot_robot(
     ax.legend()
 
 
-
-def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
+def plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
     """
     Plot baxter robot
     """
@@ -187,11 +187,13 @@ def plot_baxter(nodes, ax, visible_text=True, visible_scatter=True):
         ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
             [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
 
+
 def plot_trajectories(ax, path, size=10, color='r'):
     """
     Plot plot_trajectories
     """
     ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=size, c=color)
+
 
 def plot_animation(
     robot, 
@@ -237,7 +239,8 @@ def plot_animation(
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     plt.show()
 
-def plot_objects(ax, objects):    
+
+def plot_objects(ax, objects, alpha=0.5, color='k'):    
     """
     Plot objects
     """
@@ -247,17 +250,18 @@ def plot_objects(ax, objects):
         o_pose = value[2]
 
         if o_type == "mesh":
-            plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=0.3)
+            plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=alpha, color=color)
         if o_type == "sphere":
-            plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=0.8, color='g')
+            plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=alpha, color=color)
         if o_type == "box":
             h_mat = tf.get_h_mat(o_pose)
-            plot_box(ax, size=o_param, h_mat=h_mat, alpha=0.8, color='b')
+            plot_box(ax, size=o_param, h_mat=h_mat, alpha=alpha, color=color)
         if o_type == "cylinder":
             h_mat = tf.get_h_mat(o_pose)
-            plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=0.8, color='r')
+            plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=color)
 
-def plot_collision(robot, transformations, ax, alpha=0.8):
+
+def plot_collision(ax, robot, transformations, alpha=0.8):
     """
     Plot robot's collision
     """
@@ -395,7 +399,7 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, h_mat=np.eye(4), color="k"):
     ax.add_collection3d(p3c)
 
 
-def plot_path_planner(path, ax):
+def plot_path_planner(ax, path):
     """
     Plot rrt* path planner
     """
