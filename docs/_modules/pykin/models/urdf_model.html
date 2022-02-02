@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.models.urdf_model &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pykin.models.urdf_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pykin.models.urdf_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">io</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementTree</span> <span class="k">as</span> <span class="n">ET</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">pykin.models.robot_model</span> <span class="kn">import</span> <span class="n">RobotModel</span>
+<span class="kn">from</span> <span class="nn">pykin.geometry.frame</span> <span class="kn">import</span> <span class="n">Joint</span><span class="p">,</span> <span class="n">Link</span><span class="p">,</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">pykin.geometry.geometry</span> <span class="kn">import</span> <span class="n">Visual</span><span class="p">,</span> <span class="n">Collision</span>
+<span class="kn">from</span> <span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span>
+<span class="kn">from</span> <span class="nn">pykin.utils.kin_utils</span> <span class="kn">import</span> <span class="n">convert_transform</span><span class="p">,</span> <span class="n">JOINT_TYPE_MAP</span>
+<span class="kn">from</span> <span class="nn">pykin.utils.urdf_utils</span> <span class="kn">import</span> <span class="n">URDF_Link</span><span class="p">,</span> <span class="n">URDF_Joint</span>
+
+
+<div class="viewcode-block" id="URDFModel"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel">[docs]</a><span class="k">class</span> <span class="nc">URDFModel</span><span class="p">(</span><span class="n">RobotModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes a urdf model, as defined by a single corresponding robot URDF</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname (str): path to the urdf file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fname</span><span class="si">}</span><span class="s1"> is not Found..&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_xml</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree_xml</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robot_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_links</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_joints</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_root</span><span class="p">()</span>
+
+<div class="viewcode-block" id="URDFModel.get_urdf"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.get_urdf">[docs]</a>    <span class="k">def</span> <span class="nf">get_urdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads a string of the urdf file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: xml read in from file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span> <span class="k">as</span> <span class="n">string</span><span class="p">:</span>
+            <span class="n">string</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ET</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_xml</span><span class="o">.</span><span class="n">getroot</span><span class="p">(),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;unicode&quot;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">string</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="URDFModel.find_frame"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.find_frame">[docs]</a>    <span class="k">def</span> <span class="nf">find_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            frame_name (str): frame&#39;s name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Frame: frame with child frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">frame_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_name_recursive</span><span class="p">(</span><span class="n">frame_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">frame_type</span><span class="o">=</span><span class="s2">&quot;frame&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="URDFModel.find_link"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.find_link">[docs]</a>    <span class="k">def</span> <span class="nf">find_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            link_name (str): link&#39;s name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Link: desired robot&#39;s link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">link_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">link</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_name_recursive</span><span class="p">(</span><span class="n">link_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">frame_type</span><span class="o">=</span><span class="s2">&quot;link&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="URDFModel.find_joint"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.find_joint">[docs]</a>    <span class="k">def</span> <span class="nf">find_joint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            joint_name (str): joint&#39;s name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Joint: desired robot&#39;s joint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">joint_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">joint</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_name_recursive</span><span class="p">(</span><span class="n">joint_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">frame_type</span><span class="o">=</span><span class="s2">&quot;joint&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="URDFModel.get_actuated_joint_names"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.get_actuated_joint_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_actuated_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns actuated(revolute, prismatic) joint names</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            desired_frames (list): If is not empty, will get desired actuated joint names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: actuated joint names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">desired_frames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_actuated_joint_names</span><span class="p">(</span><span class="n">root_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">joint_names</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;head&quot;</span> <span class="ow">in</span> <span class="n">joint</span><span class="p">:</span>
+                    <span class="n">head_joint</span> <span class="o">=</span> <span class="n">joint_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">joint_names</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">head_joint</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_actuated_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="o">=</span><span class="n">desired_frames</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span></div>
+
+<div class="viewcode-block" id="URDFModel.get_revolute_joint_names"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.get_revolute_joint_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_revolute_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns revolute joint names</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            desired_frames (list): If is not empty, will get desired actuated joint names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: revolute joint names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">desired_frames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_revolute_joint_names</span><span class="p">(</span><span class="n">root_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">joint_names</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;head&quot;</span> <span class="ow">in</span> <span class="n">joint</span><span class="p">:</span>
+                    <span class="n">head_joint</span> <span class="o">=</span> <span class="n">joint_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">joint_names</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">head_joint</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_revolute_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="o">=</span><span class="n">desired_frames</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set all links from urdf file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elem_link</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;link&#39;</span><span class="p">)):</span>
+            <span class="n">link_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_link_frame</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">elem_link</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">[</span><span class="n">link_frame</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">link_frame</span><span class="o">.</span><span class="n">link</span>
+
+    <span class="k">def</span> <span class="nf">_set_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set all joints from urdf file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elem_joint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;joint&#39;</span><span class="p">)):</span>
+            <span class="n">joint_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_joint_frame</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">elem_joint</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_joints</span><span class="p">[</span><span class="n">joint_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">joint_frame</span><span class="o">.</span><span class="n">joint</span>
+
+    <span class="k">def</span> <span class="nf">_set_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set root from urdf file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root_name</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root_link</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">[</span><span class="n">root_name</span><span class="p">]</span>
+
+        <span class="n">root_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_root_frame</span><span class="p">(</span><span class="n">root_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root_frame</span>
+
+    <span class="k">def</span> <span class="nf">_generate_root_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates root frame with all child frames</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root_name (str): root name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Frame: root frame with all child frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">root_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">root_name</span> <span class="o">+</span> <span class="s2">&quot;_frame&quot;</span><span class="p">)</span>
+        <span class="n">root_frame</span><span class="o">.</span><span class="n">joint</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">()</span>
+        <span class="n">root_frame</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">root_name</span><span class="p">)</span>
+        <span class="n">root_frame</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_children_recursive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_link</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_links</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_joints</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">root_frame</span>
+
+    <span class="k">def</span> <span class="nf">_get_link_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elem_link</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns link frame from urdf file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            idx (int): index of link parsed from urdf file</span>
+<span class="sd">            elem_link (xml.etree.ElementTree.Element): element of link parsed from urdf file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Frame: link frame with all child frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attrib</span> <span class="o">=</span> <span class="n">elem_link</span><span class="o">.</span><span class="n">attrib</span>
+        <span class="n">link_name</span> <span class="o">=</span> <span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;link_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+        <span class="n">link_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">link_name</span> <span class="o">+</span> <span class="s1">&#39;_frame&#39;</span><span class="p">,</span>
+                      <span class="n">link</span><span class="o">=</span><span class="n">Link</span><span class="p">(</span>
+                          <span class="n">name</span><span class="o">=</span><span class="n">link_name</span><span class="p">,</span> 
+                          <span class="n">offset</span><span class="o">=</span><span class="n">Transform</span><span class="p">(),</span> 
+                          <span class="n">visual</span><span class="o">=</span><span class="n">Visual</span><span class="p">(),</span> 
+                          <span class="n">collision</span><span class="o">=</span><span class="n">Collision</span><span class="p">()))</span>
+
+        <span class="n">URDF_Link</span><span class="o">.</span><span class="n">set_visual</span><span class="p">(</span><span class="n">elem_link</span><span class="p">,</span> <span class="n">link_frame</span><span class="p">)</span>
+        <span class="n">URDF_Link</span><span class="o">.</span><span class="n">set_collision</span><span class="p">(</span><span class="n">elem_link</span><span class="p">,</span> <span class="n">link_frame</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">link_frame</span>
+
+    <span class="k">def</span> <span class="nf">_get_joint_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elem_joint</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns joint frame from urdf file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            idx (int): index of joint parsed from urdf file</span>
+<span class="sd">            elem_joint (xml.etree.ElementTree.Element): element of joint parsed from urdf file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Frame: joint frame with all child frames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attrib</span> <span class="o">=</span> <span class="n">elem_joint</span><span class="o">.</span><span class="n">attrib</span>
+        <span class="n">joint_name</span> <span class="o">=</span> <span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;joint_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+        <span class="n">joint_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">joint_name</span> <span class="o">+</span> <span class="s1">&#39;_frame&#39;</span><span class="p">,</span>
+                      <span class="n">joint</span><span class="o">=</span><span class="n">Joint</span><span class="p">(</span>
+                          <span class="n">name</span><span class="o">=</span><span class="n">joint_name</span><span class="p">,</span> 
+                          <span class="n">offset</span><span class="o">=</span><span class="n">Transform</span><span class="p">(),</span> 
+                          <span class="n">dtype</span><span class="o">=</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> 
+                          <span class="n">limit</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]))</span>
+
+        <span class="n">parent_tag</span> <span class="o">=</span> <span class="n">elem_joint</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;parent&#39;</span><span class="p">)</span>
+        <span class="n">joint_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;link&#39;</span><span class="p">]</span>
+
+        <span class="n">child_tag</span> <span class="o">=</span> <span class="n">elem_joint</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;child&#39;</span><span class="p">)</span>
+        <span class="n">joint_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">child</span> <span class="o">=</span> <span class="n">child_tag</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s1">&#39;link&#39;</span><span class="p">]</span>
+
+        <span class="n">URDF_Joint</span><span class="o">.</span><span class="n">set_origin</span><span class="p">(</span><span class="n">elem_joint</span><span class="p">,</span> <span class="n">joint_frame</span><span class="p">)</span>
+        <span class="n">URDF_Joint</span><span class="o">.</span><span class="n">set_axis</span><span class="p">(</span><span class="n">elem_joint</span><span class="p">,</span> <span class="n">joint_frame</span><span class="p">)</span>
+        <span class="n">URDF_Joint</span><span class="o">.</span><span class="n">set_limit</span><span class="p">(</span><span class="n">elem_joint</span><span class="p">,</span> <span class="n">joint_frame</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">joint_frame</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_generate_children_recursive</span><span class="p">(</span><span class="n">root_link</span><span class="p">:</span> <span class="n">Link</span><span class="p">,</span> <span class="n">links</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">joints</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates child frame recursive from current joint</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root (Link): </span>
+<span class="sd">            links (OrderedDict): element of joint parsed from urdf file</span>
+<span class="sd">            joints (OrderedDict): element of joint parsed from urdf file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append list If current joint&#39;s parent link is root link</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">joint</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">root_link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">child_frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">joint</span><span class="o">.</span><span class="n">child</span> <span class="o">+</span> <span class="s2">&quot;_frame&quot;</span><span class="p">)</span>
+                <span class="n">child_frame</span><span class="o">.</span><span class="n">joint</span> <span class="o">=</span> <span class="n">Joint</span><span class="p">(</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
+                                        <span class="n">offset</span><span class="o">=</span><span class="n">convert_transform</span><span class="p">(</span><span class="n">joint</span><span class="o">.</span><span class="n">offset</span><span class="p">),</span> 
+                                        <span class="n">dtype</span><span class="o">=</span><span class="n">JOINT_TYPE_MAP</span><span class="p">[</span><span class="n">joint</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span> 
+                                        <span class="n">axis</span><span class="o">=</span><span class="n">joint</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> 
+                                        <span class="n">limit</span><span class="o">=</span><span class="n">joint</span><span class="o">.</span><span class="n">limit</span><span class="p">)</span>
+
+                <span class="n">child_link</span> <span class="o">=</span> <span class="n">links</span><span class="p">[</span><span class="n">joint</span><span class="o">.</span><span class="n">child</span><span class="p">]</span>
+                <span class="n">child_frame</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="n">Link</span><span class="p">(</span><span class="n">child_link</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
+                                        <span class="n">offset</span><span class="o">=</span><span class="n">convert_transform</span><span class="p">(</span><span class="n">child_link</span><span class="o">.</span><span class="n">offset</span><span class="p">),</span>
+                                        <span class="n">visual</span><span class="o">=</span><span class="n">child_link</span><span class="o">.</span><span class="n">visual</span><span class="p">,</span>
+                                        <span class="n">collision</span><span class="o">=</span><span class="n">child_link</span><span class="o">.</span><span class="n">collision</span><span class="p">)</span>
+
+                <span class="n">child_frame</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">URDFModel</span><span class="o">.</span><span class="n">_generate_children_recursive</span><span class="p">(</span><span class="n">child_frame</span><span class="o">.</span><span class="n">link</span><span class="p">,</span> <span class="n">links</span><span class="p">,</span> <span class="n">joints</span><span class="p">)</span>
+                <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_frame</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">children</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_name_recursive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">frame_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the frame, link, or joint you want to find.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name you want to find</span>
+<span class="sd">            frame (Frame): frame from root until it finds the desired name</span>
+<span class="sd">            frame_type (str): 3 frame types, frame or link or joint</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            3 types: Frame, Link, Joint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frame_type</span> <span class="o">==</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">and</span> <span class="n">frame</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">frame</span>
+            <span class="k">if</span> <span class="n">frame_type</span> <span class="o">==</span> <span class="s2">&quot;link&quot;</span> <span class="ow">and</span> <span class="n">frame</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">frame</span><span class="o">.</span><span class="n">link</span>
+            <span class="k">if</span> <span class="n">frame_type</span> <span class="o">==</span> <span class="s2">&quot;joint&quot;</span> <span class="ow">and</span> <span class="n">frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">frame</span><span class="o">.</span><span class="n">joint</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">URDFModel</span><span class="o">.</span><span class="n">_find_name_recursive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">frame_type</span><span class="p">)</span>
+
+            <span class="k">assert</span> <span class="p">(</span><span class="n">ret</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Not Found </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, please check the name again&quot;</span>
+            <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="k">def</span> <span class="nf">_get_actuated_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">desired_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the actuated joint(revolute, prismatic)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root_frame (str): root frame</span>
+<span class="sd">            desired_frames (Frame): frames from root until it finds the desired name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">root_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">joint_names</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_get_all_actuated_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">root_frame</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">desired_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_desired_actuated_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">joint_names</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_all_actuated_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">root_frame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of all actuated joint(revolute, prismatic)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            joint_names (list): all actuated joint names</span>
+<span class="sd">            root_frame (Frame): root frame</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">root_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">num_dof</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">joint_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">root_frame</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">URDFModel</span><span class="o">.</span><span class="n">_get_all_actuated_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_desired_actuated_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of desired actuated joint(revolute, prismatic)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            desired_frames (list): desired actuated joint names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">desired_frames</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">num_dof</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">joint_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span>
+    
+    <span class="k">def</span> <span class="nf">_get_revolute_joint_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">desired_frames</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of the actuated joint(revolute, prismatic)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            root_frame (str): root frame</span>
+<span class="sd">            desired_frames (Frame): frames from root until it finds the desired name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">root_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">joint_names</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_get_all_revolute_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">root_frame</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">desired_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_desired_actuated_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">joint_names</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_all_revolute_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">root_frame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of all revolute joint</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            joint_names (list): all actuated joint names</span>
+<span class="sd">            root_frame (Frame): root frame</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">root_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;revolute&#39;</span><span class="p">:</span>
+            <span class="n">joint_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root_frame</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">root_frame</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">URDFModel</span><span class="o">.</span><span class="n">_get_all_revolute_joint_names_recursive</span><span class="p">(</span><span class="n">joint_names</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_desired_actuated_joint_names</span><span class="p">(</span><span class="n">desired_frames</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the name of desired actuated joint(revolute, prismatic)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            desired_frames (list): desired actuated joint names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append joint if joint&#39;s dof is not zero</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">joint_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">desired_frames</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;revolute&#39;</span><span class="p">:</span>
+                <span class="n">joint_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">joint</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">joint_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: robot&#39;s dof</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">joint</span><span class="o">.</span><span class="n">num_dof</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of links</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">links</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of joints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_fixed_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of fixed joints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">joint</span><span class="o">.</span><span class="n">num_dof</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_actuated_joints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: number of actuated joints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">joints</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">joint</span><span class="o">.</span><span class="n">num_dof</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span>
+
+<div class="viewcode-block" id="URDFModel.generate_desired_frame_recursive"><a class="viewcode-back" href="../../../pykin.models.html#pykin.models.urdf_model.URDFModel.generate_desired_frame_recursive">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">generate_desired_frame_recursive</span><span class="p">(</span><span class="n">base_frame</span><span class="p">,</span> <span class="n">eef_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return frames from base_frame to eef_frame you want to find</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            base_frame (list): reference frame</span>
+<span class="sd">            eef_name (str): end effector name</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Append frame until child link name is eef name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">base_frame</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">eef_name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">child</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">frames</span> <span class="o">=</span> <span class="n">URDFModel</span><span class="o">.</span><span class="n">generate_desired_frame_recursive</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">eef_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">+</span> <span class="n">frames</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.kinematics package &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pykin.kinematics package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pykin.kinematics.jacobian">pykin.kinematics.jacobian module</a></li>
+<li><a class="reference internal" href="#module-pykin.kinematics.kinematics">pykin.kinematics.kinematics module</a></li>
+<li><a class="reference internal" href="#module-pykin.kinematics.transform">pykin.kinematics.transform module</a></li>
+<li><a class="reference internal" href="#module-pykin.kinematics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pykin.kinematics package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pykin.kinematics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pykin-kinematics-package">
+<h1>pykin.kinematics package<a class="headerlink" href="#pykin-kinematics-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pykin.kinematics.jacobian">
+<span id="pykin-kinematics-jacobian-module"></span><h2>pykin.kinematics.jacobian module<a class="headerlink" href="#module-pykin.kinematics.jacobian" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pykin.kinematics.jacobian.calc_jacobian">
+<span class="sig-prename descclassname"><span class="pre">pykin.kinematics.jacobian.</span></span><span class="sig-name descname"><span class="pre">calc_jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.array</span></span></span><a class="reference internal" href="_modules/pykin/kinematics/jacobian.html#calc_jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.kinematics.jacobian.calc_jacobian" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frames</strong> (<em>list</em>) – frames to compute jacobian</p></li>
+<li><p><strong>transformations</strong> (<em>dict</em>) – transformations from forward kinematics</p></li>
+<li><p><strong>thetas</strong> (<em>int</em>) – size of joint space</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return Jacobian</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Jacobian (np.array(6, jsize))</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pykin.kinematics.kinematics">
+<span id="pykin-kinematics-kinematics-module"></span><h2>pykin.kinematics.kinematics module<a class="headerlink" href="#module-pykin.kinematics.kinematics" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.kinematics.kinematics.Kinematics">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.kinematics.kinematics.</span></span><span class="sig-name descname"><span class="pre">Kinematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">robot_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_joint_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'base'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eef_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/kinematics/kinematics.html#Kinematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.kinematics.kinematics.Kinematics" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class of Kinematics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>robot_name</strong> (<em>str</em>) – robot’s name</p></li>
+<li><p><strong>offset</strong> (<a class="reference internal" href="#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>Transform</em></a>) – robot’s offset</p></li>
+<li><p><strong>active_joint_names</strong> (<em>list</em>) – robot’s actuated joints</p></li>
+<li><p><strong>base_name</strong> (<em>str</em>) – reference link’s name</p></li>
+<li><p><strong>eef_name</strong> (<em>str</em>) – end effector’s name</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.kinematics.kinematics.Kinematics.forward_kinematics">
+<span class="sig-name descname"><span class="pre">forward_kinematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thetas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/kinematics/kinematics.html#Kinematics.forward_kinematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.kinematics.kinematics.Kinematics.forward_kinematics" title="Permalink to this definition"></a></dt>
+<dd><p>Returns transformations obtained by computing fk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frames</strong> (<em>list</em><em> or </em><a class="reference internal" href="pykin.geometry.html#pykin.geometry.frame.Frame" title="pykin.geometry.frame.Frame"><em>Frame</em></a><em>(</em><em>)</em>) – robot’s frame for forward kinematics</p></li>
+<li><p><strong>thetas</strong> (<em>sequence of float</em>) – input joint angles</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>transformations</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>transformations (OrderedDict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.kinematics.kinematics.Kinematics.inverse_kinematics">
+<span class="sig-name descname"><span class="pre">inverse_kinematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pykin.kinematics.kinematics.Kinematics.inverse_kinematics" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pykin.kinematics.transform">
+<span id="pykin-kinematics-transform-module"></span><h2>pykin.kinematics.transform module<a class="headerlink" href="#module-pykin.kinematics.transform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.kinematics.transform.</span></span><span class="sig-name descname"><span class="pre">Transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([1.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/kinematics/transform.html#Transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.kinematics.transform.Transform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class calculates the rotation and translation of a 3D rigid body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rot</strong> (<em>sequence of float</em>) – The rotation parameter. Give in quaternions or roll pitch yaw.</p></li>
+<li><p><strong>pos</strong> (<em>sequence of float</em>) – The translation parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<<<<<<< HEAD
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.h_mat">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">h_mat</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.h_mat" title="Permalink to this definition">¶</a></dt>
+=======
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.homogeneous_matrix">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">homogeneous_matrix</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.homogeneous_matrix" title="Permalink to this definition"></a></dt>
+>>>>>>> ea49476fc7b0492d09cb4006dd56bb6aba81ff14
+<dd><p>Returns:
+np.array: homogeneous matrix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.inverse">
+<span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/kinematics/transform.html#Transform.inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.kinematics.transform.Transform.inverse" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>inverse transform</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.pos">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">pos</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.pos" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+np.array: position</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.pose">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">pose</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.pose" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+np.array: pose</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.rot">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rot</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.rot" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+np.array: rotation (quaternion)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.kinematics.transform.Transform.rotation_matrix">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">rotation_matrix</span></span><a class="headerlink" href="#pykin.kinematics.transform.Transform.rotation_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+np.array: rotation matrix</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pykin.kinematics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pykin.kinematics" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

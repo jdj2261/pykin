@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
+  
+  <title>pykin.collision.collision_manager &mdash; pykin 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+=======
+  <title>pykin.utils.fcl_utils &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+>>>>>>> ea49476fc7b0492d09cb4006dd56bb6aba81ff14
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+<<<<<<< HEAD
+        
+      <li>pykin.collision.collision_manager</li>
+    
+    
+=======
+      <li>pykin.utils.fcl_utils</li>
+>>>>>>> ea49476fc7b0492d09cb4006dd56bb6aba81ff14
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+<<<<<<< HEAD
+            
+  <h1>Source code for pykin.collision.collision_manager</h1><div class="highlight"><pre>
+=======
+             
+  <h1>Source code for pykin.utils.fcl_utils</h1><div class="highlight"><pre>
+>>>>>>> ea49476fc7b0492d09cb4006dd56bb6aba81ff14
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">fcl</span>
+<span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+    <span class="n">fcl</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ContactData"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.ContactData">[docs]</a><span class="k">class</span> <span class="nc">ContactData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data structure for holding information about a collision contact.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        names (str): The names of the two objects in order.</span>
+<span class="sd">        contact (fcl.Contact): The contact in question.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">contact</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inds</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">contact</span><span class="o">.</span><span class="n">b1</span><span class="p">,</span>
+            <span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">contact</span><span class="o">.</span><span class="n">b2</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_point</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">penetration_depth</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;pykin.collision.collision_manager.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The 3D point of intersection for this contact.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (3,) float: The intersection point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The penetration depth of the 3D point of intersection for this contact.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The penetration depth.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span>
+
+<div class="viewcode-block" id="ContactData.index"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.ContactData.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the index of the face in contact for the mesh with</span>
+<span class="sd">        the given name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the target object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The index of the face in collision</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="CollisionManager"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager">[docs]</a><span class="k">class</span> <span class="nc">CollisionManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A rigid body collision manager.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">DynamicAABBTreeCollisionManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;pykin.collision.collision_manager.</span><span class="si">{}</span><span class="s1">()&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CollisionManager.add_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager.add_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                   <span class="n">name</span><span class="p">,</span> 
+                   <span class="n">gtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">gparam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an object to the collision manager.</span>
+<span class="sd">        If an object with the given name is already in the manager, replace it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): An identifier for the object</span>
+<span class="sd">            gtype (str): object type (cylinder, sphere, box)</span>
+<span class="sd">            gparam (float or tuple): object parameter (radius, length, size)</span>
+<span class="sd">            transform (np.array): Homogeneous transform matrix for the object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">gtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">transform</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;transform must be (4,4)!&#39;</span><span class="p">)</span>
+
+        <span class="n">geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_geom</span><span class="p">(</span><span class="n">gtype</span><span class="p">,</span> <span class="n">gparam</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">transform</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">transform</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">CollisionObject</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Add collision object to set</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">unregisterObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;obj&#39;</span><span class="p">:</span> <span class="n">o</span><span class="p">,</span>
+                            <span class="s1">&#39;geom&#39;</span><span class="p">:</span> <span class="n">geom</span><span class="p">}</span>
+        <span class="c1"># store the name of the geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">geom</span><span class="p">)]</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">registerObject</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CollisionManager.set_transform"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager.set_transform">[docs]</a>    <span class="k">def</span> <span class="nf">set_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the transform for one of the manager&#39;s objects.</span>
+<span class="sd">        This replaces the prior transform.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): An identifier for the object already in the manager</span>
+<span class="sd">            transform (np.array): A new homogeneous transform matrix for the object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+            
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">:</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span>
+            <span class="n">o</span><span class="o">.</span><span class="n">setRotation</span><span class="p">(</span><span class="n">transform</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">o</span><span class="o">.</span><span class="n">setTranslation</span><span class="p">(</span><span class="n">transform</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> not in collision manager!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CollisionManager.remove_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager.remove_object">[docs]</a>    <span class="k">def</span> <span class="nf">remove_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete an object from the collision manager.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The identifier for the object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">unregisterObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;obj&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;obj&#39;</span><span class="p">])</span>
+            <span class="c1"># remove objects from _objs</span>
+            <span class="n">geom_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_objs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)[</span><span class="s1">&#39;geom&#39;</span><span class="p">])</span>
+            <span class="c1"># remove names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">geom_id</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> object is removed&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> not in collision manager!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CollisionManager.reset_all_object"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager.reset_all_object">[docs]</a>    <span class="k">def</span> <span class="nf">reset_all_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset all object from the collision manager.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_objs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">DynamicAABBTreeCollisionManager</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CollisionManager.collision_check"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.collision.collision_manager.CollisionManager.collision_check">[docs]</a>    <span class="k">def</span> <span class="nf">collision_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">return_names</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if any pair of objects in the manager collide with one another.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            return_names (bool): If true, a set is returned containing the names of all pairs of objects in collision.</span>
+<span class="sd">            return_data (bool): If true, a list of ContactData is returned as well</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            is_collision (bool): True if a collision occurred between any pair of objects and False otherwise</span>
+<span class="sd">            names (set of 2-tup): The set of pairwise collisions. </span>
+<span class="sd">            contacts (list of ContactData): All contacts detected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cdata</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">CollisionData</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">return_names</span> <span class="ow">or</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="n">cdata</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">CollisionData</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">fcl</span><span class="o">.</span><span class="n">CollisionRequest</span><span class="p">(</span>
+                <span class="n">num_max_contacts</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">enable_contact</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">collide</span><span class="p">(</span><span class="n">cdata</span><span class="p">,</span> <span class="n">fcl</span><span class="o">.</span><span class="n">defaultCollisionCallback</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">cdata</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">is_collision</span>
+
+        <span class="n">objs_in_collision</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">contact_data</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">return_names</span> <span class="ow">or</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">cdata</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">contacts</span><span class="p">:</span>
+                <span class="n">coll_names</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_name</span><span class="p">(</span><span class="n">contact</span><span class="o">.</span><span class="n">o1</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_name</span><span class="p">(</span><span class="n">contact</span><span class="o">.</span><span class="n">o2</span><span class="p">))</span>
+                <span class="n">coll_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">coll_names</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;obstacle&quot;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;obstacle&quot;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Baxter</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_forearm&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;wrist&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;upper_forearm&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_forearm_visual&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_forearm&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_forearm_visual&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_elbow&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_elbow_visual&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_shoulder&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_elbow&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_shoulder&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_shoulder&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;upper_elbow&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_elbow_visual&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_shoulder&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_elbow_visual&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;lower_elbow&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;upper_forearm&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;gripper_base&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;hand_accelerometer&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head_link&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;sonar_ring&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head_link&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;head&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head_link&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;screen&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head_link&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;display&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;gripper_base&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;hand_accelerometer&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;hand&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;hand_accelerometer&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;hand&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;wrist&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;gripper_base&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;hand&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;display&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;screen&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># sawyer</span>
+                <span class="k">if</span> <span class="s1">&#39;right_l1&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l1_2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;right_l4&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l4_2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l1&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;right_l2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l2_2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;right_arm_base_link&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l0&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l1_2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l2&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;head&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;screen&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;right_hand&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;right_l6&#39;</span> <span class="ow">in</span> <span class="n">coll_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                
+                <span class="k">if</span> <span class="n">return_names</span><span class="p">:</span>
+                    <span class="n">objs_in_collision</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">coll_names</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">return_data</span><span class="p">:</span>
+                    <span class="n">contact_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ContactData</span><span class="p">(</span><span class="n">coll_names</span><span class="p">,</span> <span class="n">contact</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">objs_in_collision</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">objs_in_collision</span> <span class="o">=</span> <span class="s2">&quot;No object collided..&quot;</span>
+
+        <span class="k">if</span> <span class="n">return_names</span> <span class="ow">and</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">objs_in_collision</span><span class="p">,</span> <span class="n">contact_data</span>
+        <span class="k">elif</span> <span class="n">return_names</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">objs_in_collision</span>
+        <span class="k">elif</span> <span class="n">return_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">contact_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gtype</span><span class="p">,</span> <span class="n">gparam</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get fcl geometry from robot&#39;s geometry type or params</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            geom (CollisionObject): Input model</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            names (hashable): Name of input geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;cylinder&quot;</span><span class="p">:</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="n">gparam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">gparam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;sphere&quot;</span><span class="p">:</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gparam</span><span class="p">)</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">Sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">gparam</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">fcl</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geom</span>
+
+    <span class="k">def</span> <span class="nf">_extract_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the name of an object from the manager by its</span>
+<span class="sd">        CollisionObject, or return None if not found.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            geom (CollisionObject): Input model</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            names (hashable): Name of input geometry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">geom</span><span class="p">)]</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

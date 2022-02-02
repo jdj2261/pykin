@@ -1,0 +1,23 @@
+pykin package
+=============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pykin.geometry
+   pykin.kinematics
+   pykin.models
+   pykin.planners
+   pykin.robots
+   pykin.utils
+
+Module contents
+---------------
+
+.. automodule:: pykin
+   :members:
+   :undoc-members:
+   :show-inheritance:

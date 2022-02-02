@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.geometry package &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pykin.geometry package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pykin.geometry.frame">pykin.geometry.frame module</a></li>
+<li><a class="reference internal" href="#module-pykin.geometry.geometry">pykin.geometry.geometry module</a></li>
+<li><a class="reference internal" href="#module-pykin.geometry">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pykin.geometry package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pykin.geometry.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pykin-geometry-package">
+<h1>pykin.geometry package<a class="headerlink" href="#pykin-geometry-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pykin.geometry.frame">
+<span id="pykin-geometry-frame-module"></span><h2>pykin.geometry.frame module<a class="headerlink" href="#module-pykin.geometry.frame" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Frame">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.geometry.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">link</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.geometry.frame.Link()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">joint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.geometry.frame.Joint()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.frame.Frame" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class of Frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – frame name</p></li>
+<li><p><strong>link</strong> (<a class="reference internal" href="#pykin.geometry.frame.Link" title="pykin.geometry.frame.Link"><em>Link</em></a>) – Link frame</p></li>
+<li><p><strong>joint</strong> (<a class="reference internal" href="#pykin.geometry.frame.Joint" title="pykin.geometry.frame.Joint"><em>Joint</em></a>) – Joint frame</p></li>
+<li><p><strong>children</strong> (<em>list</em>) – all child frame</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Frame.get_transform">
+<span class="sig-name descname"><span class="pre">get_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/frame.html#Frame.get_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.frame.Frame.get_transform" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>theta</strong> (<em>list</em>) – Angle to convert</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Compute transform by multiplying current joint offset and transfrom obtained from input angle</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform">Transform</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Joint">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.geometry.frame.</span></span><span class="sig-name descname"><span class="pre">Joint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.kinematics.transform.Transform()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[None,</span> <span class="pre">None]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/frame.html#Joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.frame.Joint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class of Joint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – join name</p></li>
+<li><p><strong>offset</strong> (<a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>pykin.kinematics.transform.Transform</em></a>) – joint offset described in the urdf file</p></li>
+<li><p><strong>dtype</strong> (<em>str</em>) – joint type (fixed, revolute, prismatic) described in the urdf file</p></li>
+<li><p><strong>axis</strong> (<em>np.array</em>) – joint axis described in the urdf file</p></li>
+<li><p><strong>limit</strong> (<em>list</em>) – joint limit described in the urdf file</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#pykin.geometry.frame.Link" title="pykin.geometry.frame.Link"><em>Link</em></a>) – joint parent link described in the urdf file</p></li>
+<li><p><strong>child</strong> (<a class="reference internal" href="#pykin.geometry.frame.Link" title="pykin.geometry.frame.Link"><em>Link</em></a>) – joint child link described in the urdf file</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Joint.TYPES">
+<span class="sig-name descname"><span class="pre">TYPES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['fixed',</span> <span class="pre">'revolute',</span> <span class="pre">'prismatic']</span></em><a class="headerlink" href="#pykin.geometry.frame.Joint.TYPES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Joint.dtype">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#pykin.geometry.frame.Joint.dtype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Joint.num_dof">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_dof</span></span><a class="headerlink" href="#pykin.geometry.frame.Joint.num_dof" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.geometry.frame.Link">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.geometry.frame.</span></span><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.kinematics.transform.Transform()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.geometry.geometry.Visual()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.geometry.geometry.Collision()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/frame.html#Link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.frame.Link" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class of Link</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – link name</p></li>
+<li><p><strong>offset</strong> (<a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>pykin.kinematics.transform.Transform</em></a>) – link offset described in the urdf file</p></li>
+<li><p><strong>visual</strong> (<a class="reference internal" href="#pykin.geometry.geometry.Visual" title="pykin.geometry.geometry.Visual"><em>pykin.geometry.geometry.Visual</em></a>) – link visual described in the urdf file</p></li>
+<li><p><strong>collision</strong> (<a class="reference internal" href="#pykin.geometry.geometry.Collision" title="pykin.geometry.geometry.Collision"><em>pykin.geometry.geometry.Collision</em></a>) – link collision described in the urdf file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pykin.geometry.geometry">
+<span id="pykin-geometry-geometry-module"></span><h2>pykin.geometry.geometry module<a class="headerlink" href="#module-pykin.geometry.geometry" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Collision">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.geometry.geometry.</span></span><span class="sig-name descname"><span class="pre">Collision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.kinematics.transform.Transform()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/geometry.html#Collision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.geometry.Collision" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class of Collision</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>Transform</em></a>) – collision offset</p></li>
+<li><p><strong>geom_type</strong> (<em>str</em>) – collision type (box, cylinder, spehre, mesh)</p></li>
+<li><p><strong>geom_param</strong> (<em>dict</em>) – collision parameters</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Collision.TYPES">
+<span class="sig-name descname"><span class="pre">TYPES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['box',</span> <span class="pre">'cylinder',</span> <span class="pre">'sphere',</span> <span class="pre">'mesh']</span></em><a class="headerlink" href="#pykin.geometry.geometry.Collision.TYPES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Collision.offset">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pykin.geometry.geometry.Collision.offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Visual">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.geometry.geometry.</span></span><span class="sig-name descname"><span class="pre">Visual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">pykin.kinematics.transform.Transform()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/geometry/geometry.html#Visual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.geometry.geometry.Visual" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class of Visual</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<a class="reference internal" href="pykin.kinematics.html#pykin.kinematics.transform.Transform" title="pykin.kinematics.transform.Transform"><em>Transform</em></a>) – visual offset</p></li>
+<li><p><strong>geom_type</strong> (<em>str</em>) – visual type (box, cylinder, spehre, mesh)</p></li>
+<li><p><strong>geom_param</strong> (<em>dict</em>) – visual parameters</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Visual.TYPES">
+<span class="sig-name descname"><span class="pre">TYPES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['box',</span> <span class="pre">'cylinder',</span> <span class="pre">'sphere',</span> <span class="pre">'mesh']</span></em><a class="headerlink" href="#pykin.geometry.geometry.Visual.TYPES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.geometry.geometry.Visual.offset">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#pykin.geometry.geometry.Visual.offset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pykin.geometry">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pykin.geometry" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.models package &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pykin.models package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pykin.models.robot_model">pykin.models.robot_model module</a></li>
+<li><a class="reference internal" href="#module-pykin.models.urdf_model">pykin.models.urdf_model module</a></li>
+<li><a class="reference internal" href="#module-pykin.models">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pykin.models package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pykin.models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pykin-models-package">
+<h1>pykin.models package<a class="headerlink" href="#pykin-models-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pykin.models.robot_model">
+<span id="pykin-models-robot-model-module"></span><h2>pykin.models.robot_model module<a class="headerlink" href="#module-pykin.models.robot_model" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.models.robot_model.</span></span><span class="sig-name descname"><span class="pre">RobotModel</span></span><a class="reference internal" href="_modules/pykin/models/robot_model.html#RobotModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.robot_model.RobotModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class of robot model from urdf file
+When initialized, loads links and joints of robot.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.dof">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.dof" title="Permalink to this definition"></a></dt>
+<dd><p>Robot’s dof</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.find_frame">
+<span class="sig-name descname"><span class="pre">find_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/robot_model.html#RobotModel.find_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.robot_model.RobotModel.find_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Find robot’s frame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.find_joint">
+<span class="sig-name descname"><span class="pre">find_joint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/robot_model.html#RobotModel.find_joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.robot_model.RobotModel.find_joint" title="Permalink to this definition"></a></dt>
+<dd><p>Find robot’s joint</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.find_link">
+<span class="sig-name descname"><span class="pre">find_link</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/robot_model.html#RobotModel.find_link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.robot_model.RobotModel.find_link" title="Permalink to this definition"></a></dt>
+<dd><p>Find robot’s link</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">joints</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.joints" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+OrderedDict: all joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.links">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">links</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.links" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+OrderedDict: all links</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.num_actuated_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_actuated_joints</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.num_actuated_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Number of actuated(revolute or prismatic) joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.num_fixed_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_fixed_joints</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.num_fixed_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Number of fixed joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.num_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_joints</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.num_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Number of joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.robot_model.RobotModel.num_links">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_links</span></span><a class="headerlink" href="#pykin.models.robot_model.RobotModel.num_links" title="Permalink to this definition"></a></dt>
+<dd><p>Number of links</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pykin.models.urdf_model">
+<span id="pykin-models-urdf-model-module"></span><h2>pykin.models.urdf_model module<a class="headerlink" href="#module-pykin.models.urdf_model" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pykin.models.urdf_model.</span></span><span class="sig-name descname"><span class="pre">URDFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pykin.models.robot_model.RobotModel" title="pykin.models.robot_model.RobotModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">pykin.models.robot_model.RobotModel</span></code></a></p>
+<p>Initializes a urdf model, as defined by a single corresponding robot URDF</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – path to the urdf file.</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.dof">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dof</span></span><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.dof" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+int: robot’s dof</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.find_frame">
+<span class="sig-name descname"><span class="pre">find_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.find_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.find_frame" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>frame_name</strong> (<em>str</em>) – frame’s name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>frame with child frames</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pykin.geometry.html#pykin.geometry.frame.Frame" title="pykin.geometry.frame.Frame">Frame</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.find_joint">
+<span class="sig-name descname"><span class="pre">find_joint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">joint_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.find_joint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.find_joint" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>joint_name</strong> (<em>str</em>) – joint’s name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>desired robot’s joint</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pykin.geometry.html#pykin.geometry.frame.Joint" title="pykin.geometry.frame.Joint">Joint</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.find_link">
+<span class="sig-name descname"><span class="pre">find_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">link_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.find_link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.find_link" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>link_name</strong> (<em>str</em>) – link’s name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>desired robot’s link</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pykin.geometry.html#pykin.geometry.frame.Link" title="pykin.geometry.frame.Link">Link</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.generate_desired_frame_recursive">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">generate_desired_frame_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eef_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.generate_desired_frame_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.generate_desired_frame_recursive" title="Permalink to this definition"></a></dt>
+<dd><p>Return frames from base_frame to eef_frame you want to find</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_frame</strong> (<em>list</em>) – reference frame</p></li>
+<li><p><strong>eef_name</strong> (<em>str</em>) – end effector name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Append frame until child link name is eef name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.get_actuated_joint_names">
+<span class="sig-name descname"><span class="pre">get_actuated_joint_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desired_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.get_actuated_joint_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.get_actuated_joint_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns actuated(revolute, prismatic) joint names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>desired_frames</strong> (<em>list</em>) – If is not empty, will get desired actuated joint names</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>actuated joint names</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.get_revolute_joint_names">
+<span class="sig-name descname"><span class="pre">get_revolute_joint_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desired_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.get_revolute_joint_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.get_revolute_joint_names" title="Permalink to this definition"></a></dt>
+<dd><p>Returns revolute joint names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>desired_frames</strong> (<em>list</em>) – If is not empty, will get desired actuated joint names</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>revolute joint names</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.get_urdf">
+<span class="sig-name descname"><span class="pre">get_urdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pykin/models/urdf_model.html#URDFModel.get_urdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.get_urdf" title="Permalink to this definition"></a></dt>
+<dd><p>Reads a string of the urdf file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>xml read in from file</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.num_actuated_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_actuated_joints</span></span><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.num_actuated_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+int: number of actuated joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.num_fixed_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_fixed_joints</span></span><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.num_fixed_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+int: number of fixed joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.num_joints">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_joints</span></span><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.num_joints" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+int: number of joints</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pykin.models.urdf_model.URDFModel.num_links">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">num_links</span></span><a class="headerlink" href="#pykin.models.urdf_model.URDFModel.num_links" title="Permalink to this definition"></a></dt>
+<dd><p>Returns:
+int: number of links</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pykin.models">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pykin.models" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

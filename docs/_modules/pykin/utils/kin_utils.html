@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pykin.utils.kin_utils &mdash; pykin 2.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pykin
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pykin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pykin.utils.kin_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pykin.utils.kin_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span>
+
+<span class="n">JOINT_TYPE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;revolute&#39;</span>  <span class="p">:</span> <span class="s1">&#39;revolute&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;fixed&#39;</span>     <span class="p">:</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;prismatic&#39;</span> <span class="p">:</span> <span class="s1">&#39;prismatic&#39;</span><span class="p">}</span>
+
+<span class="n">LINK_TYPE_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cylinder&#39;</span> <span class="p">:</span> <span class="s1">&#39;cylinder&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;sphere&#39;</span>   <span class="p">:</span> <span class="s1">&#39;sphere&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;box&#39;</span>      <span class="p">:</span> <span class="s1">&#39;box&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;mesh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;mesh&#39;</span><span class="p">}</span>
+
+<span class="n">LINK_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;box&#39;</span><span class="p">,</span> <span class="s1">&#39;cylinder&#39;</span><span class="p">,</span> <span class="s1">&#39;sphere&#39;</span><span class="p">,</span> <span class="s1">&#39;capsule&#39;</span><span class="p">,</span> <span class="s1">&#39;mesh&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ShellColors"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.ShellColors">[docs]</a><span class="k">class</span> <span class="nc">ShellColors</span><span class="p">:</span>
+    <span class="n">HEADER</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[95m&#39;</span>
+    <span class="n">OKBLUE</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[94m&#39;</span>
+    <span class="n">OKCYAN</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[96m&#39;</span>
+    <span class="n">OKGREEN</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[92m&#39;</span>
+    <span class="n">WARNING</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[93m&#39;</span>
+    <span class="n">FAIL</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[91m&#39;</span>
+    <span class="n">ENDC</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[0m&#39;</span>
+    <span class="n">BOLD</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[1m&#39;</span>
+    <span class="n">UNDERLINE</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\033</span><span class="s1">[4m&#39;</span></div>
+
+
+<div class="viewcode-block" id="Baxter"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.Baxter">[docs]</a><span class="k">class</span> <span class="nc">Baxter</span><span class="p">:</span>
+    <span class="n">left_e0_fixed_offset</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mf">0.107</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>    <span class="mf">0.</span>   <span class="p">])</span>
+    <span class="n">left_w0_fixed_offset</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mf">0.088</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>    <span class="mf">0.</span>   <span class="p">])</span>
+    <span class="n">right_e0_fixed_offset</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mf">0.107</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>    <span class="mf">0.</span>   <span class="p">])</span>
+    <span class="n">right_w0_fixed_offset</span> <span class="o">=</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mf">0.088</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>    <span class="mf">0.</span>   <span class="p">])</span>
+
+<div class="viewcode-block" id="Baxter.add_visual_link"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.Baxter.add_visual_link">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">add_visual_link</span><span class="p">(</span><span class="n">link_transforms</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;left_lower_shoulder&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;left_upper_elbow_visual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;left_lower_shoulder&quot;</span><span class="p">],</span>
+                                                                        <span class="n">Baxter</span><span class="o">.</span><span class="n">left_e0_fixed_offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;left_lower_elbow&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;left_upper_forearm_visual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;left_lower_elbow&quot;</span><span class="p">],</span>
+                                                                        <span class="n">Baxter</span><span class="o">.</span><span class="n">left_w0_fixed_offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;right_lower_shoulder&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;right_upper_elbow_visual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;right_lower_shoulder&quot;</span><span class="p">],</span>
+                                                                        <span class="n">Baxter</span><span class="o">.</span><span class="n">right_e0_fixed_offset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;right_lower_elbow&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;right_upper_forearm_visual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">link_transforms</span><span class="p">[</span><span class="s2">&quot;right_lower_elbow&quot;</span><span class="p">],</span> 
+                                                                        <span class="n">Baxter</span><span class="o">.</span><span class="n">right_w0_fixed_offset</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="convert_thetas_to_dict"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.convert_thetas_to_dict">[docs]</a><span class="k">def</span> <span class="nf">convert_thetas_to_dict</span><span class="p">(</span><span class="n">active_joint_names</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if any pair of objects in the manager collide with one another.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        active_joint_names (list): actuated joint names</span>
+<span class="sd">        thetas (sequence of float): If not dict, convert to dict ex. {joint names : thetas}</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        thetas (dict): Dictionary of actuated joint angles</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">active_joint_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">thetas</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;the number of robot joint&#39;s angle is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">active_joint_names</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span>
+<span class="s2">                but the number of input joint&#39;s angle is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">thetas</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">j</span><span class="p">,</span> <span class="n">thetas</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">active_joint_names</span><span class="p">))</span>        
+    <span class="k">return</span> <span class="n">thetas</span></div>
+
+
+<div class="viewcode-block" id="logging_time"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.logging_time">[docs]</a><span class="k">def</span> <span class="nf">logging_time</span><span class="p">(</span><span class="n">original_fn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to check time of function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrapper_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">original_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WorkingTime[</span><span class="si">{</span><span class="n">original_fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">]: </span><span class="si">{</span><span class="n">end_time</span><span class="o">-</span><span class="n">start_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> sec</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper_fn</span></div>
+
+
+<div class="viewcode-block" id="convert_transform"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.convert_transform">[docs]</a><span class="k">def</span> <span class="nf">convert_transform</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        origin (None or Transform): offset of object</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Transform: Returns Transform if origin is None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Transform</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="n">origin</span><span class="o">.</span><span class="n">rot</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">origin</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="convert_string_to_narray"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.convert_string_to_narray">[docs]</a><span class="k">def</span> <span class="nf">convert_string_to_narray</span><span class="p">(</span><span class="n">str_input</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        str_input (str): string</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Returns string to np.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">str_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">str_input</span><span class="o">.</span><span class="n">split</span><span class="p">()])</span></div>
+
+
+<div class="viewcode-block" id="calc_pose_error"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.calc_pose_error">[docs]</a><span class="k">def</span> <span class="nf">calc_pose_error</span><span class="p">(</span><span class="n">tar_pose</span><span class="p">,</span> <span class="n">cur_pose</span><span class="p">,</span> <span class="n">EPS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tar_pos (np.array): target pose</span>
+<span class="sd">        cur_pos (np.array): current pose</span>
+<span class="sd">        EPS (float): epsilon</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: Returns pose error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">rot_to_omega</span><span class="p">(</span><span class="n">R</span><span class="p">):</span>
+        <span class="c1"># referred p36</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span>
+                <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]]</span>
+        <span class="p">)</span>
+        <span class="n">norm_el</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">norm_el</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">norm_el</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">norm_el</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">R</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">R</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]))</span>
+        <span class="k">return</span> <span class="n">w</span>
+
+    <span class="n">pos_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tar_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">rot_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cur_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">tar_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">w_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cur_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">rot_to_omega</span><span class="p">(</span><span class="n">rot_err</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">pos_err</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">w_err</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="limit_joints"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.limit_joints">[docs]</a><span class="k">def</span> <span class="nf">limit_joints</span><span class="p">(</span><span class="n">joint_angles</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set joint angle limit</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        joint_angles (sequence of float): joint angles</span>
+<span class="sd">        lower (sequence of float): lower limit</span>
+<span class="sd">        upper (sequence of float): upper limit</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        joint_angles (sequence of float): Returns limited joint angle </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">joint_angles</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">lower</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lower</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">joint_angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">joint_angles</span></div>
+
+
+<div class="viewcode-block" id="get_robot_collision_geom"><a class="viewcode-back" href="../../../pykin.utils.html#pykin.utils.kin_utils.get_robot_collision_geom">[docs]</a><span class="k">def</span> <span class="nf">get_robot_collision_geom</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get robot geometry from link</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        link (Link): robot&#39;s link</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        name (str): geom&#39;s name</span>
+<span class="sd">        gtype: geom&#39;s type</span>
+<span class="sd">        gparam: geom&#39;s param</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">get_cylinder_param</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gparam</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;radius&#39;</span><span class="p">))</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gparam</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;length&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_spehre_param</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gparam</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;radius&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">radius</span>
+
+    <span class="k">def</span> <span class="nf">get_box_param</span><span class="p">(</span><span class="n">link</span><span class="p">):</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gparam</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">size</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gtype</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gparam</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;cylinder&quot;</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">gtype</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span>
+        <span class="n">gparam</span> <span class="o">=</span> <span class="n">get_cylinder_param</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;sphere&quot;</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">gtype</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span>
+        <span class="n">gparam</span> <span class="o">=</span> <span class="n">get_spehre_param</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span> <span class="o">==</span> <span class="s2">&quot;box&quot;</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">gtype</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">collision</span><span class="o">.</span><span class="n">gtype</span>
+        <span class="n">gparam</span> <span class="o">=</span> <span class="n">get_box_param</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">gtype</span><span class="p">,</span> <span class="n">gparam</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, daejong jin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

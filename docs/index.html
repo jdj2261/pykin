@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>pykin &mdash; pykin 1.0 documentation</title>
+
+
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+
+
+
+
+
+
+
+
+
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+
+  <script type="text/javascript" id="documentation_options" data-url_root="./"
+    src="_static/documentation_options.js"></script>
+  <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script src="_static/jquery.js"></script>
+  <script src="_static/underscore.js"></script>
+  <script src="_static/doctools.js"></script>
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+
+  <link rel="index" title="Index" href="genindex.html" />
+  <link rel="search" title="Search" href="search.html" />
+  <link rel="next" title="pykin package" href="pykin.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+
+
+
+          <a href="#" class="icon icon-home"> pykin
+
+
+
+          </a>
+
+
+
+
+
+
+
+          <div role="search">
+            <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+              <input type="text" name="q" placeholder="Search docs" />
+              <input type="hidden" name="check_keywords" value="yes" />
+              <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+
+
+        </div>
+
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+          <ul>
+            <li class="toctree-l1"><a class="reference external" href="http://github.com/jdj2261/pykin">Pykin On
+                Github</a></li>
+          </ul>
+          <ul>
+            <li class="toctree-l1"><a class="reference internal" href="pykin.html">API Reference</a></li>
+          </ul>
+
+
+
+        </div>
+
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">pykin</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div role="navigation" aria-label="breadcrumbs navigation">
+
+            <ul class="wy-breadcrumbs">
+
+              <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+
+              <li>pykin</li>
+
+
+              <li class="wy-breadcrumbs-aside">
+
+
+                <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+
+
+              </li>
+
+            </ul>
+
+
+            <hr />
+          </div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div itemprop="articleBody">
+
+              <blockquote>
+                <div>
+                  <div class="toctree-wrapper compound">
+                  </div>
+                </div>
+              </blockquote>
+              <div class="section" id="pykin">
+                <h1>pykin<a class="headerlink" href="#pykin" title="Permalink to this headline">¶</a></h1>
+                <p>Python Interface for the Robot Kinematics Library</p>
+                <p>This library has been created simply by referring to
+                  <a class="reference external" href="https://github.com/Phylliade/ikpy.git">ikpy</a>.
+                </p>
+                <div class="section" id="features">
+                  <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+                  <ul class="simple">
+                    <li>
+                      <p>Pure python library</p>
+                    </li>
+                    <li>
+                      <p>Support only URDF file</p>
+                    </li>
+                    <li>
+                      <p>Compute Forward, Inverse Kinematics and Jacobian</p>
+                    </li>
+                    <li>
+                      <p>There are two ways to find the IK solution, referring to the
+                        <a class="reference external"
+                          href="https://link.springer.com/book/10.1007/978-3-642-54536-8">Introduction to Humanoid
+                          Robotics
+                          book</a>.
+                      </p>
+                    </li>
+                    <li>
+                      <p>Compute Collision checkinkg</p>
+                    </li>
+                    <li>
+                      <p>Plot Robot Kinematic Chain and Robot Mesh (STL file)</p>
+                    </li>
+                  </ul>
+                </div>
+                <div class="section" id="installation">
+                  <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a>
+                  </h2>
+                  <div class="section" id="requirements">
+                    <h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a>
+                    </h3>
+                    <p>You need a
+                      <a class="reference external"
+                        href="https://github.com/BerkeleyAutomation/python-fcl">python-fcl</a>
+                      package to do object collision checking.
+                    </p>
+                    <ul class="simple">
+                      <li>
+                        <p>For Ubuntu, using <code
+                            class="docutils literal notranslate"><span class="pre">apt</span></code></p>
+                      </li>
+                    </ul>
+                    <p><code
+                        class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">liboctomap-dev</span></code>
+                    </p>
+                    <p><code
+                        class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">libfcl-dev</span></code>
+                      - For Mac, First, Download the source
+                      and build it.</p>
+                    <ul>
+                      <li>
+                        <p>octomap</p>
+                        <p><code
+                            class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/OctoMap/octomap.git</span></code>
+                        </p>
+                        <div class="highlight-default notranslate">
+                          <div class="highlight">
+                            <pre><span></span>$ cd octomap
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ make install
+</pre>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <p>fcl</p>
+                        <p><code
+                            class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/flexible-collision-library/fcl.git</span></code>
+                        </p>
+                        <p>Since python-fcl uses version 0.5.0 of fcl, checkout with tag 0.5.0</p>
+                        <div class="highlight-default notranslate">
+                          <div class="highlight">
+                            <pre><span></span>$ cd fcl
+$ git checkout 0.5.0
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ make install
+</pre>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                    <p>If the above installation is complete</p>
+                    <div class="highlight-default notranslate">
+                      <div class="highlight">
+                        <pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">fcl</span>
+</pre>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="section" id="install-pykin">
+                    <h3>Install Pykin<a class="headerlink" href="#install-pykin"
+                        title="Permalink to this headline">¶</a></h3>
+                    <div class="highlight-default notranslate">
+                      <div class="highlight">
+                        <pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pykin</span>
+</pre>
+                      </div>
+                    </div>
+                    <p>When git clone, use the –recurse-submodules option.</p>
+                    <p>The download may take a long time due to the large urdf file size.</p>
+                    <div class="highlight-default notranslate">
+                      <div class="highlight">
+                        <pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jdj2261</span><span class="o">/</span><span class="n">pykin</span><span class="o">.</span><span class="n">git</span>
+</pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="section" id="quick-start">
+                  <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+                  <ul class="simple">
+                    <li>
+                      <p>Robot Info</p>
+                    </li>
+                  </ul>
+                  <p>You can see 4 example robot information.</p>
+                  <p><code
+                      class="docutils literal notranslate"><span class="pre">baxter,</span> <span class="pre">iiwa14,</span> <span class="pre">panda,</span> <span class="pre">and</span> <span class="pre">sawyer</span></code>
+                  </p>
+                  <div class="highlight-default notranslate">
+                    <div class="highlight">
+                      <pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span>
+<span class="kn">from</span> <span class="nn">pykin.utils</span> <span class="kn">import</span> <span class="n">plot_utils</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../asset/urdf/baxter/baxter.urdf&#39;</span>
+
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">robot_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../asset/urdf/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;.urdf&#39;</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">init_3d_figure</span><span class="p">(</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Only baxter and sawyer robots can see collisions.</span>
+<span class="sd">It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># If visible_collision is True, visualize collision</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot_robot</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span>
+                <span class="n">transformations</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">transformations</span><span class="p">,</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">robot_name</span><span class="p">,</span>
+                <span class="n">visible_visual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">visible_collision</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">mesh_path</span><span class="o">=</span><span class="s1">&#39;../../asset/urdf/baxter/&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show_figure</span><span class="p">()</span>
+</pre>
+                    </div>
+                  </div>
+                  <ul class="simple">
+                    <li>
+                      <p>Forward Kinematics</p>
+                    </li>
+                  </ul>
+                  <div class="highlight-default notranslate">
+                    <div class="highlight">
+                      <pre><span></span><span class="kn">from</span> <span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span> <span class="kn">from</span>
+<span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span> <span class="kn">from</span> <span class="nn">pykin.utils.kin</span>\<span class="n">_utils</span>
+<span class="kn">import</span> <span class="nn">ShellColors</span> <span class="k">as</span> <span class="nn">sc</span>
+
+<span class="c1"># baxter\_example file\_path = &#39;../asset/urdf/baxter/baxter.urdf&#39; robot</span>
+<span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+<span class="c1"># set input joints head\_thetas = [0.0] right\_arm\_thetas = [0, 0, 0,</span>
+<span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="n">thetas</span> <span class="o">=</span>
+<span class="n">head</span>\<span class="n">_thetas</span> <span class="o">+</span> <span class="n">right</span>\<span class="n">_arm</span>\<span class="n">_thetas</span> <span class="o">+</span> <span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span>
+
+<span class="c1"># compute FK fk = robot.kin.forward\_kinematics(thetas) for link,</span>
+<span class="n">transform</span> <span class="ow">in</span> <span class="n">fk</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sc</span><span class="o">.</span><span class="n">HEADER</span><span class="si">}{</span><span class="n">link</span><span class="si">}{</span><span class="n">sc</span><span class="o">.</span><span class="n">ENDC</span><span class="si">}</span><span class="s2">,</span>
+<span class="p">{</span><span class="n">transform</span><span class="o">.</span><span class="n">rot</span><span class="p">},</span> <span class="p">{</span><span class="n">transform</span><span class="o">.</span><span class="n">pos</span><span class="p">}</span><span class="s2">&quot;)</span>
+</pre>
+                    </div>
+                  </div>
+                  <ul class="simple">
+                    <li>
+                      <p>Jacobian</p>
+                    </li>
+                  </ul>
+                  <div class="highlight-default notranslate">
+                    <div class="highlight">
+                      <pre><span></span><span class="kn">from</span> <span class="nn">pykin.kinematics</span> <span class="kn">import</span> <span class="n">transform</span> <span class="k">as</span> <span class="n">tf</span> <span class="kn">from</span>
+<span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span>
+
+<span class="c1"># import jacobian from pykin.kinematics import jacobian as jac</span>
+
+<span class="n">file</span>\<span class="n">_path</span> <span class="o">=</span> <span class="s1">&#39;../asset/urdf/baxter/baxter.urdf&#39;</span> <span class="n">robot</span> <span class="o">=</span>
+<span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+<span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Before compute Jacobian, you must set from start link to end link</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">set</span>\<span class="n">_desired</span>\<span class="n">_frame</span><span class="p">(</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="s2">&quot;left\_wrist&quot;</span><span class="p">)</span> <span class="n">fk</span> <span class="o">=</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward</span>\<span class="n">_kinematics</span><span class="p">(</span><span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span><span class="p">)</span>
+
+<span class="c1"># If you want to get Jacobian, use calc\_jacobian function J =</span>
+<span class="n">jac</span><span class="o">.</span><span class="n">calc</span>\<span class="n">_jacobian</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">desired</span>\<span class="n">_frames</span><span class="p">,</span> <span class="n">fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+
+<span class="n">right</span>\<span class="n">_arm</span>\<span class="n">_thetas</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">set</span>\<span class="n">_desired</span>\<span class="n">_frame</span><span class="p">(</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="s2">&quot;right\_wrist&quot;</span><span class="p">)</span> <span class="n">fk</span> <span class="o">=</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward</span>\<span class="n">_kinematics</span><span class="p">(</span><span class="n">right</span>\<span class="n">_arm</span>\<span class="n">_thetas</span><span class="p">)</span> <span class="n">J</span> <span class="o">=</span>
+<span class="n">jac</span><span class="o">.</span><span class="n">calc</span>\<span class="n">_jacobian</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">desired</span>\<span class="n">_frames</span><span class="p">,</span> <span class="n">fk</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">right</span>\<span class="n">_arm</span>\<span class="n">_thetas</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+</pre>
+                    </div>
+                  </div>
+                  <ul class="simple">
+                    <li>
+                      <p>Inverse Kinematics</p>
+                    </li>
+                  </ul>
+                  <div class="highlight-default notranslate">
+                    <div class="highlight">
+                      <pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="kn">from</span> <span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span> <span class="kn">from</span>
+<span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span>
+
+<span class="c1"># baxter\_example file\_path = &#39;../asset/urdf/baxter/baxter.urdf&#39; robot</span>
+<span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+<span class="c1"># set joints for targe pose right\_arm\_thetas = np.random.randn(7)</span>
+
+<span class="c1"># set init joints init\_right\_thetas = np.random.randn(7)</span>
+
+<span class="c1"># Before compute IK, you must set from start link to end link</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">set</span>\<span class="n">_desired</span>\<span class="n">_frame</span><span class="p">(</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="s2">&quot;right\_wrist&quot;</span><span class="p">)</span>
+
+<span class="c1"># Compute FK for target pose target\_fk =</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward</span>\<span class="n">_kinematics</span><span class="p">(</span><span class="n">right</span>\<span class="n">_arm</span>\<span class="n">_thetas</span><span class="p">)</span>
+
+<span class="c1"># get target pose target\_r\_pose =</span>
+<span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">target</span>\<span class="n">_fk</span><span class="p">[</span><span class="s2">&quot;right\_wrist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
+<span class="n">target</span>\<span class="n">_fk</span><span class="p">[</span><span class="s2">&quot;right\_wrist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rot</span><span class="p">))</span>
+
+<span class="c1"># Compute IK Solution using LM(Levenberg-Marquardt) or</span>
+<span class="n">NR</span><span class="p">(</span><span class="n">Newton</span><span class="o">-</span><span class="n">Raphson</span><span class="p">)</span> <span class="n">method</span> <span class="n">ik</span>\<span class="n">_right</span>\<span class="n">_result</span><span class="p">,</span> \<span class="n">_</span> <span class="o">=</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">inverse</span>\<span class="n">_kinematics</span><span class="p">(</span><span class="n">init</span>\<span class="n">_right</span>\<span class="n">_thetas</span><span class="p">,</span> <span class="n">target</span>\<span class="n">_r</span>\<span class="n">_pose</span><span class="p">,</span>
+<span class="n">method</span><span class="o">=</span><span class="s2">&quot;LM&quot;</span><span class="p">)</span>
+
+<span class="c1"># Compare error btween Target pose and IK pose result\_fk =</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">kin</span><span class="o">.</span><span class="n">forward</span>\<span class="n">_kinematics</span><span class="p">(</span><span class="n">ik</span>\<span class="n">_right</span>\<span class="n">_result</span><span class="p">)</span> <span class="n">error</span> <span class="o">=</span>
+<span class="n">robot</span><span class="o">.</span><span class="n">compute</span>\<span class="n">_pose</span>\<span class="n">_error</span><span class="p">(</span>
+<span class="n">target</span>\<span class="n">_fk</span><span class="p">[</span><span class="s2">&quot;right\_wrist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous</span>\<span class="n">_matrix</span><span class="p">,</span>
+<span class="n">result</span>\<span class="n">_fk</span><span class="p">[</span><span class="s2">&quot;right\_wrist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">homogeneous</span>\<span class="n">_matrix</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="section" id="links">
+                <h1>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h1>
+                <div class="toctree-wrapper compound">
+                  <ul>
+                    <li class="toctree-l1"><a class="reference external" href="http://github.com/jdj2261/pykin">Pykin On
+                        Github</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="section" id="api-reference">
+                <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a>
+                </h1>
+                <div class="toctree-wrapper compound">
+                  <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="pykin.html">API Reference</a></li>
+                  </ul>
+                </div>
+              </div>
+
+
+            </div>
+
+          </div>
+          <footer>
+            <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+              <a href="pykin.html" class="btn btn-neutral float-right" title="pykin package" accesskey="n"
+                rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+            </div>
+
+            <hr />
+
+            <div role="contentinfo">
+              <p>
+                &#169; Copyright 2021, DaeJong Jin.
+
+              </p>
+            </div>
+
+
+
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+
+            <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+
+            provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+          </footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <script type="text/javascript">
+    jQuery(function () {
+      SphinxRtdTheme.Navigation.enable(true);
+    });
+  </script>
+
+
+
+
+
+
+</body>
+
+</html>
