@@ -14,9 +14,6 @@ def vector_norm(data, axis=None, out=None):
         out = np.atleast_1d(np.sum(data, axis=axis))
         np.sqrt(out, out)
         return out
-    data *= data
-    np.sum(data, axis=axis, out=out)
-    np.sqrt(out, out)
     
 
 def get_rot_mat_from_homogeneous(h_mat):

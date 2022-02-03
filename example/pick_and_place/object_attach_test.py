@@ -133,17 +133,3 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, h_mat=obs_pos2.h_mat, alpha=0.2)
 plt.plot_mesh(ax=ax, mesh=obj_mesh3, h_mat=obs_pos3.h_mat, alpha=0.2)
 plt.show_figure()
-# test = np.eye(4)
-# for i, (eef_pose, gripper) in enumerate(grasp_poses):
-
-#     test[:3, 3] = np.array([0, -0.1, 0.1])
-#     eef_pose_transfomred = np.dot(eef_pose, test)
-#     T = get_relative_transform(eef_pose, obs_pos1.h_mat)
-#     obj_pos_transformed = np.dot(eef_pose_transfomred, T)
-
-#     grasp_man.visualize_axis(ax, eef_pose)
-#     grasp_man.visualize_axis(ax, eef_pose_transfomred)
-#     plt.plot_axis(ax, obs_pos1.h_mat)
-#     plt.plot_axis(ax, obj_pos_transformed)
-#     plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_pos_transformed, alpha=0.2)
-# plt.show_figure()

@@ -125,13 +125,14 @@ class Planner(metaclass=ABCMeta):
             data (sequence of float): input data
 
         Returns:
-            data (np.array)
+            np_data (np.array)
         """
-        if not isinstance(data, (np.ndarray)):
-            data = np.array(data)
-            if data.size == 0:
+        np_data = np.array(data)
+        if not isinstance(np_data, (np.ndarray)):
+            print(np_data.size)
+            if np_data.size == 0:
                 raise NotFoundError("Make sure set current or goal joints..")
-        return data
+        return np_data
 
     def _setup_q_limits(self):
         """
