@@ -128,18 +128,19 @@ grasp_man = GraspManager(
 # # Release test
 # #########
 # # random sample
-# # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-# # plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obs_pos1.h_mat, alpha=0.2)
-# # plt.plot_mesh(ax=ax, mesh=obj_mesh2, h_mat=obs_pos2.h_mat, alpha=0.2)
-# # plt.plot_mesh(ax=ax, mesh=obj_mesh3, h_mat=obs_pos3.h_mat, alpha=0.2)
-# # for point, normal in grasp_man.generate_points_on_support(obj_mesh2, obs_pos2.h_mat, n_samples=10):
-# #     plt.plot_vertices(ax, point)
-# #     plt.plot_normal_vector(ax, point, normal, scale=0.1)
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+# plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obs_pos1.h_mat, alpha=0.2)
+# plt.plot_mesh(ax=ax, mesh=obj_mesh2, h_mat=obs_pos2.h_mat, alpha=0.2)
+# plt.plot_mesh(ax=ax, mesh=obj_mesh3, h_mat=obs_pos3.h_mat, alpha=0.2)
+# plt.plot_basis(ax, robot)
+# for point, normal in grasp_man.generate_points_on_support(obj_mesh2, obs_pos2.h_mat, n_samples=100):
+#     plt.plot_vertices(ax, point)
+#     plt.plot_normal_vector(ax, point, normal, scale=0.1)
 
-# # for point, normal in grasp_man.generate_points_for_support(obj_mesh1, obs_pos1.h_mat, n_samples=10):
-# #     plt.plot_vertices(ax, point)
-# #     plt.plot_normal_vector(ax, point, normal, scale=0.1)
-# # plt.show_figure()
+# for point, normal in grasp_man.generate_points_for_support(obj_mesh1, obs_pos1.h_mat, n_samples=10):
+#     plt.plot_vertices(ax, point)
+#     plt.plot_normal_vector(ax, point, normal, scale=0.1)
+# plt.show_figure()
 # #########
 # # support_poses = grasp_man.generate_supports(obj_mesh2, obs_pos2.h_mat, 3, obj_mesh1, obs_pos1.h_mat, 10)
 

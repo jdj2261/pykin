@@ -37,6 +37,7 @@ class CollisionManager:
         self._manager.setup()
         self._filter_names = set()
         self.geom = "visual"
+        self.objects = None
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
@@ -62,6 +63,7 @@ class CollisionManager:
         Args:
             objects (defaultdict): pykin objects
         """
+        self.objects = objects
         for name, info in objects:
             self.add_object(name, info[0], info[1], info[2])
 
@@ -338,7 +340,7 @@ class CollisionManager:
         res = fcl.DistanceResult()
 
         result = collections.defaultdict(float)
-        for (o1, o2) in list(itertools.combinations(self._objs, 2)):
+        for (o1, o2) in list(itertools.permutations(self._objs, 2)):
             if (o1, o2) in self._filter_names:
                 continue
             distance = np.round(fcl.distance(self._objs[o1]['obj'],self._objs[o2]['obj'], req, res), 6)
