@@ -50,7 +50,6 @@ class Planner(metaclass=ABCMeta):
         self.robot_col_mngr.remove_object(
             self.obj_info["name"]
         )
-        self.reattach_object(self.result_object_pose)
 
     def reattach_object(self, transform):
         """

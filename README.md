@@ -297,3 +297,7 @@ $ git submodule update
 
     | <img src="img/grasp01.png" width="400" height="400"/> | <img src="img/grasp02.png" width="400" height="400"/> |
     | ----------------------------------------------------- | ----------------------------------------------------- |
+    
+  - Compute pick and place waypoints for 2 or more objects.
+  
+    <img align="left" src="img/pnp_result.png" width="400" height="300"/>

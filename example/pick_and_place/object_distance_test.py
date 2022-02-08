@@ -104,28 +104,25 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     obj_pre_release_pos_transformed = np.dot(pre_release_pose, T)
     obj_release_pos_transformed = np.dot(release_pose, T)
 
-    grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
-    grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
-
     grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
     gripper = grasp_man.get_transformed_gripper_fk(grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
     
-    grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
-    gripper = grasp_man.get_transformed_gripper_fk(pre_grasp_pose, is_tcp=False)
+    # grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
+    # gripper = grasp_man.get_transformed_gripper_fk(pre_grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
     grasp_man.visualize_axis(ax, release_pose, visible_basis=True)
     gripper = grasp_man.get_transformed_gripper_fk(release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
-    grasp_man.visualize_axis(ax, pre_release_pose, visible_basis=True)
-    gripper = grasp_man.get_transformed_gripper_fk(pre_release_pose, is_tcp=False)
+    # grasp_man.visualize_axis(ax, pre_release_pose, visible_basis=True)
+    # gripper = grasp_man.get_transformed_gripper_fk(pre_release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
-    plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
+    # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_release_pos_transformed, alpha=0.2, color=color)
-    plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
+    # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=info[1], h_mat=info[2], alpha=0.2, color=color)
 
 result = grasp_man.object_c_manager.get_distances_internal()
