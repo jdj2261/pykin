@@ -6,7 +6,6 @@ import pykin.utils.kin_utils as k_utils
 import pykin.kinematics.jacobian as jac
 
 from pykin.planners.planner import Planner
-from pykin.utils.error_utils import OriValueError, CollisionError
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.log_utils import create_logger
 from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp

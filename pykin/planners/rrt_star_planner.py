@@ -5,7 +5,6 @@ from pykin.planners.planner import Planner
 from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
-from pykin.utils.error_utils import CollisionError
 from pykin.utils.transform_utils import get_linear_interpoation
 
 logger = create_logger('RRT Star Planner', "debug")

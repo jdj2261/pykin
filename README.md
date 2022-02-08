@@ -77,6 +77,7 @@ If you hadn't done this
 
 ~~~
 $ git clone https://github.com/jdj2261/pykin.git
+$ cd pykin
 $ git submodule init
 $ git submodule update
 ~~~

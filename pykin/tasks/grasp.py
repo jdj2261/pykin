@@ -639,7 +639,7 @@ class GraspManager(ActivityBase):
                         self.obj_release_pose = result_obj_pose
                         self.obj_post_release_pose = result_obj_pose
                         
-                        if self._check_between_object_distances():
+                        if self._check_between_object_distances(eps=0.005):
                             is_success_filtered = True
                             break
 
@@ -658,7 +658,7 @@ class GraspManager(ActivityBase):
         obj_mesh,
         obj_pose,
         n_samples,
-        alpha=0.6
+        alpha=0.9
     ):
         """
         Generate support points
@@ -667,13 +667,14 @@ class GraspManager(ActivityBase):
             obj_mesh (trimesh.base.Trimesh): mesh of support object
             obj_pose (np.array): pose of support object
             n_samples (int): number of sampling points on support object
-            alpha (float): 
+            alpha (float)
 
         Returns:
             point, normal_vector (tuple)
         """
         copied_mesh = deepcopy(obj_mesh)
         copied_mesh.apply_transform(obj_pose)
+        center_point = copied_mesh.center_mass
 
         weights = np.zeros(len(copied_mesh.faces))
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
@@ -683,10 +684,10 @@ class GraspManager(ActivityBase):
 
         support_points, _, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)
         for point, normal_vector in zip(support_points, normal_vectors):
-            len_x = abs(copied_mesh.bounds[0][0] - copied_mesh.bounds[1][0])/2
-            len_y = abs(copied_mesh.bounds[0][1] - copied_mesh.bounds[1][1])/2
-            if copied_mesh.bounds[0][0] + len_x * alpha <= point[0] <= copied_mesh.bounds[1][0] - len_x * alpha:
-                if copied_mesh.bounds[0][1] + len_y * alpha <= point[1] <= copied_mesh.bounds[1][1] - len_y * alpha:
+            len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
+            len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
+            if center_point[0] - len_x * alpha <= point[0] <= center_point[0] + len_x * alpha:
+                if center_point[1] - len_y * alpha <= point[1] <= center_point[1] + len_y * alpha:
                     yield point, normal_vector
 
     def generate_points_for_support(
@@ -773,10 +774,10 @@ class GraspManager(ActivityBase):
         logger.warning("Not found support point")
         return False
 
-    def _check_between_object_distances(self):
+    def _check_between_object_distances(self, eps=0.01):
         distance_info = self.object_c_manager.get_distances_internal()
         distances = []
         for (o1, o2), distance in distance_info.items():
             if o1 == self.obj_info["name"] and o2 in list(self.object_c_manager.objects.grasp_objects.keys()):
                 distances.append(distance)
-        return np.all(self.release_distance <= np.array(distances))
+        return np.all(eps <= np.array(distances))
