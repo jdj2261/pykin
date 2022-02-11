@@ -634,14 +634,15 @@ class GraspManager(ActivityBase):
                     if self.has_obj:
                         self.object_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
+                    if not self._check_between_object_distances(eps=0.02):
+                        continue
+
                     if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self._collision_free(post_release_transforms):
                         self.post_release_pose = post_release_pose
                         self.obj_release_pose = result_obj_pose
                         self.obj_post_release_pose = result_obj_pose
-                        
-                        if self._check_between_object_distances(eps=0.005):
-                            is_success_filtered = True
-                            break
+                        is_success_filtered = True
+                        break
 
         if not is_success_filtered:
             logger.error(f"Failed to filter Release poses")

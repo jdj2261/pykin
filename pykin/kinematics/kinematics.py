@@ -99,7 +99,7 @@ class Kinematics:
         fk = OrderedDict()
         if not isinstance(frames, list):
             trans = offset * frames.get_transform(thetas.get(frames.joint.name, 0.0))
-            fk[frames.link.name] = trans * frames.link.offset
+            fk[frames.link.name] = trans
             for child in frames.children:
                 fk.update(self._compute_FK(child, trans, thetas))
         else:
@@ -108,7 +108,7 @@ class Kinematics:
             trans = offset
             for frame in frames:
                 trans = trans * frame.get_transform(thetas[cnt])
-                fk[frame.link.name] = trans * frame.link.offset
+                fk[frame.link.name] = trans
                 
                 if frame.joint.dtype != "fixed":
                     cnt += 1
