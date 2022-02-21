@@ -300,10 +300,7 @@ $ git submodule update
   
   - Compute pick and place waypoints for 2 or more objects.
   
-    <img align="left" src="img/pnp_result.png" width="400" height="400"/>
+    As a result, you can show pick and place demo in MuJoCo Simulator.
   
-      
-  
-  - As a result, you can show pick and place demo in MuJoCo Simulator.
-  
-    <img align="left" src="img/sim_result.png" width="400" height="400"/>
+    | <img src="img/pnp_result.png" width="400" height="400"/> | <img src="img/sim_result.png" width="400" height="400"/> |
+    | -------------------------------------------------------- | -------------------------------------------------------- |
