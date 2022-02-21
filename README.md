@@ -302,6 +302,8 @@ $ git submodule update
   
     <img align="left" src="img/pnp_result.png" width="400" height="400"/>
   
+      
+  
   - As a result, you can show pick and place demo in MuJoCo Simulator.
   
     <img align="left" src="img/sim_result.png" width="400" height="400"/>
