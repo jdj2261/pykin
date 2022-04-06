@@ -59,7 +59,7 @@ class CartesianPlanner(Planner):
         return 'pykin.planners.cartesian_planner.{}()'.format(type(self).__name__)
     
     @logging_time
-    def get_path_in_joinst_space(
+    def get_joint_path(
         self, 
         cur_q,
         goal_pose,

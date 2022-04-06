@@ -1,6 +1,19 @@
 import numpy as np
 from pykin.utils import transform_utils as tf
 
+def convert_transform(origin):
+    """
+    Args:
+        origin (None or Transform): offset of object
+
+    Returns:
+        Transform: Returns Transform if origin is None
+    """
+    if origin is None:
+        return Transform()
+    else:
+        return Transform(rot=origin.rot, pos=origin.pos)
+
 class Transform:
     """
     This class calculates the rotation and translation of a 3D rigid body.

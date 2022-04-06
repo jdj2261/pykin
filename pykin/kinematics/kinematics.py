@@ -2,8 +2,10 @@ import numpy as np
 from collections import OrderedDict
 
 from pykin.kinematics import jacobian as jac
+from pykin.kinematics.transform import Transform
 from pykin.utils import transform_utils as tf
-from pykin.utils.kin_utils import Baxter, calc_pose_error, convert_thetas_to_dict, logging_time
+from pykin.utils.kin_utils import calc_pose_error, convert_thetas_to_dict, logging_time
+
 
 class Kinematics:
     """
@@ -236,3 +238,24 @@ class Kinematics:
         print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
+
+class Baxter:
+    left_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
+    left_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
+    right_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
+    right_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
+
+    @staticmethod
+    def add_visual_link(link_transforms, f):
+        if "left_lower_shoulder" in f.link.name:
+            link_transforms["left_upper_elbow_visual"] = np.dot(link_transforms["left_lower_shoulder"],
+                                                                        Baxter.left_e0_fixed_offset)
+        if "left_lower_elbow" in f.link.name:
+            link_transforms["left_upper_forearm_visual"] = np.dot(link_transforms["left_lower_elbow"],
+                                                                        Baxter.left_w0_fixed_offset)
+        if "right_lower_shoulder" in f.link.name:
+            link_transforms["right_upper_elbow_visual"] = np.dot(link_transforms["right_lower_shoulder"],
+                                                                        Baxter.right_e0_fixed_offset)
+        if "right_lower_elbow" in f.link.name:
+            link_transforms["right_upper_forearm_visual"] = np.dot(link_transforms["right_lower_elbow"], 
+                                                                        Baxter.right_w0_fixed_offset)

@@ -1,8 +1,12 @@
 import math
 import numpy as np
+import networkx as nx
 
-from pykin.planners.planner import Planner
-from pykin.planners.tree import Tree
+from scipy.spatial import distance
+
+
+from pykin.planners.planner import NodeData, Planner
+# from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
@@ -15,13 +19,13 @@ class RRTStarPlanner(Planner):
 
     Args:
         robot(SingleArm or Bimanual): manipulator type
-        delta_distance(float): distance between nearest vertex and new vertex
+        delta_distance(float): distance between nearest point and new point
         epsilon(float): 1-epsilon is probability of random sampling
         gamma_RRT_star(int): factor used for search radius
         max_iter(int): maximum number of iterations
         dimension(int): robot arm's dof
-        n_step(int): number for n equal divisions between waypoints
     """
+
     def __init__(
         self, 
         robot,
@@ -29,7 +33,6 @@ class RRTStarPlanner(Planner):
         epsilon=0.2,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
-        n_step=10
     ):
         super(RRTStarPlanner, self).__init__(
             robot, 
@@ -42,12 +45,10 @@ class RRTStarPlanner(Planner):
         self._max_iter = None
         self._cur_qpos = None
         self._goal_pose = None
-        self.T = None
-        self.cost = None
+        self.tree = None
 
         self.arm = None
         self.dimension = dimension
-        self.n_step = n_step
         self.eef_name = self.robot.eef_name
 
         super()._setup_q_limits()
@@ -55,14 +56,21 @@ class RRTStarPlanner(Planner):
 
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
-    
+
+    def _create_tree(self):
+        tree = nx.DiGraph()
+        tree.add_node(0)
+        tree.update(
+            nodes=[(0, {NodeData.COST: 0,
+                        NodeData.POINT: None})])
+        return tree
+
     @logging_time
-    def get_path_in_joinst_space(
+    def run(
         self, 
         cur_q,
         goal_pose, 
         max_iter=1000, 
-        resolution=1, 
         robot_col_manager=None,
         object_col_manager=None,
         is_attached=False, 
@@ -77,16 +85,12 @@ class RRTStarPlanner(Planner):
             cur_q (sequence of float): current joints
             goal_pose (sequence of float): goal pose
             max_iter(int): maximum number of iterations
-            resolution (float): Get number of waypoints * resolution
             robot_col_manager (CollisionManager): robot's CollisionManager
             object_col_manager (CollisionManager): object's CollisionManager
             is_attached (bool): if the object is attached or not
             current_obj_info (dict): current object info
             result_obj_info (dict): result object info
             T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object
-        
-        Returns:
-            interpolate_paths(list) : interpoated paths from start joint pose to goal joint
         """
         logger.info(f"Start to compute RRT-star Planning")
 
@@ -121,40 +125,59 @@ class RRTStarPlanner(Planner):
                     break
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
-            q_paths = []
-            self.T = Tree()
-            self.cost = {}
-
-            self.T.add_vertex(self._cur_qpos)
-            self.cost[0] = 0
+            self.goal_node = None
+            self.tree = self._create_tree()
+            self.tree.nodes[0][NodeData.POINT] = self._cur_qpos
 
             for step in range(self._max_iter):
-                if step % 300 == 0 and step !=0:
+                if step % 100 == 0 and step !=0:
                     logger.info(f"iter : {step}")
                     
-                rand_q = self.random_state()
-                if not self._collision_free(rand_q, is_attached):
+                q_rand = self._sample_free()
+                if not self._collision_free(q_rand, is_attached):
                     continue
-
-                nearest_q, nearest_idx = self.nearest_neighbor(rand_q, self.T)
-                new_q = self.new_state(nearest_q, rand_q)
+                
+                nearest_node, q_nearest = self._nearest(q_rand)
+                q_new = self._steer(q_nearest, q_rand)
     
-                if self._collision_free(new_q, is_attached) and self._check_q_in_limits(new_q):
-                    neighbor_indexes = self.get_near_neighbor_indices(new_q)
-                    min_cost = self.get_new_cost(nearest_idx, nearest_q, new_q)
-                    min_cost, nearest_idx = self.get_minimum_cost_and_index(neighbor_indexes, new_q, min_cost, nearest_idx)
-    
-                    self.T.add_vertex(new_q)
-                    new_idx = len(self.T.vertices) - 1
-                    self.cost[new_idx] = min_cost
-                    self.T.add_edge([nearest_idx, new_idx])
+                if self._collision_free(q_new, is_attached) and self._check_q_in_limits(q_new):
+                    near_nodes = self._near(q_new)
 
-                    self.rewire(neighbor_indexes, new_q, new_idx)
+                    new_node = self.tree.number_of_nodes()
+                    self.tree.add_node(new_node)
+                    
+                    c_min = self.tree.nodes[nearest_node][NodeData.COST] + self._get_distance(q_nearest, q_new)
+                    min_node = nearest_node
 
-                    if self.reach_to_goal(new_q):        
-                        q_paths = self.find_path(self.T)
+                    for near_node in near_nodes:
+                        q_near = self.tree.nodes[near_node][NodeData.POINT]
+                        near_cost = self.tree.nodes[near_node][NodeData.COST]
+                        if (near_cost + self._get_distance(q_near, q_new)) < c_min:
+                            c_min = near_cost + self._get_distance(q_near, q_new)
+                            min_node = near_node
 
-            if q_paths:
+                    self.tree.update(nodes=[(new_node, {NodeData.COST: c_min,
+                                                     NodeData.POINT: q_new})])
+                    self.tree.add_edge(min_node, new_node)
+
+                    new_cost = self.tree.nodes[new_node][NodeData.COST]
+                    q_new = self.tree.nodes[new_node][NodeData.POINT]
+
+                    # rewire
+                    for near_node in near_nodes:
+                        q_near = self.tree.nodes[near_node][NodeData.POINT]
+                        near_cost = self.tree.nodes[near_node][NodeData.COST]
+                        
+                        if (new_cost + self._get_distance(q_near, q_new)) < near_cost:
+                            parent_node = [node for node in self.tree.predecessors(near_node)][0]
+                            self.tree.remove_edge(parent_node, near_node)
+                            self.tree.add_edge(new_node, near_node)
+                            print("rewire")
+                    
+                    if self._reach_to_goal(q_new):
+                        self.goal_node = new_node
+
+            if self.goal_node:
                 logger.info(f"Generate Path Successfully!!")  
                 break 
 
@@ -165,22 +188,62 @@ class RRTStarPlanner(Planner):
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
 
-        result_q_paths = []
-        if q_paths:
-            for step, joint in enumerate(q_paths):
-                if step % round(1/resolution) == 0 or step == len(q_paths)-1:
-                    result_q_paths.append(joint)
+    def get_joint_path(self, goal_node=None, n_step=1):
+        """
+        Get path in joint space
 
-            interpolate_path = []
-            interpolate_paths = []
-            
-            for i in range(len(result_q_paths)-1):
-                interpolate_path = [path.tolist() for path in self._get_linear_path(result_q_paths[i], result_q_paths[i+1])]
-                interpolate_paths.extend(interpolate_path)
+        Args:
+            goal_node(int): goal node in rrt path
+            n_step(int): number for n equal divisions between waypoints
+    
+        Returns:
+            interpolate_paths(list) : interpoated paths from start joint pose to goal joint
+        """
+        
+        path = [self.goal_q]
+        if goal_node is None:
+            goal_node = self.goal_node
 
+        parent_node = [node for node in self.tree.predecessors(goal_node)][0]
+        while parent_node:
+            path.append(self.tree.nodes[parent_node][NodeData.POINT])
+            parent_node = [node for node in self.tree.predecessors(parent_node)][0]
+        
+        path.append(self._cur_qpos)
+        path.reverse()
+
+        unique_path = []
+        for joints in path:
+            if not any(np.array_equal(np.round(joints, 8), np.round(unique_joints,8)) for unique_joints in unique_path):
+                unique_path.append(joints)
+
+        if n_step == 1:
+            logger.info(f"Path Length : {len(unique_path)}")
+            return unique_path
+
+        interpolate_path = []
+        interpolate_paths = []
+        for i in range(len(unique_path)-1):
+            interpolate_path = [unique_path.tolist() for unique_path in self._get_linear_path(unique_path[i], unique_path[i+1], n_step)]
+            interpolate_paths.extend(interpolate_path)
+        logger.info(f"Path length {len(unique_path)} --> {len(interpolate_paths)}")
         return interpolate_paths
 
-    def random_state(self):
+    def get_rrt_tree(self):
+        """
+        Return obtained RRT Trees
+
+        Returns:
+            tree(list)
+        """
+        tree = []
+        for edge in self.tree.edges:
+            from_node = self.tree.vertices[edge[0]]
+            goal_node = self.tree.vertices[edge[1]]
+            tree.append((from_node, goal_node))
+        return tree
+
+    def _sample_free(self):
         """
         sampling joints in q space within joint limits 
         If random probability is greater than the epsilon, return random joint angles
@@ -199,136 +262,81 @@ class RRTStarPlanner(Planner):
 
         return q_outs
 
-    def nearest_neighbor(self, random_q, tree):
+    def _nearest(self, q_rand):
         """
-        Find nearest neighbor vertex and index from random_q
+        Find nearest neighbor point and index from q_rand
 
         Args:
-            random_q(np.array): sampled random joint angles 
-            tree(Tree): Trees obtained so far
+            q_rand(np.array): sampled random joint angles 
 
         Returns:
-            nearest_vertex(np.array): nearest vertex(joint angles)
-            nearest_idx(int): nearest index
+            nearest_node(int): nearest node
+            nearest_point(np.array): nearest point(joint angles)
         """
-        distances = [self.distance(random_q, vertex) for vertex in tree.vertices]
-        nearest_idx = np.argmin(distances)
-        nearest_vertex = tree.vertices[nearest_idx]
-        return nearest_vertex, nearest_idx
+        distances = [self._get_distance(self.tree.nodes[node][NodeData.POINT], q_rand) for node in self.tree.nodes]
+        nearest_node = np.argmin(distances)
+        nearest_point = self.tree.nodes[nearest_node][NodeData.POINT]
+        return nearest_node, nearest_point
 
-    def distance(self, pointA, pointB):
+    def _get_distance(self, p1, p2):
         """
         Get distance from pointA to pointB
 
         Args:
-            pointA(np.array)
-            pointB(np.array)
+            p1(np.array)
+            p2(np.array)
             
         Returns:
             Norm(float or ndarray)
         """
-        return np.linalg.norm(pointB - pointA)
 
-    def new_state(self, nearest_q, random_q):
+        return np.linalg.norm(p2-p1)
+    
+    def _steer(self, q_nearest, q_random):
         """
-        Get new point between nearest vertex and random vertex
+        Get new point between nearest point and random point
 
         Args:
-            nearest_q(np.array): nearest joint angles 
-            random_q(np.array): sampled random joint angles 
+            q_nearest(np.array): nearest joint angles 
+            q_random(np.array): sampled random joint angles 
 
         Returns:
-            new_q(np.array): new joint angles
+            q_new(np.array): new joint angles
         """
-        if np.equal(nearest_q, random_q).all():
-            return nearest_q
+        if np.equal(q_nearest, q_random).all():
+            return q_nearest
 
-        vector = random_q - nearest_q
-        dist = self.distance(random_q, nearest_q)
+        vector = q_random - q_nearest
+        dist = self._get_distance(q_random, q_nearest)
         step = min(self.delta_dis, dist)
-        unit_vector = vector / dist
-        new_q = nearest_q + unit_vector * step
+        unit_vector = vector / np.linalg.norm(vector)
+        q_new = q_nearest + unit_vector * step
 
-        return new_q
+        return q_new
 
-    def get_near_neighbor_indices(self, q):
+    def _near(self, q_rand):
         """
-        Returns all neighbor indices within the search radius from the new vertex
+        Returns all neighbor nodes within the search radius from the new point
 
         Args:
-            q(np.array): new joint angles 
+            q_rand(np.array): new joint angles 
 
         Returns:
-            near_indexes(list): all neighbor indices
+            near_nodes(list): all neighbor nodes
         """
-        card_V = len(self.T.vertices) + 1
-        r = self.gamma_RRTs * ((math.log(card_V) / card_V) ** (1/self.dimension))
-        search_radius = min(r, self.delta_dis)
-        dist_list = [self.distance(vertex, q) for vertex in self.T.vertices]
-                                                   
-        near_indexes = []
-        for idx, dist in enumerate(dist_list):
+        card_V = len(self.tree.nodes) + 1
+        r = self.gamma_RRTs * ((math.log(card_V) / card_V) ** (1/self._dimension))
+        search_radius = min(r, self.gamma_RRTs)
+        distances = [self._get_distance(self.tree.nodes[node][NodeData.POINT], q_rand) for node in self.tree.nodes]
+                              
+        near_nodes = []
+        for node, dist in enumerate(distances):
             if dist <= search_radius:
-                near_indexes.append(idx)
+                near_nodes.append(node)
 
-        return near_indexes
+        return near_nodes
 
-    def get_new_cost(self, idx, pointA, pointB):
-        """
-        Returns new cost 
-
-        Args:
-            idx(int): neighbor vertex's index
-            A(np.array): vector A
-            B(np.array): vector B
-
-        Returns:
-            cost(float)
-        """
-        cost = self.cost[idx] + self.distance(pointA, pointB)
-        return cost
-
-    def get_minimum_cost_and_index(self, neighbor_indexes, new_q, min_cost, nearest_idx):
-        """
-        Returns minimum cost and neer vertex index 
-        between neighbor vertices and new vertex in search radius
-
-        Args:
-            neighbor_indexes: neighbor vertex's index
-            new_q(int): new joint angles
-            min_cost(np.array): minimum cost
-            nearest_idx(np.array): nearest index
-
-        Returns:
-            min_cost(float)
-            nearest_idx(int)
-        """
-        for i in neighbor_indexes:
-            new_cost = self.get_new_cost(i, new_q, self.T.vertices[i])
-
-            if new_cost < min_cost:
-                min_cost = new_cost
-                nearest_idx = i
-
-        return min_cost, nearest_idx
-
-    def rewire(self, neighbor_indexes, new_q, new_idx):
-        """
-        Rewire a new vertex with a neighbor vertex with minimum cost
-
-        Args:
-            neighbor_indexes: neighbor vertex's index
-            new_q(int): new joint angles
-            new_idx(np.array): new joint angles's index
-        """
-        for i in neighbor_indexes:
-            new_cost = self.get_new_cost(new_idx, new_q, self.T.vertices[i])
-
-            if new_cost < self.cost[i]:
-                self.cost[i] = new_cost
-                self.T.edges[i-1][0] = new_idx
-
-    def reach_to_goal(self, point):
+    def _reach_to_goal(self, point):
         """
         Check reach to goal
         If reach to goal, return True
@@ -338,60 +346,25 @@ class RRTStarPlanner(Planner):
         Returns:
             bool
         """
-        dist = self.distance(point, self.goal_q)
-        if dist <= 0.6:
+        dist = self._get_distance(point, self.goal_q)
+        if dist <= 0.5:
             return True
         return False
 
-    def find_path(self, tree):
-        """
-        find path result from start index to goal index
-
-        Args:
-            tree(Tree): Trees obtained so far
-
-        Returns:
-            path(list)
-        """
-        path = [self.goal_q]
-        goal_idx = tree.edges[-1][1]
- 
-        while goal_idx != 0:
-            if not np.allclose(path[0], tree.vertices[goal_idx]):
-                path.append(tree.vertices[goal_idx])
-            parent_idx = tree.edges[goal_idx-1][0]
-            goal_idx = parent_idx
-        path.append(self._cur_qpos)
-
-        return path[::-1]
-
-    def get_rrt_tree(self):
-        """
-        Return obtained RRT Trees
-
-        Returns:
-            verteices(list)
-        """
-        vertices = []
-        for edge in self.T.edges:
-            from_node = self.T.vertices[edge[0]]
-            goal_node = self.T.vertices[edge[1]]
-            vertices.append((from_node, goal_node))
-        return vertices
-
-    def _get_linear_path(self, init_pose, goal_pose):
+    def _get_linear_path(self, init_pose, goal_pose, n_step=1):
         """
         Get linear path (only qpos)
 
         Args:
             init_pose (np.array): init robots' eef pose
             goal_pose (np.array): goal robots' eef pose  
+            n_step(int): number for n equal divisions between waypoints
         
         Return:
             pos (np.array): position
         """
-        for step in range(1, self.n_step + 1):
-            delta_t = step / self.n_step
+        for step in range(1, n_step + 1):
+            delta_t = step / n_step
             pos = get_linear_interpoation(init_pose, goal_pose, delta_t)
             yield pos
 

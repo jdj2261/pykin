@@ -1,12 +1,18 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
+from dataclasses import dataclass
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
 
 logger = create_logger('Cartesian Planner', "debug",)
 
-class Planner(metaclass=ABCMeta):
+@dataclass
+class NodeData:
+    COST = 'cost'
+    POINT = 'point'
+
+class Planner(NodeData, metaclass=ABCMeta):
     """
     Base Planner class 
 
@@ -62,7 +68,7 @@ class Planner(metaclass=ABCMeta):
             h_mat=transform)
 
     @abstractclassmethod
-    def get_path_in_joinst_space(self):
+    def get_joint_path(self):
         """
         write planner algorithm you want 
         """
@@ -217,8 +223,10 @@ class Planner(metaclass=ABCMeta):
         if visible_name:
             is_object_collision, col_name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=visible_name)  
             if is_self_collision or is_object_collision:
+                print(col_name)
                 return False, col_name
             return True, col_name
+            
 
         is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
         if is_self_collision or is_object_collision:

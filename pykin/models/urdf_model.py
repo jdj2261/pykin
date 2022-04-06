@@ -5,10 +5,10 @@ from collections import OrderedDict
 from pykin.models.robot_model import RobotModel
 from pykin.geometry.frame import Joint, Link, Frame
 from pykin.geometry.geometry import Visual, Collision
-from pykin.kinematics.transform import Transform
+from pykin.kinematics.transform import Transform, convert_transform
 from pykin.models.urdf_joint import URDF_Joint
 from pykin.models.urdf_link import URDF_Link
-from pykin.utils.kin_utils import convert_transform, JOINT_TYPE_MAP
+from pykin.utils.kin_utils import JOINT_TYPE_MAP
 
 class URDFModel(RobotModel):
     """

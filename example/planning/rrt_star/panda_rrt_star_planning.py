@@ -14,7 +14,7 @@ from pykin.kinematics.transform import Transform
 from pykin.utils.object_utils import ObjectManager
 from pykin.utils import plot_utils as plt
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
+
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
 mesh_path = pykin_path+"/asset/urdf/panda/"
@@ -51,22 +51,19 @@ for i in range(6):
 # objs.remove_object("milk_1")
 planner = RRTStarPlanner(
     robot=robot,
-    delta_distance=0.1,
-    epsilon=0.4, 
-    gamma_RRT_star=0.1,
-    dimension=7,
-    n_step=5
+    delta_distance=0.05,
+    epsilon=0.2, 
+    gamma_RRT_star=0.8,
+    dimension=7
 )
-
-interpolated_path = planner.get_path_in_joinst_space(
+planner.run(
     cur_q=init_qpos, 
     goal_pose=goal_eef_pose,
     robot_col_manager=robot_c_manager,
     object_col_manager=obj_c_manager,
-    max_iter=1000,
-    resolution=0.3)
+    max_iter=1000)
 
-planner.robot_col_mngr.show_collision_info()
+interpolated_path = planner.get_joint_path(n_step=5)
 
 if not interpolated_path:
     print("Cannot Visulization Path")
@@ -75,11 +72,14 @@ if not interpolated_path:
 joint_trajectory = []
 eef_poses = []
 
+# print(planner._cur_qpos, interpolated_path[0])
+
 for step, joint in enumerate(interpolated_path):
     fk = robot.forward_kin(joint)
     joint_trajectory.append(fk)
     eef_poses.append(fk[robot.eef_name].pos)
 
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)
 plt.plot_animation(
     robot,
     joint_trajectory, 
@@ -91,4 +91,3 @@ plt.plot_animation(
     visible_collision=True, 
     interval=1, 
     repeat=True)
-

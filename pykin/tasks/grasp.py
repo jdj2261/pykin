@@ -634,7 +634,7 @@ class GraspManager(ActivityBase):
                     if self.has_obj:
                         self.object_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
-                    if not self._check_between_object_distances(eps=0.02):
+                    if not self._check_between_object_distances(eps=0.03):
                         continue
 
                     if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self._collision_free(post_release_transforms):
@@ -659,7 +659,7 @@ class GraspManager(ActivityBase):
         obj_mesh,
         obj_pose,
         n_samples,
-        alpha=0.9
+        alpha=0.99
     ):
         """
         Generate support points
@@ -680,7 +680,7 @@ class GraspManager(ActivityBase):
         weights = np.zeros(len(copied_mesh.faces))
         for idx, vertex in enumerate(copied_mesh.vertices[copied_mesh.faces]):
             weights[idx]=0.0
-            if np.all(vertex[:,2] >= copied_mesh.bounds[1][2] * 0.98):
+            if np.all(vertex[:,2] >= copied_mesh.bounds[1][2] * 0.99):
                 weights[idx] = 1.0
 
         support_points, _, normal_vectors = surface_sampling(copied_mesh, n_samples, weights)

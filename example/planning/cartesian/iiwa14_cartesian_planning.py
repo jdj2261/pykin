@@ -50,7 +50,7 @@ task_plan = CartesianPlanner(
     damping=args.damping,
     pos_sensitivity=args.pos_sensitivity)
 
-joint_path, target_poses = task_plan.get_path_in_joinst_space(
+joint_path, target_poses = task_plan.get_joint_path(
     cur_q=init_qpos,
     goal_pose=goal_eef_pose,
     robot_col_manager=c_manager,

@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from pykin.kinematics.transform import Transform
+# from pykin.kinematics.transform import Transform
 
 JOINT_TYPE_MAP = {'revolute'  : 'revolute',
                   'fixed'     : 'fixed',
@@ -25,30 +25,6 @@ class ShellColors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-
-
-class Baxter:
-    left_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
-    left_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
-    right_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
-    right_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
-
-    @staticmethod
-    def add_visual_link(link_transforms, f):
-        if "left_lower_shoulder" in f.link.name:
-            link_transforms["left_upper_elbow_visual"] = np.dot(link_transforms["left_lower_shoulder"],
-                                                                        Baxter.left_e0_fixed_offset)
-        if "left_lower_elbow" in f.link.name:
-            link_transforms["left_upper_forearm_visual"] = np.dot(link_transforms["left_lower_elbow"],
-                                                                        Baxter.left_w0_fixed_offset)
-        if "right_lower_shoulder" in f.link.name:
-            link_transforms["right_upper_elbow_visual"] = np.dot(link_transforms["right_lower_shoulder"],
-                                                                        Baxter.right_e0_fixed_offset)
-        if "right_lower_elbow" in f.link.name:
-            link_transforms["right_upper_forearm_visual"] = np.dot(link_transforms["right_lower_elbow"], 
-                                                                        Baxter.right_w0_fixed_offset)
-
 
 def convert_thetas_to_dict(active_joint_names, thetas):
     """
@@ -80,21 +56,6 @@ def logging_time(original_fn):
         print(f"WorkingTime[{original_fn.__name__}]: {end_time-start_time:.4f} sec\n")
         return result
     return wrapper_fn
-
-
-def convert_transform(origin):
-    """
-    Args:
-        origin (None or Transform): offset of object
-
-    Returns:
-        Transform: Returns Transform if origin is None
-    """
-    if origin is None:
-        return Transform()
-    else:
-        return Transform(rot=origin.rot, pos=origin.pos)
-
 
 def convert_string_to_narray(str_input):
     """
