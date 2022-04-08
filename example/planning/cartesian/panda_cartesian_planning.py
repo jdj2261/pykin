@@ -13,7 +13,7 @@ from pykin.kinematics.transform import Transform
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils import plot_utils as plt
-from pykin.utils.object_utils import ObjectManager
+from pykin.objects.object_manager import ObjectManager
 
 
 help_str = "python panda_cartesian_planning.py"\

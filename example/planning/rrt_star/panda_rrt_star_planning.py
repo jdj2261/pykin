@@ -11,9 +11,8 @@ from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
-from pykin.utils.object_utils import ObjectManager
+from pykin.objects.object_manager import ObjectManager
 from pykin.utils import plot_utils as plt
-
 
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
@@ -51,9 +50,9 @@ for i in range(6):
 # objs.remove_object("milk_1")
 planner = RRTStarPlanner(
     robot=robot,
-    delta_distance=0.05,
+    delta_distance=0.1,
     epsilon=0.2, 
-    gamma_RRT_star=0.8,
+    gamma_RRT_star=3,
     dimension=7
 )
 planner.run(
@@ -63,7 +62,9 @@ planner.run(
     object_col_manager=obj_c_manager,
     max_iter=1000)
 
-interpolated_path = planner.get_joint_path(n_step=5)
+print(planner.tree.nodes[planner.goal_node][planner.COST])
+
+interpolated_path = planner.get_joint_path(n_step=10)
 
 if not interpolated_path:
     print("Cannot Visulization Path")

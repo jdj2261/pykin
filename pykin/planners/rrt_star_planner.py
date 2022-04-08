@@ -2,11 +2,7 @@ import math
 import numpy as np
 import networkx as nx
 
-from scipy.spatial import distance
-
-
 from pykin.planners.planner import NodeData, Planner
-# from pykin.planners.tree import Tree
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation

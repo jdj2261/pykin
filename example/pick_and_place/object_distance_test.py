@@ -10,7 +10,7 @@ from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.grasp import GraspManager, GraspStatus
 from pykin.utils.task_utils import get_relative_transform
-from pykin.utils.object_utils import ObjectManager
+from pykin.objects.object_manager import ObjectManager
 import pykin.utils.plot_utils as plt
 
 file_path = '../../asset/urdf/panda/panda.urdf'

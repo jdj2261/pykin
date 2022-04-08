@@ -11,7 +11,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.collision.collision_manager import CollisionManager
 from pykin.kinematics.transform import Transform
-from pykin.utils.object_utils import ObjectManager
+from pykin.objects.object_manager import ObjectManager
 from pykin.utils import plot_utils as plt
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi= 100)

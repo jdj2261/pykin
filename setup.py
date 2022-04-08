@@ -19,7 +19,8 @@ setup(
         "trimesh[easy]",
         "tqdm",
         "pyyaml",
-        "python-fcl"
+        "python-fcl",
+	"networkx"
     ],
     eager_resources=['*'],
     include_package_data=True,
@@ -29,7 +30,7 @@ setup(
     url="https://github.com/jdj2261/pykin.git",
 	download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
     author_email="wlseoeo@gmail.com",
-    version="1.1.6",
+    version="1.2.0",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
