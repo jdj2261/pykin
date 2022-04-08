@@ -1,12 +1,20 @@
-import sys, os
 import numpy as np
 
+from dataclasses import dataclass
 from collections import OrderedDict
 from pykin.utils.error_utils import NotFoundError
+import pykin.utils.plot_utils as plt
 
 object_types = ["mesh", "sphere", "box", "cylinder"]
 
-class ObjectManager():
+@dataclass
+class ObjectData:
+    NAME = "name"
+    G_TYPE = "gtype"
+    G_PARAM = "gparam"
+    POSE = "pose"
+
+class ObjectManager(ObjectData):
     """
     ObjectManager class 
     """
@@ -35,8 +43,10 @@ class ObjectManager():
         gtype=None, 
         gparam=None, 
         h_mat=np.eye(4),
+        color='k',
         for_grasp=False,
-        for_support=False):
+        for_support=False,
+        ):
         """
         Add object
 
@@ -45,22 +55,26 @@ class ObjectManager():
             gtype (str): object type (cylinder, sphere, box)
             gparam (float or tuple): object parameter (radius, length, size)
             h_mat (np.array): Homogeneous transform matrix for the object
+            color (np.array or str) : object color
         """
         obs_name = self._convert_name(name)
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)
-        self._objects[obs_name] = (gtype, gparam, h_mat)
+        self._objects[obs_name] = [gtype, gparam, h_mat, color]
 
         if for_grasp:
-            self.grasp_objects[obs_name] = (gtype, gparam, h_mat)
+            self.grasp_objects[obs_name] = [gtype, gparam, h_mat, color]
         
         if for_support:
-            self.support_objects[obs_name] = (gtype, gparam, h_mat)
+            self.support_objects[obs_name] = [gtype, gparam, h_mat, color]
 
     def remove_object(self, name):
         name = self._convert_name(name)
         if name in list(self._objects.keys()):
             self._objects.pop(name, None)
+
+    def set_transform(self, name, h_mat=np.eye(4)):
+        self._objects[self._convert_name(name)][2] = h_mat
 
     def get_info(self, name):
         name = self._convert_name(name)
@@ -69,13 +83,28 @@ class ObjectManager():
             raise NotFoundError(f"'{name}' is not in {self._objects.keys()}")
 
         info = {}
-        info["name"] = name
-        info["gtype"] = self._objects[name][0]
-        info["gparam"] = self._objects[name][1]
-        info["transform"] = self._objects[name][2]
+        info[ObjectData.NAME] = name
+        info[ObjectData.G_TYPE] = self._objects[name][0]
+        info[ObjectData.G_PARAM] = self._objects[name][1]
+        info[ObjectData.POSE] = self._objects[name][2]
 
         return info
 
+    def visualize(
+        self,
+        ax, 
+        alpha=1.0,
+    ):
+        for info in self._objects.values():
+            plt.plot_mesh(
+                ax=ax, 
+                mesh=info[1], 
+                h_mat=info[2], 
+                color=info[3],
+                alpha=alpha,
+            )
+        plt.plot_basis(ax)
+        
     @staticmethod
     def _convert_name(name):
         """

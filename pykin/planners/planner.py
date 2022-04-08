@@ -46,7 +46,7 @@ class Planner(NodeData, metaclass=ABCMeta):
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], 
             gparam=self.obj_info["gparam"], 
-            h_mat=self.obj_info["transform"])
+            h_mat=self.obj_info["pose"])
         self.object_col_mngr.remove_object(self.obj_info["name"])
 
     def detach_object_from_robot(self):
@@ -113,10 +113,10 @@ class Planner(NodeData, metaclass=ABCMeta):
         if current_obj_info is not None and result_obj_info is not None:
             self.obj_info = current_obj_info
             self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.result_object_pose = result_obj_info["transform"]
+            self.result_object_pose = result_obj_info["pose"]
 
             if not self.is_attached:
-                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["transform"])    
+                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["pose"])    
 
             self.robot_col_mngr.show_collision_info(name="Robot")
             self.object_col_mngr.show_collision_info(name="Object")

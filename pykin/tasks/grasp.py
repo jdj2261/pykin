@@ -90,7 +90,7 @@ class GraspManager(ActivityBase):
             self.has_obj = True
             self.obj_info = obj_info
             obj_mesh = obj_info["gparam"]
-            obj_pose = obj_info["transform"]
+            obj_pose = obj_info["pose"]
 
         grasp_pose = self.get_grasp_pose(obj_mesh, obj_pose, limit_angle, num_grasp, n_trials)    
         waypoints[GraspStatus.pre_grasp_pose] = self.pre_grasp_pose
@@ -217,10 +217,10 @@ class GraspManager(ActivityBase):
                     post_transforms, post_goal_pose = self._get_goal_pose(post_grasp_pose)
 
                     if self.has_obj:
-                        self.obj_pre_grasp_pose = self.obj_info["transform"]
-                        self.obj_grasp_pose = self.obj_info["transform"]
+                        self.obj_pre_grasp_pose = self.obj_info["pose"]
+                        self.obj_grasp_pose = self.obj_info["pose"]
 
-                        self.T_between_gripper_and_obj = get_relative_transform(grasp_pose, self.obj_info["transform"])
+                        self.T_between_gripper_and_obj = get_relative_transform(grasp_pose, self.obj_info["pose"])
                         obj_post_grasp_pose = np.dot(post_grasp_pose, self.T_between_gripper_and_obj)
                         self.obj_post_grasp_pose = obj_post_grasp_pose
                         self._attach_gripper2object(obj_post_grasp_pose)
@@ -402,11 +402,11 @@ class GraspManager(ActivityBase):
 
         if obj_info_on_sup:
             obj_mesh_on_sup = obj_info_on_sup["gparam"]
-            obj_pose_on_sup = obj_info_on_sup["transform"]
+            obj_pose_on_sup = obj_info_on_sup["pose"]
 
         if obj_info_for_sup:
             obj_mesh_for_sup = obj_info_for_sup["gparam"]
-            obj_pose_for_sup = obj_info_for_sup["transform"]
+            obj_pose_for_sup = obj_info_for_sup["pose"]
 
         release_pose = self.get_release_pose(
             obj_mesh_on_sup,
