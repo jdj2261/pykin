@@ -2,7 +2,7 @@ import numpy as np
 import sys, os
 import trimesh
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -13,7 +13,7 @@ from pykin.utils.task_utils import get_relative_transform
 from pykin.objects.object_manager import ObjectManager
 import pykin.utils.plot_utils as plt
 
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = '../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 robot.setup_link_name(eef_name="panda_right_hand")
 
@@ -24,27 +24,27 @@ mesh_path = pykin_path+"/asset/urdf/panda/"
 c_manager = CollisionManager(mesh_path)
 c_manager.setup_robot_collision(robot, fk)
 
-grasp_obj1_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-grasp_obj2_pose = Transform(pos=np.array([0.4, 0.2, 0.77]))
-grasp_obj3_pose = Transform(pos=np.array([0.6, 0.1, 0.77]))
+grasp_obj1_pose = Transform(pos=np.array([0.6, 0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
+grasp_obj2_pose = Transform(pos=np.array([0.4, 0.2, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
+grasp_obj3_pose = Transform(pos=np.array([0.6, 0.1, 0.77]), rot=np.array([0, np.pi/2, np.pi/2]))
 
 obs_pos2 = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 obs_pos3 = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
-cube_mesh = trimesh.load(pykin_path+'/asset/objects/meshes/ben_cube.stl')
-box_goal_mesh = trimesh.load(pykin_path+'/asset/objects/meshes/box_goal.stl')
-table_mesh = trimesh.load(pykin_path+'/asset/objects/meshes/custom_table.stl')
+obj_mesh1 = trimesh.load(pykin_path+'/asset/objects/meshes/square_box.stl')
+obj_mesh2 = trimesh.load(pykin_path+'/asset/objects/meshes/box_goal.stl')
+obj_mesh3 = trimesh.load(pykin_path+'/asset/objects/meshes/custom_table.stl')
 
-cube_mesh.apply_scale(0.06)
-box_goal_mesh.apply_scale(0.001)
-table_mesh.apply_scale(0.01)
+obj_mesh1.apply_scale(0.001)
+obj_mesh2.apply_scale(0.001)
+obj_mesh3.apply_scale(0.01)
 
 objects = ObjectManager()
-objects.add_object(name="red_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj1_pose.h_mat, for_grasp=True)
-objects.add_object(name="blue_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj2_pose.h_mat, for_grasp=True)
-objects.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj3_pose.h_mat, for_grasp=True)
-objects.add_object(name="box", gtype="mesh", gparam=box_goal_mesh, h_mat=obs_pos2.h_mat, for_support=True)
-objects.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=obs_pos3.h_mat)
+objects.add_object(name="obj_1", gtype="mesh", gparam=obj_mesh1, h_mat=grasp_obj1_pose.h_mat, for_grasp=True)
+objects.add_object(name="obj_2", gtype="mesh", gparam=obj_mesh1, h_mat=grasp_obj2_pose.h_mat, for_grasp=True)
+# objects.add_object(name="obj_3", gtype="mesh", gparam=obj_mesh1, transform=grasp_obj3_pose.h_mat, for_grasp=True)
+objects.add_object(name="box", gtype="mesh", gparam=obj_mesh2, h_mat=obs_pos2.h_mat, for_support=True)
+objects.add_object(name="table", gtype="mesh", gparam=obj_mesh3, h_mat=obs_pos3.h_mat)
 
 o_manager = CollisionManager()
 o_manager.setup_object_collision(objects)
@@ -60,7 +60,7 @@ configures["tcp_position"] = np.array([0, 0, 0.097])
 grasp_man = GraspManager(
     robot, 
     c_manager, 
-    o_manager,
+    o_manager, 
     mesh_path,    
     retreat_distance=0.15,
     release_distance=0.01,
@@ -91,7 +91,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
         n_samples_on_sup=20, 
         obj_info_for_sup=grasp_object_info, 
         n_samples_for_sup=20, 
-        n_trials=20)
+        n_trials=10)
     
     grasp_pose = grasp_waypoints[GraspStatus.grasp_pose]
     pre_grasp_pose = grasp_waypoints[GraspStatus.pre_grasp_pose]
@@ -104,32 +104,32 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     obj_pre_release_pos_transformed = np.dot(pre_release_pose, T)
     obj_release_pos_transformed = np.dot(release_pose, T)
 
+    
+    grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
+    grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
+
     grasp_man.visualize_axis(ax, grasp_pose, visible_basis=True)
     gripper = grasp_man.get_transformed_gripper_fk(grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
     
-    # grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
-    # gripper = grasp_man.get_transformed_gripper_fk(pre_grasp_pose, is_tcp=False)
+    grasp_man.visualize_axis(ax, pre_grasp_pose, visible_basis=True)
+    gripper = grasp_man.get_transformed_gripper_fk(pre_grasp_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
     grasp_man.visualize_axis(ax, release_pose, visible_basis=True)
     gripper = grasp_man.get_transformed_gripper_fk(release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
-    # grasp_man.visualize_axis(ax, pre_release_pose, visible_basis=True)
-    # gripper = grasp_man.get_transformed_gripper_fk(pre_release_pose, is_tcp=False)
+    grasp_man.visualize_axis(ax, pre_release_pose, visible_basis=True)
+    gripper = grasp_man.get_transformed_gripper_fk(pre_release_pose, is_tcp=False)
     # grasp_man.visualize_gripper(ax, gripper, visible_basis=True, alpha=0.5, color='blue')
 
-    # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
-    plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_release_pos_transformed, alpha=0.2, color=color)
-    # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_release_pos_transformed, alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=info[1], h_mat=info[2], alpha=0.2, color=color)
+    # plt.plot_mesh(ax, mesh=info[1], h_mat=grasp_man.result_obj_pose, alpha=0.5, color='red')
 
-result = grasp_man.object_c_manager.get_distances_internal()
-for (o1, o2), distance in result.items():
-    if o1 in list(grasp_man.object_c_manager.objects.grasp_objects.keys()) and o2 in list(grasp_man.object_c_manager.objects.grasp_objects.keys()):
-        print(o1, o2, distance)
-
-plt.plot_mesh(ax=ax, mesh=box_goal_mesh, h_mat=obs_pos2.h_mat, alpha=0.2)
-plt.plot_mesh(ax=ax, mesh=table_mesh, h_mat=obs_pos3.h_mat, alpha=0.2)
+plt.plot_mesh(ax=ax, mesh=obj_mesh2, h_mat=obs_pos2.h_mat, alpha=0.2)
+plt.plot_mesh(ax=ax, mesh=obj_mesh3, h_mat=obs_pos3.h_mat, alpha=0.2)
 plt.show_figure()

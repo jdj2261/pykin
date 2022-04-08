@@ -2,7 +2,7 @@ import numpy as np
 import sys, os
 import trimesh
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.append(pykin_path)
 
 from pykin.robots.single_arm import SingleArm
@@ -12,7 +12,7 @@ from pykin.tasks.grasp import GraspManager, GraspStatus
 from pykin.objects.object_manager import ObjectManager
 import pykin.utils.plot_utils as plt
 
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = '../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 robot.setup_link_name(eef_name="panda_right_hand")
 

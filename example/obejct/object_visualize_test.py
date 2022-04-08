@@ -32,7 +32,6 @@ objects.add_object(name="blue_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_
 objects.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj3_pose.h_mat, for_grasp=True)
 objects.add_object(name="box", gtype="mesh", color=[1, 0, 0], gparam=box_goal_mesh, h_mat=obs_pos2.h_mat, for_support=True)
 objects.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=obs_pos3.h_mat)
-objects.visualize(ax, 0.2)
 
-plt.plot_basis(ax)
+objects.visualize(ax, 0.2)
 plt.show_figure()

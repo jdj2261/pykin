@@ -145,4 +145,3 @@ class ObjectManager(ObjectData):
     @property
     def objects(self):
         return self._objects
-    
