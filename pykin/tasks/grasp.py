@@ -775,7 +775,7 @@ class GraspManager(ActivityBase):
         logger.warning("Not found support point")
         return False
 
-    def _check_between_object_distances(self, eps=0.01):
+    def _check_between_object_distances(self, eps=0.02):
         distance_info = self.object_c_manager.get_distances_internal()
         distances = []
         for (o1, o2), distance in distance_info.items():

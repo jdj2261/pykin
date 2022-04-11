@@ -1,20 +1,16 @@
 import numpy as np
-
-from dataclasses import dataclass
 from collections import OrderedDict
-from pykin.utils.error_utils import NotFoundError
+
+
 import pykin.utils.plot_utils as plt
+from pykin.utils.error_utils import NotFoundError
 
-object_types = ["mesh", "sphere", "box", "cylinder"]
+from pykin.objects.object_info import ObjectInfo
+from pykin.objects.object_info import ObjectData
 
-@dataclass
-class ObjectData:
-    NAME = "name"
-    G_TYPE = "gtype"
-    G_PARAM = "gparam"
-    POSE = "pose"
+object_types = ("mesh", "sphere", "box", "cylinder")
 
-class ObjectManager(ObjectData):
+class ObjectManager(ObjectInfo):
     """
     ObjectManager class 
     """
@@ -24,7 +20,8 @@ class ObjectManager(ObjectData):
         self.grasp_objects = OrderedDict()
         self.support_objects = OrderedDict()
         self._gtype = None
-
+        self.logical_states = OrderedDict()
+        
     def __call__(self, *args, **kwards):
         self.add_object(*args, **kwards)
 
@@ -46,6 +43,7 @@ class ObjectManager(ObjectData):
         color='k',
         for_grasp=False,
         for_support=False,
+        obj_info=None
         ):
         """
         Add object
@@ -57,40 +55,42 @@ class ObjectManager(ObjectData):
             h_mat (np.array): Homogeneous transform matrix for the object
             color (np.array or str) : object color
         """
-        obs_name = self._convert_name(name)
-        self._check_gtype(gtype)
-        self._check_gparam(gtype, gparam)
-        self._objects[obs_name] = [gtype, gparam, h_mat, color]
+        if isinstance(obj_info, ObjectInfo):
+            self._objects[obj_info.name] = obj_info
+            
+            if for_grasp:
+                self.grasp_objects[obj_info.name] = obj_info
+            if for_support:
+                self.support_objects[obj_info.name] = obj_info
 
-        if for_grasp:
-            self.grasp_objects[obs_name] = [gtype, gparam, h_mat, color]
-        
-        if for_support:
-            self.support_objects[obs_name] = [gtype, gparam, h_mat, color]
+        else:
+            self._objects[name] = ObjectInfo(name, gtype, gparam, h_mat, color)
+            if for_grasp:
+                self.grasp_objects[name] = ObjectInfo(name, gtype, gparam, h_mat, color, for_grasp=for_grasp)
+            
+            if for_support:
+                self.support_objects[name] = ObjectInfo(name, gtype, gparam, h_mat, color, for_support=for_support)
 
     def remove_object(self, name):
-        name = self._convert_name(name)
         if name in list(self._objects.keys()):
             self._objects.pop(name, None)
 
     def set_transform(self, name, h_mat=np.eye(4)):
-        self._objects[self._convert_name(name)][2] = h_mat
+        self._objects[name].pose = h_mat
 
     def get_info(self, name):
-        name = self._convert_name(name)
-
         if name not in list(self._objects.keys()):
             raise NotFoundError(f"'{name}' is not in {self._objects.keys()}")
 
         info = {}
         info[ObjectData.NAME] = name
-        info[ObjectData.G_TYPE] = self._objects[name][0]
-        info[ObjectData.G_PARAM] = self._objects[name][1]
-        info[ObjectData.POSE] = self._objects[name][2]
+        info[ObjectData.G_TYPE] = self._objects[name].gtype
+        info[ObjectData.G_PARAM] = self._objects[name].gparam
+        info[ObjectData.POSE] = self._objects[name].pose
 
         return info
 
-    def visualize(
+    def visualize_all_objects(
         self,
         ax, 
         alpha=1.0,
@@ -98,50 +98,13 @@ class ObjectManager(ObjectData):
         for info in self._objects.values():
             plt.plot_mesh(
                 ax=ax, 
-                mesh=info[1], 
-                h_mat=info[2], 
-                color=info[3],
+                mesh=info.gparam, 
+                h_mat=info.pose, 
+                color=info.color,
                 alpha=alpha,
             )
         plt.plot_basis(ax)
         
-    @staticmethod
-    def _convert_name(name):
-        """
-        convert input name to object name
-
-        Args:
-            nam (str): An identifier for the object
-
-        Returns:
-            name(str) : objects_ + name
-        """
-        if name and "object" not in name:
-            name = "object_" + name
-        return name
-    
-    @staticmethod
-    def _check_gtype(gtype):
-        """
-        check object's geom type
-        """
-        if gtype not in object_types:
-            raise NotFoundError(f"'{gtype}' is not in {object.object_types}")
-    
-    @staticmethod
-    def _check_gparam(gtype, gparam):
-        """
-        check object's geom param 
-        """
-        if not isinstance(gparam, (tuple, list, np.ndarray)):
-            gparam = [gparam]
-        if gtype == "sphere":
-            assert len(gparam) == 1, f"{gtype}'s parameter need only 'radius'"
-        if gtype == "box":
-            assert len(gparam) == 3, f"{gtype}'s parameter need box 'size(x, y, z)'"
-        if gtype == "cylinder":
-            assert len(gparam) == 2, f"{gtype}'s parameter need 'radius' and 'length'"
-
     @property
     def objects(self):
         return self._objects
