@@ -3,6 +3,9 @@ import collections
 import itertools
 import copy
 
+# from pykin.objects.object_manager import ObjectManager
+# from pykin.objects.gripper import Gripper
+
 try:
     # pip install python-fcl
     # pip install trimesh[easy]
@@ -37,7 +40,6 @@ class CollisionManager:
         self._manager.setup()
         self._filter_names = set()
         self.geom = "visual"
-        self.objects = None
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
@@ -65,7 +67,7 @@ class CollisionManager:
         """
         self.objects = objects
         for name, info in objects:
-            self.add_object(name, info[0], info[1], info[2])
+            self.add_object(name, info.gtype, info.gparam, info.h_mat)
 
     def _filter_contact_names(self, robot, fk, geom):      
         """

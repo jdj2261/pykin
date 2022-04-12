@@ -11,6 +11,7 @@ from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.grasp import GraspManager, GraspStatus
 from pykin.utils.task_utils import get_relative_transform
 from pykin.objects.object_manager import ObjectManager
+from pykin.objects.object_info import ObjectInfo
 import pykin.utils.plot_utils as plt
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
@@ -70,7 +71,7 @@ grasp_man = GraspManager(
 #generate_grasps
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 for i, (name, info) in enumerate(objects.grasp_objects.items()):
-    
+    info:ObjectInfo = info
     if i%3 == 0:
         color ='red'
     elif i%3 == 1:
@@ -99,7 +100,8 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     release_pose = release_waypoints[GraspStatus.release_pose]
     pre_release_pose = release_waypoints[GraspStatus.pre_release_pose]
 
-    T = get_relative_transform(grasp_pose, info[2])
+    
+    T = get_relative_transform(grasp_pose, info.h_mat)
     obj_grasp_pos_transformed = np.dot(pre_grasp_pose, T)
     obj_pre_release_pos_transformed = np.dot(pre_release_pose, T)
     obj_release_pos_transformed = np.dot(release_pose, T)
@@ -127,7 +129,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_release_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=obj_mesh1, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
-    plt.plot_mesh(ax=ax, mesh=info[1], h_mat=info[2], alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=info.gparam, h_mat=info.h_mat, alpha=0.2, color=color)
     # plt.plot_mesh(ax, mesh=info[1], h_mat=grasp_man.result_obj_pose, alpha=0.5, color='red')
 
 plt.plot_mesh(ax=ax, mesh=obj_mesh2, h_mat=obs_pos2.h_mat, alpha=0.2)

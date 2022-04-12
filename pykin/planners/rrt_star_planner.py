@@ -53,7 +53,8 @@ class RRTStarPlanner(Planner):
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
 
-    def _create_tree(self):
+    @staticmethod
+    def _create_tree():
         tree = nx.DiGraph()
         tree.add_node(0)
         tree.update(

@@ -3,9 +3,9 @@ import numpy as np
 from pykin.utils.error_utils import NotFoundError
 from pykin.objects.object_data import ObjectData
 from pykin.utils.transform_utils import get_pose_from_homogeneous
+from pykin.utils.kin_utils import ShellColors as scolors
 
 object_types = ("mesh", "sphere", "box", "cylinder")
-
 class ObjectInfo(ObjectData):
     def __init__(
         self, 
@@ -14,29 +14,23 @@ class ObjectInfo(ObjectData):
         gparam, 
         h_mat=np.eye(4), 
         color='k', 
-        for_grasp=False, 
-        for_support=False
+        logical_state={}
     ):
         self.name = name
         self.gtype = gtype
         self.gparam = gparam
-        self.pose = h_mat
+        self.h_mat = h_mat
         self.color = color
-        self._for_grasp = for_grasp
-        self._for_support = for_support
+        self.logical_state = logical_state
 
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)
 
-    def __str__(self):
-        pose = get_pose_from_homogeneous(self.pose)
-        pos = pose[:3]
-        rot = pose[3:]
-        return "ObjectInfo(name={}, pos={}, rot={})".format(self.name, pos, rot)
-
     def __repr__(self):
-        return 'pykin.objects.object_data.{}()'.format(type(self).__name__)
-
+        pose = get_pose_from_homogeneous(self.h_mat)
+        pos = pose[:3]
+        return f"""{scolors.HEADER}ObjectInfo{scolors.ENDC}(name={self.name}, pos={pos})"""
+    
     @staticmethod
     def _check_gtype(gtype):
         """

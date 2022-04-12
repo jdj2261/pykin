@@ -50,7 +50,7 @@ o_manager = CollisionManager()
 o_manager.setup_object_collision(objects)
 
 configures = {}
-configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]
+configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger"]
 configures["gripper_max_width"] = 0.08
 configures["gripper_max_depth"] = 0.035
 configures["tcp_position"] = np.array([0, 0, 0.097])

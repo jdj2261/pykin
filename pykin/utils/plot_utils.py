@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from pykin.objects.object_info import ObjectInfo
 from pykin.utils import transform_utils as tf
 
 # Colors of each directions axes. For ex X is green
@@ -245,9 +246,10 @@ def plot_objects(ax, objects, alpha=0.5, color='k'):
     Plot objects
     """
     for key, value in objects:
-        o_type = value[0]
-        o_param = value[1]
-        o_pose = value[2]
+        info:ObjectInfo = value
+        o_type = info.gtype
+        o_param = info.gparam
+        o_pose = info.h_mat
 
         if o_type == "mesh":
             plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=alpha, color=color)

@@ -22,8 +22,8 @@ class ActivityBase:
     def __init__(
         self,
         robot,
-        robot_col_manager,
-        objects_col_manager,
+        robot_col_manager: CollisionManager,
+        objects_col_manager :CollisionManager,
         mesh_path,
         **gripper_configures
     ):

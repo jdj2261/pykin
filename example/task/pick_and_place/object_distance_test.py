@@ -39,15 +39,16 @@ cube_mesh.apply_scale(0.06)
 box_goal_mesh.apply_scale(0.0013)
 table_mesh.apply_scale(0.01)
 
-objects = ObjectManager()
-objects.add_object(name="red_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj1_pose.h_mat, for_grasp=True)
-objects.add_object(name="blue_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj2_pose.h_mat, for_grasp=True)
-objects.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj3_pose.h_mat, for_grasp=True)
-objects.add_object(name="box", gtype="mesh", gparam=box_goal_mesh, h_mat=obs_pos2.h_mat, for_support=True)
-objects.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=obs_pos3.h_mat)
+object_man = ObjectManager()
+object_man.add_object(name="red_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj1_pose.h_mat, for_grasp=True)
+object_man.add_object(name="blue_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj2_pose.h_mat, for_grasp=True)
+object_man.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=grasp_obj3_pose.h_mat, for_grasp=True)
+object_man.add_object(name="box", gtype="mesh", gparam=box_goal_mesh, h_mat=obs_pos2.h_mat, for_support=True)
+object_man.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=obs_pos3.h_mat)
+
 
 o_manager = CollisionManager()
-o_manager.setup_object_collision(objects)
+o_manager.setup_object_collision(object_man)
 
 configures = {}
 configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]
@@ -66,10 +67,10 @@ grasp_man = GraspManager(
     release_distance=0.01,
     **configures)
 
-####################################################################################
+###################################################################################
 #generate_grasps
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-for i, (name, info) in enumerate(objects.grasp_objects.items()):
+for i, (name, info) in enumerate(object_man.grasp_objects.items()):
     
     if i%3 == 0:
         color ='red'
@@ -78,8 +79,8 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     else:
         color = 'green'
         
-    grasp_object_info = objects.get_info(name)
-    support_obj_info = objects.get_info(list(objects.support_objects.keys())[0])
+    grasp_object_info = object_man.get_info(name)
+    support_obj_info = object_man.get_info(list(object_man.support_objects.keys())[0])
     grasp_waypoints = grasp_man.get_grasp_waypoints(
         obj_info=grasp_object_info, 
         limit_angle=0.05, 
@@ -99,7 +100,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     release_pose = release_waypoints[GraspStatus.release_pose]
     pre_release_pose = release_waypoints[GraspStatus.pre_release_pose]
 
-    T = get_relative_transform(grasp_pose, info[2])
+    T = get_relative_transform(grasp_pose, info.h_mat)
     obj_grasp_pos_transformed = np.dot(pre_grasp_pose, T)
     obj_pre_release_pos_transformed = np.dot(pre_release_pose, T)
     obj_release_pos_transformed = np.dot(release_pose, T)
@@ -123,7 +124,7 @@ for i, (name, info) in enumerate(objects.grasp_objects.items()):
     # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_grasp_pos_transformed, alpha=0.2, color=color)
     plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_release_pos_transformed, alpha=0.2, color=color)
     # plt.plot_mesh(ax=ax, mesh=cube_mesh, h_mat=obj_pre_release_pos_transformed, alpha=0.2, color=color)
-    plt.plot_mesh(ax=ax, mesh=info[1], h_mat=info[2], alpha=0.2, color=color)
+    plt.plot_mesh(ax=ax, mesh=info.gparam, h_mat=info.h_mat, alpha=0.2, color=color)
 
 result = grasp_man.object_c_manager.get_distances_internal()
 for (o1, o2), distance in result.items():

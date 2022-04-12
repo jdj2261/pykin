@@ -2,6 +2,7 @@ import numpy as np
 from enum import Enum, auto
 from collections import OrderedDict
 from copy import deepcopy
+from pykin.collision.collision_manager import CollisionManager
 
 from pykin.tasks.activity import ActivityBase
 from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
@@ -39,7 +40,7 @@ class GraspManager(ActivityBase):
         self,
         robot,
         robot_col_manager,
-        objects_col_manager,
+        objects_col_manager: CollisionManager(),
         mesh_path,
         retreat_distance = 0.1,
         release_distance = 0.01,
