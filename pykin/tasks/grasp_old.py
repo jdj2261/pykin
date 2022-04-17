@@ -3,10 +3,8 @@ from enum import Enum, auto
 from collections import OrderedDict
 from copy import deepcopy
 from pykin.collision.collision_manager import CollisionManager
-from pykin.objects.gripper import Gripper
-from pykin.objects.object_manager import ObjectManager
 
-from pykin.tasks.activity import ActivityBase
+from pykin.tasks.activity_old import ActivityBase
 from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
@@ -41,16 +39,19 @@ class GraspManager(ActivityBase):
     def __init__(
         self,
         robot,
-        robot_col_mngr: CollisionManager,
-        object_mngr: ObjectManager(),
+        robot_col_manager,
+        objects_col_manager: CollisionManager(),
+        mesh_path,
         retreat_distance = 0.1,
         release_distance = 0.01,
+        **gripper_configures
     ):
         super().__init__(
             robot,
-            robot_col_mngr,
-            object_mngr
-        )
+            robot_col_manager,
+            objects_col_manager,
+            mesh_path,
+            **gripper_configures)
 
         self.retreat_distance = retreat_distance
         self.release_distance = release_distance
@@ -96,7 +97,7 @@ class GraspManager(ActivityBase):
         waypoints[GraspStatus.pre_grasp_pose] = self.pre_grasp_pose
         waypoints[GraspStatus.grasp_pose] = grasp_pose
         waypoints[GraspStatus.post_grasp_pose] =self.post_grasp_pose
-        
+
         return waypoints
 
     def get_grasp_pose(        
@@ -244,7 +245,7 @@ class GraspManager(ActivityBase):
         Args:
             obj_post_grasp_pose (np.array): pose grasp pose of object
         """
-        self.robot_col_mngr.add_object(
+        self.robot_c_manager.add_object(
             self.obj_info["name"], 
             gtype=self.obj_info["gtype"], gparam=self.obj_info["gparam"], h_mat=obj_post_grasp_pose)
 
@@ -614,7 +615,7 @@ class GraspManager(ActivityBase):
             goal_pose = transforms[self.robot.eef_name].h_mat
 
             if self.has_obj:
-                self.robot_col_mngr.set_transform(self.obj_info["name"], result_obj_pose)
+                self.robot_c_manager.set_transform(self.obj_info["name"], result_obj_pose)
 
             if self._check_ik_solution(release_pose, goal_pose) and self._collision_free(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
@@ -622,7 +623,7 @@ class GraspManager(ActivityBase):
 
                 if self.has_obj:
                     obj_pre_release_pose = np.dot(pre_release_pose, self.T_between_gripper_and_obj)
-                    self.robot_col_mngr.set_transform(self.obj_info["name"], obj_pre_release_pose)
+                    self.robot_c_manager.set_transform(self.obj_info["name"], obj_pre_release_pose)
                     self.obj_pre_release_pose = obj_pre_release_pose
 
                 if self._check_ik_solution(pre_release_pose, pre_release_goal_pose) and self._collision_free(pre_release_transforms):
@@ -649,7 +650,7 @@ class GraspManager(ActivityBase):
             return None
         
         if self.has_obj:
-            self.robot_col_mngr.remove_object(self.obj_info["name"])
+            self.robot_c_manager.remove_object(self.obj_info["name"])
 
         logger.info(f"Success to get Release pose.\n")
         return release_pose

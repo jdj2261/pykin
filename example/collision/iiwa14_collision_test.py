@@ -25,7 +25,7 @@ mesh_path = pykin_path+"/asset/urdf/iiwa14/"
 
 c_manager = CollisionManager(mesh_path)
 c_manager.setup_robot_collision(robot, fk)
-test, name, data = c_manager.in_collision_internal(return_names=True, return_data=True)
+test, name = c_manager.in_collision_internal(return_names=True)
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)
@@ -39,10 +39,10 @@ scene.add_geometry(test_mesh, node_name="milk2", transform=Transform(pos=[0.1, 0
 o_manager = CollisionManager(milk_path)
 o_manager.add_object("milk1", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.1, 0, 0]).h_mat)
 o_manager.add_object("milk2", gtype="mesh", gparam=test_mesh, h_mat=Transform(pos=[0.1, 0, 0.1]).h_mat)
-test, name, data = o_manager.in_collision_internal(return_names=True, return_data=True)
+test, name = o_manager.in_collision_internal(return_names=True)
 print(test, name)
 
-test, name, data = c_manager.in_collision_other(o_manager, True, True)
+test, name = c_manager.in_collision_other(o_manager, True)
 print(test, name)
 
 scene.show()

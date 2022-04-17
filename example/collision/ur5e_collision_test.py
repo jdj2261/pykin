@@ -25,8 +25,8 @@ mesh_path = pykin_path+"/asset/urdf/ur5e/"
 c_manager = CollisionManager(mesh_path)
 c_manager.setup_robot_collision(robot, fk, geom="collision")
 
-result, objs_in_collision, contact_data = c_manager.in_collision_internal(return_names=True, return_data=True)
-print(result, objs_in_collision, len(contact_data))
+result, objs_in_collision = c_manager.in_collision_internal(return_names=True)
+print(result, objs_in_collision)
 
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(scene=scene, mesh_path=mesh_path, robot=robot, fk=fk)

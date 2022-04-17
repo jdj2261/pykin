@@ -1,12 +1,12 @@
 import numpy as np
 
 from pykin.utils.error_utils import NotFoundError
-from pykin.objects.object_data import ObjectData
-from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.kin_utils import ShellColors as scolors
+from pykin.utils.transform_utils import get_pose_from_homogeneous
 
 object_types = ("mesh", "sphere", "box", "cylinder")
-class ObjectInfo(ObjectData):
+
+class Object:
     def __init__(
         self, 
         name, 
@@ -29,8 +29,14 @@ class ObjectInfo(ObjectData):
     def __repr__(self):
         pose = get_pose_from_homogeneous(self.h_mat)
         pos = pose[:3]
-        return f"""{scolors.HEADER}ObjectInfo{scolors.ENDC}(name={self.name}, pos={pos})"""
-    
+        return f"""{scolors.HEADER}Object{scolors.ENDC}(name={self.name}, pos={pos})"""
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
+
     @staticmethod
     def _check_gtype(gtype):
         """

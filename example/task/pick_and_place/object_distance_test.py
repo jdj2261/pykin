@@ -8,7 +8,7 @@ sys.path.append(pykin_path)
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
-from pykin.tasks.grasp import GraspManager, GraspStatus
+from pykin.tasks.grasp_old import GraspManager, GraspStatus
 from pykin.utils.task_utils import get_relative_transform
 from pykin.objects.object_manager import ObjectManager
 import pykin.utils.plot_utils as plt
@@ -48,7 +48,6 @@ object_man.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=obs_p
 
 
 o_manager = CollisionManager()
-o_manager.setup_object_collision(object_man)
 
 configures = {}
 configures["gripper_names"] = ["right_gripper", "leftfinger", "rightfinger", "tcp"]

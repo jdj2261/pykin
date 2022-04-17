@@ -15,7 +15,6 @@ except BaseException:
     fcl = None
     trimesh = None
 
-from pykin.collision.contact_data import ContactData
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
 
@@ -29,17 +28,19 @@ class CollisionManager:
         mesh_path (str): absolute path of mesh
     """
 
-    def __init__(self, mesh_path=None):
+    def __init__(self, is_robot=False):
         if fcl is None:
             raise ValueError('No FCL Available! Please install the python-fcl library')
         
-        self.mesh_path = mesh_path
         self._objs = {}
         self._names = collections.defaultdict(lambda: None)
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
-        self._filter_names = set()
-        self.geom = "visual"
+
+        if is_robot:
+            self.is_robot = is_robot
+            self.filtered_link_names = set()
+            self.robot_geom = None
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
@@ -53,21 +54,25 @@ class CollisionManager:
             fk (OrderedDict): result(forward kinematics) of computing robots' forward kinematics
             geom (str): robot's geometry type name ("visual" or "collision")
         """
+        if not self.is_robot:
+            raise ValueError('Check argument!! Is is_robot True?')
+
         if fk is None:
             fk = robot.init_fk
         self.geom = geom
         self._filter_contact_names(robot, fk, geom)
 
-    def setup_object_collision(self, objects):
-        """
-        Setup object' collision
+    def setup_gripper_collision(self, robot, fk=None):
+        if fk is None:
+            fk = robot.init_fk
 
-        Args:
-            objects (defaultdict): pykin objects
-        """
-        self.objects = objects
-        for name, info in objects:
-            self.add_object(name, info.gtype, info.gparam, info.h_mat)
+        info = robot.gripper.info
+        for name, transform in fk.items():
+            if name in list(info.keys()):
+                robot_type = info[name][1]  
+                if robot_type == "mesh":
+                    h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
+                    self.add_object(name, info[name][1], info[name][2], h_mat)
 
     def _filter_contact_names(self, robot, fk, geom):      
         """
@@ -78,16 +83,16 @@ class CollisionManager:
             fk (OrderedDict): result(forward kinematics) of computing robots' forward kinematics
             geom (str): robot's geometry type name ("visual" or "collision")
         """
-        for link, transformation in fk.items():
+        for link, transform in fk.items():
             if geom == "visual":
                 robot_gtype = robot.links[link].visual.gtype
-                h_mat = np.dot(transformation.h_mat, robot.links[link].visual.offset.h_mat)
+                h_mat = np.dot(transform.h_mat, robot.links[link].visual.offset.h_mat)
                 
                 if robot_gtype is None:
                     continue
 
                 if robot_gtype == "mesh":
-                    mesh_name = self.mesh_path + robot.links[link].visual.gparam.get('filename')
+                    mesh_name = robot.mesh_path + robot.links[link].visual.gparam.get('filename')
                     gparam = trimesh.load_mesh(mesh_name)
                 elif robot_gtype == 'cylinder':
                     radius = float(robot.links[link].visual.gparam.get('radius'))
@@ -101,13 +106,13 @@ class CollisionManager:
                     gparam = size
             else:
                 robot_gtype = robot.links[link].collision.gtype
-                h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
+                h_mat = np.dot(transform.h_mat, robot.links[link].collision.offset.h_mat)
 
                 if robot_gtype is None:
                     continue
                 
                 if robot_gtype == "mesh":
-                    mesh_name = self.mesh_path + robot.links[link].collision.gparam.get('filename')
+                    mesh_name = robot.mesh_path + robot.links[link].collision.gparam.get('filename')
                     gparam = trimesh.load_mesh(mesh_name)
                 elif robot_gtype == 'cylinder':
                     radius = float(robot.links[link].collision.gparam.get('radius'))
@@ -123,7 +128,7 @@ class CollisionManager:
             self.add_object(robot.links[link].name, robot_gtype, gparam, h_mat)
 
         _, names = self.in_collision_internal(return_names=True)
-        self._filter_names = copy.deepcopy(names)
+        self.filtered_link_names = copy.deepcopy(names)
 
     def add_object(self, 
                    name, 
@@ -217,24 +222,22 @@ class CollisionManager:
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
 
-    def in_collision_internal(self, return_names=False, return_data=False):
+    def in_collision_internal(self, return_names=False):
         """
         Check if any pair of objects in the manager collide with one another.
 
         Args:
             return_names (bool): If true, a set is returned containing the names 
                                  of all pairs of objects in collision.
-            return_data (bool): If true, a list of ContactData is returned as well
         
         Returns:
             is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
             names (set of 2-tup): The set of pairwise collisions. Each tuple
                                   contains two names in alphabetical order indicating
                                   that the two corresponding objects are in collision.
-            contacts (list of ContactData): All contacts detected
         """
         cdata = fcl.CollisionData()
-        if return_names or return_data:
+        if return_names:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
                     num_max_contacts=100000, enable_contact=True))
 
@@ -243,32 +246,25 @@ class CollisionManager:
         result = cdata.result.is_collision
 
         objs_in_collision = set()
-        contact_data = []
         for contact in cdata.result.contacts:
             names = (self._extract_name(contact.o1),
                         self._extract_name(contact.o2))
             names = tuple(sorted(names))
-            if (names[0], names[1]) in self._filter_names:
+            if (names[0], names[1]) in self.filtered_link_names:
                 continue
             if return_names:
-                objs_in_collision.add(tuple(sorted(names)))
-            if return_data:
-                contact_data.append(ContactData(names, contact))
-                
+                objs_in_collision.add(names)
+
         if not objs_in_collision:
             result = False
             objs_in_collision = "No object collided.."
 
-        if return_names and return_data:
-            return result, objs_in_collision, contact_data
-        elif return_names:
+        if return_names:
             return result, objs_in_collision
-        elif return_data:
-            return result, contact_data
         else:
             return result
 
-    def in_collision_other(self, other_manager=None, return_names=False, return_data=False): 
+    def in_collision_other(self, other_manager=None, return_names=False): 
         """
         Check if any object from this manager collides with any object
         from another manager.
@@ -277,15 +273,12 @@ class CollisionManager:
             other_manager (CollisionManager): Another collision manager object
             return_names (bool): If true, a set is returned containing the names 
                                  of all pairs of objects in collision.
-            return_data (bool): If true, a list of ContactData is returned as well
-        
         Returns:
             is_collision (bool): True if a collision occurred between any pair of objects and False otherwise
             names (set of 2-tup): The set of pairwise collisions. Each tuple
                                   contains two names (first from this manager,
                                   second from the other_manager) indicating
                                   that the two corresponding objects are in collision.
-            contacts (list of ContactData): All contacts detected
         """
         
         if other_manager is None:
@@ -294,7 +287,7 @@ class CollisionManager:
             return None
             
         cdata = fcl.CollisionData()
-        if return_names or return_data:
+        if return_names:
             cdata = fcl.CollisionData(request=fcl.CollisionRequest(
                 num_max_contacts=100000, enable_contact=False))
 
@@ -305,35 +298,24 @@ class CollisionManager:
         result = cdata.result.is_collision
 
         objs_in_collision = set()
-        contact_data = []
 
         for contact in cdata.result.contacts:
-            reverse = False
             coll_names = (self._extract_name(contact.o1), other_manager._extract_name(contact.o2))
-            if (coll_names[0], coll_names[1]) in self._filter_names:
+            if (coll_names[0], coll_names[1]) in self.filtered_link_names:
                 continue
             if coll_names[0] is None:
                 coll_names = (self._extract_name(contact.o2), other_manager._extract_name(contact.o1))
-                reverse = True
 
             if return_names:
                 objs_in_collision.add(coll_names)
-            if return_data:
-                if reverse:
-                    coll_names = reversed(coll_names)
-                contact_data.append(ContactData(coll_names, contact))
 
         if return_names:
             if not objs_in_collision:
                 result = False
                 objs_in_collision = "No object collided.."
 
-        if return_names and return_data:
-            return result, objs_in_collision, contact_data
-        elif return_names:
+        if return_names:
             return result, objs_in_collision
-        elif return_data:
-            return result, contact_data
         else:
             return result
 
@@ -343,7 +325,7 @@ class CollisionManager:
 
         result = collections.defaultdict(float)
         for (o1, o2) in list(itertools.permutations(self._objs, 2)):
-            if (o1, o2) in self._filter_names:
+            if (o1, o2) in self.filtered_link_names:
                 continue
             distance = np.round(fcl.distance(self._objs[o1]['obj'],self._objs[o2]['obj'], req, res), 6)
             result[(o1, o2)] = distance
@@ -471,5 +453,3 @@ class CollisionManager:
             names (hashable): Name of input geometry
         """
         return self._names[id(geom)]
-
-

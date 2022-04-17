@@ -1,3 +1,4 @@
+import trimesh
 import numpy as np
 
 from pykin.robots.robot import Robot
@@ -22,6 +23,9 @@ class SingleArm(Robot):
         self.desired_base_frame = ""
         self._set_joint_limits_upper_and_lower()
         self._init_qpos = np.zeros(self.arm_dof)
+
+        self.info = self._init_robot_info()
+        self.gripper.info = self._init_gripper_info()
         
     def _set_joint_limits_upper_and_lower(self):
         """
@@ -36,6 +40,31 @@ class SingleArm(Robot):
                     limit_upper = np.pi
                 self.joint_limits_lower.append(limit_lower)
                 self.joint_limits_upper.append(limit_upper)
+
+    def _init_robot_info(self):
+        robot_info = {}
+        for link, transform in self.init_fk.items():
+            gtype = self.links[link].collision.gtype
+            mesh = None
+            if gtype == "mesh":
+                mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
+                mesh = trimesh.load_mesh(mesh_path)
+            h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+            robot_info[link] = (link, gtype, mesh, h_mat)
+        return robot_info
+
+    def _init_gripper_info(self):
+        gripper_info = {}
+        for link, transform in self.init_fk.items():
+            if link in self.gripper.names:
+                gtype = self.links[link].collision.gtype
+                mesh = None
+                if gtype == "mesh":
+                    mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
+                    mesh = trimesh.load_mesh(mesh_path)
+                h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+                gripper_info[link] = (link, gtype, mesh, h_mat)
+        return gripper_info
 
     def check_limit_joint(self, q_in):
         """

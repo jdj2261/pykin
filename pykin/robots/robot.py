@@ -10,6 +10,8 @@ signal.signal(signal.SIGINT, handler)
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
 
+
+from pykin.robots.gripper import Gripper
 from pykin.kinematics.transform import Transform
 from pykin.kinematics.kinematics import Kinematics
 from pykin.models.urdf_model import URDFModel
@@ -30,11 +32,15 @@ class Robot(URDFModel):
     ):
         if fname is None:
             fname = pykin_path + "/asset/urdf/baxter/baxter.urdf"
+        self.urdf_name = os.path.abspath(fname)
+        self.mesh_path = os.path.abspath(fname + "/../") + '/'
         self._offset = offset
         if offset is None:
             self._offset = Transform()
             
         super(Robot, self).__init__(fname)
+
+        self.gripper = Gripper()
 
         self.joint_limits_lower = []
         self.joint_limits_upper = []

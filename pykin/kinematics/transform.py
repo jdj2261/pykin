@@ -32,7 +32,7 @@ class Transform:
         self.rot = self._to_quaternion(rot)
 
     def __str__(self):
-        return "Transform(pos={0}, rot={1})".format(self.pos, self.rot)
+        return f"Transform(pos={self.pos}, rot={ self.rot})"
 
     def __repr__(self):
         return 'pykin.kinematics.transform.{}()'.format(type(self).__name__)
