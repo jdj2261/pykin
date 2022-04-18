@@ -34,15 +34,9 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=gr
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1, 0, 1])
 scene_mngr.add_robot(robot)
 
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+############################# Render Test #############################
 
 scene_mngr.render_all_scene(ax, robot_color='b')
-# scene_mngr.render_object_and_gripper(ax, gripper_color='b')
 # scene_mngr.render_object(ax)
 # scene_mngr.render_gripper(ax, gripper_color='b')
 

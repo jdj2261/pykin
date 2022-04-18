@@ -25,6 +25,8 @@ class SingleArm(Robot):
         self._init_qpos = np.zeros(self.arm_dof)
 
         self.info = self._init_robot_info()
+
+        self.gripper.init_info = self._init_gripper_info()
         self.gripper.info = self._init_gripper_info()
         
     def _set_joint_limits_upper_and_lower(self):
@@ -50,7 +52,7 @@ class SingleArm(Robot):
                 mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
                 mesh = trimesh.load_mesh(mesh_path)
             h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
-            robot_info[link] = (link, gtype, mesh, h_mat)
+            robot_info[link] = [link, gtype, mesh, h_mat]
         return robot_info
 
     def _init_gripper_info(self):
@@ -63,7 +65,7 @@ class SingleArm(Robot):
                     mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
                     mesh = trimesh.load_mesh(mesh_path)
                 h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
-                gripper_info[link] = (link, gtype, mesh, h_mat)
+                gripper_info[link] = [link, gtype, mesh, h_mat]
         return gripper_info
 
     def check_limit_joint(self, q_in):

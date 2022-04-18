@@ -1,5 +1,7 @@
 import numpy as np
+
 from pykin.utils import transform_utils as tf
+from pykin.utils.kin_utils import ShellColors as sc
 
 def convert_transform(origin):
     """
@@ -32,10 +34,10 @@ class Transform:
         self.rot = self._to_quaternion(rot)
 
     def __str__(self):
-        return f"Transform(pos={self.pos}, rot={ self.rot})"
+        return f"Transform({sc.MAGENTA}pos{sc.ENDC}={self.pos}, {sc.MAGENTA}rot{sc.ENDC}={ self.rot})"
 
     def __repr__(self):
-        return 'pykin.kinematics.transform.{}()'.format(type(self).__name__)
+        return f"Transform({sc.MAGENTA}pos{sc.ENDC}={self.pos}, {sc.MAGENTA}rot{sc.ENDC}={ self.rot})"
 
     def __mul__(self, other):
         rot = tf.quaternion_multiply(self.rot, other.rot)

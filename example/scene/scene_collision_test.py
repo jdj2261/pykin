@@ -34,21 +34,28 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=gr
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1, 0, 1])
 scene_mngr.add_robot(robot)
 
-############################# Logical State #############################
+############################# Show collision info #############################
+# scene_mngr._robot_collision_mngr.show_collision_info()
+# scene_mngr._obj_collision_mngr.show_collision_info("Object")
+# scene_mngr._gripper_collision_mngr.show_collision_info("Gripper")
 
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+############################# Collide Robot and Object #############################
+eef_pose = blue_box_pose.h_mat
+target_thetas = scene_mngr.get_robot_joint_thetas(eef_pose)
+scene_mngr.set_robot_eef_pose(target_thetas)
+scene_mngr._robot_collision_mngr.show_collision_info("Robot")
 
-scene_mngr.update_logical_states()
-scene_mngr.show_scene_info()
-scene_mngr.show_logical_states()
+print(scene_mngr.collide_self_robot(return_names=True))
+print(scene_mngr.collide_objs_and_robot(return_names=True))
 
-############################# Scene Info #############################
-print(scene_mngr.get_objs_info())
-print(scene_mngr.get_gripper_info())
-print(scene_mngr.get_robot_info())
+scene_mngr.render_all_scene(ax, robot_color='b')
+plt.show_figure()
+############################# Collide Gripper and Object #############################
+# scene_mngr.set_gripper_pose(green_box_pose.h_mat)
+# scene_mngr._gripper_collision_mngr.show_collision_info("Gripper")
 
+# result, names = scene_mngr.collide_objs_and_gripper(return_names=True)
+# print(result, names)
+
+# scene_mngr.render_object_and_gripper(ax, gripper_color='b', visible_tcp=False)
+# plt.show_figure()

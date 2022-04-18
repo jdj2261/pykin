@@ -34,21 +34,15 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=gr
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1, 0, 1])
 scene_mngr.add_robot(robot)
 
-############################# Logical State #############################
+############################# Robot IK, FK Test #############################
+target_thetas = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
+fk = scene_mngr.robot.forward_kin(target_thetas)
+eef_pose = fk[scene_mngr.robot.eef_name].h_mat
 
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+target_thetas = scene_mngr.get_robot_joint_thetas(eef_pose)
+scene_mngr.set_robot_eef_pose(target_thetas)
+print(scene_mngr.get_robot_eef_pose())
 
-scene_mngr.update_logical_states()
-scene_mngr.show_scene_info()
-scene_mngr.show_logical_states()
-
-############################# Scene Info #############################
-print(scene_mngr.get_objs_info())
-print(scene_mngr.get_gripper_info())
-print(scene_mngr.get_robot_info())
+scene_mngr.render_all_scene(ax, robot_color='b')
+plt.show_figure()
 

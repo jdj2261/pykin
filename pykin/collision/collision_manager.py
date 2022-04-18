@@ -3,8 +3,6 @@ import collections
 import itertools
 import copy
 
-# from pykin.objects.object_manager import ObjectManager
-# from pykin.objects.gripper import Gripper
 
 try:
     # pip install python-fcl
@@ -17,6 +15,7 @@ except BaseException:
 
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger
+from pykin.utils.kin_utils import ShellColors as sc
 
 logger = create_logger('Collision Manager', "debug")
 
@@ -36,11 +35,10 @@ class CollisionManager:
         self._names = collections.defaultdict(lambda: None)
         self._manager = fcl.DynamicAABBTreeCollisionManager()
         self._manager.setup()
-
+        self.filtered_link_names = set()
+        
         if is_robot:
             self.is_robot = is_robot
-            self.filtered_link_names = set()
-            self.robot_geom = None
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
@@ -378,7 +376,7 @@ class CollisionManager:
         Args:
             name (str)
         """
-        print(f"*"*20 + f" {name} Collision Info "+ f"*"*20)
+        print(f"*"*20 + f" {sc.OKGREEN}{name} Collision Info{sc.ENDC} "+ f"*"*20)
         for name, info in self.get_collision_info().items():
             print(name, info[:3, 3])
         print(f"*"*63 + "\n")

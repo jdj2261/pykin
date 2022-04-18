@@ -40,6 +40,7 @@ class Robot(URDFModel):
             
         super(Robot, self).__init__(fname)
 
+        self.info = None
         self.gripper = Gripper()
 
         self.joint_limits_lower = []

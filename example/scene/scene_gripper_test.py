@@ -34,21 +34,15 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=gr
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1, 0, 1])
 scene_mngr.add_robot(robot)
 
-############################# Logical State #############################
+############################# Gripper Pose Test #############################
+scene_mngr.set_gripper_pose(np.eye(4))
+scene_mngr.render_object_and_gripper(ax, gripper_color='b')
 
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+scene_mngr.set_gripper_tcp_pose(np.eye(4))
+scene_mngr.render_object_and_gripper(ax, gripper_color='r')
 
-scene_mngr.update_logical_states()
-scene_mngr.show_scene_info()
-scene_mngr.show_logical_states()
+print(scene_mngr.get_gripper_pose())
+print(scene_mngr.get_gripper_tcp_pose())
 
-############################# Scene Info #############################
-print(scene_mngr.get_objs_info())
-print(scene_mngr.get_gripper_info())
-print(scene_mngr.get_robot_info())
+plt.show_figure()
 
