@@ -73,13 +73,44 @@ class SceneManager:
         self.objs.pop(name, None)
         self._obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self):
+    def attach_object_on_gripper(self, name, pose, only_gripper=True):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+        
+        if name not in self.objs:
+            raise ValueError("object {} needs to be added first".format(name))
+
+        if pose.shape != (4,4):
+            raise ValueError("Expecting the shape of the pose to be (4,4), instead got: "
+                             "{}".format(pose.shape))
+
+        self.set_object_pose(name, pose)
+
+        if not only_gripper:
+            self._robot_collision_mngr.add_object(
+                self.objs[name].name,
+                self.objs[name].gtype,
+                self.objs[name].gparam,
+                pose)
+        else:
+            self._gripper_collision_mngr.add_object(
+                self.objs[name].name,
+                self.objs[name].gtype,
+                self.objs[name].gparam,
+                pose)
+
+        self._obj_collision_mngr.remove_object(name)
+
+    def detach_object_from_gripper(self, name, only_gripper=True):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
-    def detach_object_from_gripper(self):
-        if self.robot is None:
-            raise ValueError("Robot needs to be added first")
+        if not only_gripper:
+            self._robot_collision_mngr.remove_object(name)
+        else:
+            self._gripper_collision_mngr.remove_object(name)
+        
+        self.objs.pop(name, None)
 
     def get_object_pose(self, name):
         if name not in self.objs:
@@ -99,6 +130,9 @@ class SceneManager:
         self._obj_collision_mngr.set_transform(name, pose)
 
     def get_robot_joint_thetas(self, pose=np.eye(4), method="LM", max_iter=1000):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+
         pose = np.asarray(pose)
         if pose.shape != (4,4):
             raise ValueError("Expecting the shape of the pose to be (4,4), instead got: "
@@ -112,9 +146,15 @@ class SceneManager:
             max_iter=max_iter)
 
     def get_robot_eef_pose(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+
         return self.robot.info[self.robot.eef_name][3]
 
     def set_robot_eef_pose(self, thetas):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+
         for link, transform in self.robot.forward_kin(thetas).items():
             h_mat = np.dot(transform.h_mat, self.robot.links[link].collision.offset.h_mat)
             self.robot.info[link][3] = h_mat
@@ -122,27 +162,43 @@ class SceneManager:
                 self._robot_collision_mngr.set_transform(link, h_mat)
 
     def get_gripper_pose(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+
         return self.robot.gripper.get_gripper_pose()
 
     def set_gripper_pose(self, pose=np.eye(4)):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
+
         self.robot.gripper.set_gripper_pose(pose)
         for link, info in self.robot.gripper.info.items():
             if info[1] == "mesh":
                 self._gripper_collision_mngr.set_transform(link, info[3])
 
     def get_gripper_tcp_pose(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self.robot.gripper.get_gripper_tcp_pose()
 
     def set_gripper_tcp_pose(self, pose=np.eye(4)):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         self.robot.gripper.set_gripper_tcp_pose(pose)
 
     def collide_objs_and_robot(self, return_names=False):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self._robot_collision_mngr.in_collision_other(self._obj_collision_mngr, return_names)
 
     def collide_self_robot(self, return_names=False):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self._robot_collision_mngr.in_collision_internal(return_names)
 
     def collide_objs_and_gripper(self, return_names=False):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self._gripper_collision_mngr.in_collision_other(self._obj_collision_mngr, return_names)
 
     def update_logical_states(self):
@@ -160,9 +216,13 @@ class SceneManager:
         return self.objs
 
     def get_robot_info(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self.robot.info
 
     def get_gripper_info(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self.robot.gripper.info
 
     def show_scene_info(self):
@@ -184,7 +244,7 @@ class SceneManager:
 
         self.render.render_all_scene(ax, self.objs, self.robot, alpha, robot_color)
 
-    def render_object_and_gripper(self, ax, alpha=0.3, gripper_color=None, visible_tcp=True):
+    def render_object_and_gripper(self, ax, alpha=0.3, robot_color=None, visible_tcp=True):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
@@ -192,7 +252,7 @@ class SceneManager:
             ax, 
             self.objs, 
             self.robot, 
-            alpha, gripper_color, visible_tcp=visible_tcp)
+            alpha, robot_color, visible_tcp=visible_tcp)
 
     def render_object(self, ax, alpha=0.3):
         self.render.render_object(ax, self.objs, alpha)
@@ -220,4 +280,6 @@ class SceneManager:
 
     @property
     def gripper_name(self):
+        if self.robot is None:
+            raise ValueError("Robot needs to be added first")
         return self.robot.gripper.name

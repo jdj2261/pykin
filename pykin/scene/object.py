@@ -22,7 +22,7 @@ class Object:
         self.h_mat = h_mat
         self.color = color
         self.logical_state = logical_state
-
+        
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)
 
