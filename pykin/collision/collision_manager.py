@@ -54,7 +54,6 @@ class CollisionManager:
         """
         if not self.is_robot:
             raise ValueError('Check argument!! Is is_robot True?')
-
         if fk is None:
             fk = robot.init_fk
         self.geom = geom

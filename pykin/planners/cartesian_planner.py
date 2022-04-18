@@ -145,7 +145,7 @@ class CartesianPlanner(Planner):
                 if not self._check_q_in_limits(self._cur_qpos):
                     continue
                 
-                is_collision_free, col_name = self._collision_free(self._cur_qpos, self.is_attached, visible_name=True)
+                is_collision_free, col_name = self._collide(self._cur_qpos, self.is_attached, visible_name=True)
                 if not is_collision_free:
                     collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
                     continue

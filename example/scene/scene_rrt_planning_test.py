@@ -7,6 +7,7 @@ sys.path.append(pykin_path)
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene import SceneManager
+from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as plt
 
@@ -26,6 +27,8 @@ cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
+init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
+
 scene_mngr = SceneManager()
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=cube_mesh, h_mat=red_box_pose.h_mat, color=[1, 0, 0])
@@ -34,28 +37,49 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=cube_mesh, h_mat=gr
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1, 0, 1])
 scene_mngr.add_robot(robot)
 
-############################# Show collision info #############################
-# scene_mngr.robot_collision_mngr.show_collision_info()
-# scene_mngr.obj_collision_mngr.show_collision_info("Object")
-# scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
-
-############################# Collide Robot and Object #############################
-eef_pose = blue_box_pose.h_mat
-target_thetas = scene_mngr.compute_ik(eef_pose)
-scene_mngr.set_robot_eef_pose(target_thetas)
-scene_mngr.robot_collision_mngr.show_collision_info("Robot")
-
-print(scene_mngr.collide_self_robot(return_names=True))
-print(scene_mngr.collide_objs_and_robot(return_names=True))
-
-scene_mngr.render_all_scene(ax, robot_color='b')
+robot_pose = green_box_pose.h_mat
+robot_pose[:3,3] = robot_pose[:3,3] + np.array([0, 0, 0.5])
+thetas = scene_mngr.compute_ik(robot_pose)
+scene_mngr.set_robot_eef_pose(thetas)
+scene_mngr.render_all_scene(ax=ax, robot_color='b')
 plt.show_figure()
-############################# Collide Gripper and Object #############################
-# scene_mngr.set_gripper_pose(green_box_pose.h_mat)
-# scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
 
-# result, names = scene_mngr.collide_objs_and_gripper(return_names=True)
-# print(result, names)
+############################ Show collision info #############################
+# planner = RRTStarPlanner(
+#     scene_mngr=scene_mngr,
+#     delta_distance=0.1,
+#     epsilon=0.2, 
+#     gamma_RRT_star=2,
+#     dimension=7
+# )
 
-# scene_mngr.render_object_and_gripper(ax, gripper_color='b', visible_tcp=False)
-# plt.show_figure()
+# planner.run(
+#     cur_q=init_qpos, 
+#     goal_pose=robot_pose,
+#     max_iter=1000)
+
+# interpolated_path = planner.get_joint_path(n_step=10)
+
+# if not interpolated_path:
+#     print("Cannot Visulization Path")
+#     exit()
+
+# joint_trajectory = []
+# eef_poses = []
+# for step, joint in enumerate(interpolated_path):
+#     fk = robot.forward_kin(joint)
+#     joint_trajectory.append(fk)
+#     eef_poses.append(fk[robot.eef_name].pos)
+
+# # TODO
+# plt.plot_animation(
+#     robot,
+#     joint_trajectory, 
+#     fig, 
+#     ax,
+#     eef_poses=eef_poses,
+#     objects=scene_mngr.objs,
+#     visible_objects=True,
+#     visible_collision=True, 
+#     interval=1, 
+#     repeat=True)

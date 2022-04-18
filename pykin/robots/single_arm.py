@@ -3,6 +3,7 @@ import numpy as np
 
 from pykin.robots.robot import Robot
 from pykin.utils.error_utils import NotFoundError
+from pykin.utils.transform_utils import get_pose_from_homogeneous
 
 class SingleArm(Robot):
     """
@@ -143,6 +144,9 @@ class SingleArm(Robot):
         Returns:
             joints (np.array): target joint angles
         """
+        if target_pose.shape == (4,4):
+            target_pose = get_pose_from_homogeneous(target_pose)
+
         joints = self.kin.inverse_kinematics(
             self.desired_frames,
             current_joints,

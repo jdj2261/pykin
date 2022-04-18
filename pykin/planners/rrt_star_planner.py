@@ -14,7 +14,7 @@ class RRTStarPlanner(Planner):
     RRT star path planner
 
     Args:
-        robot(SingleArm or Bimanual): manipulator type
+        scene_mngr(SceneManager): Scene Manager
         delta_distance(float): distance between nearest point and new point
         epsilon(float): 1-epsilon is probability of random sampling
         gamma_RRT_star(int): factor used for search radius
@@ -24,14 +24,14 @@ class RRTStarPlanner(Planner):
 
     def __init__(
         self, 
-        robot,
+        scene_mngr,
         delta_distance=0.5,
         epsilon=0.2,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
     ):
         super(RRTStarPlanner, self).__init__(
-            robot, 
+            scene_mngr, 
             dimension
         )
         self.delta_dis = delta_distance
@@ -42,10 +42,6 @@ class RRTStarPlanner(Planner):
         self._cur_qpos = None
         self._goal_pose = None
         self.tree = None
-
-        self.arm = None
-        self.dimension = dimension
-        self.eef_name = self.robot.eef_name
 
         super()._setup_q_limits()
         super()._setup_eef_name()
@@ -67,27 +63,15 @@ class RRTStarPlanner(Planner):
         self, 
         cur_q,
         goal_pose, 
-        max_iter=1000, 
-        robot_col_manager=None,
-        object_col_manager=None,
-        is_attached=False, 
-        current_obj_info=None,
-        result_obj_info=None,
-        T_between_gripper_and_obj=None,
+        max_iter=1000
     ):
         """
-        Get path in joint space
+        compute rrt-star
 
         Args:
             cur_q (sequence of float): current joints
             goal_pose (sequence of float): goal pose
             max_iter(int): maximum number of iterations
-            robot_col_manager (CollisionManager): robot's CollisionManager
-            object_col_manager (CollisionManager): object's CollisionManager
-            is_attached (bool): if the object is attached or not
-            current_obj_info (dict): current object info
-            result_obj_info (dict): result object info
-            T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object
         """
         logger.info(f"Start to compute RRT-star Planning")
 
@@ -96,25 +80,16 @@ class RRTStarPlanner(Planner):
         
         self._max_iter = max_iter
 
-        if not super()._check_robot_col_mngr(robot_col_manager):
+        if not super()._check_robot_col_mngr():
             logger.warning(f"This Planner does not do collision checking")
         
-        super()._setup_collision_manager(
-            robot_col_manager,
-            object_col_manager,
-            is_attached,
-            current_obj_info,
-            result_obj_info,
-            T_between_gripper_and_obj
-        )
-
         cnt = 0
         total_cnt = 10
 
         while True:
             cnt += 1
             for _ in range(total_cnt):
-                self.goal_q = self.robot.inverse_kin(np.random.randn(self._dimension), self._goal_pose)
+                self.goal_q = self._scene_mngr.robot.inverse_kin(np.random.randn(self._dimension), self._goal_pose)
                 if self._check_q_in_limits(self.goal_q):
                     break
                 if cnt > total_cnt:
@@ -131,13 +106,13 @@ class RRTStarPlanner(Planner):
                     logger.info(f"iter : {step}")
                     
                 q_rand = self._sample_free()
-                if not self._collision_free(q_rand, is_attached):
+                if self._collide(q_rand):
                     continue
                 
                 nearest_node, q_nearest = self._nearest(q_rand)
                 q_new = self._steer(q_nearest, q_rand)
     
-                if self._collision_free(q_new, is_attached) and self._check_q_in_limits(q_new):
+                if not self._collide(q_new) and self._check_q_in_limits(q_new):
                     near_nodes = self._near(q_new)
 
                     new_node = self.tree.number_of_nodes()

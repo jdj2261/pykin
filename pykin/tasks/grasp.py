@@ -183,7 +183,7 @@ class GraspManager(ActivityBase):
             for tcp_pose, contact_points, _ in tcp_poses:
                 gripper_transformed = self.get_transformed_gripper_fk(tcp_pose)
 
-                if self._collision_free(gripper_transformed, only_gripper=True):
+                if self._collide(gripper_transformed, only_gripper=True):
                     self.tcp_pose = tcp_pose
                     self.contact_points = contact_points
                     eef_pose = self.get_eef_h_mat_from_tcp(tcp_pose)
@@ -206,11 +206,11 @@ class GraspManager(ActivityBase):
             grasp_transforms = self.robot.forward_kin(np.array(qpos))
             goal_eef_pose = grasp_transforms[self.robot.eef_name].h_mat
  
-            if self._check_ik_solution(grasp_pose, goal_eef_pose) and self._collision_free(grasp_transforms):
+            if self._check_ik_solution(grasp_pose, goal_eef_pose) and self._collide(grasp_transforms):
                 pre_grasp_pose = self.get_pre_grasp_pose(grasp_pose)
                 pre_transforms, pre_goal_pose = self._get_goal_pose(pre_grasp_pose)
         
-                if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self._collision_free(pre_transforms):
+                if self._check_ik_solution(pre_grasp_pose, pre_goal_pose) and self._collide(pre_transforms):
                     self.pre_grasp_pose = pre_grasp_pose
                     
                     post_grasp_pose = self.get_post_grasp_pose(grasp_pose)
@@ -225,7 +225,7 @@ class GraspManager(ActivityBase):
                         self.obj_post_grasp_pose = obj_post_grasp_pose
                         self._attach_gripper2object(obj_post_grasp_pose)
 
-                    if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self._collision_free(post_transforms):
+                    if self._check_ik_solution(post_grasp_pose, post_goal_pose) and self._collide(post_transforms):
                         self.post_grasp_pose = post_grasp_pose
                         is_success_filtered = True
                         break
@@ -532,7 +532,7 @@ class GraspManager(ActivityBase):
                 result_gripper_pose[:3, 3] = gripper_pose_transformed[:3, 3] + (point_on_sup - point_transformed) + np.array([0, 0, self.release_distance])
 
                 gripper_transformed = self.get_transformed_gripper_fk(result_gripper_pose)
-                if self._collision_free(gripper_transformed, only_gripper=True):
+                if self._collide(gripper_transformed, only_gripper=True):
                     release_pose = gripper_transformed[self.robot.eef_name]
                     yield release_pose, result_obj_pose
             cnt += 1
@@ -616,7 +616,7 @@ class GraspManager(ActivityBase):
             if self.has_obj:
                 self.robot_col_mngr.set_transform(self.obj_info["name"], result_obj_pose)
 
-            if self._check_ik_solution(release_pose, goal_pose) and self._collision_free(transforms):
+            if self._check_ik_solution(release_pose, goal_pose) and self._collide(transforms):
                 pre_release_pose = self.get_pre_release_pose(release_pose)
                 pre_release_transforms, pre_release_goal_pose = self._get_goal_pose(pre_release_pose)
 
@@ -625,7 +625,7 @@ class GraspManager(ActivityBase):
                     self.robot_col_mngr.set_transform(self.obj_info["name"], obj_pre_release_pose)
                     self.obj_pre_release_pose = obj_pre_release_pose
 
-                if self._check_ik_solution(pre_release_pose, pre_release_goal_pose) and self._collision_free(pre_release_transforms):
+                if self._check_ik_solution(pre_release_pose, pre_release_goal_pose) and self._collide(pre_release_transforms):
                     self.pre_release_pose = pre_release_pose
                     
                     post_release_pose = self.get_post_release_pose(release_pose)
@@ -637,7 +637,7 @@ class GraspManager(ActivityBase):
                     if not self._check_between_object_distances(eps=0.03):
                         continue
 
-                    if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self._collision_free(post_release_transforms):
+                    if self._check_ik_solution(post_release_pose, post_release_goal_pose) and self._collide(post_release_transforms):
                         self.post_release_pose = post_release_pose
                         self.obj_release_pose = result_obj_pose
                         self.obj_post_release_pose = result_obj_pose

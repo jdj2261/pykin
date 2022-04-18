@@ -36,15 +36,15 @@ scene_mngr.add_robot(robot)
 
 ############################# Object Attach to Robot Test #############################
 eef_pose = red_box_pose.h_mat
-target_thetas = scene_mngr.get_robot_joint_thetas(eef_pose)
+target_thetas = scene_mngr.compute_ik(eef_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 
 tcp_pose = scene_mngr.robot.info["tcp"][3]
 scene_mngr.attach_object_on_gripper("red_box", tcp_pose, only_gripper=False)
 print(scene_mngr.collide_objs_and_robot(return_names=True))
 
-scene_mngr._obj_collision_mngr.show_collision_info("Object")
-scene_mngr._robot_collision_mngr.show_collision_info("Robot")
+scene_mngr.obj_collision_mngr.show_collision_info("Object")
+scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 
 scene_mngr.render_all_scene(ax, robot_color='b')
 plt.show_figure()
@@ -52,8 +52,8 @@ plt.show_figure()
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 scene_mngr.detach_object_from_gripper("red_box", only_gripper=False)
 
-scene_mngr._obj_collision_mngr.show_collision_info("Object")
-scene_mngr._robot_collision_mngr.show_collision_info("Robot")
+scene_mngr.obj_collision_mngr.show_collision_info("Object")
+scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 
 scene_mngr.render_all_scene(ax, robot_color='b')
 plt.show_figure()
@@ -65,8 +65,8 @@ tcp_pose = scene_mngr.robot.gripper.info["tcp"][3]
 scene_mngr.attach_object_on_gripper("green_box", tcp_pose, only_gripper=True)
 print(scene_mngr.collide_objs_and_gripper(return_names=True))
 
-scene_mngr._obj_collision_mngr.show_collision_info("Object")
-scene_mngr._gripper_collision_mngr.show_collision_info("Gripper")
+scene_mngr.obj_collision_mngr.show_collision_info("Object")
+scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
 
 scene_mngr.render_object_and_gripper(ax, robot_color='b')
 plt.show_figure()
@@ -74,8 +74,8 @@ plt.show_figure()
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 scene_mngr.detach_object_from_gripper("green_box", only_gripper=True)
 
-scene_mngr._obj_collision_mngr.show_collision_info("Object")
-scene_mngr._gripper_collision_mngr.show_collision_info("Gripper")
+scene_mngr.obj_collision_mngr.show_collision_info("Object")
+scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
 
 scene_mngr.render_object_and_gripper(ax, robot_color='b')
 plt.show_figure()

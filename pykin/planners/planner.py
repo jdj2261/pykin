@@ -1,6 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
+from pykin.scene.scene import SceneManager
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
@@ -22,50 +23,15 @@ class Planner(NodeData, metaclass=ABCMeta):
     """
     def __init__(
         self,
-        robot,
+        scene_mngr:SceneManager,
         dimension
     ):
-        self.robot = robot
+        self._scene_mngr = scene_mngr
         self._dimension = dimension
-        
-        self.robot_col_mngr = None
-        self.object_col_mngr = None
-        self.is_attached = None
-        self.obj_info = None
-        self.T_between_grippper_and_obj = None
-        self.result_object_pose = None
+        self.arm = None
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
-
-    def attach_object_on_robot(self):
-        """
-        Attach object collision on robot collision
-        """
-        self.robot_col_mngr.add_object(
-            self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], 
-            gparam=self.obj_info["gparam"], 
-            h_mat=self.obj_info["pose"])
-        self.object_col_mngr.remove_object(self.obj_info["name"])
-
-    def detach_object_from_robot(self):
-        """
-        Detach object collision from robot collision
-        """
-        self.robot_col_mngr.remove_object(
-            self.obj_info["name"]
-        )
-
-    def reattach_object(self, transform):
-        """
-        Reattach object collision
-        """
-        self.object_col_mngr.add_object(
-            self.obj_info["name"], 
-            gtype=self.obj_info["gtype"], 
-            gparam=self.obj_info["gparam"], 
-            h_mat=transform)
 
     @abstractclassmethod
     def get_joint_path(self):
@@ -84,42 +50,6 @@ class Planner(NodeData, metaclass=ABCMeta):
             goal_pose (np.array): goal robots' eef pose        
         """
         raise NotImplementedError
-
-    def _setup_collision_manager(
-        self, 
-        robot_col_manager,
-        object_col_manager,
-        is_attached,
-        current_obj_info,
-        result_obj_info,
-        T_between_gripper_and_obj
-    ):
-        """
-        Setup Robot, Object Collision Manager
-
-        Args:
-            robot_col_manager (CollisionManager): robot's CollisionManager
-            object_col_manager (CollisionManager): object's CollisionManager
-            is_attached (bool): if the object is attached or not
-            current_obj_info (dict): current object info
-            result_obj_info (dict): result object info
-            T_between_gripper_and_obj (np.array): The transformation relationship between gripper and object.
-        """
-
-        self.robot_col_mngr = robot_col_manager
-        self.object_col_mngr = object_col_manager
-        self.is_attached = is_attached
-
-        if current_obj_info is not None and result_obj_info is not None:
-            self.obj_info = current_obj_info
-            self.T_between_gripper_and_obj = T_between_gripper_and_obj
-            self.result_object_pose = result_obj_info["pose"]
-
-            if not self.is_attached:
-                self.object_col_mngr.set_transform(self.obj_info["name"], self.obj_info["pose"])    
-
-            self.robot_col_mngr.show_collision_info(name="Robot")
-            self.object_col_mngr.show_collision_info(name="Object")
 
     @staticmethod
     def _convert_numpy_type(data):
@@ -144,11 +74,11 @@ class Planner(NodeData, metaclass=ABCMeta):
         Setup joint limits (lower and upper)
         """
         if self.arm is not None:
-            self.q_limits_lower = self.robot.joint_limits_lower[self.arm]
-            self.q_limits_upper = self.robot.joint_limits_upper[self.arm]
+            self.q_limits_lower = self._scene_mngr.robot.joint_limits_lower[self.arm]
+            self.q_limits_upper = self._scene_mngr.robot.joint_limits_upper[self.arm]
         else:
-            self.q_limits_lower = self.robot.joint_limits_lower
-            self.q_limits_upper = self.robot.joint_limits_upper
+            self.q_limits_lower = self._scene_mngr.robot.joint_limits_lower
+            self.q_limits_upper = self._scene_mngr.robot.joint_limits_upper
 
     def _check_q_in_limits(self, q_in):
         """
@@ -161,13 +91,11 @@ class Planner(NodeData, metaclass=ABCMeta):
         """
         return np.all([q_in >= self.q_limits_lower, q_in <= self.q_limits_upper])
 
-    def _check_robot_col_mngr(self, robot_col_manager):
-        if robot_col_manager is None:
+    def _check_robot_col_mngr(self):
+        if self._scene_mngr.robot_collision_mngr is None:
             return False
         
-        is_self_collision = robot_col_manager.in_collision_internal()
-        
-        if is_self_collision:
+        if self._scene_mngr.collide_self_robot():
             raise CollisionError("Conflict confirmed. Check the joint settings again")
         
         return True
@@ -177,12 +105,11 @@ class Planner(NodeData, metaclass=ABCMeta):
         Setup end-effector name
         """
         if self.arm is not None:
-            self.eef_name = self.robot.eef_name[self.arm]
+            self.eef_name = self._scene_mngr.robot.eef_name[self.arm]
 
-    def _collision_free(
+    def _collide(
         self, 
         new_q, 
-        is_attached=False, 
         visible_name=False
     ):
         """
@@ -190,7 +117,6 @@ class Planner(NodeData, metaclass=ABCMeta):
 
         Args:
             new_q (np.array): new joint angles
-            is_attached (bool): if the object is attached or not
             visible_name (bool): If it's true, the result of the collision and the name will come out. 
                                  Otherwise, only the collision results will come out.
 
@@ -199,39 +125,34 @@ class Planner(NodeData, metaclass=ABCMeta):
             names (set of 2-tup): The set of pairwise collisions. 
         """
  
-        if self.robot_col_mngr is None:
-            return True
+        if self._scene_mngr.robot_collision_mngr is None:
+            return False
 
         fk = self._get_fk(new_q)
         
-        if is_attached:
-            grasp_pose = fk[self.robot.eef_name].h_mat
-            obj_pose = np.dot(grasp_pose, self.T_between_gripper_and_obj)
-            self.robot_col_mngr.set_transform(self.obj_info["name"], obj_pose)
-        
-        for link, transformation in fk.items():
-            if link in self.robot_col_mngr._objs:
-                transform = transformation.h_mat
-                if self.robot_col_mngr.geom == "visual":
-                    h_mat = np.dot(transform, self.robot.links[link].visual.offset.h_mat)
+        for link, transform in fk.items():
+            if link in self._scene_mngr.robot_collision_mngr._objs:
+                if self._scene_mngr.robot_collision_mngr.geom == "visual":
+                    h_mat = np.dot(transform.h_mat, self._scene_mngr.robot.links[link].visual.offset.h_mat)
                 else:
-                    h_mat = np.dot(transform, self.robot.links[link].collision.offset.h_mat)
-                self.robot_col_mngr.set_transform(name=link, h_mat=h_mat)
+                    h_mat = np.dot(transform.h_mat, self._scene_mngr.robot.links[link].collision.offset.h_mat)
+                self._scene_mngr.robot_collision_mngr.set_transform(name=link, h_mat=h_mat)
         
-        is_self_collision = self.robot_col_mngr.in_collision_internal(return_names=False, return_data=False)
+        is_self_collision = self._scene_mngr.robot_collision_mngr.in_collision_internal(return_names=False)
         
         if visible_name:
-            is_object_collision, col_name = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=visible_name)  
+            is_object_collision, col_name = self._scene_mngr.robot_collision_mngr.in_collision_other(
+                other_manager=self._scene_mngr.obj_collision_mngr, return_names=visible_name)  
             if is_self_collision or is_object_collision:
                 print(col_name)
-                return False, col_name
-            return True, col_name
+                return True, col_name
+            return False, col_name
             
-
-        is_object_collision = self.robot_col_mngr.in_collision_other(other_manager=self.object_col_mngr, return_names=False)  
+        is_object_collision = self._scene_mngr.robot_collision_mngr.in_collision_other(
+            other_manager=self._scene_mngr.obj_collision_mngr, return_names=False)  
         if is_self_collision or is_object_collision:
-            return False
-        return True
+            return True
+        return False
 
     def _get_fk(self, q_in):
         """
@@ -243,13 +164,13 @@ class Planner(NodeData, metaclass=ABCMeta):
         Returns:
             fk (OrderedDict)
         """
-        if self.robot.robot_name == "sawyer":
+        if self._scene_mngr.robot.robot_name == "sawyer":
             q_in = np.concatenate((np.zeros(1), q_in))
 
         if self.arm is not None:
-            fk = self.robot.forward_kin(q_in, self.robot.desired_frames[self.arm])
+            fk = self._scene_mngr.robot.forward_kin(q_in, self._scene_mngr.robot.desired_frames[self.arm])
         else:
-            fk = self.robot.forward_kin(q_in)
+            fk = self._scene_mngr.robot.forward_kin(q_in)
         return fk
 
     @property

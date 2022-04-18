@@ -39,7 +39,7 @@ target_thetas = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
 fk = scene_mngr.robot.forward_kin(target_thetas)
 eef_pose = fk[scene_mngr.robot.eef_name].h_mat
 
-target_thetas = scene_mngr.get_robot_joint_thetas(eef_pose)
+target_thetas = scene_mngr.compute_ik(eef_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 print(scene_mngr.get_robot_eef_pose())
 

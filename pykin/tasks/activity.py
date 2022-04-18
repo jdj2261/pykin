@@ -38,7 +38,7 @@ class ActivityBase:
         """
         pass
 
-    def _collision_free(self, fk, only_gripper=False):
+    def _collide(self, fk, only_gripper=False):
         """
         Check collision free or not
 
