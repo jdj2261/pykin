@@ -86,7 +86,9 @@ def plot_robot(
     geom="collision",
     visible_geom=False, 
     visible_text=True,
-    visible_scatter=True
+    visible_scatter=True,
+    alpha=0.4,
+    color=None
 ):
     """
     Plot robot
@@ -128,7 +130,7 @@ def plot_robot(
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
     if visible_geom:
-        plot_geom(ax, robot, geom)
+        plot_geom(ax, robot, geom, alpha=alpha, color=color)
     else:
         plot_basis(ax, robot)
 
@@ -143,7 +145,7 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
         h_mat = info[3]
 
         if info[1] == 'mesh':
-            # mesh_color = color
+            mesh_color = color
             if color is None:
                 if geom == "collision":
                     mesh_color = robot.links[link].collision.gparam.get('color')

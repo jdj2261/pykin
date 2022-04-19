@@ -112,7 +112,7 @@ You can see various examples in example directory
 
   |                            visual                            |                          Collision                           |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/baxter_plot_visual.png" width="300" height="300"/> | <img src="img/baxter_plot_collision.png" width="300" height="300"/> |
+  | <img src="img/baxter_plot_visual.png" width="400" height="300"/> | <img src="img/baxter_plot_collision.png" width="400" height="300"/> |
 
 - Inverse Kinematics
 
@@ -127,36 +127,46 @@ You can see various examples in example directory
 
   The image below shows the collision result as well as visualize robot using trimesh.Scene class
 
+  ~~~shell
+  $ cd example/single_stage/collision
+  $ python sawyer_collision_test.py
+  ~~~
+
   |                        trimesh.Scene                         |                            Result                            |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="img/sawyer_mesh_collision.png" width="300" height="300"/> | <img src="img/sawyer_collision_result.png" width="600" height="300"/> |
 
 ## Visualization
 
-- urdf
+You can see visualization using matplotlib library or trimesh.Scene class.
 
-  *You can see visualization using matplotlib.*
-
-
-|          baxter          |          sawyer          |          iiwa14          |          panda          |
-| :-------------------------: | :-------------------------: | :-------------------------: | :-----------------------: |
-| ![baxter](img/baxter.png) | ![sawyer](img/sawyer.png) | ![iiwa14](img/iiwa14.png) | ![panda](img/panda.png) |
-
-- collision
-
-  *You can see collision defined in collision/geometry tags in urdf.*
+- Visualize simple urdf using Matplotlib
 
 
-|               baxter               |               sawyer               |
-| :-----------------------------------: | :-----------------------------------: |
-| <img src="img/baxter_collision.png" width="200" height="200"/> | <img src="img/sawyer_collision.png" width="200" height="200"/> |
+  |                        ur5e                        |                        sawyer                        |                        iiwa14                        |                        panda                        |
+  | :------------------------------------------------: | :--------------------------------------------------: | :--------------------------------------------------: | :-------------------------------------------------: |
+  | <img src="img/ur5e.png" width="200" height="300"/> | <img src="img/sawyer.png" width="200" height="300"/> | <img src="img/iiwa14.png" width="200" height="300"/> | <img src="img/panda.png" width="200" height="300"/> |
 
-- mesh
 
-  *You can see  mesh defined in visual/geometry tags in urdf.*
-  
+- Visualize visual geometry using Matplotlib
+
+
+  |                           ur5e                            |                           sawyer                            |                           iiwa14                            |                           panda                            |
+  | :-------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: | :--------------------------------------------------------: |
+  | <img src="img/ur5e_visual.png" width="200" height="300"/> | <img src="img/sawyer_visual.png" width="200" height="300"/> | <img src="img/iiwa14_visual.png" width="200" height="300"/> | <img src="img/panda_visual.png" width="200" height="300"/> |
+
+
+- Visualize collision geometry using Matplotlib
+
+
+  |                             ur5e                             |                            sawyer                            |                            iiwa14                            |                            panda                             |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/ur5e_collision.png" width="200" height="300"/> | <img src="img/sawyer_collision.png" width="200" height="300"/> | <img src="img/iiwa14_collision.png" width="200" height="300"/> | <img src="img/panda_collision.png" width="200" height="300"/> |
+
+- Visualize mesh about visual/collision geometry using trimesh.Scene class
+
   ![baxter](img/all_robot.png)
-
+  
 - Planning
 
   *You can see an planning animation that visualizes trajectory*

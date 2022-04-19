@@ -11,12 +11,13 @@ file_path = '../../../asset/urdf/ur5e/ur5e.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name("ur5e_base_link", "ur5e_right_hand")
 
-target_thetas = [np.pi/3, 0, 0, 0, 0, 0]
+target_thetas = [-0.470, -1.735, 2.480, -2.275, -1.590, -1.991]
 robot.set_transform(target_thetas)
 
 _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(ax=ax, 
                robot=robot,
-               geom="collision",
-               visible_geom=True)
+               geom="visual",
+               visible_geom=False,
+               alpha=0.5)
 plt.show_figure()

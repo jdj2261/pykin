@@ -11,12 +11,13 @@ file_path = '../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 robot.setup_link_name(eef_name="panda_right_hand")
 
-target_thetas = [0, np.pi/3, 0, 0, 0, 0, 0]
+target_thetas = [0, 0.1963495375, 0.00, -2.616, 0.00, 2.9415926, 0.78539815]
 robot.set_transform(target_thetas)
 
 _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(ax=ax, 
                robot=robot,
                geom="collision",
-               visible_geom=True)
+               visible_geom=True,
+               alpha=0.9)
 plt.show_figure()

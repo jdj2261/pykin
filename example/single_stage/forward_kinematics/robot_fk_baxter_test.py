@@ -17,6 +17,6 @@ _, ax = plt.init_3d_figure("FK")
 
 plt.plot_robot(ax=ax, 
                robot=robot,
-               geom="collision",
+               geom="visual",
                visible_geom=True)
 plt.show_figure()
