@@ -3,9 +3,11 @@ import numpy as np
 import networkx as nx
 
 from pykin.planners.planner import NodeData, Planner
+from pykin.scene.scene import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
+from pykin.utils.plot_utils import plot_trajectories, plot_animation
 
 logger = create_logger('RRT Star Planner', "debug")
 
@@ -24,27 +26,18 @@ class RRTStarPlanner(Planner):
 
     def __init__(
         self, 
-        scene_mngr,
         delta_distance=0.5,
         epsilon=0.2,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
     ):
         super(RRTStarPlanner, self).__init__(
-            scene_mngr, 
             dimension
         )
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.gamma_RRTs = gamma_RRT_star
-        
-        self._max_iter = None
-        self._cur_qpos = None
-        self._goal_pose = None
         self.tree = None
-
-        super()._setup_q_limits()
-        super()._setup_eef_name()
 
     def __repr__(self):
         return 'pykin.planners.rrt_star_planner.{}()'.format(type(self).__name__)
@@ -60,7 +53,8 @@ class RRTStarPlanner(Planner):
 
     @logging_time
     def run(
-        self, 
+        self,
+        scene_mngr,
         cur_q,
         goal_pose, 
         max_iter=1000
@@ -73,7 +67,14 @@ class RRTStarPlanner(Planner):
             goal_pose (sequence of float): goal pose
             max_iter(int): maximum number of iterations
         """
+        if not scene_mngr:
+            raise ValueError("SceneManager needs to be added first")
+
         logger.info(f"Start to compute RRT-star Planning")
+
+        self._scene_mngr:SceneManager = scene_mngr
+        super()._setup_q_limits()
+        super()._setup_eef_name()
 
         self._cur_qpos = super()._convert_numpy_type(cur_q)
         self._goal_pose = super()._convert_numpy_type(goal_pose)
@@ -89,12 +90,17 @@ class RRTStarPlanner(Planner):
         while True:
             cnt += 1
             for _ in range(total_cnt):
-                self.goal_q = self._scene_mngr.robot.inverse_kin(np.random.randn(self._dimension), self._goal_pose)
+                self.goal_q = self._scene_mngr.robot.inverse_kin(
+                    np.random.randn(self._scene_mngr.robot.arm_dof), self._goal_pose)
+                
                 if self._check_q_in_limits(self.goal_q):
+                    logger.info(f"The joint limit has been successfully checked.")
                     break
+
                 if cnt > total_cnt:
                     logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
                     break
+
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
             self.goal_node = None

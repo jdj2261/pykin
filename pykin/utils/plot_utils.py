@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from pykin.kinematics import transform
 from pykin.utils import transform_utils as tf
 
 # Colors of each directions axes. For ex X is green
@@ -78,45 +79,39 @@ def plot_basis(ax=None, robot=None):
             c=directions_colors[1], label="Y")
     ax.plot([0, 0], [0, 0], [0, offset * 1.5],
             c=directions_colors[2], label="Z")
-
-
+    
 def plot_robot(
-    robot, 
     ax=None, 
-    fk=None, 
-    visible_collision=False, 
+    robot=None,
+    geom="collision",
+    visible_geom=False, 
     visible_text=True,
-    visible_scatter=True,
-    visible_basis=True):
-
+    visible_scatter=True
+):
     """
     Plot robot
     """
-    if fk is None:
-        fk = robot.init_fk
-
     name = robot.robot_name
-
-    if visible_basis:
-        plot_basis(ax, robot)
     
     links = []
     nodes = []
     transformation_matrix = []
 
-    for i, (link, transformation) in enumerate(fk.items()):
+    for i, (link, info) in enumerate(robot.info[geom].items()):
+        if name != "baxter":
+            if "pedestal" in link or "controller_box" in link or "tcp" in link:
+                continue
         links.append(link)
-        transformation_matrix.append(transformation.h_mat)
+        transformation_matrix.append(info[3])
 
     eef_idx = 0
-
     for i, (link, matrix) in enumerate(zip(links, transformation_matrix)):
         nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
         if link == robot.eef_name:
             eef_idx=i
 
     if name == "baxter":
-        plot_baxter(ax, nodes, visible_text, visible_scatter)
+        _plot_baxter(ax, nodes, visible_text, visible_scatter)
     else:
         lines = ax.plot([x[0] for x in nodes], [x[1] for x in nodes], [
             x[2] for x in nodes], linewidth=2, label=name)
@@ -132,14 +127,57 @@ def plot_robot(
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
-
-    if visible_collision:
-        plot_collision(ax, robot, fk)
+    if visible_geom:
+        plot_geom(ax, robot, geom)
+    else:
+        plot_basis(ax, robot)
 
     ax.legend()
 
+def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
+    """
+    Plot robot's collision
+    """
+    plot_basis(ax, robot)
+    for link, info in robot.info[geom].items():
+        h_mat = info[3]
 
-def plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
+        if info[1] == 'mesh':
+            # mesh_color = color
+            if color is None:
+                if geom == "collision":
+                    mesh_color = robot.links[link].collision.gparam.get('color')
+                    if mesh_color is None:
+                        mesh_color = 'k'
+                    else:
+                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+                else:
+                    mesh_color = robot.links[link].visual.gparam.get('color')
+                    if mesh_color is None:
+                        mesh_color = 'k'
+                    else:
+                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+            plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
+
+        if info[1] == 'cylinder':
+            length = float(info[2][0])
+            radius = float(info[2][1])
+            cylinder_color = get_color(robot.links[link].visual.gparam)
+            plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=cylinder_color)
+
+        if info[1] == 'sphere':
+            radius = float(info[2])
+            pos = h_mat[:3,-1]
+            sphere_color = get_color(robot.links[link].visual.gparam)
+            plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
+    
+        if info[1] == 'box':
+            size = info[2]
+            box_color = get_color(robot.links[link].visual.gparam)
+            plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
+    
+
+def _plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
     """
     Plot baxter robot
     """
@@ -188,63 +226,11 @@ def plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
             [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
 
 
-def plot_trajectories(ax, path, size=10, color='r'):
-    """
-    Plot plot_trajectories
-    """
-    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=size, c=color)
-
-
-def plot_animation(
-    robot, 
-    trajectory,
-    fig=None,
-    ax=None,
-    eef_poses=None,
-    objects=None,
-    visible_objects=False,
-    visible_collision=False,
-    visible_text=True,
-    visible_scatter=True,
-    interval=100, 
-    repeat=False
-    ):
-
-    """
-    Plot animation
-    """
-
-    def update(i):
-        # print(f"{i/len(trajectory) * 100:.1f} %")
-    
-        if i == len(trajectory)-1:
-            # print(f"{i/(len(trajectory)-1) * 100:.1f} %")
-            print("Animation Finished..")
-        ax.clear()
-
-        if visible_objects and objects:
-            plot_objects(ax, objects)
-        
-        if eef_poses is not None:
-            plot_trajectories(ax, eef_poses)
-          
-        plot_robot(
-            robot, 
-            fk=trajectory[i], 
-            ax=ax, 
-            visible_collision=visible_collision,
-            visible_text=visible_text,
-            visible_scatter=visible_scatter)
-
-    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
-    plt.show()
-
-
 def plot_objects(ax, objects, alpha=0.5, color='k'):    
     """
     Plot objects
     """
-    for name, info in objects.items():
+    for _, info in objects.items():
         o_type = info.gtype
         o_param = info.gparam
         o_pose = info.h_mat
@@ -260,36 +246,14 @@ def plot_objects(ax, objects, alpha=0.5, color='k'):
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=info.color)
 
 
-def plot_collision(ax, robot, fk, alpha=0.8):
-    """
-    Plot robot's collision
-    """
-    def _get_color(params):
-        color = []
-        if params is not None:
-            visual_color = params.get('color')
-            if visual_color is not None:
-                color = list(visual_color.keys())
-        return color
-
-    for link, transformation in fk.items():
-        h_mat = np.dot(transformation.h_mat, robot.links[link].collision.offset.h_mat)
-        color = _get_color(robot.links[link].visual.gparam)
-
-        if robot.links[link].collision.gtype == 'cylinder':
-            length = float(robot.links[link].collision.gparam.get('length'))
-            radius = float(robot.links[link].collision.gparam.get('radius'))
-            plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=color)
-
-        if robot.links[link].collision.gtype == 'sphere':
-            radius = float(robot.links[link].collision.gparam.get('radius'))
-            pos = h_mat[:3,-1]
-            plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=color)
+def get_color(params):
+    color = []
+    if params is not None:
+        visual_color = params.get('color')
+        if visual_color is not None:
+            color = list(visual_color.keys())
+    return color
     
-        if robot.links[link].collision.gtype == 'box':
-            size = robot.links[link].collision.gparam.get('size')
-            plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=color)
-
 
 def plot_cylinder(
     ax=None, 
@@ -398,20 +362,6 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, h_mat=np.eye(4), color="k"):
     ax.add_collection3d(p3c)
 
 
-def plot_path_planner(ax, path):
-    """
-    Plot rrt* path planner
-    """
-    if path is None:
-        print("cannot create path")
-        return
-
-    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
-    ax.plot([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], '-b', linewidth=0.5,)
-    ax.text(path[0][0], path[0][1], path[0][2], 'Start', verticalalignment='bottom', horizontalalignment='center', size="20")
-    ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
-
-
 def plot_mesh(
     ax=None, 
     mesh=None, 
@@ -474,3 +424,70 @@ def plot_line(ax, vertices, linewidth=1):
         [x[0] for x in vertices], 
         [x[1] for x in vertices],
         [x[2] for x in vertices], linewidth=linewidth)
+
+
+
+def plot_animation(
+    robot, 
+    trajectory,
+    fig=None,
+    ax=None,
+    eef_poses=None,
+    objects=None,
+    visible_objects=False,
+    visible_geom=False,
+    visible_text=True,
+    visible_scatter=True,
+    interval=100, 
+    repeat=False
+    ):
+
+    """
+    Plot animation
+    """
+
+    def update(i):
+        # print(f"{i/len(trajectory) * 100:.1f} %")
+    
+        if i == len(trajectory)-1:
+            # print(f"{i/(len(trajectory)-1) * 100:.1f} %")
+            print("Animation Finished..")
+        ax.clear()
+
+        if visible_objects and objects:
+            plot_objects(ax, objects)
+        
+        if eef_poses is not None:
+            plot_trajectories(ax, eef_poses)
+          
+        plot_robot(
+            robot, 
+            fk=trajectory[i], 
+            ax=ax, 
+            visible_geom=visible_geom,
+            visible_text=visible_text,
+            visible_scatter=visible_scatter)
+
+    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
+    show_figure()
+
+
+def plot_path_planner(ax, path):
+    """
+    Plot rrt* path planner
+    """
+    if path is None:
+        print("cannot create path")
+        return
+
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=10, c='r')
+    ax.plot([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], '-b', linewidth=0.5,)
+    ax.text(path[0][0], path[0][1], path[0][2], 'Start', verticalalignment='bottom', horizontalalignment='center', size="20")
+    ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
+
+
+def plot_trajectories(ax, path, size=10, color='r'):
+    """
+    Plot plot_trajectories
+    """
+    ax.scatter([x for (x, y, z) in path], [y for (x, y, z) in path], [z for (x, y, z) in path], s=size, c=color)

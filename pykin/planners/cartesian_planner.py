@@ -90,7 +90,7 @@ class CartesianPlanner(Planner):
         self._cur_qpos = super()._convert_numpy_type(cur_q)
         self._goal_pose = super()._convert_numpy_type(goal_pose)
         init_fk = self.robot.kin.forward_kinematics(self.robot.desired_frames, self._cur_qpos)
-        self._cur_pose = self.robot.get_eef_pose(init_fk)
+        self._cur_pose = self.robot.compute_eef_pose(init_fk)
         self._resolution = resolution
 
         if not super()._check_robot_col_mngr(robot_col_manager):

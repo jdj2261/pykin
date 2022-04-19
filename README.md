@@ -12,12 +12,12 @@ You can see a Pick and Place demo video using pykin library <a href="https://you
 
 - Pure python library
 - Support only URDF file
-- Compute Forward, Inverse Kinematics and Jacobian, referred to the [Introduction to Humanoid Robotics book](https://link.springer.com/book/10.1007/978-3-642-54536-8).
-- Check self-collision and collision between objects
+- Compute forward, inverse kinematics and jacobian, referred to the [Introduction to Humanoid Robotics book](https://link.springer.com/book/10.1007/978-3-642-54536-8).
+- Check robot self-collision and collision between objects
 - Path Planning (Caretsian Planning)
 - Motion Planning (RRT-star)
-- Plot Robot Kinematic Chain and Mesh
-- Compute and Visualize grasp pose
+- Plot robot kinematic chain and mesh
+- Compute and visualize pick and place pose
 
 ## Installation
 
@@ -82,170 +82,54 @@ $ git submodule init
 $ git submodule update
 ~~~
 
-## Quick Start
+## Example
+
+You can see various examples in example directory
 
 - Robot Info
 
-  You can see 4 example robot information.
+  You can see 6 robot info.
 
-  `baxter, iiwa14, panda, and sawyer`
+  `baxter, sawyer, iiwa14, iiwa7, panda, ur5e`
 
-  <details>
-    <summary>Code</summary>
-
-  ~~~python
-  import sys
-  
-  file_path = '../asset/urdf/baxter/baxter.urdf'
-  
-  if len(sys.argv) > 1:
-      robot_name = sys.argv[1]
-      file_path = '../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
-  
-  if "baxter" in file_path:
-      from pykin.robots.bimanual import Bimanual
-      robot = Bimanual(file_path)
-  else:
-      from pykin.robots.single_arm import SingleArm
-      robot = SingleArm(file_path)
-  
-  robot.show_robot_info()
+  ~~~shell
+  $ cd example/single_stage
+  $ python robot_info.py $(robot_name)
+  # baxter
+  $ python robot_info.py baxter
+  # saywer
+  $ python robot_info.py sawyer
   ~~~
-  
-  </details>
-  
-- Forward Kinematics
 
-  <details>
-    <summary>Code</summary>
+- Compute Forward kinematics
 
-  ~~~python
-  import numpy as np
-  
-  from pykin.robots.bimanual import Bimanual
-  from pykin.kinematics.transform import Transform
-  from pykin.utils import plot_utils as plt
-  from pykin.utils.kin_utils import ShellColors as sc
-  
-  # baxter_example
-  file_path = '../../asset/urdf/baxter/baxter.urdf'
-  robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-  
-  head_thetas = [0.0]
-  right_arm_thetas = [np.pi/3, -np.pi/5, -np.pi/2, np.pi/7, 0, np.pi/7 ,0]
-  left_arm_thetas = [0, 0, 0, 0, 0, 0, 0]
-  
-  thetas = head_thetas + right_arm_thetas + left_arm_thetas
-  fk = robot.forward_kin(thetas)
-  
-  for link, transform in fk.items():
-      print(f"{sc.HEADER}{link}{sc.ENDC}, {transform.rot}, {transform.pos}")
+  You can compute the forward kinematics as well as visualize the visual or collision geometry.
+
+  ~~~shell
+  $ cd example/single_stage/forward_kinematics
+  $ python robot_fk_baxter_test.py
   ~~~
-  
-  </details>
-  
-- Jacobian
 
-  <details>
-    <summary>Code</summary>
+  |                            visual                            |                          Collision                           |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/baxter_plot_visual.png" width="300" height="300"/> | <img src="img/baxter_plot_collision.png" width="300" height="300"/> |
 
-  ~~~python
-  import numpy as np
-  
-  from pykin.kinematics import transform as tf
-  from pykin.robots.bimanual import Bimanual
-  from pykin.kinematics import jacobian as jac
-  
-  file_path = '../asset/urdf/baxter/baxter.urdf'
-  robot = Bimanual(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-  
-  left_arm_thetas = np.zeros(15)
-  robot.setup_link_name("base", "right_wrist")
-  robot.setup_link_name("base", "left_wrist")
-  
-  fk = robot.forward_kin(left_arm_thetas)
-  
-  J = {}
-  for arm in robot.arm_type:
-      if robot.eef_name[arm]:
-          J[arm] = jac.calc_jacobian(robot.desired_frames[arm], fk, len(np.zeros(7)))
-  
-  print(J)
-  ~~~
-  
-  </details>
-  
 - Inverse Kinematics
 
-  <details>
-    <summary>Code</summary>
+  You can compute the inverse kinematics using levenberg marquardt(LM) or newton raphson(NR) method
 
-  ~~~python
-  import numpy as np
-  
-  from pykin.robots.bimanual import Bimanual
-  from pykin.kinematics.transform import Transform
-  from pykin.utils import plot_utils as plt
-  
-  file_path = '../../asset/urdf/baxter/baxter.urdf'
-  
-  robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
-  
-  visible_collision = True
-  visible_visual = False
-  
-  # set target joints angle
-  head_thetas =  np.zeros(1)
-  right_arm_thetas = np.array([-np.pi/4 , 0, 0, 0, 0 , 0 ,0])
-  left_arm_thetas = np.array([np.pi/4 , 0, 0, 0, 0 , 0 ,0])
-  
-  thetas = np.concatenate((head_thetas ,right_arm_thetas ,left_arm_thetas))
-  
-  robot.setup_link_name("base", "right_wrist")
-  robot.setup_link_name("base", "left_wrist")
-  
-  #################################################################################
-  #                                Set target pose                                #
-  #################################################################################
-  target_fk = robot.forward_kin(thetas)
-  _, ax = plt.init_3d_figure("Target Pose")
-  plt.plot_robot(robot, 
-                 ax=ax,
-                 fk=target_fk,
-                 visible_visual=visible_visual, 
-                 visible_collision=visible_collision,
-                 mesh_path='../../asset/urdf/baxter/')
-  
-  #################################################################################
-  #                                Inverse Kinematics                             #
-  #################################################################################
-  init_thetas = np.random.randn(7)
-  target_pose = { "right": robot.get_eef_pose(target_fk)["right"], 
-                  "left" : robot.get_eef_pose(target_fk)["left"]}
-  
-  ik_LM_result = robot.inverse_kin(
-      init_thetas, 
-      target_pose, 
-      method="LM", 
-      max_iter=100)
-  
-  ik_NR_result = robot.inverse_kin(
-      init_thetas, 
-      target_pose, 
-      method="NR", 
-      max_iter=100)
-  
-  print(ik_LM_result, ik_NR_result)
+  ~~~shell
+  $ cd example/single_stage/inverse_kinematics
+  $ python robot_fk_baxter_test.py
   ~~~
-  
-  </details>
-  
-- Check Collision
 
-  *The image below shows the result of a sawyer head and milk collision.*
+- Collision check
 
-  | <img src="img/sawyer_mesh_collision.png" height="200"/> | <img src="img/sawyer_collision_result.png" height="200"/> |
-  | ------------------------------------------------------- | --------------------------------------------------------- |
+  The image below shows the collision result as well as visualize robot using trimesh.Scene class
+
+  |                        trimesh.Scene                         |                            Result                            |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/sawyer_mesh_collision.png" width="300" height="300"/> | <img src="img/sawyer_collision_result.png" width="600" height="300"/> |
 
 ## Visualization
 

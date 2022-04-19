@@ -1,11 +1,15 @@
 import numpy as np
+import sys, os
+
+pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+sys.path.append(pykin_path)
 
 from pykin.kinematics import transform as tf
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics import jacobian as jac
 
 
-file_path = '../asset/urdf/baxter/baxter.urdf'
+file_path = '../../asset/urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 left_arm_thetas = np.zeros(15)

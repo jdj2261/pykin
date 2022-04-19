@@ -45,7 +45,7 @@ class Gripper:
             T = get_absolute_transform(self.init_info[self.names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
 
-    def get_eef_pose_from_tcp_pose(self, tcp_pose=np.eye(4)):
+    def compute_eef_pose_from_tcp_pose(self, tcp_pose=np.eye(4)):
         eef_pose = np.eye(4)
         eef_pose[:3, :3] = tcp_pose[:3, :3]
         eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(self.tcp_position[-1], tcp_pose[:3, 2])

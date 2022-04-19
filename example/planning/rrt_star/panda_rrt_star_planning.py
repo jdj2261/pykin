@@ -89,6 +89,6 @@ plt.plot_animation(
     eef_poses=eef_poses,
     objects=objs,
     visible_objects=True,
-    visible_collision=True, 
+    visible_geom=True, 
     interval=1, 
     repeat=True)

@@ -14,7 +14,10 @@ import pykin.utils.plot_utils as plt
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 
 file_path = '../../asset/urdf/panda/panda.urdf'
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+robot = SingleArm(
+    f_name=file_path, 
+    offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
+    has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
@@ -41,45 +44,46 @@ robot_pose = green_box_pose.h_mat
 robot_pose[:3,3] = robot_pose[:3,3] + np.array([0, 0, 0.5])
 thetas = scene_mngr.compute_ik(robot_pose)
 scene_mngr.set_robot_eef_pose(thetas)
-scene_mngr.render_all_scene(ax=ax, robot_color='b')
-plt.show_figure()
+
+# scene_mngr.render_all_scene(ax=ax, robot_color='b')
+# plt.show_figure()
 
 ############################ Show collision info #############################
-# planner = RRTStarPlanner(
-#     scene_mngr=scene_mngr,
-#     delta_distance=0.1,
-#     epsilon=0.2, 
-#     gamma_RRT_star=2,
-#     dimension=7
-# )
+planner = RRTStarPlanner(
+    delta_distance=0.1,
+    epsilon=0.2, 
+    gamma_RRT_star=2,
+)
 
-# planner.run(
-#     cur_q=init_qpos, 
-#     goal_pose=robot_pose,
-#     max_iter=1000)
+planner.run(
+    scene_mngr=scene_mngr,
+    cur_q=init_qpos, 
+    goal_pose=robot_pose,
+    max_iter=1000)
 
-# interpolated_path = planner.get_joint_path(n_step=10)
+# planner.simulate_planning(ax)
 
-# if not interpolated_path:
-#     print("Cannot Visulization Path")
-#     exit()
+joint_path = planner.get_joint_path(n_step=10)
 
-# joint_trajectory = []
-# eef_poses = []
-# for step, joint in enumerate(interpolated_path):
-#     fk = robot.forward_kin(joint)
-#     joint_trajectory.append(fk)
-#     eef_poses.append(fk[robot.eef_name].pos)
+joint_trajectory = []
+eef_poses = []
+for step, joint in enumerate(joint_path):
+    fk = robot.forward_kin(joint)
+    joint_trajectory.append(fk)
+    eef_poses.append(fk[robot.eef_name].pos)
+
+# plt.plot_path_planner(ax, eef_poses)
+# plt.show_figure()
 
 # # TODO
-# plt.plot_animation(
-#     robot,
-#     joint_trajectory, 
-#     fig, 
-#     ax,
-#     eef_poses=eef_poses,
-#     objects=scene_mngr.objs,
-#     visible_objects=True,
-#     visible_collision=True, 
-#     interval=1, 
-#     repeat=True)
+plt.plot_animation(
+    robot,
+    joint_trajectory, 
+    fig, 
+    ax,
+    eef_poses=eef_poses,
+    objects=scene_mngr.objs,
+    visible_objects=True,
+    visible_geom=True, 
+    interval=1, 
+    repeat=True)

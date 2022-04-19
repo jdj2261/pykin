@@ -43,7 +43,7 @@ class CollisionManager:
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)
 
-    def setup_robot_collision(self, robot, fk=None, geom="visual"):
+    def setup_robot_collision(self, robot, geom="collision"):
         """
         Setup robots' collision
 
@@ -54,24 +54,26 @@ class CollisionManager:
         """
         if not self.is_robot:
             raise ValueError('Check argument!! Is is_robot True?')
-        if fk is None:
-            fk = robot.init_fk
         self.geom = geom
-        self._filter_contact_names(robot, fk, geom)
+        self._filter_contact_names(robot, geom)
 
-    def setup_gripper_collision(self, robot, fk=None):
+    def setup_gripper_collision(self, robot, fk=None, geom="collision"):
         if fk is None:
             fk = robot.init_fk
 
         info = robot.gripper.info
         for name, transform in fk.items():
             if name in list(info.keys()):
-                robot_type = info[name][1]  
+                robot_type = info[name][1]
                 if robot_type == "mesh":
-                    h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
-                    self.add_object(name, info[name][1], info[name][2], h_mat)
+                    if geom == "collision":
+                        h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
+                        self.add_object(name, info[name][1], info[name][2], h_mat)
+                    else:
+                        h_mat = np.dot(transform.h_mat, robot.links[name].visual.offset.h_mat)
+                        self.add_object(name, info[name][1], info[name][2], h_mat)
 
-    def _filter_contact_names(self, robot, fk, geom):      
+    def _filter_contact_names(self, robot, geom):      
         """
         Filter contact names in the beginning
 
@@ -80,49 +82,8 @@ class CollisionManager:
             fk (OrderedDict): result(forward kinematics) of computing robots' forward kinematics
             geom (str): robot's geometry type name ("visual" or "collision")
         """
-        for link, transform in fk.items():
-            if geom == "visual":
-                robot_gtype = robot.links[link].visual.gtype
-                h_mat = np.dot(transform.h_mat, robot.links[link].visual.offset.h_mat)
-                
-                if robot_gtype is None:
-                    continue
-
-                if robot_gtype == "mesh":
-                    mesh_name = robot.mesh_path + robot.links[link].visual.gparam.get('filename')
-                    gparam = trimesh.load_mesh(mesh_name)
-                elif robot_gtype == 'cylinder':
-                    radius = float(robot.links[link].visual.gparam.get('radius'))
-                    length = float(robot.links[link].visual.gparam.get('length'))
-                    gparam = (radius, length)
-                elif robot_gtype == 'sphere':
-                    radius = float(robot.links[link].visual.gparam.get('radius'))
-                    gparam = radius
-                elif robot_gtype == 'box':
-                    size = robot.links[link].visual.gparam.get('size')
-                    gparam = size
-            else:
-                robot_gtype = robot.links[link].collision.gtype
-                h_mat = np.dot(transform.h_mat, robot.links[link].collision.offset.h_mat)
-
-                if robot_gtype is None:
-                    continue
-                
-                if robot_gtype == "mesh":
-                    mesh_name = robot.mesh_path + robot.links[link].collision.gparam.get('filename')
-                    gparam = trimesh.load_mesh(mesh_name)
-                elif robot_gtype == 'cylinder':
-                    radius = float(robot.links[link].collision.gparam.get('radius'))
-                    length = float(robot.links[link].collision.gparam.get('length'))
-                    gparam = (radius, length)
-                elif robot_gtype == 'sphere':
-                    radius = float(robot.links[link].collision.gparam.get('radius'))
-                    gparam = radius
-                elif robot_gtype == 'box':
-                    size = robot.links[link].collision.gparam.get('size')
-                    gparam = size
-
-            self.add_object(robot.links[link].name, robot_gtype, gparam, h_mat)
+        for link, info in robot.info[geom].items():
+            self.add_object(info[0], info[1], info[2], info[3])
 
         _, names = self.in_collision_internal(return_names=True)
         self.filtered_link_names = copy.deepcopy(names)
@@ -425,8 +386,8 @@ class CollisionManager:
         """
         geom = None
         if gtype == "cylinder":
-            radius = gparam[0]
-            length = gparam[1]
+            length = gparam[0]
+            radius = gparam[1]
             geom = fcl.Cylinder(radius, length)
         elif gtype == "sphere":
             radius = float(gparam)

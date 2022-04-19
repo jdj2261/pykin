@@ -1,4 +1,4 @@
-import trimesh
+
 import numpy as np
 
 from pykin.robots.robot import Robot
@@ -10,25 +10,28 @@ class SingleArm(Robot):
     Initializes a single-armed robot simulation object.
 
     Args:
-        fname (str): path to the urdf file.
+        f_name (str): path to the urdf file.
         offset (Transform): robot init offset
     """
     def __init__(
         self,
-        fname:str,
-        offset=None
+        f_name:str,
+        offset=None,
+        has_gripper=False,
     ):
-        super(SingleArm, self).__init__(fname, offset)
+        super(SingleArm, self).__init__(f_name, offset, has_gripper)
         self._base_name = ""
         self._eef_name  = ""
         self.desired_base_frame = ""
         self._set_joint_limits_upper_and_lower()
         self._init_qpos = np.zeros(self.arm_dof)
+        
+        self.info = {}
+        self.info= super()._init_robot_info()
 
-        self.info = self._init_robot_info()
-
-        self.gripper.init_info = self._init_gripper_info()
-        self.gripper.info = self._init_gripper_info()
+        if has_gripper:
+            self.gripper.init_info = super()._init_gripper_info()
+            self.gripper.info = super()._init_gripper_info()
         
     def _set_joint_limits_upper_and_lower(self):
         """
@@ -44,30 +47,15 @@ class SingleArm(Robot):
                 self.joint_limits_lower.append(limit_lower)
                 self.joint_limits_upper.append(limit_upper)
 
-    def _init_robot_info(self):
-        robot_info = {}
-        for link, transform in self.init_fk.items():
-            gtype = self.links[link].collision.gtype
-            mesh = None
-            if gtype == "mesh":
-                mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
-                mesh = trimesh.load_mesh(mesh_path)
-            h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
-            robot_info[link] = [link, gtype, mesh, h_mat]
-        return robot_info
+    def get_info(self, geom="all"):
+        if geom == "all":
+            return self.info
 
-    def _init_gripper_info(self):
-        gripper_info = {}
-        for link, transform in self.init_fk.items():
-            if link in self.gripper.names:
-                gtype = self.links[link].collision.gtype
-                mesh = None
-                if gtype == "mesh":
-                    mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
-                    mesh = trimesh.load_mesh(mesh_path)
-                h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
-                gripper_info[link] = [link, gtype, mesh, h_mat]
-        return gripper_info
+        if geom == "collision":
+            return self.info["collision"]
+        
+        if geom == "visual":
+            return self.info["visual"]
 
     def check_limit_joint(self, q_in):
         """
@@ -155,7 +143,7 @@ class SingleArm(Robot):
             max_iter)
         return joints
 
-    def get_eef_pose(self, fk=None):
+    def compute_eef_pose(self, fk=None):
         """
         Get end effector's pose
 
@@ -170,7 +158,7 @@ class SingleArm(Robot):
 
         return np.concatenate((fk[self.eef_name].pos, fk[self.eef_name].rot))
 
-    def get_eef_h_mat(self, fk=None):
+    def compute_eef_h_mat(self, fk=None):
         """
         Get end effector's homogeneous marix
 
@@ -184,36 +172,6 @@ class SingleArm(Robot):
             fk = self.init_fk
 
         return fk[self.eef_name].h_mat
-
-    def get_eef_pos(self, fk=None):
-        """
-        Get end effector's position
-
-        Args:
-            fk(OrderedDict)
-        
-        Returns:
-            vals(dict)
-        """
-        if fk is None:
-            fk = self.init_fk
-
-        return fk[self.eef_name].pos
-
-    def get_eef_ori(self, fk=None):
-        """
-        Get end effector's orientation
-
-        Args:
-            fk(OrderedDict)
-        
-        Returns:
-            vals(dict)
-        """
-        if fk is None:
-            fk = self.init_fk
-
-        return fk[self.eef_name].rot
 
     @property
     def base_name(self):

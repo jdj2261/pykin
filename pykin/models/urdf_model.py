@@ -15,15 +15,15 @@ class URDFModel(RobotModel):
     Initializes a urdf model, as defined by a single corresponding robot URDF
 
     Args:
-        fname (str): path to the urdf file.
+        f_name (str): path to the urdf file.
     """
-    def __init__(self, fname):
+    def __init__(self, f_name):
         super().__init__()
 
-        if not os.path.isfile(fname):
-            raise FileNotFoundError(f'{fname} is not Found..')
+        if not os.path.isfile(f_name):
+            raise FileNotFoundError(f'{f_name} is not Found..')
 
-        self.tree_xml = ET.parse(fname)
+        self.tree_xml = ET.parse(f_name)
         self.root = self.tree_xml.getroot()
         self.robot_name = self.root.attrib.get('name')
 

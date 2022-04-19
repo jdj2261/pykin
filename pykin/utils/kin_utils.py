@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import trimesh
 
 # from pykin.kinematics.transform import Transform
 
@@ -124,3 +125,61 @@ def limit_joints(joint_angles, lower, upper):
                 joint_angles[i] = upper[i]
     return joint_angles
 
+
+def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
+    if trimesh_scene is None:
+        trimesh_scene = trimesh.Scene()
+
+    for link, info in robot.info[geom].items():
+        mesh = info[2]
+        h_mat = info[3]
+
+        if info[1] == "mesh":
+            if geom=="visual":
+                color = robot.links[link].visual.gparam.get('color')
+            else:
+                color = robot.links[link].collision.gparam.get('color')
+
+            if color is None:
+                color = np.array([0.2, 0, 0])
+            else:
+                color = np.array([color for color in color.values()]).flatten()
+
+            mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(mesh, transform=h_mat)
+    
+        if info[1] == "box":
+            box_mesh = trimesh.creation.box(extents=info[2])
+            trimesh_scene.add_geometry(box_mesh, transform=h_mat)
+
+        if info[1] == "cylinder":
+            capsule_mesh = trimesh.creation.cylinder(height=info[2][0], radius=info[2][1])
+            trimesh_scene.add_geometry(capsule_mesh, transform=h_mat)
+
+        if info[1] == "spehre":
+            sphere_mesh = trimesh.creation.icosphere(radius=info[2])
+            trimesh_scene.add_geometry(sphere_mesh, transform=h_mat)
+    return trimesh_scene
+
+
+def get_mesh_param(link_type):
+    file_name = str(link_type.gparam.get('filename'))
+    color = link_type.gparam.get('color')
+    color = np.array([color for color in color.values()]).flatten()
+    return (file_name, color)
+
+
+def get_cylinder_param(link_type):
+    radius = float(link_type.gparam.get('radius'))
+    length = float(link_type.gparam.get('length'))
+    return (radius, length)
+
+
+def get_spehre_param(link_type):
+    radius = float(link_type.gparam.get('radius'))
+    return radius
+
+
+def get_box_param(link_type):
+    size = list(link_type.gparam.get('size'))
+    return size

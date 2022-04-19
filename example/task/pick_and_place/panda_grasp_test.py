@@ -37,7 +37,7 @@ obj_mesh2.apply_scale(0.001)
 obj_mesh3.apply_scale(0.01)
 
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
-# plt.plot_robot(robot, ax, fk, visible_collision=True)
+# plt.plot_robot(robot, ax, fk, visible_geom=True)
 # plt.plot_mesh(ax, obj_mesh1)
 # plt.plot_mesh(ax, obj_mesh2)
 # plt.plot_mesh(ax, obj_mesh3, h_mat=obs_pos3.h_mat)

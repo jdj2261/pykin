@@ -179,7 +179,7 @@ class ActivityBase:
         """
         return self.gripper
 
-    def get_eef_h_mat_from_tcp(self, tcp_pose):
+    def compute_eef_h_mat_from_tcp(self, tcp_pose):
         """
         Get eef transformation matrix from tcp pose
 

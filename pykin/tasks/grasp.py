@@ -186,7 +186,7 @@ class GraspManager(ActivityBase):
                 if self._collide(gripper_transformed, only_gripper=True):
                     self.tcp_pose = tcp_pose
                     self.contact_points = contact_points
-                    eef_pose = self.get_eef_h_mat_from_tcp(tcp_pose)
+                    eef_pose = self.compute_eef_h_mat_from_tcp(tcp_pose)
                     cnt += 1
                     yield (eef_pose, gripper_transformed)
     

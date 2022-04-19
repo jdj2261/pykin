@@ -36,7 +36,7 @@ robot.setup_link_name("sawyer_base", "sawyer_right_hand")
 
 ##################################################################
 init_fk = robot.forward_kin([0] + init_qpos)
-init_eef_pose = robot.get_eef_pose(init_fk)
+init_eef_pose = robot.compute_eef_pose(init_fk)
 goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
@@ -77,7 +77,7 @@ plt.plot_animation(
     joint_trajectory,
     fig=fig, 
     ax=ax,
-    visible_collision=True,
+    visible_geom=True,
     eef_poses=target_poses,
     objects=[],
     repeat=True)

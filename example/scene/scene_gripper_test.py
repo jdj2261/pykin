@@ -13,7 +13,12 @@ import pykin.utils.plot_utils as plt
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 
 file_path = '../../asset/urdf/panda/panda.urdf'
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+
+robot = SingleArm(
+    f_name=file_path, 
+    offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
+    has_gripper=True)
+
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
@@ -36,10 +41,10 @@ scene_mngr.add_robot(robot)
 
 ############################# Gripper Pose Test #############################
 scene_mngr.set_gripper_pose(np.eye(4))
-scene_mngr.render_object_and_gripper(ax, gripper_color='b')
+scene_mngr.render_object_and_gripper(ax, robot_color='b')
 
 scene_mngr.set_gripper_tcp_pose(np.eye(4))
-scene_mngr.render_object_and_gripper(ax, gripper_color='r')
+scene_mngr.render_object_and_gripper(ax, robot_color='r')
 
 print(scene_mngr.get_gripper_pose())
 print(scene_mngr.get_gripper_tcp_pose())

@@ -29,7 +29,7 @@ robot.setup_link_name("iiwa14_link_0", "iiwa14_right_hand")
 ##################################################################
 init_qpos = controller_config["init_qpos"]
 init_fk = robot.forward_kin(init_qpos)
-init_eef_pose = robot.get_eef_pose(init_fk)
+init_eef_pose = robot.compute_eef_pose(init_fk)
 goal_eef_pose = controller_config["goal_pose"]
 
 c_manager = CollisionManager(mesh_path)
@@ -89,7 +89,7 @@ plt.plot_animation(
     eef_poses=eef_poses,
     objects=obs,
     visible_objects=True,
-    visible_collision=True, 
+    visible_geom=True, 
     interval=1, 
     repeat=True)
 

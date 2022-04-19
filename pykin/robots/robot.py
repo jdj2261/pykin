@@ -1,7 +1,8 @@
 import sys, os
 import numpy as np
-
 import signal
+import trimesh
+
 def handler(signum, frame):
     exit()
 # Set the signal handler
@@ -9,7 +10,6 @@ signal.signal(signal.SIGINT, handler)
 
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
 sys.path.append(pykin_path)
-
 
 from pykin.robots.gripper import Gripper
 from pykin.kinematics.transform import Transform
@@ -22,26 +22,32 @@ class Robot(URDFModel):
     Initializes a robot object, as defined by a single corresponding robot URDF
 
     Args:
-        fname (str): path to the urdf file.
+        f_name (str): path to the urdf file.
         offset (Transform): robot init offset
     """
     def __init__(
-        self, 
-        fname=None, 
-        offset=None, 
+        self,
+        f_name,
+        offset, 
+        has_gripper
     ):
-        if fname is None:
-            fname = pykin_path + "/asset/urdf/baxter/baxter.urdf"
-        self.urdf_name = os.path.abspath(fname)
-        self.mesh_path = os.path.abspath(fname + "/../") + '/'
+        if not f_name:
+            f_name = pykin_path + "/asset/urdf/baxter/baxter.urdf"
+        
+        self.urdf_name = os.path.abspath(f_name)
+        self.mesh_path = os.path.abspath(f_name + "/../") + '/'
         self._offset = offset
         if offset is None:
             self._offset = Transform()
+        self.has_gripper = has_gripper
             
-        super(Robot, self).__init__(fname)
+        super(Robot, self).__init__(f_name)
 
         self.info = None
-        self.gripper = Gripper()
+        self.gripper = None
+
+        if has_gripper:
+            self.gripper = Gripper()
 
         self.joint_limits_lower = []
         self.joint_limits_upper = []
@@ -59,6 +65,16 @@ class Robot(URDFModel):
     def __repr__(self):
         return 'pykin.robot.{}()'.format(type(self).__name__)
 
+    def set_transform(self, thetas):
+        fk = self.forward_kin(thetas)
+        for link, transform in fk.items():
+
+            collision_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+            visual_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
+
+            self.info["collision"][link][3] = collision_h_mat
+            self.info["visual"][link][3] = visual_h_mat
+
     def show_robot_info(self):
         """
         Shows robot's info 
@@ -75,6 +91,61 @@ class Robot(URDFModel):
         print(f"active joint names: \n{self.get_all_active_joint_names()}")
         print(f"revolute joint names: \n{self.get_revolute_joint_names()}")
         print("*" * 100)
+
+    def _init_robot_info(self):
+        robot_info = {}
+        robot_info["collision"] = {}
+        robot_info["visual"] = {}
+
+        for link, transform in self.init_fk.items():
+            col_gparam = None
+            col_gtype = self.links[link].collision.gtype
+            
+            vis_gparam = None
+            vis_gtype = self.links[link].visual.gtype
+
+            if col_gtype == "mesh":
+                mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
+                col_gparam = trimesh.load_mesh(mesh_path)
+            if col_gtype == "box":
+                col_gparam = self.links[link].collision.gparam.get('size')
+            if col_gtype == "cylinder":
+                length = float(self.links[link].collision.gparam.get('length'))
+                radius = float(self.links[link].collision.gparam.get('radius'))
+                col_gparam = (length, radius)
+            if col_gtype == "sphere":
+                col_gparam = float(self.links[link].collision.gparam.get('radius'))
+            col_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+            robot_info["collision"][link] = [link, col_gtype, col_gparam, col_h_mat]
+            
+            if vis_gtype == "mesh":
+                mesh_path = self.mesh_path + self.links[link].visual.gparam.get('filename')
+                vis_gparam = trimesh.load_mesh(mesh_path)
+            if vis_gtype == "box":
+                vis_gparam = self.links[link].visual.gparam.get('size')
+            if vis_gtype == "cylinder":
+                length = float(self.links[link].visual.gparam.get('length'))
+                radius = float(self.links[link].visual.gparam.get('radius'))
+                vis_gparam = (length, radius)
+            if vis_gtype == "sphere":
+                vis_gparam = float(self.links[link].visual.gparam.get('radius'))
+            vis_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
+            robot_info["visual"][link] = [link, vis_gtype, vis_gparam, vis_h_mat]
+
+        return robot_info
+
+    def _init_gripper_info(self):
+        gripper_info = {}
+        for link, transform in self.init_fk.items():
+            if link in self.gripper.names:
+                gtype = self.links[link].collision.gtype
+                mesh = None
+                if gtype == "mesh":
+                    mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
+                    mesh = trimesh.load_mesh(mesh_path)
+                h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+                gripper_info[link] = [link, gtype, mesh, h_mat]
+        return gripper_info
 
     def _setup_kinematics(self):
         """

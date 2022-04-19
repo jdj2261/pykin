@@ -38,7 +38,7 @@ with open(yaml_fpath) as f:
 init_qpos = controller_config["init_qpos"]
 fk = robot.forward_kin(np.array(init_qpos))
 
-init_eef_pose = robot.get_eef_pose(fk)
+init_eef_pose = robot.compute_eef_pose(fk)
 goal_eef_pose = controller_config["goal_pos"]
 ##################################################################
 
@@ -91,7 +91,7 @@ plt.plot_animation(
     joint_trajectory,
     fig=fig, 
     ax=ax,
-    visible_collision=True,
+    visible_geom=True,
     eef_poses=target_poses,
     objects=obs,
     visible_objects=True,

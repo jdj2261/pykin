@@ -1,7 +1,6 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
-from pykin.scene.scene import SceneManager
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
@@ -18,20 +17,24 @@ class Planner(NodeData, metaclass=ABCMeta):
     Base Planner class 
 
     Args:
-        robot (SingleArm or Bimanual): manipulator type
         dimension(int): robot arm's dof
     """
     def __init__(
         self,
-        scene_mngr:SceneManager,
         dimension
     ):
-        self._scene_mngr = scene_mngr
         self._dimension = dimension
+        self._cur_qpos = None
+        self._goal_pose = None
+        self._max_iter = None
         self.arm = None
 
     def __repr__(self) -> str:
         return 'pykin.planners.planner.{}()'.format(type(self).__name__)
+
+    @abstractclassmethod
+    def run(self):
+        raise NotImplementedError
 
     @abstractclassmethod
     def get_joint_path(self):
@@ -39,6 +42,14 @@ class Planner(NodeData, metaclass=ABCMeta):
         write planner algorithm you want 
         """
         raise NotImplementedError
+
+    # @abstractclassmethod
+    # def simulate_planning(self):
+    #     raise NotImplementedError
+
+    # @abstractclassmethod
+    # def render_trajectory(self):
+    #     raise NotImplementedError
 
     @abstractclassmethod
     def _get_linear_path(self, init_pose, goal_pose):

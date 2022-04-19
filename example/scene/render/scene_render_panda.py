@@ -1,7 +1,7 @@
 import numpy as np
 import sys, os
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
@@ -12,8 +12,11 @@ import pykin.utils.plot_utils as plt
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 
-file_path = '../../asset/urdf/panda/panda.urdf'
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+file_path = '../../../asset/urdf/panda/panda.urdf'
+robot = SingleArm(
+    f_name=file_path, 
+    offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
+    has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
@@ -35,10 +38,10 @@ scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat
 scene_mngr.add_robot(robot)
 
 ############################# Render Test #############################
+target_thetas = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
+scene_mngr.set_robot_eef_pose(target_thetas)
 
 scene_mngr.render_all_scene(ax, robot_color='b')
-# scene_mngr.render_object(ax)
-# scene_mngr.render_gripper(ax, gripper_color='b')
-
 plt.show_figure()
+
 

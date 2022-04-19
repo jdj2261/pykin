@@ -1,4 +1,5 @@
 import numpy as np
+import trimesh
 from pykin.robots.robot import Robot
 from pykin.utils.error_utils import NotFoundError
 
@@ -7,17 +8,25 @@ class Bimanual(Robot):
     Initializes a bimanual robot simulation object.
 
     Args:
-        fname (str): path to the urdf file.
+        f_name (str): path to the urdf file.
         offset (Transform): robot init offset
     """
     def __init__(
         self,
-        fname: str,
-        offset=None
+        f_name: str,
+        offset=None,
+        has_gripper=False
     ):
-        super(Bimanual, self).__init__(fname, offset)
+        super(Bimanual, self).__init__(f_name, offset, has_gripper)
         self._setup_input2dict()
         self._set_joint_limits_upper_and_lower()
+        
+        self.info = {}
+        self.info= super()._init_robot_info()
+
+        if has_gripper:
+            self.gripper.init_info = super()._init_gripper_info()
+            self.gripper.info = super()._init_gripper_info()
 
     def _setup_input2dict(self):
         """
@@ -32,6 +41,16 @@ class Bimanual(Robot):
         self._target_pose = self._input2dict(None)
         self.joint_limits_lower = self._input2dict(None)
         self.joint_limits_upper = self._input2dict(None)
+
+    def set_transform(self, thetas):
+        fk = self.forward_kin(thetas)
+        for link, transform in fk.items():
+
+            collision_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+            visual_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
+
+            self.info["collision"][link][3] = collision_h_mat
+            self.info["visual"][link][3] = visual_h_mat
 
     def _input2dict(self, inp):
         """
@@ -161,7 +180,7 @@ class Bimanual(Robot):
             value = np.array(value)
         return value.flatten()
 
-    def get_eef_pose(self, fk):
+    def compute_eef_pose(self, fk):
         """
         Compute end effector's pose
 
@@ -205,7 +224,11 @@ class Bimanual(Robot):
             return ["left"]
         else:
             raise NotFoundError("Can not find robot's arm type")
-        
+
+    @property
+    def arm_dof(self):
+        return len([ joint for joint in self.get_revolute_joint_names() if "head" not in joint])
+
     @property
     def base_name(self):
         return self._base_name
