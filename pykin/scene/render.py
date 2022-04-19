@@ -31,8 +31,6 @@ class RenderTriMesh(SceneRender):
 
     def __init__(self):
         self.scene = trimesh.Scene()
-        # self.scene.set_camera(
-        #     np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
     
     def render_all_scene(self, objs, robot, geom):
         self.render_object(objs)
@@ -45,20 +43,9 @@ class RenderTriMesh(SceneRender):
     def render_object(self, objs):
         pass
 
-    def render_robot(self, robot, geom):
-        for link, info in robot.info[geom].items():
-            if info[1] == "mesh":
-                file_name = robot.mesh_path + robot.links[link].visual.gparam.get('filename')
-                mesh = trimesh.load_mesh(file_name)
-                color = robot.links[link].visual.gparam.get('color')
-
-                if color is None:
-                    color = np.array([0.2, 0, 0])
-                else:
-                    color = np.array([color for color in color.values()]).flatten()
-                
-                mesh.visual.face_colors = color
-                self.scene.add_geometry(mesh, transform=info[3])
+    def render_robot(self, robot, geom="collision"):
+        self.scene = apply_robot_to_scene(trimesh_scene=self.scene, robot=robot, geom=geom)
+        self.scene.set_camera(np.array([np.pi/2, 0, np.pi]), 5, resolution=(1024, 512))
 
     def render_gripper(self, robot):
         pass
@@ -92,35 +79,8 @@ class RenderPyPlot(SceneRender):
 
     @staticmethod
     def render_robot(ax, robot, geom, alpha, color):
-        plt.plot_basis(ax)
-        for link, info in robot.info[geom].items():            
-            if info[1] == 'mesh':
-                mesh_color = color
-                if color is None:
-                    mesh_color = robot.links[link].collision.gparam.get('color')
-                    mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-                if "finger" in link:
-                    alpha = 1
-                plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
-            
-            if info[1] == 'cylinder':
-                cylinder_color = plt.get_color(robot.links[link].visual.gparam)
-                length = float(robot.links[link].collision.gparam.get('length'))
-                radius = float(robot.links[link].collision.gparam.get('radius'))
-                plt.plot_cylinder(ax, length=length, radius=radius, h_mat=info[3], alpha=alpha, color=cylinder_color)
+        plt.plot_geom(ax, robot, geom, alpha, color)
 
-            if info[1] == 'sphere':
-                sphere_color = plt.get_color(robot.links[link].visual.gparam)
-                radius = float(robot.links[link].collision.gparam.get('radius'))
-                pos = info[3][:3,-1]
-                plt.plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
-    
-            if info[1]== 'box':
-                box_color = plt.get_color(robot.links[link].visual.gparam)
-                size = robot.links[link].collision.gparam.get('size')
-                plt.plot_box(ax, size, h_mat=info[3], alpha=alpha, color=box_color)
-
-    @staticmethod
     def render_gripper(ax, robot, alpha=0.3, color='b', visible_tcp=True):
         plt.plot_basis(ax)
         for _, info in robot.gripper.info.items():

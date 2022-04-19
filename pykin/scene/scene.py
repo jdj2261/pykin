@@ -67,7 +67,7 @@ class SceneManager:
         self.robot:SingleArm = robot
 
         self.robot_collision_mngr = CollisionManager(is_robot=True)
-        self.robot_collision_mngr.setup_robot_collision(robot, geom="collision")
+        self.robot_collision_mngr.setup_robot_collision(robot, geom=self.geom)
 
         if self.robot.has_gripper:
             self.gripper_collision_mngr = CollisionManager()
@@ -291,7 +291,7 @@ class SceneManager:
             self.render.render_robot(ax, self.robot, self.geom, alpha, color)
         else:
             self.render = RenderTriMesh()
-            self.render.render_robot(self.robot)
+            self.render.render_robot(self.robot, self.geom)
 
     def render_gripper(self, ax=None, alpha=0.3, robot_color='b', visible_tcp=True):
         if not self.robot.has_gripper:

@@ -156,7 +156,7 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
             capsule_mesh = trimesh.creation.cylinder(height=info[2][0], radius=info[2][1])
             trimesh_scene.add_geometry(capsule_mesh, transform=h_mat)
 
-        if info[1] == "spehre":
+        if info[1] == "sphere":
             sphere_mesh = trimesh.creation.icosphere(radius=info[2])
             trimesh_scene.add_geometry(sphere_mesh, transform=h_mat)
     return trimesh_scene

@@ -436,6 +436,7 @@ def plot_animation(
     ax=None,
     eef_poses=None,
     objects=None,
+    geom="collision",
     visible_objects=False,
     visible_geom=False,
     visible_text=True,
@@ -461,14 +462,15 @@ def plot_animation(
         
         if eef_poses is not None:
             plot_trajectories(ax, eef_poses)
-          
+        
+        robot.set_transform(trajectory[i])
         plot_robot(
-            robot, 
-            fk=trajectory[i], 
+            robot=robot, 
             ax=ax, 
             visible_geom=visible_geom,
             visible_text=visible_text,
-            visible_scatter=visible_scatter)
+            visible_scatter=visible_scatter,
+            geom=geom)
 
     ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
     show_figure()

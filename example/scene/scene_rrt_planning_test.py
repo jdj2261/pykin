@@ -50,7 +50,7 @@ scene_mngr.set_robot_eef_pose(thetas)
 
 ############################ Show collision info #############################
 planner = RRTStarPlanner(
-    delta_distance=0.1,
+    delta_distance=0.05,
     epsilon=0.2, 
     gamma_RRT_star=2,
 )
@@ -69,7 +69,7 @@ joint_trajectory = []
 eef_poses = []
 for step, joint in enumerate(joint_path):
     fk = robot.forward_kin(joint)
-    joint_trajectory.append(fk)
+    joint_trajectory.append(joint)
     eef_poses.append(fk[robot.eef_name].pos)
 
 # plt.plot_path_planner(ax, eef_poses)
@@ -83,7 +83,8 @@ plt.plot_animation(
     ax,
     eef_poses=eef_poses,
     objects=scene_mngr.objs,
+    geom=scene_mngr.geom,
     visible_objects=True,
-    visible_geom=True, 
+    visible_geom=False, 
     interval=1, 
     repeat=True)

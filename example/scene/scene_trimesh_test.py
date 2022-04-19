@@ -40,9 +40,10 @@ scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat
 scene_mngr.add_robot(robot)
 
 ############################# Render Test #############################
-
+target_thetas = [0, 0.1963495375, 0.00, -2.616, 0.00, 2.9415926, 0.78539815]
+scene_mngr.robot.set_transform(target_thetas)
 # scene_mngr.render_all_scene(ax, alpha=0.5, robot_color='b')
-scene_mngr.render.render_robot(scene_mngr.robot)
+scene_mngr.render.render_robot(scene_mngr.robot, geom="visual")
 scene_mngr.render.show()
 # scene_mngr.render_object(ax)
 # scene_mngr.render_gripper(ax, robot_color='b')

@@ -28,7 +28,7 @@ cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
-scene_mngr = SceneManager()
+scene_mngr = SceneManager("collision")
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=cube_mesh, h_mat=red_box_pose.h_mat, color=[1, 0, 0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=cube_mesh, h_mat=blue_box_pose.h_mat, color=[0, 0, 1])
@@ -40,6 +40,6 @@ scene_mngr.add_robot(robot)
 target_thetas = np.array([0.0, np.pi/6, 0.0, -np.pi*12/24, 0.0, np.pi*5/8,0.0])
 scene_mngr.set_robot_eef_pose(target_thetas)
 
-scene_mngr.render_all_scene(ax, robot_color='b')
+scene_mngr.render_all_scene(ax, robot_color="b")
 plt.show_figure()
 
