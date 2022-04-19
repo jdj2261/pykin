@@ -120,7 +120,7 @@ You can see various examples in example directory
 
   ~~~shell
   $ cd example/single_stage/inverse_kinematics
-  $ python robot_fk_baxter_test.py
+  $ python robot_ik_baxter_test.py
   ~~~
 
 - Collision check
