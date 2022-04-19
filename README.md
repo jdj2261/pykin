@@ -101,7 +101,7 @@ You can see various examples in example directory
   $ python robot_info.py sawyer
   ~~~
 
-- Compute Forward kinematics
+- Forward kinematics
 
   You can compute the forward kinematics as well as visualize the visual or collision geometry.
 
