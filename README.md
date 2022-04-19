@@ -110,7 +110,7 @@ You can see various examples in example directory
   $ python robot_fk_baxter_test.py
   ~~~
 
-  |                            visual                            |                          Collision                           |
+  |                            visual                            |                          collision                           |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="img/baxter_plot_visual.png" width="400" height="300"/> | <img src="img/baxter_plot_collision.png" width="400" height="300"/> |
 
@@ -166,7 +166,11 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 - Visualize mesh about visual/collision geometry using trimesh.Scene class
 
   ![baxter](img/all_robot.png)
-  
+
+## SceneManager [TODO]
+
+- Scene 
+
 - Planning
 
   *You can see an planning animation that visualizes trajectory*
@@ -182,7 +186,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     |                         iiwa14                         |                          panda                          |                          sawyer                          |
     | :----------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: |
     | <img src="img/iiwa_rrt.gif" width="500" height="200"/> | <img src="img/panda_rrt.gif" width="500" height="200"/> | <img src="img/sawyer_rrt.gif" width="500" height="200"/> |
-  
+
 - Grasping
 
   You can see an visualization the pose for the robot to grasp and release an object.
@@ -191,10 +195,10 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
     | <img src="img/grasp01.png" width="400" height="400"/> | <img src="img/grasp02.png" width="400" height="400"/> |
     | ----------------------------------------------------- | ----------------------------------------------------- |
-  
+
   - Compute pick and place waypoints for 2 or more objects.
-  
+
     As a result, you can show pick and place demo in MuJoCo Simulator.
-  
+
     | <img src="img/pnp_result.png" width="400" height="400"/> | <img src="img/sim_result.png" width="400" height="400"/> |
     | -------------------------------------------------------- | -------------------------------------------------------- |
