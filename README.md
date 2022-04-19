@@ -145,7 +145,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
   |                        ur5e                        |                        sawyer                        |                        iiwa14                        |                        panda                        |
   | :------------------------------------------------: | :--------------------------------------------------: | :--------------------------------------------------: | :-------------------------------------------------: |
-  | <img src="img/ur5e.png" width="200" height="300"/> | <img src="img/sawyer.png" width="200" height="300"/> | <img src="img/iiwa14.png" width="200" height="300"/> | <img src="img/panda.png" width="200" height="300"/> |
+  | <img src="img/ur5e.png" width="200" height="200"/> | <img src="img/sawyer.png" width="200" height="200"/> | <img src="img/iiwa14.png" width="200" height="200"/> | <img src="img/panda.png" width="200" height="200"/> |
 
 
 - Visualize visual geometry using Matplotlib
@@ -153,7 +153,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
   |                           ur5e                            |                           sawyer                            |                           iiwa14                            |                           panda                            |
   | :-------------------------------------------------------: | :---------------------------------------------------------: | :---------------------------------------------------------: | :--------------------------------------------------------: |
-  | <img src="img/ur5e_visual.png" width="200" height="300"/> | <img src="img/sawyer_visual.png" width="200" height="300"/> | <img src="img/iiwa14_visual.png" width="200" height="300"/> | <img src="img/panda_visual.png" width="200" height="300"/> |
+  | <img src="img/ur5e_visual.png" width="200" height="200"/> | <img src="img/sawyer_visual.png" width="200" height="200"/> | <img src="img/iiwa14_visual.png" width="200" height="200"/> | <img src="img/panda_visual.png" width="200" height="200"/> |
 
 
 - Visualize collision geometry using Matplotlib
@@ -161,7 +161,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
   |                             ur5e                             |                            sawyer                            |                            iiwa14                            |                            panda                             |
   | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/ur5e_collision.png" width="200" height="300"/> | <img src="img/sawyer_collision.png" width="200" height="300"/> | <img src="img/iiwa14_collision.png" width="200" height="300"/> | <img src="img/panda_collision.png" width="200" height="300"/> |
+  | <img src="img/ur5e_collision.png" width="200" height="200"/> | <img src="img/sawyer_collision.png" width="200" height="200"/> | <img src="img/iiwa14_collision.png" width="200" height="200"/> | <img src="img/panda_collision.png" width="200" height="200"/> |
 
 - Visualize mesh about visual/collision geometry using trimesh.Scene class
 
