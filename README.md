@@ -172,7 +172,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 - Scene 
 
   You can manage entire scene using SceneManager class. We recommend using the SceneManager.  
-  For example, You can manage robot pose, object pose, gripper pose as well as visualize their geom.  
+  For example, You can manage robot, object, gripper pose or collision as well as visualize their geom.   
   In addition, You can compute cartesian or motion planning.  
   You can see various examples in `example/scene` directory. 
 
@@ -188,7 +188,16 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> | <img src="img/panda_scene_matplotlib.png" width="200" height="200"/> |
 
-    
+- Collision Check
+
+  You can check collision of (robot and object), (gripper and object), (robot self collision)
+
+  |                     Robot self collision                     |                      Robot and objects                       |                   Only gripper and objects                   |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> | <img src="img/gripper_and_object.png" width="200" height="200"/> |
+  | <img src="img/self_collision_result.png" width="400" height="200"/> | <img src="img/robot_and_object_result.png" width="400" height="200"/> | <img src="img/gripper_and_object_result.png" width="400" height="200"/> |
+
+  
 
 - Planning
 

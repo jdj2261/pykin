@@ -1,4 +1,5 @@
 
+from re import S
 import numpy as np
 import pprint
 from collections import OrderedDict
@@ -66,15 +67,15 @@ class SceneManager:
             )
         self.robot:SingleArm = robot
 
+        if np.array(thetas).size != 0:
+            self.robot.set_transform(thetas)
+
         self.robot_collision_mngr = CollisionManager(is_robot=True)
         self.robot_collision_mngr.setup_robot_collision(robot, geom=self.geom)
 
         if self.robot.has_gripper:
             self.gripper_collision_mngr = CollisionManager()
             self.gripper_collision_mngr.setup_gripper_collision(robot)
-
-        if np.array(thetas).size != 0:
-            self.set_robot_eef_pose(thetas)
         
     def remove_object(self, name):
         if name not in self.objs:
