@@ -3,7 +3,7 @@ import trimesh
 from abc import abstractclassmethod, ABCMeta
 
 import pykin.utils.plot_utils as plt
-from pykin.utils.kin_utils import apply_robot_to_scene
+from pykin.utils.kin_utils import apply_robot_to_scene, apply_objects_to_scene, apply_gripper_to_scene
 
 class SceneRender(metaclass=ABCMeta):
 
@@ -32,33 +32,34 @@ class RenderTriMesh(SceneRender):
     def __init__(self):
         self.scene = trimesh.Scene()
     
-    def render_all_scene(self, objs, robot, geom):
+    def render_all_scene(self, objs, robot, geom="collision"):
         self.render_object(objs)
         self.render_robot(robot, geom)
-    
+
     def render_object_and_gripper(self, objs, robot):
         self.render_object(objs)
         self.render_gripper(robot)
 
     def render_object(self, objs):
-        pass
+        self.scene = apply_objects_to_scene(trimesh_scene=self.scene, objs=objs)
 
-    def render_robot(self, robot, geom="collision"):
+    def render_robot(self, robot, geom):
         self.scene = apply_robot_to_scene(trimesh_scene=self.scene, robot=robot, geom=geom)
-        self.scene.set_camera(np.array([np.pi/2, 0, np.pi]), 5, resolution=(1024, 512))
-
+        
     def render_gripper(self, robot):
-        pass
+        self.scene = apply_gripper_to_scene(trimesh_scene=self.scene, robot=robot)
 
     def show(self):
-        self.scene.show()
+        self.scene.set_camera(np.array([np.pi/2, 0, np.pi/2]), 5, resolution=(1024, 512))
+        self.scene.show('gl')
+        self.scene = None
 
 class RenderPyPlot(SceneRender):
 
     @staticmethod
-    def render_all_scene(ax, objs, robot, geom, alpha, robot_color):
+    def render_all_scene(ax, objs, robot, geom, alpha, robot_color, visible_geom, visible_text):
         RenderPyPlot.render_object(ax, objs, alpha)
-        RenderPyPlot.render_robot(ax, robot, geom, alpha, robot_color)
+        RenderPyPlot.render_robot(ax, robot, geom, alpha, robot_color,visible_geom, visible_text)
 
     @staticmethod
     def render_object_and_gripper(ax, objs, robot, alpha, robot_color, visible_tcp):
@@ -67,7 +68,7 @@ class RenderPyPlot(SceneRender):
 
     @staticmethod
     def render_object(ax, objs, alpha):
-        plt.plot_basis(ax)
+        # plt.plot_basis(ax)
         for info in objs.values():
             plt.plot_mesh(
                 ax=ax, 
@@ -78,8 +79,14 @@ class RenderPyPlot(SceneRender):
             )
 
     @staticmethod
-    def render_robot(ax, robot, geom, alpha, color):
-        plt.plot_geom(ax, robot, geom, alpha, color)
+    def render_robot(ax, robot, geom, alpha, color, visible_geom=True, visible_text=True):
+        plt.plot_robot(
+            ax, 
+            robot, 
+            geom, 
+            alpha=alpha, color=color,
+            visible_geom=visible_geom,
+            visible_text=visible_text)
 
     def render_gripper(ax, robot, alpha=0.3, color='b', visible_tcp=True):
         plt.plot_basis(ax)
@@ -92,7 +99,8 @@ class RenderPyPlot(SceneRender):
                 robot.gripper.info["tcp"][3][0,3], 
                 robot.gripper.info["tcp"][3][1,3], 
                 robot.gripper.info["tcp"][3][2,3], s=5, c='r')
-
+        ax.legend()
+        
     @staticmethod
     def show():
         plt.show_figure()

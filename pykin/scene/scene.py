@@ -21,7 +21,7 @@ class State:
     holding = 'holding'
 
 class SceneManager:
-    def __init__(self, geom="collision", render_pyplot=True):
+    def __init__(self, geom="collision", is_pyplot=True):
         # Element for Scene
         self.geom = geom
         self.objs = OrderedDict()
@@ -37,8 +37,8 @@ class SceneManager:
         self.gripper_collision_mngr = None
 
         # Render
-        self.render_pyplot = render_pyplot
-        if render_pyplot:
+        self.is_pyplot = is_pyplot
+        if is_pyplot:
             self.render = RenderPyPlot()
         else:
             self.render = RenderTriMesh()
@@ -83,7 +83,7 @@ class SceneManager:
         self.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name, pose, only_gripper=True):
+    def attach_object_on_gripper(self, name, pose):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
         
@@ -96,30 +96,27 @@ class SceneManager:
 
         self.set_object_pose(name, pose)
 
-        if not only_gripper:
-            self.robot_collision_mngr.add_object(
-                self.objs[name].name,
-                self.objs[name].gtype,
-                self.objs[name].gparam,
-                pose)
-        else:
-            self.gripper_collision_mngr.add_object(
-                self.objs[name].name,
-                self.objs[name].gtype,
-                self.objs[name].gparam,
-                pose)
+        self.robot_collision_mngr.add_object(
+            self.objs[name].name,
+            self.objs[name].gtype,
+            self.objs[name].gparam,
+            pose)
+
+        self.gripper_collision_mngr.add_object(
+            self.objs[name].name,
+            self.objs[name].gtype,
+            self.objs[name].gparam,
+            pose)
 
         self.obj_collision_mngr.remove_object(name)
 
-    def detach_object_from_gripper(self, name, only_gripper=True):
+    def detach_object_from_gripper(self, name):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        if not only_gripper:
-            self.robot_collision_mngr.remove_object(name)
-        else:
-            self.gripper_collision_mngr.remove_object(name)
-        
+        self.robot_collision_mngr.remove_object(name)
+        self.gripper_collision_mngr.remove_object(name)
+
         self.objs.pop(name, None)
 
     def get_object_pose(self, name):
@@ -163,11 +160,15 @@ class SceneManager:
     def set_robot_eef_pose(self, thetas):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
-        
+
         self.robot.set_transform(thetas)
-        for link, info in self.robot.info["collision"].items():
+        for link, info in self.robot.info[self.geom].items():
             if link in self.robot_collision_mngr._objs:
                 self.robot_collision_mngr.set_transform(link, info[3])
+            
+            if self.robot.has_gripper:
+                if link in self.gripper_collision_mngr._objs:
+                    self.gripper_collision_mngr.set_transform(link, info[3])
 
     def get_gripper_pose(self):
         if not self.robot.has_gripper:
@@ -195,6 +196,9 @@ class SceneManager:
             raise ValueError("Robot doesn't have a gripper")
 
         self.robot.gripper.set_gripper_tcp_pose(pose)
+        for link, info in self.robot.gripper.info.items():
+            if link in self.gripper_collision_mngr._objs:
+                self.gripper_collision_mngr.set_transform(link, info[3])
 
     def collide_objs_and_robot(self, return_names=False):
         if self.robot is None:
@@ -252,21 +256,32 @@ class SceneManager:
         pprint.pprint(self.logical_states)
         print(f"*"*63 + "\n")
 
-    def render_all_scene(self, ax=None, alpha=0.3, robot_color=None):
+    def render_all_scene(
+        self, 
+        ax=None, 
+        alpha=0.3, 
+        robot_color=None,
+        visible_geom=True,
+        visible_text=False):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        if self.render_pyplot:
-            self.render.render_all_scene(ax, self.objs, self.robot, self.geom, alpha, robot_color)
+        if self.is_pyplot:
+            self.render.render_all_scene(
+                ax, self.objs, 
+                self.robot, self.geom, 
+                alpha, robot_color,
+                visible_geom=visible_geom,
+                visible_text=visible_text)
         else:
             self.render = RenderTriMesh()
-            self.render.render_all_scene(objs=self.objs, robot=self.robot)
-
+            self.render.render_all_scene(objs=self.objs, robot=self.robot, geom=self.geom)
+            
     def render_object_and_gripper(self, ax=None, alpha=0.3, robot_color=None, visible_tcp=True):
         if not self.robot.has_gripper:
             raise ValueError("Robot doesn't have a gripper")
 
-        if self.render_pyplot:
+        if self.is_pyplot:
             self.render.render_object_and_gripper(
                 ax, 
                 self.objs, 
@@ -277,18 +292,26 @@ class SceneManager:
             self.render.render_object_and_gripper(objs=self.objs, robot=self.robot)
 
     def render_object(self, ax=None, alpha=0.3):
-        if self.render_pyplot:
+        if self.is_pyplot:
             self.render.render_object(ax, self.objs, alpha)
         else:
             self.render = RenderTriMesh()
             self.render.render_object(objs=self.objs)
 
-    def render_robot(self, ax=None, alpha=0.3, color=None):
+    def render_robot(
+        self, 
+        ax=None, 
+        alpha=0.3, 
+        robot_color=None,
+        visible_geom=True,
+        visible_text=False):
+
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        if self.render_pyplot:
-            self.render.render_robot(ax, self.robot, self.geom, alpha, color)
+        if self.is_pyplot:
+            self.render.render_robot(
+                ax, self.robot, self.geom, alpha, robot_color, visible_geom, visible_text)
         else:
             self.render = RenderTriMesh()
             self.render.render_robot(self.robot, self.geom)
@@ -297,14 +320,15 @@ class SceneManager:
         if not self.robot.has_gripper:
             raise ValueError("Robot doesn't have a gripper")
 
-        if self.render_pyplot:
+        if self.is_pyplot:
             self.render.render_gripper(ax, self.robot, alpha, robot_color, visible_tcp)
         else:
             self.render = RenderTriMesh()
-            self.render.render_robot(self.robot)
+            self.render.render_gripper(self.robot)
 
     def show(self):
         self.render.show()
+        self.render = None
 
     def reset(self):
         self.obj_collision_mngr = None

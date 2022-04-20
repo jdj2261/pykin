@@ -7,8 +7,6 @@ sys.path.append(pykin_path)
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.utils import plot_utils as plt
-from pykin.utils.transform_utils import compute_pose_error
-
 
 file_path = '../../../asset/urdf/baxter/baxter.urdf'
 

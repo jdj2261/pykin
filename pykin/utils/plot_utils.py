@@ -81,7 +81,7 @@ def plot_basis(ax=None, robot=None):
             c=directions_colors[2], label="Z")
     
 def plot_robot(
-    ax=None, 
+    ax=None,
     robot=None,
     geom="collision",
     visible_geom=False, 

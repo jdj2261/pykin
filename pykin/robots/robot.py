@@ -43,7 +43,7 @@ class Robot(URDFModel):
             
         super(Robot, self).__init__(f_name)
 
-        self.info = None
+        self.info = {}
         self.gripper = None
 
         if has_gripper:
@@ -74,6 +74,10 @@ class Robot(URDFModel):
 
             self.info["collision"][link][3] = collision_h_mat
             self.info["visual"][link][3] = visual_h_mat
+            
+            if self.has_gripper:
+                if link in self.gripper.names:
+                    self.gripper.info[link][3] = collision_h_mat
 
     def show_robot_info(self):
         """

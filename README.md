@@ -82,7 +82,7 @@ $ git submodule init
 $ git submodule update
 ~~~
 
-## Example
+## Quick Start
 
 You can see various examples in example directory
 
@@ -167,9 +167,21 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
   ![baxter](img/all_robot.png)
 
-## SceneManager [TODO]
+## SceneManager
 
 - Scene 
+
+  You can manage entire scene using SceneManager class. We recommend using the SceneManager.
+  For example, You can manage robot pose, object pose, gripper pose as well as visualize their geom.
+  In addition, You can compute cartesian or motion planning.
+
+  - Render using trimesh.Scene
+
+    |                           baxter                           |                           sawyer                           |                           iiwa14                           |                           panda                           |
+    | :--------------------------------------------------------: | :--------------------------------------------------------: | :--------------------------------------------------------: | :-------------------------------------------------------: |
+    | <img src="img/baxter_scene.png" width="200" height="200"/> | <img src="img/sawyer_scene.png" width="200" height="200"/> | <img src="img/iiwa14_scene.png" width="200" height="200"/> | <img src="img/panda_scene.png" width="200" height="200"/> |
+
+  - Render using matplotlib
 
 - Planning
 

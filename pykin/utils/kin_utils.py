@@ -126,6 +126,32 @@ def limit_joints(joint_angles, lower, upper):
     return joint_angles
 
 
+def apply_objects_to_scene(trimesh_scene=None, objs=None):
+    if trimesh_scene is None:
+        trimesh_scene = trimesh.Scene()
+
+    for name, info in objs.items():
+        mesh = info.gparam
+        color = np.array(info.color)
+        mesh.visual.face_colors = color
+        trimesh_scene.add_geometry(mesh, transform=info.h_mat)
+
+    return trimesh_scene
+
+def apply_gripper_to_scene(trimesh_scene=None, robot=None):
+    if trimesh_scene is None:
+        trimesh_scene = trimesh.Scene()
+
+    for link, info in robot.gripper.info.items():
+        if info[1] == 'mesh':
+            mesh = info[2]
+            color = robot.links[link].collision.gparam.get('color')
+            color = np.array([color for color in color.values()]).flatten()
+            mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(info[2], transform=info[3])
+
+    return trimesh_scene
+
 def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()
@@ -139,12 +165,10 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
                 color = robot.links[link].visual.gparam.get('color')
             else:
                 color = robot.links[link].collision.gparam.get('color')
-
             if color is None:
                 color = np.array([0.2, 0, 0])
             else:
                 color = np.array([color for color in color.values()]).flatten()
-
             mesh.visual.face_colors = color
             trimesh_scene.add_geometry(mesh, transform=h_mat)
     
