@@ -112,7 +112,7 @@ You can see various examples in example directory
 
   |                            visual                            |                          collision                           |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/baxter_plot_visual.png" width="300" height="200"/> | <img src="img/baxter_plot_collision.png" width="300" height="200"/> |
+  | <img src="img/baxter_plot_visual.png" width="400" height="300"/> | <img src="img/baxter_plot_collision.png" width="400" height="300"/> |
 
 - Inverse Kinematics
 
