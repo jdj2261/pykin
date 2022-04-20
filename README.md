@@ -112,7 +112,7 @@ You can see various examples in example directory
 
   |                            visual                            |                          collision                           |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/baxter_plot_visual.png" width="400" height="300"/> | <img src="img/baxter_plot_collision.png" width="400" height="300"/> |
+  | <img src="img/baxter_plot_visual.png" width="300" height="200"/> | <img src="img/baxter_plot_collision.png" width="300" height="200"/> |
 
 - Inverse Kinematics
 
@@ -134,7 +134,7 @@ You can see various examples in example directory
 
   |                        trimesh.Scene                         |                            Result                            |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/sawyer_mesh_collision.png" width="300" height="300"/> | <img src="img/sawyer_collision_result.png" width="600" height="300"/> |
+  | <img src="img/sawyer_mesh_collision.png" width="200" height="200"/> | <img src="img/sawyer_collision_result.png" width="600" height="200"/> |
 
 ## Visualization
 
@@ -196,6 +196,8 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> | <img src="img/gripper_and_object.png" width="200" height="200"/> |
   | <img src="img/self_collision_result.png" width="300" height="200"/> | <img src="img/robot_and_object_result.png" width="300" height="200"/> | <img src="img/gripper_and_object_result.png" width="500" height="200"/> |
+
+- Attach/Detach object to Gripper
 
   
 
