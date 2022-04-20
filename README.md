@@ -171,10 +171,10 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
 - Scene 
 
-  You can manage entire scene using SceneManager class. We recommend using the SceneManager. 
-  For example, You can manage robot pose, object pose, gripper pose as well as visualize their geom. 
-  In addition, You can compute cartesian or motion planning. 
-  You can see various examples in `example/scene` directory.
+  You can manage entire scene using SceneManager class. We recommend using the SceneManager.  
+  For example, You can manage robot pose, object pose, gripper pose as well as visualize their geom.  
+  In addition, You can compute cartesian or motion planning.  
+  You can see various examples in `example/scene` directory. 
 
   - Render using trimesh.Scene
 
