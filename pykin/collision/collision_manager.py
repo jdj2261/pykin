@@ -8,10 +8,10 @@ try:
     # pip install python-fcl
     # pip install trimesh[easy]
     import fcl
-    import trimesh
+    # import trimesh
 except BaseException:
     fcl = None
-    trimesh = None
+    # trimesh = None
 
 from pykin.utils.transform_utils import get_h_mat
 from pykin.utils.log_utils import create_logger

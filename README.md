@@ -169,7 +169,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
 ## SceneManager
 
-- Scene 
+- **Scene** 
 
   You can manage entire scene using SceneManager class. We recommend using the SceneManager.  
   For example, You can manage robot, object, gripper pose or collision as well as visualize their geom.   
@@ -188,16 +188,16 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> | <img src="img/panda_scene_matplotlib.png" width="200" height="200"/> |
 
-- Collision Check
+- **Collision Check**
 
   You can check collision of (robot and object), (gripper and object), (robot self collision)
 
-  |                     Robot self collision                     |                      Robot and objects                       |                   Only gripper and objects                   |
-  | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> | <img src="img/gripper_and_object.png" width="200" height="200"/> |
-  | <img src="img/self_collision_result.png" width="300" height="200"/> | <img src="img/robot_and_object_result.png" width="300" height="200"/> | <img src="img/gripper_and_object_result.png" width="500" height="200"/> |
+  |                     Robot self collision                     |                      Robot and objects                       |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> |
+  | <img src="img/self_collision_result.png" width="300" height="200"/> | <img src="img/robot_and_object_result.png" width="300" height="200"/> |
 
-- Attach object to Gripper
+- **Attach object to Gripper**
 
   You can manage by attaching or detaching objects to the gripper.  
   These managing are used for Planning. You can see a example in `example/scene/gripper` directory. 
@@ -211,12 +211,12 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
     You can see that the collision information of the gree box object has been moved to the robot or gripper collision info.
 
-    |                    Attach object to Robot                    |                   Attach object to Gripper                   |
+    |                    Attach object to robot                    |                   Attach object to gripper                   |
     | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/attach_object_robot.png" width="200" height="200"/> | <img src="img/attach_object_gripper.png" width="200" height="200"/> |
     | <img src="img/attach_object_robot_result.png" width="500" height="200"/> | <img src="img/attach_object_gripper_result.png" width="500" height="200"/> |
 
-- Planning
+- **Planning**
 
   *You can see an planning animation that visualizes trajectory*
 
@@ -232,7 +232,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     | :----------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: |
     | <img src="img/iiwa_rrt.gif" width="500" height="200"/> | <img src="img/panda_rrt.gif" width="500" height="200"/> | <img src="img/sawyer_rrt.gif" width="500" height="200"/> |
 
-- Grasping
+- **Grasping**
 
   You can see an visualization the pose for the robot to grasp and release an object.
 

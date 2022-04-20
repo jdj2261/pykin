@@ -7,7 +7,6 @@ from pykin.scene.scene import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
-from pykin.utils.plot_utils import plot_trajectories, plot_animation
 
 logger = create_logger('RRT Star Planner', "debug")
 
@@ -192,7 +191,7 @@ class RRTStarPlanner(Planner):
 
         unique_path = []
         for joints in path:
-            if not any(np.array_equal(np.round(joints, 8), np.round(unique_joints,8)) for unique_joints in unique_path):
+            if not any(np.array_equal(np.round(joints, 8), np.round(unique_joints, 8)) for unique_joints in unique_path):
                 unique_path.append(joints)
 
         if n_step == 1:

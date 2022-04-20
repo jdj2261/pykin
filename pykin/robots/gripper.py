@@ -15,7 +15,6 @@ class Gripper:
         self.tcp_position = np.array([0, 0, 0.097])
         self.logical_state = OrderedDict()
         self.info = OrderedDict()
-        self.init_info = OrderedDict()
 
         if configures:
             self._setup_gripper(configures)
@@ -33,16 +32,16 @@ class Gripper:
 
     def set_gripper_pose(self, eef_pose=np.eye(4)):
         tcp_pose = self.get_tcp_pose_from_eef_pose(eef_pose)
-        for link, info in self.init_info.items():
-            T = get_absolute_transform(self.init_info[self.names[-1]][3], tcp_pose)
+        for link, info in self.info.items():
+            T = get_absolute_transform(self.info[self.names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
 
     def get_gripper_tcp_pose(self):
         return self.info["tcp"][3]
 
     def set_gripper_tcp_pose(self, tcp_pose=np.eye(4)):
-        for link, info in self.init_info.items():
-            T = get_absolute_transform(self.init_info[self.names[-1]][3], tcp_pose)
+        for link, info in self.info.items():
+            T = get_absolute_transform(self.info[self.names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
 
     def compute_eef_pose_from_tcp_pose(self, tcp_pose=np.eye(4)):

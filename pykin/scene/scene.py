@@ -1,5 +1,3 @@
-
-from re import S
 import numpy as np
 import pprint
 from collections import OrderedDict
@@ -10,8 +8,8 @@ from pykin.scene.object import Object
 from pykin.scene.render import RenderPyPlot, RenderTriMesh
 from pykin.robots.single_arm import SingleArm
 from pykin.collision.collision_manager import CollisionManager
-
-from pykin.utils.kin_utils import ShellColors as sc, apply_robot_to_scene
+from pykin.utils.task_utils import get_relative_transform
+from pykin.utils.kin_utils import ShellColors as sc
 
 @dataclass
 class State:
@@ -43,6 +41,9 @@ class SceneManager:
             self.render = RenderPyPlot()
         else:
             self.render = RenderTriMesh()
+
+        # Attach / Detach
+        self.is_attached = False
             
 
     def __repr__(self):
@@ -84,44 +85,50 @@ class SceneManager:
         self.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name, pose, only_gripper=False):
+    def attach_object_on_gripper(self, name, only_gripper=False):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
         
         if name not in self.objs:
             raise ValueError("object {} needs to be added first".format(name))
 
-        if pose.shape != (4,4):
-            raise ValueError("Expecting the shape of the pose to be (4,4), instead got: "
-                             "{}".format(pose.shape))
-
-        self.set_object_pose(name, pose)
+        self.is_attached = True
+        self.attach_obj_name = self.objs[name].name
+        self.obj_collision_mngr.remove_object(name)
+        
+        eef_pose = self.get_gripper_pose()
+        self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self.objs[name].h_mat)
 
         if not only_gripper:
             self.robot_collision_mngr.add_object(
                 self.objs[name].name,
                 self.objs[name].gtype,
                 self.objs[name].gparam,
-                pose)
+                self.objs[name].h_mat)
+            self.robot.info["collision"][name] = [self.objs[name].name, self.objs[name].gtype, self.objs[name].gparam, self.objs[name].h_mat]
+            self.robot.info["visual"][name] = [self.objs[name].name, self.objs[name].gtype, self.objs[name].gparam, self.objs[name].h_mat]
 
         self.gripper_collision_mngr.add_object(
             self.objs[name].name,
             self.objs[name].gtype,
             self.objs[name].gparam,
-            pose)
+            self.objs[name].h_mat)       
+        self.robot.gripper.info[name] = [self.objs[name].name, self.objs[name].gtype, self.objs[name].gparam, self.objs[name].h_mat]
 
-        self.obj_collision_mngr.remove_object(name)
+        self.objs.pop(name, None)
 
-    def detach_object_from_gripper(self, name, only_gripper=False):
+    def detach_object_from_gripper(self, only_gripper=False):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
         if not only_gripper:
-            self.robot_collision_mngr.remove_object(name)
+            self.robot_collision_mngr.remove_object(self.attach_obj_name)
+            self.robot.info["collision"].pop(self.attach_obj_name)
+            self.robot.info["visual"].pop(self.attach_obj_name)
 
-        self.gripper_collision_mngr.remove_object(name)
-
-        self.objs.pop(name, None)
+        self.gripper_collision_mngr.remove_object(self.attach_obj_name)
+        self.robot.gripper.info.pop(self.attach_obj_name)
+        self.is_attached = False
 
     def get_object_pose(self, name):
         if name not in self.objs:
@@ -173,6 +180,11 @@ class SceneManager:
             if self.robot.has_gripper:
                 if link in self.gripper_collision_mngr._objs:
                     self.gripper_collision_mngr.set_transform(link, info[3])
+
+        if self.is_attached:
+            self.robot.info["collision"][self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot.info["visual"][self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot.gripper.info[self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
 
     def get_gripper_pose(self):
         if not self.robot.has_gripper:

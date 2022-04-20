@@ -29,7 +29,6 @@ class SingleArm(Robot):
         self.info= super()._init_robot_info()
 
         if has_gripper:
-            self.gripper.init_info = super()._init_gripper_info()
             self.gripper.info = super()._init_gripper_info()
         
     def _set_joint_limits_upper_and_lower(self):

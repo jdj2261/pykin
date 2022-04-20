@@ -88,18 +88,30 @@ class RenderPyPlot(SceneRender):
             visible_geom=visible_geom,
             visible_text=visible_text)
 
-    def render_gripper(ax, robot, alpha=0.3, color='b', visible_tcp=True):
+    def render_gripper(ax, robot, alpha, color, visible_tcp=True):
         plt.plot_basis(ax)
-        for _, info in robot.gripper.info.items():
+        for link, info in robot.gripper.info.items():
             if info[1] == 'mesh':
-                plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=color)
+                mesh_color = color
+                if color is None:
+                    link = robot.links.get(link)
+                
+                    if link is not None:
+                        mesh_color = link.collision.gparam.get('color')
+                    else:
+                        mesh_color = None
+
+                    if mesh_color is None:
+                        mesh_color = 'k'
+                    else:
+                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+                plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
 
         if visible_tcp:
             ax.scatter(
                 robot.gripper.info["tcp"][3][0,3], 
                 robot.gripper.info["tcp"][3][1,3], 
                 robot.gripper.info["tcp"][3][2,3], s=5, c='r')
-        ax.legend()
         
     @staticmethod
     def show():

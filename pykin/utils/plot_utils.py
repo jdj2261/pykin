@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from pykin.kinematics import transform
 from pykin.utils import transform_utils as tf
 
 # Colors of each directions axes. For ex X is green
@@ -148,13 +147,23 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
             mesh_color = color
             if color is None:
                 if geom == "collision":
-                    mesh_color = robot.links[link].collision.gparam.get('color')
+                    link = robot.links.get(link)
+                    if link is not None:
+                        mesh_color = link.collision.gparam.get('color')
+                    else:
+                        mesh_color = None
+
                     if mesh_color is None:
                         mesh_color = 'k'
                     else:
                         mesh_color = np.array([color for color in mesh_color.values()]).flatten()
                 else:
-                    mesh_color = robot.links[link].visual.gparam.get('color')
+                    link = robot.links.get(link)
+                    if link is not None:
+                        mesh_color = link.visual.gparam.get('color')
+                    else:
+                        mesh_color = None
+
                     if mesh_color is None:
                         mesh_color = 'k'
                     else:
