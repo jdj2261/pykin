@@ -195,7 +195,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   |                     Robot self collision                     |                      Robot and objects                       |
   | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> |
-  | <img src="img/self_collision_result.png" width="300" height="200"/> | <img src="img/robot_and_object_result.png" width="300" height="200"/> |
+  | <img src="img/self_collision_result.png" width="700" height="200"/> | <img src="img/robot_and_object_result.png" width="700" height="200"/> |
 
 - **Attach object to Gripper**
 
