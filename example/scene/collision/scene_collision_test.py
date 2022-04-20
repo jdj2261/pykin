@@ -75,27 +75,27 @@ r_mat = get_matrix_from_rpy(np.array([0, np.pi/2, 0]))
 eef_pose[:3, :3] = r_mat
 eef_pose[:3, 3] = eef_pose[:3, 3] - [0.05, 0, 0]
 ############################ Collide Robot and Object #############################
-target_thetas = scene_mngr.compute_ik(eef_pose)
-scene_mngr.set_robot_eef_pose(target_thetas)
-scene_mngr.robot_collision_mngr.show_collision_info("Robot")
+# target_thetas = scene_mngr.compute_ik(eef_pose)
+# scene_mngr.set_robot_eef_pose(target_thetas)
+# scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 
-# print(scene_mngr.collide_self_robot(return_names=True))
-result, names = scene_mngr.collide_objs_and_robot(return_names=True)
-if result:
-    for obj1, obj2 in list(names):
-        print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
-
-scene_mngr.render_all_scene(ax, robot_color='b')
-scene_mngr.show()
-
-############################# Collide Gripper and Object #############################
-# scene_mngr.set_gripper_pose(eef_pose)
-# scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
-
-# result, names = scene_mngr.collide_objs_and_gripper(return_names=True)
+# # print(scene_mngr.collide_self_robot(return_names=True))
+# result, names = scene_mngr.collide_objs_and_robot(return_names=True)
 # if result:
 #     for obj1, obj2 in list(names):
 #         print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
 
-# scene_mngr.render_object_and_gripper(ax, robot_color='b', visible_tcp=False)
+# scene_mngr.render_all_scene(ax, robot_color='b')
 # scene_mngr.show()
+
+############################# Collide Gripper and Object #############################
+scene_mngr.set_gripper_pose(eef_pose)
+scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
+
+result, names = scene_mngr.collide_objs_and_gripper(return_names=True)
+if result:
+    for obj1, obj2 in list(names):
+        print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
+
+scene_mngr.render_object_and_gripper(ax, robot_color='b', visible_tcp=False)
+scene_mngr.show()
