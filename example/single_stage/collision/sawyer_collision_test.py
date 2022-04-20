@@ -10,6 +10,7 @@ from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import apply_robot_to_scene
 from pykin.utils import plot_utils as plt
+from pykin.utils.kin_utils import ShellColors as sc
 
 
 file_path = '../../../asset/urdf/sawyer/sawyer.urdf'
@@ -53,6 +54,7 @@ scene.add_geometry(test_mesh, node_name="milk2", transform=Transform(pos=[0.4, 0
 # print(result, name)
 
 result, name = c_manager.in_collision_other(o_manager, return_names=True)
-print(result, name)
 
+if result:
+    print(f"{sc.FAIL}Collide!! {sc.ENDC}{list(name)[0][0]} and {list(name)[0][1]}")
 scene.show()
