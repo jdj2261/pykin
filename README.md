@@ -172,8 +172,12 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 - Scene 
 
   You can manage entire scene using SceneManager class. We recommend using the SceneManager.
+
   For example, You can manage robot pose, object pose, gripper pose as well as visualize their geom.
-  In addition, You can compute cartesian or motion planning.
+
+  In addition, You can compute cartesian or motion planning. 
+
+  You can see various examples in `example/scene` directory.
 
   - Render using trimesh.Scene
 
@@ -182,6 +186,12 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     | <img src="img/baxter_scene.png" width="200" height="200"/> | <img src="img/sawyer_scene.png" width="200" height="200"/> | <img src="img/iiwa14_scene.png" width="200" height="200"/> | <img src="img/panda_scene.png" width="200" height="200"/> |
 
   - Render using matplotlib
+
+    |                            baxter                            |                            sawyer                            |                            iiwa14                            |                            panda                             |
+    | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+    | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> | <img src="img/panda_scene_matplotlib.png" width="200" height="200"/> |
+
+    
 
 - Planning
 
