@@ -84,7 +84,7 @@ class SceneManager:
         self.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name, pose):
+    def attach_object_on_gripper(self, name, pose, only_gripper=False):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
         
@@ -97,11 +97,12 @@ class SceneManager:
 
         self.set_object_pose(name, pose)
 
-        self.robot_collision_mngr.add_object(
-            self.objs[name].name,
-            self.objs[name].gtype,
-            self.objs[name].gparam,
-            pose)
+        if not only_gripper:
+            self.robot_collision_mngr.add_object(
+                self.objs[name].name,
+                self.objs[name].gtype,
+                self.objs[name].gparam,
+                pose)
 
         self.gripper_collision_mngr.add_object(
             self.objs[name].name,
@@ -111,11 +112,13 @@ class SceneManager:
 
         self.obj_collision_mngr.remove_object(name)
 
-    def detach_object_from_gripper(self, name):
+    def detach_object_from_gripper(self, name, only_gripper=False):
         if self.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        self.robot_collision_mngr.remove_object(name)
+        if not only_gripper:
+            self.robot_collision_mngr.remove_object(name)
+
         self.gripper_collision_mngr.remove_object(name)
 
         self.objs.pop(name, None)
@@ -329,7 +332,6 @@ class SceneManager:
 
     def show(self):
         self.render.show()
-        self.render = None
 
     def reset(self):
         self.obj_collision_mngr = None

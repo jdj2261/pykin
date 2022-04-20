@@ -140,7 +140,7 @@ You can see various examples in example directory
 
 You can see visualization using matplotlib library or trimesh.Scene class.
 
-- Visualize simple urdf using Matplotlib
+- Visualize `simple urdf` using `matplotlib`
 
 
   |                        ur5e                        |                        sawyer                        |                        iiwa14                        |                        panda                        |
@@ -148,7 +148,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   | <img src="img/ur5e.png" width="200" height="200"/> | <img src="img/sawyer.png" width="200" height="200"/> | <img src="img/iiwa14.png" width="200" height="200"/> | <img src="img/panda.png" width="200" height="200"/> |
 
 
-- Visualize visual geometry using Matplotlib
+- Visualize `visual geometry` using `matplotlib`
 
 
   |                           ur5e                            |                           sawyer                            |                           iiwa14                            |                           panda                            |
@@ -156,14 +156,14 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   | <img src="img/ur5e_visual.png" width="200" height="200"/> | <img src="img/sawyer_visual.png" width="200" height="200"/> | <img src="img/iiwa14_visual.png" width="200" height="200"/> | <img src="img/panda_visual.png" width="200" height="200"/> |
 
 
-- Visualize collision geometry using Matplotlib
+- Visualize `collision geometry` using `matplotlib`
 
 
   |                             ur5e                             |                            sawyer                            |                            iiwa14                            |                            panda                             |
   | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
   | <img src="img/ur5e_collision.png" width="200" height="200"/> | <img src="img/sawyer_collision.png" width="200" height="200"/> | <img src="img/iiwa14_collision.png" width="200" height="200"/> | <img src="img/panda_collision.png" width="200" height="200"/> |
 
-- Visualize mesh about visual/collision geometry using trimesh.Scene class
+- Visualize mesh about `visual/collision geometry` using `trimesh.Scene class`
 
   ![baxter](img/all_robot.png)
 
@@ -197,9 +197,24 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> | <img src="img/gripper_and_object.png" width="200" height="200"/> |
   | <img src="img/self_collision_result.png" width="300" height="200"/> | <img src="img/robot_and_object_result.png" width="300" height="200"/> | <img src="img/gripper_and_object_result.png" width="500" height="200"/> |
 
-- Attach/Detach object to Gripper
+- Attach object to Gripper
 
-  
+  You can manage by attaching or detaching objects to the gripper.  
+  These managing are used for Planning. You can see a example in `example/scene/gripper` directory. 
+
+  ~~~shell
+  $ cd example/scene/gripper
+  $ python scene_attach_detach_test.py
+  ~~~
+
+  - Attach object to Robot, Gripper
+
+    You can see that the collision information of the gree box object has been moved to the robot or gripper collision info.
+
+    |                    Attach object to Robot                    |                   Attach object to Gripper                   |
+    | :----------------------------------------------------------: | :----------------------------------------------------------: |
+    | <img src="img/attach_object_robot.png" width="200" height="200"/> | <img src="img/attach_object_gripper.png" width="200" height="200"/> |
+    | <img src="img/attach_object_robot_result.png" width="500" height="200"/> | <img src="img/attach_object_gripper_result.png" width="500" height="200"/> |
 
 - Planning
 
