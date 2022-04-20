@@ -1,6 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
+from pykin.scene.scene import SceneManager
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError
@@ -27,6 +28,7 @@ class Planner(NodeData, metaclass=ABCMeta):
         self._cur_qpos = None
         self._goal_pose = None
         self._max_iter = None
+        self._scene_mngr:SceneManager = None
         self.arm = None
 
     def __repr__(self) -> str:
@@ -140,7 +142,7 @@ class Planner(NodeData, metaclass=ABCMeta):
             return False
 
         fk = self._get_fk(new_q)
-        
+
         for link, transform in fk.items():
             if link in self._scene_mngr.robot_collision_mngr._objs:
                 if self._scene_mngr.robot_collision_mngr.geom == "visual":
@@ -149,8 +151,13 @@ class Planner(NodeData, metaclass=ABCMeta):
                     h_mat = np.dot(transform.h_mat, self._scene_mngr.robot.links[link].collision.offset.h_mat)
                 self._scene_mngr.robot_collision_mngr.set_transform(name=link, h_mat=h_mat)
         
+        if self._scene_mngr.is_attached:
+            gripper_pose = fk[self._scene_mngr.robot.eef_name].h_mat
+            h_mat = np.dot(gripper_pose, self._scene_mngr._transform_bet_gripper_n_obj)
+            self._scene_mngr.robot_collision_mngr.set_transform(name=self._scene_mngr.attached_obj_name, h_mat=h_mat)
+
         is_self_collision = self._scene_mngr.robot_collision_mngr.in_collision_internal(return_names=False)
-        
+
         if visible_name:
             is_object_collision, col_name = self._scene_mngr.robot_collision_mngr.in_collision_other(
                 other_manager=self._scene_mngr.obj_collision_mngr, return_names=visible_name)  

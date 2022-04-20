@@ -131,6 +131,8 @@ def plot_robot(
     if visible_geom:
         plot_geom(ax, robot, geom, alpha=alpha, color=color)
     else:
+        if robot.gripper.is_attached:
+            plot_mesh(ax, mesh=robot.info[geom][robot.gripper.attached_obj_name][2], h_mat=robot.info[geom][robot.gripper.attached_obj_name ][3], alpha=alpha, color='k')
         plot_basis(ax, robot)
 
     ax.legend()
@@ -437,9 +439,8 @@ def plot_line(ax, vertices, linewidth=1):
         [x[2] for x in vertices], linewidth=linewidth)
 
 
-
 def plot_animation(
-    robot, 
+    scene_mngr, 
     trajectory,
     fig=None,
     ax=None,
@@ -472,9 +473,9 @@ def plot_animation(
         if eef_poses is not None:
             plot_trajectories(ax, eef_poses)
         
-        robot.set_transform(trajectory[i])
+        scene_mngr.set_robot_eef_pose(trajectory[i])
         plot_robot(
-            robot=robot, 
+            robot=scene_mngr.robot, 
             ax=ax, 
             visible_geom=visible_geom,
             visible_text=visible_text,

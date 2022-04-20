@@ -15,6 +15,8 @@ class Gripper:
         self.tcp_position = np.array([0, 0, 0.097])
         self.logical_state = OrderedDict()
         self.info = OrderedDict()
+        self.is_attached = False
+        self.attached_obj_name = None
 
         if configures:
             self._setup_gripper(configures)

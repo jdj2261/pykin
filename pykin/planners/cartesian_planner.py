@@ -1,6 +1,4 @@
 import numpy as np
-
-
 import pykin.utils.transform_utils as t_utils
 import pykin.utils.kin_utils as k_utils
 import pykin.kinematics.jacobian as jac

@@ -9,7 +9,7 @@ from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
-from pykin.planners.rrt_star_planner import RRTStarPlanner
+from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.utils.transform_utils import get_matrix_from_rpy
 import pykin.utils.plot_utils as plt
 

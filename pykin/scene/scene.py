@@ -93,7 +93,10 @@ class SceneManager:
             raise ValueError("object {} needs to be added first".format(name))
 
         self.is_attached = True
-        self.attach_obj_name = self.objs[name].name
+        self.robot.gripper.is_attached = self.is_attached
+        self.attached_obj_name = self.objs[name].name
+        self.robot.gripper.attached_obj_name = self.objs[name].name
+        
         self.obj_collision_mngr.remove_object(name)
         
         eef_pose = self.get_gripper_pose()
@@ -108,6 +111,7 @@ class SceneManager:
             self.robot.info["collision"][name] = [self.objs[name].name, self.objs[name].gtype, self.objs[name].gparam, self.objs[name].h_mat]
             self.robot.info["visual"][name] = [self.objs[name].name, self.objs[name].gtype, self.objs[name].gparam, self.objs[name].h_mat]
 
+        # TODO [gripper_collision_mngr이 필요한가??]
         self.gripper_collision_mngr.add_object(
             self.objs[name].name,
             self.objs[name].gtype,
@@ -122,13 +126,16 @@ class SceneManager:
             raise ValueError("Robot needs to be added first")
 
         if not only_gripper:
-            self.robot_collision_mngr.remove_object(self.attach_obj_name)
-            self.robot.info["collision"].pop(self.attach_obj_name)
-            self.robot.info["visual"].pop(self.attach_obj_name)
+            self.robot_collision_mngr.remove_object(self.attached_obj_name)
+            self.robot.info["collision"].pop(self.attached_obj_name)
+            self.robot.info["visual"].pop(self.attached_obj_name)
 
-        self.gripper_collision_mngr.remove_object(self.attach_obj_name)
-        self.robot.gripper.info.pop(self.attach_obj_name)
+        self.gripper_collision_mngr.remove_object(self.attached_obj_name)
+        self.robot.gripper.info.pop(self.attached_obj_name)
+
         self.is_attached = False
+        self.robot.gripper.is_attached = False
+        self.robot.gripper.attached_obj_name = None
 
     def get_object_pose(self, name):
         if name not in self.objs:
@@ -182,9 +189,9 @@ class SceneManager:
                     self.gripper_collision_mngr.set_transform(link, info[3])
 
         if self.is_attached:
-            self.robot.info["collision"][self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
-            self.robot.info["visual"][self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
-            self.robot.gripper.info[self.attach_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot.info["collision"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot.info["visual"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot.gripper.info[self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
 
     def get_gripper_pose(self):
         if not self.robot.has_gripper:
