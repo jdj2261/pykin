@@ -213,7 +213,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
     |                    Attach object to robot                    |                   Attach object to gripper                   |
     | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/attach_object_robot.png" width="200" height="200"/> | <img src="img/attach_object_gripper.png" width="200" height="200"/> |
+    | <img src="img/attach_object_robot.png" width="400" height="200"/> | <img src="img/attach_object_gripper.png" width="400" height="200"/> |
   
 - **Planning**
 
