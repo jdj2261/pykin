@@ -438,7 +438,6 @@ def plot_line(ax, vertices, linewidth=1):
         [x[1] for x in vertices],
         [x[2] for x in vertices], linewidth=linewidth)
 
-
 def plot_animation(
     scene_mngr, 
     trajectory,

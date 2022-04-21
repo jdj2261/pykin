@@ -45,6 +45,18 @@ class SingleArm(Robot):
                 self.joint_limits_lower.append(limit_lower)
                 self.joint_limits_upper.append(limit_upper)
 
+    def get_result_qpos(self, init_qpos, eef_pos):
+        is_limit_qpos = False
+        result_qpos = self.inverse_kin(init_qpos, eef_pos, method="LM")
+        is_limit_qpos = self.check_limit_joint(result_qpos)
+        if is_limit_qpos:
+            return result_qpos
+
+        while not is_limit_qpos:
+            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pos, method="LM")
+            is_limit_qpos = self.check_limit_joint(result_qpos)
+        return result_qpos
+
     def get_info(self, geom="all"):
         if geom == "all":
             return self.info

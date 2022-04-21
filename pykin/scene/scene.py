@@ -1,5 +1,6 @@
 import numpy as np
 import pprint
+import matplotlib.animation as animation
 from collections import OrderedDict
 from dataclasses import dataclass
 
@@ -291,9 +292,12 @@ class SceneManager:
 
         if self.is_pyplot:
             self.render.render_all_scene(
-                ax, self.objs, 
-                self.robot, self.geom, 
-                alpha, robot_color,
+                ax, 
+                self.objs, 
+                self.robot, 
+                alpha, 
+                robot_color, 
+                geom=self.geom, 
                 visible_geom=visible_geom,
                 visible_text=visible_text)
         else:
@@ -334,7 +338,7 @@ class SceneManager:
 
         if self.is_pyplot:
             self.render.render_robot(
-                ax, self.robot, self.geom, alpha, robot_color, visible_geom, visible_text)
+                ax, self.robot, alpha, robot_color, self.geom, visible_geom, visible_text)
         else:
             self.render = RenderTriMesh()
             self.render.render_robot(self.robot, self.geom)
@@ -348,6 +352,47 @@ class SceneManager:
         else:
             self.render = RenderTriMesh()
             self.render.render_gripper(self.robot)
+
+    def animation(
+        self,
+        ax=None, 
+        fig=None,
+        alpha=0.3, 
+        robot_color=None,
+        joint_path=[], 
+        eef_poses=[], 
+        visible_geom=True,
+        visible_text=True,
+        interval=1,
+        repeat=True
+    ):
+        if not self.is_pyplot:
+            ValueError("Only pyplot can render.")
+
+        def update(i):
+            if i == len(joint_path)-1:
+                print("Animation Finished..")
+            ax.clear()
+
+            if self.objs:
+                self.render.render_object(ax, self.objs, 0.3)
+            
+            if eef_poses is not None:
+                self.render.render_trajectory(ax, eef_poses)
+            
+            self.set_robot_eef_pose(joint_path[i])
+            self.render.render_robot(
+                ax=ax,
+                robot=self.robot,
+                alpha=alpha,
+                color=robot_color,
+                geom=self.geom,
+                visible_geom=visible_geom,
+                visible_text=visible_text,
+                )
+        
+        ani = animation.FuncAnimation(fig, update, np.arange(len(joint_path)), interval=interval, repeat=repeat)
+        self.show()
 
     def show(self):
         self.render.show()

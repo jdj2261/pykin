@@ -29,6 +29,7 @@ class Planner(NodeData, metaclass=ABCMeta):
         self._goal_pose = None
         self._max_iter = None
         self._scene_mngr:SceneManager = None
+        self.joint_path = None
         self.arm = None
 
     def __repr__(self) -> str:
@@ -45,13 +46,15 @@ class Planner(NodeData, metaclass=ABCMeta):
         """
         raise NotImplementedError
 
-    # @abstractclassmethod
-    # def simulate_planning(self):
-    #     raise NotImplementedError
-
-    # @abstractclassmethod
-    # def render_trajectory(self):
-    #     raise NotImplementedError
+    def get_target_eef_poses(self):
+        if not self.joint_path:
+            ValueError("Cannot get target eef poses, because the joint path has not been optained")
+        
+        eef_poses = []
+        for step, joint in enumerate(self.joint_path):
+            fk = self._scene_mngr.robot.forward_kin(joint)
+            eef_poses.append(fk[self._scene_mngr.robot.eef_name].pos)
+        return eef_poses
 
     @abstractclassmethod
     def _get_linear_path(self, init_pose, goal_pose):

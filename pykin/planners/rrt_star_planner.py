@@ -15,7 +15,6 @@ class RRTStarPlanner(Planner):
     RRT star path planner
 
     Args:
-        scene_mngr(SceneManager): Scene Manager
         delta_distance(float): distance between nearest point and new point
         epsilon(float): 1-epsilon is probability of random sampling
         gamma_RRT_star(int): factor used for search radius
@@ -30,9 +29,7 @@ class RRTStarPlanner(Planner):
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
     ):
-        super(RRTStarPlanner, self).__init__(
-            dimension
-        )
+        super(RRTStarPlanner, self).__init__(dimension)
         self.delta_dis = delta_distance
         self.epsilon = epsilon
         self.gamma_RRTs = gamma_RRT_star
@@ -59,7 +56,7 @@ class RRTStarPlanner(Planner):
         max_iter=1000
     ):
         """
-        compute rrt-star
+        Compute rrt-star path
 
         Args:
             cur_q (sequence of float): current joints
@@ -71,7 +68,7 @@ class RRTStarPlanner(Planner):
 
         logger.info(f"Start to compute RRT-star Planning")
 
-        self._scene_mngr:SceneManager = scene_mngr
+        self._scene_mngr = scene_mngr
         super()._setup_q_limits()
         super()._setup_eef_name()
 
@@ -204,6 +201,7 @@ class RRTStarPlanner(Planner):
             interpolate_path = [unique_path.tolist() for unique_path in self._get_linear_path(unique_path[i], unique_path[i+1], n_step)]
             interpolate_paths.extend(interpolate_path)
         logger.info(f"Path length {len(unique_path)} --> {len(interpolate_paths)}")
+        self.joint_path = interpolate_paths
         return interpolate_paths
 
     def get_rrt_tree(self):

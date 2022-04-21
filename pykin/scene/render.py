@@ -57,9 +57,9 @@ class RenderTriMesh(SceneRender):
 class RenderPyPlot(SceneRender):
 
     @staticmethod
-    def render_all_scene(ax, objs, robot, geom, alpha, robot_color, visible_geom, visible_text):
+    def render_all_scene(ax, objs, robot, alpha, robot_color, geom, visible_geom, visible_text):
         RenderPyPlot.render_object(ax, objs, alpha)
-        RenderPyPlot.render_robot(ax, robot, geom, alpha, robot_color,visible_geom, visible_text)
+        RenderPyPlot.render_robot(ax, robot, alpha, robot_color, geom, visible_geom, visible_text)
 
     @staticmethod
     def render_object_and_gripper(ax, objs, robot, alpha, robot_color, visible_tcp):
@@ -68,23 +68,16 @@ class RenderPyPlot(SceneRender):
 
     @staticmethod
     def render_object(ax, objs, alpha):
-        # plt.plot_basis(ax)
-        for info in objs.values():
-            plt.plot_mesh(
-                ax=ax, 
-                mesh=info.gparam, 
-                h_mat=info.h_mat, 
-                color=info.color,
-                alpha=alpha,
-            )
+        plt.plot_objects(ax, objs, alpha)
 
     @staticmethod
-    def render_robot(ax, robot, geom, alpha, color, visible_geom=True, visible_text=True):
+    def render_robot(ax, robot, alpha, color, geom="collision", visible_geom=True, visible_text=True):
         plt.plot_robot(
             ax, 
             robot, 
-            geom, 
-            alpha=alpha, color=color,
+            alpha=alpha, 
+            color=color,
+            geom=geom,
             visible_geom=visible_geom,
             visible_text=visible_text)
 
@@ -112,7 +105,10 @@ class RenderPyPlot(SceneRender):
                 robot.gripper.info["tcp"][3][0,3], 
                 robot.gripper.info["tcp"][3][1,3], 
                 robot.gripper.info["tcp"][3][2,3], s=5, c='r')
-        
+
+    def render_trajectory(self, ax, poses):
+        plt.plot_trajectories(ax, poses)
+
     @staticmethod
     def show():
         plt.show_figure()
