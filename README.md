@@ -214,11 +214,10 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     |                    Attach object to robot                    |                   Attach object to gripper                   |
     | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/attach_object_robot.png" width="200" height="200"/> | <img src="img/attach_object_gripper.png" width="200" height="200"/> |
-    | <img src="img/attach_object_robot_result.png" width="500" height="200"/> | <img src="img/attach_object_gripper_result.png" width="500" height="200"/> |
-
+  
 - **Planning**
 
-  *You can see an planning animation that visualizes trajectory*
+  You can see an planning animation that visualizes trajectory
 
   - Cartesian planning
 

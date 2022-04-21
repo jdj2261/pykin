@@ -4,7 +4,6 @@ import matplotlib.animation as animation
 from collections import OrderedDict
 from dataclasses import dataclass
 
-
 from pykin.scene.object import Object
 from pykin.scene.render import RenderPyPlot, RenderTriMesh
 from pykin.robots.single_arm import SingleArm
@@ -46,7 +45,6 @@ class SceneManager:
         # Attach / Detach
         self.is_attached = False
             
-
     def __repr__(self):
         return 'pykin.scene.scene.{}()'.format(type(self).__name__)
 
