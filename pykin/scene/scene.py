@@ -23,6 +23,7 @@ class SceneManager:
     def __init__(self, geom="collision", is_pyplot=True):
         # Element for Scene
         self.geom = geom
+
         self.objs = OrderedDict()
         self.robot = None
 
@@ -405,6 +406,11 @@ class SceneManager:
         if self.robot.has_gripper:
             self.gripper_collision_mngr = None
             self.robot.gripper = None
+
+    def deecopy_scene(self, scene_mngr):
+        copied_scene = SceneManager()
+        copied_scene.__dict__ = {k:v for k,v in scene_mngr.__dict__.items()}
+        return copied_scene
 
     @property
     def gripper_name(self):
