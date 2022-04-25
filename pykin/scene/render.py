@@ -12,11 +12,11 @@ class SceneRender(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractclassmethod
-    def render_object_and_gripper():
+    def render_objects_and_gripper():
         raise NotImplementedError
     
     @abstractclassmethod
-    def render_object():
+    def render_objects():
         raise NotImplementedError
 
     @abstractclassmethod
@@ -33,14 +33,14 @@ class RenderTriMesh(SceneRender):
         self.scene = trimesh.Scene()
     
     def render_all_scene(self, objs, robot, geom="collision"):
-        self.render_object(objs)
+        self.render_objects(objs)
         self.render_robot(robot, geom)
 
-    def render_object_and_gripper(self, objs, robot):
-        self.render_object(objs)
+    def render_objects_and_gripper(self, objs, robot):
+        self.render_objects(objs)
         self.render_gripper(robot)
 
-    def render_object(self, objs):
+    def render_objects(self, objs):
         self.scene = apply_objects_to_scene(trimesh_scene=self.scene, objs=objs)
 
     def render_robot(self, robot, geom):
@@ -58,16 +58,16 @@ class RenderPyPlot(SceneRender):
 
     @staticmethod
     def render_all_scene(ax, objs, robot, alpha, robot_color, geom, visible_geom, visible_text):
-        RenderPyPlot.render_object(ax, objs, alpha)
+        RenderPyPlot.render_objects(ax, objs, alpha)
         RenderPyPlot.render_robot(ax, robot, alpha, robot_color, geom, visible_geom, visible_text)
 
     @staticmethod
-    def render_object_and_gripper(ax, objs, robot, alpha, robot_color, visible_tcp):
-        RenderPyPlot.render_object(ax, objs, alpha)
+    def render_objects_and_gripper(ax, objs, robot, alpha, robot_color, visible_tcp):
+        RenderPyPlot.render_objects(ax, objs, alpha)
         RenderPyPlot.render_gripper(ax, robot, alpha, robot_color, visible_tcp)
 
     @staticmethod
-    def render_object(ax, objs, alpha):
+    def render_objects(ax, objs, alpha):
         plt.plot_objects(ax, objs, alpha)
 
     @staticmethod
@@ -81,11 +81,17 @@ class RenderPyPlot(SceneRender):
             visible_geom=visible_geom,
             visible_text=visible_text)
 
-    def render_gripper(ax, robot, alpha, color, visible_tcp=True):
+    @staticmethod
+    def render_gripper(ax, robot, alpha=0.3, color=None, visible_tcp=True, pose=None):
         plt.plot_basis(ax)
         for link, info in robot.gripper.info.items():
             if info[1] == 'mesh':
                 mesh_color = color
+                if pose is None:
+                    h_mat = info[3]
+                else:
+                    h_mat = pose
+                print(h_mat)
                 if color is None:
                     link = robot.links.get(link)
                 
@@ -98,7 +104,7 @@ class RenderPyPlot(SceneRender):
                         mesh_color = 'k'
                     else:
                         mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-                plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
+                plt.plot_mesh(ax, mesh=info[2], h_mat=h_mat, alpha=alpha, color=mesh_color)
 
         if visible_tcp:
             ax.scatter(
@@ -106,7 +112,8 @@ class RenderPyPlot(SceneRender):
                 robot.gripper.info["tcp"][3][1,3], 
                 robot.gripper.info["tcp"][3][2,3], s=5, c='r')
 
-    def render_trajectory(self, ax, poses):
+    @staticmethod
+    def render_trajectory(ax, poses):
         plt.plot_trajectories(ax, poses)
 
     @staticmethod

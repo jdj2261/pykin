@@ -5,7 +5,7 @@ from copy import deepcopy
 from pykin.collision.collision_manager import CollisionManager
 
 from pykin.tasks.activity_old import ActivityBase
-from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
+from pykin.utils.action_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 

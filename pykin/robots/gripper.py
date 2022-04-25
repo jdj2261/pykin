@@ -1,6 +1,6 @@
 import numpy as np
 from collections import OrderedDict
-from pykin.utils.task_utils import get_absolute_transform
+from pykin.utils.action_utils import get_absolute_transform
 
 class Gripper:
     def __init__(
@@ -33,7 +33,7 @@ class Gripper:
         return self.info["right_gripper"][3]
 
     def set_gripper_pose(self, eef_pose=np.eye(4)):
-        tcp_pose = self.get_tcp_pose_from_eef_pose(eef_pose)
+        tcp_pose = self.compute_tcp_pose_from_eef_pose(eef_pose)
         for link, info in self.info.items():
             T = get_absolute_transform(self.info[self.names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
@@ -52,7 +52,7 @@ class Gripper:
         eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(self.tcp_position[-1], tcp_pose[:3, 2])
         return eef_pose
 
-    def get_tcp_pose_from_eef_pose(self, eef_pose=np.eye(4)):
+    def compute_tcp_pose_from_eef_pose(self, eef_pose=np.eye(4)):
         tcp_pose = np.eye(4)
         tcp_pose[:3, :3] = eef_pose[:3, :3]
         tcp_pose[:3, 3] = eef_pose[:3, 3] + np.dot(self.tcp_position[-1], eef_pose[:3, 2])

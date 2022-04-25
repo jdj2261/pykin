@@ -9,7 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.tasks.grasp_old import GraspManager, GraspStatus
-from pykin.utils.task_utils import get_relative_transform
+from pykin.utils.action_utils import get_relative_transform
 from pykin.objects.object_manager import ObjectManager
 from pykin.scene.object import Object
 import pykin.utils.plot_utils as plt

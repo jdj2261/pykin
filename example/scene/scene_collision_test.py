@@ -95,5 +95,5 @@ if result:
     for obj1, obj2 in list(names):
         print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
 
-scene_mngr.render_object_and_gripper(ax, robot_color='b', visible_tcp=False)
+scene_mngr.render_objects_and_gripper(ax, robot_color='b', visible_tcp=False)
 scene_mngr.show()

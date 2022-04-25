@@ -8,7 +8,7 @@ from pykin.scene.object import Object
 from pykin.scene.render import RenderPyPlot, RenderTriMesh
 from pykin.robots.single_arm import SingleArm
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.task_utils import get_relative_transform
+from pykin.utils.action_utils import get_relative_transform
 from pykin.utils.kin_utils import ShellColors as sc
 
 @dataclass
@@ -236,7 +236,7 @@ class SceneManager:
     def collide_objs_and_gripper(self, return_names=False):
         if not self.robot.has_gripper:
             raise ValueError("Robot doesn't have a gripper")
-
+    
         return self.gripper_collision_mngr.in_collision_other(self.obj_collision_mngr, return_names)
 
     def update_logical_states(self):
@@ -303,26 +303,26 @@ class SceneManager:
             self.render = RenderTriMesh()
             self.render.render_all_scene(objs=self.objs, robot=self.robot, geom=self.geom)
             
-    def render_object_and_gripper(self, ax=None, alpha=0.3, robot_color=None, visible_tcp=True):
+    def render_objects_and_gripper(self, ax=None, alpha=0.3, robot_color=None, visible_tcp=True):
         if not self.robot.has_gripper:
             raise ValueError("Robot doesn't have a gripper")
 
         if self.is_pyplot:
-            self.render.render_object_and_gripper(
+            self.render.render_objects_and_gripper(
                 ax, 
                 self.objs, 
                 self.robot, 
                 alpha, robot_color, visible_tcp=visible_tcp)
         else:
             self.render = RenderTriMesh()
-            self.render.render_object_and_gripper(objs=self.objs, robot=self.robot)
+            self.render.render_objects_and_gripper(objs=self.objs, robot=self.robot)
 
-    def render_object(self, ax=None, alpha=0.3):
+    def render_objects(self, ax=None, alpha=0.3):
         if self.is_pyplot:
-            self.render.render_object(ax, self.objs, alpha)
+            self.render.render_objects(ax, self.objs, alpha)
         else:
             self.render = RenderTriMesh()
-            self.render.render_object(objs=self.objs)
+            self.render.render_objects(objs=self.objs)
 
     def render_robot(
         self, 
@@ -342,12 +342,18 @@ class SceneManager:
             self.render = RenderTriMesh()
             self.render.render_robot(self.robot, self.geom)
 
-    def render_gripper(self, ax=None, alpha=0.3, robot_color='b', visible_tcp=True):
+    def render_gripper(self, ax=None, alpha=0.3, robot_color=None, visible_tcp=True, pose=None):
         if not self.robot.has_gripper:
             raise ValueError("Robot doesn't have a gripper")
 
         if self.is_pyplot:
-            self.render.render_gripper(ax, self.robot, alpha, robot_color, visible_tcp)
+            self.render.render_gripper(
+                ax=ax, 
+                robot=self.robot, 
+                alpha=alpha, 
+                color=robot_color, 
+                visible_tcp=visible_tcp,
+                pose=pose)
         else:
             self.render = RenderTriMesh()
             self.render.render_gripper(self.robot)
@@ -374,7 +380,7 @@ class SceneManager:
             ax.clear()
 
             if self.objs:
-                self.render.render_object(ax, self.objs, 0.3)
+                self.render.render_objects(ax, self.objs, 0.3)
             
             if eef_poses is not None:
                 self.render.render_trajectory(ax, eef_poses)

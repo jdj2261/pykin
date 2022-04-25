@@ -47,10 +47,10 @@ scene_mngr.add_robot(robot, init_qpos)
 
 ############################# Gripper Pose Test #############################
 scene_mngr.set_gripper_pose(np.eye(4))
-scene_mngr.render_object_and_gripper(ax, robot_color='b')
+scene_mngr.render_objects_and_gripper(ax, robot_color='b')
 
 scene_mngr.set_gripper_tcp_pose(np.eye(4))
-scene_mngr.render_object_and_gripper(ax, robot_color='r')
+scene_mngr.render_objects_and_gripper(ax, robot_color='r')
 
 print(scene_mngr.get_gripper_pose())
 print(scene_mngr.get_gripper_tcp_pose())

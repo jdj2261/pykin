@@ -7,7 +7,7 @@ from pykin.objects.gripper import Gripper
 from pykin.objects.object_manager import ObjectManager
 
 from pykin.tasks.activity import ActivityBase
-from pykin.utils.task_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
+from pykin.utils.action_utils import normalize, surface_sampling, projection, get_rotation_from_vectors, get_relative_transform
 from pykin.utils.transform_utils import get_pose_from_homogeneous
 from pykin.utils.log_utils import create_logger
 
