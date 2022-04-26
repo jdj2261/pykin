@@ -178,15 +178,15 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
   - Render using trimesh.Scene
 
-    |                           baxter                           |                           sawyer                           |                           iiwa14                           |                           panda                           |
-    | :--------------------------------------------------------: | :--------------------------------------------------------: | :--------------------------------------------------------: | :-------------------------------------------------------: |
-    | <img src="img/baxter_scene.png" width="200" height="200"/> | <img src="img/sawyer_scene.png" width="200" height="200"/> | <img src="img/iiwa14_scene.png" width="200" height="200"/> | <img src="img/panda_scene.png" width="200" height="200"/> |
+    |                           baxter                           |                           sawyer                           |                           iiwa14                           |
+    | :--------------------------------------------------------: | :--------------------------------------------------------: | :--------------------------------------------------------: |
+    | <img src="img/baxter_scene.png" width="200" height="200"/> | <img src="img/sawyer_scene.png" width="200" height="200"/> | <img src="img/iiwa14_scene.png" width="200" height="200"/> |
 
   - Render using matplotlib
 
-    |                            baxter                            |                            sawyer                            |                            iiwa14                            |                            panda                             |
-    | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> | <img src="img/panda_scene_matplotlib.png" width="200" height="200"/> |
+    |                            baxter                            |                            sawyer                            |                            iiwa14                            |
+    | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+    | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> |
 
 - **Attach object to robot**
 
