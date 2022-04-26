@@ -150,8 +150,9 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None):
                 color = link.collision.gparam.get('color')
             else:
                 color = None
+
             if color is None:
-                color = 'k'
+                color = np.array([0.2, 0.2, 0.2, 1.])
             else:
                 color = np.array([color for color in color.values()]).flatten()
             mesh.visual.face_colors = color
@@ -171,16 +172,17 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
             link = robot.links.get(link)
             if geom=="visual":
                 if link is not None:
-                    color = link.collision.gparam.get('color')
+                    color = link.visual.gparam.get('color')
                 else:
                     color = None
             else:
                 if link is not None:
-                    color = link.visual.gparam.get('color')
+                    color = link.collision.gparam.get('color')
                 else:
                     color = None
+
             if color is None:
-                color = 'k'
+                color = np.array([0.2, 0.2, 0.2, 1.])
             else:
                 color = np.array([color for color in color.values()]).flatten()
             mesh.visual.face_colors = color

@@ -188,16 +188,7 @@ You can see visualization using matplotlib library or trimesh.Scene class.
     | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
     | <img src="img/baxter_scene_matplotlib.png" width="200" height="200"/> | <img src="img/sawyer_scene_matplotlib.png" width="200" height="200"/> | <img src="img/iiwa14_scene_matplotlib.png" width="200" height="200"/> | <img src="img/panda_scene_matplotlib.png" width="200" height="200"/> |
 
-- **Collision Check**
-
-  You can check collision of (robot and object), (gripper and object), (robot self collision)
-
-  |                     Robot self collision                     |                      Robot and objects                       |
-  | :----------------------------------------------------------: | :----------------------------------------------------------: |
-  | <img src="img/self_collision.png" width="200" height="200"/> | <img src="img/robot_and_object.png" width="200" height="200"/> |
-  | <img src="img/self_collision_result.png" width="700" height="200"/> | <img src="img/robot_and_object_result.png" width="700" height="200"/> |
-
-- **Attach object to Gripper**
+- **Attach object to robot**
 
   You can manage by attaching or detaching objects to the gripper.  
   These managing are used for Planning. You can see a example in `example/scene/gripper` directory. 
@@ -207,13 +198,12 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   $ python scene_attach_detach_test.py
   ~~~
 
-  - Attach object to Robot, Gripper
-
-    You can see that the collision information of the gree box object has been moved to the robot or gripper collision info.
-
-    |                    Attach object to robot                    |                   Attach object to gripper                   |
-    | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/attach_object_robot.png" width="400" height="200"/> | <img src="img/attach_object_gripper.png" width="400" height="200"/> |
+  You can see the attaching process as shown in the figure below.  
+  If the object is attached, a color of the object will change black. And then, the object becomes a part of the robot.
+  
+  |                       Move a robot                       |                 Attach an object to robot                  |                         Move a robot                         |                      Detach an object                      |
+  | :------------------------------------------------------: | :--------------------------------------------------------: | :----------------------------------------------------------: | :--------------------------------------------------------: |
+  | <img src="img/panda_move.png" width="400" height="200"/> | <img src="img/panda_attach.png" width="400" height="200"/> | <img src="img/panda_move_attached.png" width="400" height="200"/> | <img src="img/panda_detach.png" width="400" height="200"/> |
   
 - **Planning**
 
