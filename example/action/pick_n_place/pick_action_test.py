@@ -1,4 +1,3 @@
-from cmath import pi
 import numpy as np
 import sys, os
 import yaml
@@ -58,24 +57,24 @@ plt.plot_basis(ax)
 
 ####### All Grasp Pose #######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Grasp Pose")
-tcp_poses = list(pick.get_grasp_poses("green_box"))
-for tcp_pose in tcp_poses:
-    pick.render_axis(ax, tcp_pose)
+grasp_poses = list(pick.get_grasp_poses("green_box"))
+for grasp_pose in grasp_poses:
+    pick.render_axis(ax, grasp_pose)
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 
 ###### Level wise - 1 #######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 1")
-grasp_poses = list(pick.get_grasp_poses_for_only_gripper("green_box"))
-for grasp_pose in grasp_poses:
-    pick.render_axis(ax, grasp_pose, scale=0.05)
+grasp_poses_for_only_gripper = list(pick.get_grasp_poses_for_only_gripper(grasp_poses))
+for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
+    pick.render_axis(ax, grasp_pose_for_only_gripper, scale=0.05)
     # pick.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=grasp_pose)
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 
 ####### Level wise - 2 #######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 2")
-goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses))
+goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses_for_only_gripper))
 for grasp_pose in goal_grasp_poses:
     pick.render_axis(ax, grasp_pose, scale=0.05)
 

@@ -48,8 +48,11 @@ class PickAction(ActivityBase):
             yield grasp_pose
 
     # for level wise - 1 (Consider gripper collision)
-    def get_grasp_poses_for_only_gripper(self, obj_name):
-        for grasp_pose in list(self.get_grasp_poses(obj_name)):
+    def get_grasp_poses_for_only_gripper(self, grasp_poses):
+        if not grasp_poses:
+            raise ValueError("Not found grasp poses!")
+
+        for grasp_pose in grasp_poses:
             self.scene_mngr.set_gripper_pose(grasp_pose)
             if not self._collide(is_only_gripper=True):
                 yield grasp_pose
