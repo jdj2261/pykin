@@ -413,7 +413,7 @@ class SceneManager:
             self.gripper_collision_mngr = None
             self.robot.gripper = None
 
-    def deecopy_scene(self, scene_mngr):
+    def copy_scene(self, scene_mngr):
         copied_scene = SceneManager()
         copied_scene.__dict__ = {k:v for k,v in scene_mngr.__dict__.items()}
         return copied_scene

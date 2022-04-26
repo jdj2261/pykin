@@ -1,7 +1,8 @@
-from cmath import pi
 import numpy as np
 import sys, os
 import yaml
+
+
 
 pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.append(pykin_path)
@@ -10,6 +11,7 @@ from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
+from pykin.action.place import PlaceAction
 from pykin.action.pick import PickAction
 import pykin.utils.plot_utils as plt
 
@@ -51,33 +53,27 @@ scene_mngr.add_robot(robot, init_qpos)
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
 
 pick = PickAction(scene_mngr)
+place = PlaceAction(scene_mngr, n_samples=100)
 
-# surface_points, _ = pick.get_mesh_surface_points(obj_name="green_box")
-# pick.render_points(ax, surface_points)
+# support_points, _ = place.get_surface_points_for_support_obj("goal_box")
+# place.render_points(ax, support_points)
 
-# contact_points = list(pick.get_contact_points(obj_name="green_box"))
-# pick.render_points(ax, contact_points)
+# support_points, _ = place.get_surface_points_for_held_obj("green_box")
+# place.render_points(ax, support_points)
 
-# tcp_poses = list(pick.get_tcp_poses("green_box"))
-# for tcp_pose in tcp_poses:
-#     pick.render_axis(ax, tcp_pose)
-
+tcp_poses = list(pick.get_tcp_poses("green_box"))
+print(len(tcp_poses))
+for tcp_pose in tcp_poses:
+    support_poses = list(place.get_support_poses("goal_box", "green_box", tcp_pose))
+    for result_gripper_pose, result_obj_pose in support_poses:
+        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
+        place.scene_mngr.render.render_object(ax, place.scene_mngr.objs["green_box"], result_obj_pose)
+        place.render_axis(ax, result_gripper_pose)
+        place.scene_mngr.render_objects(ax)
+        plt.plot_basis(ax)
+        place.show()
+        
 # plt.plot_basis(ax)
-# plt.plot_object(ax, scene_mngr.objs["green_box"])
+# place.scene_mngr.render_objects(ax)
+# place.show()
 
-grasp_poses = list(pick.get_grasp_poses_for_only_gripper("green_box"))
-print(len(grasp_poses))
-for grasp_pose in grasp_poses:
-    pick.render_axis(ax, grasp_pose, scale=0.05)
-pick.scene_mngr.render_objects(ax)
-    # pick.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=grasp_pose)
-goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses))
-
-print(len(goal_grasp_poses))
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Test Scene")
-for grasp_pose in goal_grasp_poses:
-    pick.render_axis(ax, grasp_pose, scale=0.05)
-
-pick.scene_mngr.render_objects(ax)
-
-pick.show()

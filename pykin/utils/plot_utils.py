@@ -258,13 +258,17 @@ def plot_objects(ax, objects, alpha=0.5, color='k'):
             h_mat = tf.get_h_mat(o_pose)
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=info.color)
 
-def plot_object(ax, obj, alpha=0.5, color='k'):    
+
+def plot_object(ax, obj, pose=None, alpha=0.5, color='k'):    
     """
     Plot objects
     """
     o_type = obj.gtype
     o_param = obj.gparam
-    o_pose = obj.h_mat
+    if pose is None:
+        o_pose = obj.h_mat
+    else:
+        o_pose = pose
     if o_type == "mesh":
         plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=alpha, color=obj.color)
     if o_type == "sphere":
@@ -275,7 +279,6 @@ def plot_object(ax, obj, alpha=0.5, color='k'):
     if o_type == "cylinder":
         h_mat = tf.get_h_mat(o_pose)
         plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=obj.color)
-
 
 
 def get_color(params):

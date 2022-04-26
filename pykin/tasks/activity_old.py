@@ -4,7 +4,7 @@ from abc import abstractclassmethod
 
 import pykin.utils.plot_utils as plt
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.task_utils import get_absolute_transform
+from pykin.utils.action_utils import get_absolute_transform
 
 
 class ActivityBase:

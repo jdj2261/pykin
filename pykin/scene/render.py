@@ -71,6 +71,10 @@ class RenderPyPlot(SceneRender):
         plt.plot_objects(ax, objs, alpha)
 
     @staticmethod
+    def render_object(ax, obj, pose=None, alpha=0.3):
+        plt.plot_object(ax, obj, pose, alpha)
+
+    @staticmethod
     def render_robot(ax, robot, alpha, color, geom="collision", visible_geom=True, visible_text=True):
         plt.plot_robot(
             ax, 

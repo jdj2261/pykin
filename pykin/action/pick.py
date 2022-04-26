@@ -1,9 +1,6 @@
 import numpy as np
-
-from copy import deepcopy
 from enum import Enum, auto
-
-from pkg_resources import yield_lines
+from copy import deepcopy
 
 import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
@@ -40,35 +37,38 @@ class PickAction(ActivityBase):
         pass
 
     def get_contact_points(self, obj_name):
-        def _is_force_closure(points, normals, limit_angle):
-            vectorA = points[0]
-            vectorB = points[1]
-
-            normalA = -normals[0]
-            normalB = -normals[1]
-
-            vectorAB = vectorB - vectorA
-            distance = np.linalg.norm(vectorAB)
-
-            unit_vectorAB = a_utils.normalize(vectorAB)
-            angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
-
-            unit_vectorBA = -1 * unit_vectorAB
-            angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
-
-            if distance > self.scene_mngr.robot.gripper.max_width:
-                return False
-
-            if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
-                return False    
-            return True
+        copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
+        copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
         
         cnt = 0
         while cnt < self.n_contacts:
-            surface_points, normals = self.get_mesh_surface_points(obj_name, 2)
-            if _is_force_closure(surface_points, normals, self.limit_angle):
+            surface_points, normals = self.get_surface_points_from_mesh(copied_mesh, 2)
+            if self._is_force_closure(surface_points, normals, self.limit_angle):
                 cnt += 1
                 yield surface_points
+
+    def _is_force_closure(self, points, normals, limit_angle):
+        vectorA = points[0]
+        vectorB = points[1]
+
+        normalA = -normals[0]
+        normalB = -normals[1]
+
+        vectorAB = vectorB - vectorA
+        distance = np.linalg.norm(vectorAB)
+
+        unit_vectorAB = a_utils.normalize(vectorAB)
+        angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
+
+        unit_vectorBA = -1 * unit_vectorAB
+        angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
+
+        if distance > self.scene_mngr.robot.gripper.max_width:
+            return False
+
+        if angle_A2AB > limit_angle or angle_B2AB > limit_angle:
+            return False    
+        return True
 
     def get_tcp_poses(self, obj_name):
         contact_points = list(self.get_contact_points(obj_name))
@@ -122,4 +122,3 @@ class PickAction(ActivityBase):
 
             if self._solve_ik(grasp_pose, grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
                 yield grasp_pose
-
