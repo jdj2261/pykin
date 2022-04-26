@@ -26,15 +26,44 @@ class PickAction(ActivityBase):
         self.n_contacts = n_contacts
         self.n_directions = n_directions
         self.limit_angle = limit_angle_for_force_closure
-        
-    def get_possible_actions(self, scene_mngr:SceneManager=None):
+        self.filter_logical_states = [ self.scene_mngr.state.support, 
+                                       self.scene_mngr.state.static]
+
+    def get_possible_actions(self, scene_mngr:SceneManager=None, level=0):
+        if not 0 <= level <= 2:
+            raise ValueError("Confirm level number")
+
         if scene_mngr is not None:
-            self.scene_mngr = scene_mngr
+            self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
+        self.scene_mngr.show_logical_states()
         
-    def get_possible_transitions(self, scene_mngr=None):
+        for obj in self.scene_mngr.objs:
+            if not any(logical_state in self.scene_mngr.logical_states[obj] for logical_state in self.filter_logical_states):
+                grasp_poses = list(self.get_grasp_poses(obj_name=obj))
+                if level == 0:
+                    action = self.get_action(obj, grasp_poses)
+                    yield action
+                elif 0 < level <= 2:
+                    grasp_poses_for_only_gripper = list(self.get_grasp_poses_for_only_gripper(grasp_poses))
+                    if level == 1:
+                        action = self.get_action(obj, grasp_poses_for_only_gripper)
+                        yield action
+                    else:
+                        goal_grasp_poses = list(self.get_grasp_poses_for_robot(grasp_poses_for_only_gripper))
+                        action = self.get_action(obj, goal_grasp_poses)
+                        yield action     
+
+    def get_action(self, obj_name, poses):
+        action = {}
+        action[self.action_info.ACTION] = "pick"
+        action[self.action_info.OBJ_NAME] = obj_name
+        action[self.action_info.GRASP_POSES] = poses
+        return action
+
+    def get_possible_transitions(self, scene_mngr=None, actions:list=None):
         if scene_mngr is not None:
-            self.scene_mngr = scene_mngr
-        pass
+            self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
+        
 
     # Not consider collision
     def get_grasp_poses(self, obj_name):
@@ -64,10 +93,10 @@ class PickAction(ActivityBase):
 
         grasp_poses = grasp_poses_for_only_grpper
         if not grasp_poses:
-            raise ValueError("Not found grasp poses for only gripper!")
+            return
 
         for grasp_pose in grasp_poses:
-            thetas = self.scene_mngr.compute_ik(pose=grasp_pose)
+            thetas = self.scene_mngr.compute_ik(pose=grasp_pose, max_iter=200)
             self.scene_mngr.set_robot_eef_pose(thetas)
             grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
 

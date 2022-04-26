@@ -41,8 +41,8 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ mkdir build
     $ cd build
     $ cmake ..
-    $ make
-    $ make install
+    $ sudo make
+    $ sudo make install
     ~~~
   - fcl
 
@@ -56,8 +56,8 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ mkdir build
     $ cd build
     $ cmake ..
-    $ make
-    $ make install
+    $ sudo make
+    $ sudo make install
     ~~~
 
 ### Install Pykin
