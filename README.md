@@ -207,21 +207,13 @@ You can see visualization using matplotlib library or trimesh.Scene class.
   
 - **Planning**
 
-  You can see an planning animation that visualizes trajectory
+  You can see an animation that visualizes trajectory in `example/planning` directory. 
 
-  - Cartesian planning
+  |                          Cartesian                           |                             RRT*                             |
+  | :----------------------------------------------------------: | :----------------------------------------------------------: |
+  | <img src="img/panda_cartesian_planning.gif" width="500" height="300"/> | <img src="img/panda_rrt_planning.gif" width="500" height="300"/> |
 
-    |                            iiwa14                            |                            panda                             |                            sawyer                            |
-    | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-    | <img src="img/iiwa_cartesian.gif" width="500" height="200"/> | <img src="img/panda_cartesian.gif" width="500" height="200"/> | <img src="img/sawyer_cartesian.gif" width="500" height="200"/> |
-
-  - RRT-star planning
-
-    |                         iiwa14                         |                          panda                          |                          sawyer                          |
-    | :----------------------------------------------------: | :-----------------------------------------------------: | :------------------------------------------------------: |
-    | <img src="img/iiwa_rrt.gif" width="500" height="200"/> | <img src="img/panda_rrt.gif" width="500" height="200"/> | <img src="img/sawyer_rrt.gif" width="500" height="200"/> |
-
-- **Grasping**
+- **Pick and Place**
 
   You can see an visualization the pose for the robot to grasp and release an object.
 

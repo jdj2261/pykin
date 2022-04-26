@@ -2,7 +2,7 @@ import numpy as np
 import sys, os
 import yaml
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
@@ -15,14 +15,14 @@ import pykin.utils.plot_utils as plt
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
     has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 
-custom_fpath = '../../../asset/config/panda_init_params.yaml'
+custom_fpath = '../../asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
