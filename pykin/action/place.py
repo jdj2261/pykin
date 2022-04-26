@@ -35,6 +35,20 @@ class PlaceAction(ActivityBase):
         if scene_mngr is not None:
             self.scene_mngr = scene_mngr.copy_scene(self.scene_mngr)
 
+    # for level wise - 1
+    def get_support_poses_for_only_gripper(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
+        if self.scene_mngr.robot.has_gripper is None:
+            raise ValueError("Robot doesn't have a gripper")
+
+        gripper = self.scene_mngr.robot.gripper
+        tcp_poses = list(self.get_tcp_poses(support_obj_name, held_obj_name, gripper_tcp_pose))
+        for tcp_pose, obj_pose_transformed in tcp_poses:
+            # print(tcp_poses)
+            grasp_pose = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+            self.scene_mngr.set_gripper_pose(grasp_pose)
+            if not self._collide(is_only_gripper=True):
+                yield grasp_pose, obj_pose_transformed
+
     def get_surface_points_for_support_obj(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
@@ -71,7 +85,7 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 0.7
         return weights
 
-    def get_support_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
+    def get_tcp_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
         held_obj_pose = deepcopy(self.scene_mngr.objs[held_obj_name].h_mat)
 
         support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)

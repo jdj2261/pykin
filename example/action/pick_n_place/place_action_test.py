@@ -52,8 +52,8 @@ scene_mngr.add_robot(robot, init_qpos)
 
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
 
-pick = PickAction(scene_mngr)
-place = PlaceAction(scene_mngr, n_samples=100)
+pick = PickAction(scene_mngr, n_contacts=3, n_directions=3)
+place = PlaceAction(scene_mngr, n_samples=1)
 
 # support_points, _ = place.get_surface_points_for_support_obj("goal_box")
 # place.render_points(ax, support_points)
@@ -64,16 +64,18 @@ place = PlaceAction(scene_mngr, n_samples=100)
 tcp_poses = list(pick.get_tcp_poses("green_box"))
 print(len(tcp_poses))
 for tcp_pose in tcp_poses:
-    support_poses = list(place.get_support_poses("goal_box", "green_box", tcp_pose))
-    for result_gripper_pose, result_obj_pose in support_poses:
-        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
+    tcp_poses = list(place.get_support_poses_for_only_gripper("goal_box", "green_box", tcp_pose))
+    print(len(tcp_poses))
+    for gripper_tcp_pose, result_obj_pose in tcp_poses:
+        # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
         place.scene_mngr.render.render_object(ax, place.scene_mngr.objs["green_box"], result_obj_pose)
-        place.render_axis(ax, result_gripper_pose)
-        place.scene_mngr.render_objects(ax)
-        plt.plot_basis(ax)
-        place.show()
+        place.render_axis(ax, gripper_tcp_pose)
+        place.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=gripper_tcp_pose)
+        # place.scene_mngr.render_objects(ax)
+        # plt.plot_basis(ax)
+        # place.show()
         
-# plt.plot_basis(ax)
-# place.scene_mngr.render_objects(ax)
-# place.show()
+plt.plot_basis(ax)
+place.scene_mngr.render_objects(ax)
+place.show()
 

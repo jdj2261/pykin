@@ -19,8 +19,7 @@ class ActivityBase(metaclass=ABCMeta):
         self,
         scene_mngr:SceneManager
     ):
-        self.scene_mngr = scene_mngr
-        self.init_scene_mngr = scene_mngr.copy_scene(scene_mngr)
+        self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
 
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)

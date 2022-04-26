@@ -36,6 +36,41 @@ class PickAction(ActivityBase):
             self.scene_mngr = scene_mngr
         pass
 
+    # Not consider collision
+    def get_grasp_poses(self, obj_name):
+        if self.scene_mngr.robot.has_gripper is None:
+            raise ValueError("Robot doesn't have a gripper")
+
+        gripper = self.scene_mngr.robot.gripper
+        tcp_poses = self.get_tcp_poses(obj_name)
+        for tcp_pose in tcp_poses:
+            grasp_pose = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+            yield grasp_pose
+
+    # for level wise - 1 (Consider gripper collision)
+    def get_grasp_poses_for_only_gripper(self, obj_name):
+        for grasp_pose in list(self.get_grasp_poses(obj_name)):
+            self.scene_mngr.set_gripper_pose(grasp_pose)
+            if not self._collide(is_only_gripper=True):
+                yield grasp_pose
+
+    # for level wise - 2 (Consider IK and collision)
+    def get_grasp_poses_for_robot(self, grasp_poses_for_only_grpper):
+        if self.scene_mngr.robot is None:
+            raise ValueError("Robot needs to be added first")
+
+        grasp_poses = grasp_poses_for_only_grpper
+        if not grasp_poses:
+            raise ValueError("Not found grasp poses for only gripper!")
+
+        for grasp_pose in grasp_poses:
+            thetas = self.scene_mngr.compute_ik(pose=grasp_pose)
+            self.scene_mngr.set_robot_eef_pose(thetas)
+            grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
+
+            if self._solve_ik(grasp_pose, grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
+                yield grasp_pose
+
     def get_contact_points(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
@@ -92,33 +127,3 @@ class PickAction(ActivityBase):
                 tcp_pose[:3,3] = center_point
 
                 yield tcp_pose
-        
-    # for level wise - 1
-    def get_grasp_poses_for_only_gripper(self, obj_name):
-        if self.scene_mngr.robot.has_gripper is None:
-            raise ValueError("Robot doesn't have a gripper")
-
-        gripper = self.scene_mngr.robot.gripper
-        tcp_poses = self.get_tcp_poses(obj_name)
-        for tcp_pose in tcp_poses:
-            grasp_pose = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
-            self.scene_mngr.set_gripper_pose(grasp_pose)
-            if not self._collide(is_only_gripper=True):
-                yield grasp_pose
-
-    # for level wise - 2
-    def get_grasp_poses_for_robot(self, grasp_poses_for_only_grpper):
-        if self.scene_mngr.robot is None:
-            raise ValueError("Robot needs to be added first")
-
-        grasp_poses = grasp_poses_for_only_grpper
-        if not grasp_poses:
-            raise ValueError("Not found grasp poses for only gripper!")
-
-        for grasp_pose in grasp_poses:
-            thetas = self.scene_mngr.compute_ik(pose=grasp_pose)
-            self.scene_mngr.set_robot_eef_pose(thetas)
-            grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
-
-            if self._solve_ik(grasp_pose, grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
-                yield grasp_pose

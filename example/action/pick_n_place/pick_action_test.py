@@ -47,35 +47,38 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, init_qpos)
 
+pick = PickAction(scene_mngr, 4, 50)
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Initialize Scene")
-
-pick = PickAction(scene_mngr)
-
-
+####### All Contact Points #######
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
 contact_points = list(pick.get_contact_points(obj_name="green_box"))
 pick.render_points(ax, contact_points)
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
 
-# tcp_poses = list(pick.get_tcp_poses("green_box"))
-# for tcp_pose in tcp_poses:
-#     pick.render_axis(ax, tcp_pose)
+####### All Grasp Pose #######
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Grasp Pose")
+tcp_poses = list(pick.get_grasp_poses("green_box"))
+for tcp_pose in tcp_poses:
+    pick.render_axis(ax, tcp_pose)
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
 
-# plt.plot_basis(ax)
-# plt.plot_object(ax, scene_mngr.objs["green_box"])
+###### Level wise - 1 #######
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 1")
+grasp_poses = list(pick.get_grasp_poses_for_only_gripper("green_box"))
+for grasp_pose in grasp_poses:
+    pick.render_axis(ax, grasp_pose, scale=0.05)
+    # pick.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=grasp_pose)
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
 
-# grasp_poses = list(pick.get_grasp_poses_for_only_gripper("green_box"))
-# print(len(grasp_poses))
-# for grasp_pose in grasp_poses:
-#     pick.render_axis(ax, grasp_pose, scale=0.05)
-# pick.scene_mngr.render_objects(ax)
-#     # pick.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=grasp_pose)
-# goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses))
-
-# print(len(goal_grasp_poses))
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Test Scene")
-# for grasp_pose in goal_grasp_poses:
-#     pick.render_axis(ax, grasp_pose, scale=0.05)
+####### Level wise - 2 #######
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 2")
+goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses))
+for grasp_pose in goal_grasp_poses:
+    pick.render_axis(ax, grasp_pose, scale=0.05)
 
 pick.scene_mngr.render_objects(ax)
-
+plt.plot_basis(ax)
 pick.show()

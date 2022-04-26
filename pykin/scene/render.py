@@ -88,14 +88,15 @@ class RenderPyPlot(SceneRender):
     @staticmethod
     def render_gripper(ax, robot, alpha=0.3, color=None, visible_tcp=True, pose=None):
         plt.plot_basis(ax)
-        for link, info in robot.gripper.info.items():
+
+        if pose is not None:
+            robot.gripper.set_gripper_pose(pose)
+        gripper_info =  robot.gripper.info
+        
+        for link, info in gripper_info.items():
             if info[1] == 'mesh':
                 mesh_color = color
-                if pose is None:
-                    h_mat = info[3]
-                else:
-                    h_mat = pose
-                print(h_mat)
+
                 if color is None:
                     link = robot.links.get(link)
                 
@@ -108,7 +109,7 @@ class RenderPyPlot(SceneRender):
                         mesh_color = 'k'
                     else:
                         mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-                plt.plot_mesh(ax, mesh=info[2], h_mat=h_mat, alpha=alpha, color=mesh_color)
+                plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
 
         if visible_tcp:
             ax.scatter(
