@@ -5,7 +5,6 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from copy import deepcopy
 
-
 from pykin.scene.object import Object
 from pykin.scene.render import RenderPyPlot, RenderTriMesh
 from pykin.robots.single_arm import SingleArm
@@ -24,8 +23,9 @@ class State:
 class Scene:
     def __init__(self):
         self.objs = OrderedDict()
-        self.robot = None
+        self.robot:SingleArm = None
         self.logical_states = OrderedDict()
+        self.state = State
 
     def show_scene_info(self):
         print(f"*"*23 + f" {sc.OKGREEN}Scene{sc.ENDC} "+ f"*"*23)
@@ -36,6 +36,22 @@ class Scene:
                 print(self.robot.gripper.name, self.robot.gripper.get_gripper_pose())
         print(f"*"*63 + "\n")
 
+    def show_logical_states(self):
+        print(f"*"*23 + f" {sc.OKGREEN}Logical States{sc.ENDC} "+ f"*"*23)
+        pprint.pprint(self.logical_states)
+        print(f"*"*63 + "\n")
+
+    def update_logical_states(self):
+        for object_name, logical_state in self.logical_states.items():
+            if logical_state.get(State.on):
+                if not self.logical_states[logical_state[State.on].name].get(State.support):
+                    self.logical_states[logical_state[State.on].name][State.support] = []
+                if self.objs[object_name] not in self.logical_states[logical_state[State.on].name][State.support]:
+                    self.logical_states[logical_state[State.on].name][State.support].append(self.objs[object_name])
+            
+            if logical_state.get(State.holding):
+                self.logical_states[logical_state[State.holding].name][State.held] = True
+
 
 class SceneManager:
     def __init__(self, geom="collision", is_pyplot=True, scene=None):
@@ -45,9 +61,6 @@ class SceneManager:
         self.scene = scene
         if scene is None:
             self.scene = Scene()
-
-        # Logical state
-        self.state = State
 
         # Collision Manager
         self.obj_collision_mngr = CollisionManager()
@@ -172,7 +185,7 @@ class SceneManager:
         self.scene.objs[name].h_mat = pose
         self.obj_collision_mngr.set_transform(name, pose)
 
-    def compute_ik(self, pose=np.eye(4), method="LM", max_iter=1000):
+    def compute_ik(self, pose=np.eye(4), method="LM", max_iter=100):
         if self.scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
@@ -258,15 +271,7 @@ class SceneManager:
         return self.gripper_collision_mngr.in_collision_other(self.obj_collision_mngr, return_names)
 
     def update_logical_states(self):
-        for object_name, logical_state in self.scene.logical_states.items():
-            if logical_state.get(self.state.on):
-                if not self.scene.logical_states[logical_state[self.state.on].name].get(self.state.support):
-                    self.scene.logical_states[logical_state[self.state.on].name][self.state.support] = []
-                if self.scene.objs[object_name] not in self.scene.logical_states[logical_state[self.state.on].name][self.state.support]:
-                    self.scene.logical_states[logical_state[self.state.on].name][self.state.support].append(self.scene.objs[object_name])
-            
-            if logical_state.get(self.state.holding):
-                self.scene.logical_states[logical_state[self.state.holding].name][self.state.held] = True
+        self.scene.update_logical_states()
 
     def get_objs_info(self):
         return self.scene.objs
@@ -287,9 +292,7 @@ class SceneManager:
         self.scene.show_scene_info()
 
     def show_logical_states(self):
-        print(f"*"*23 + f" {sc.OKGREEN}Logical States{sc.ENDC} "+ f"*"*23)
-        pprint.pprint(self.scene.logical_states)
-        print(f"*"*63 + "\n")
+        self.scene.show_logical_states()
 
     def render_scene(
         self, 
@@ -387,7 +390,8 @@ class SceneManager:
         alpha=0.3, 
         robot_color=None, 
         visible_tcp=True, 
-        pose=None
+        pose=None,
+        only_visible_axis=False,
     ):
         scene = scene
         if scene is None:
@@ -403,7 +407,8 @@ class SceneManager:
                 alpha=alpha, 
                 color=robot_color, 
                 visible_tcp=visible_tcp,
-                pose=pose)
+                pose=pose,
+                only_visible_axis=only_visible_axis)
         else:
             self.render = RenderTriMesh()
             self.render.render_gripper(scene.robot)
@@ -411,8 +416,8 @@ class SceneManager:
     def animation(
         self,
         ax=None, 
-        scene=None,
         fig=None,
+        scene=None,
         alpha=0.3, 
         robot_color=None,
         joint_path=[], 
@@ -468,8 +473,10 @@ class SceneManager:
             self.gripper_collision_mngr = None
             self.scene.robot.gripper = None
 
-    def copy_scene(self, scene_mngr):
+    def copy_scene(self, scene_mngr=None):
         copied_scene = SceneManager()
+        if scene_mngr is None:
+            scene_mngr = self
         for k,v in scene_mngr.__dict__.items():
             if not "collision_mngr" in k:
                 copied_scene.__dict__[k] = deepcopy(v)

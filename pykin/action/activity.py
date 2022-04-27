@@ -12,6 +12,8 @@ class ActionInfo:
     ACTION = "action"
     OBJ_NAME = "obj_name"
     GRASP_POSES = "grasp_poses"
+    TCP_POSES = "tcp_poses"
+    RELEASE_POSES = "release_poses"
     LEVEL = "level"
     
 class ActivityBase(metaclass=ABCMeta):
@@ -75,12 +77,7 @@ class ActivityBase(metaclass=ABCMeta):
         axis=[1, 1, 1],
         scale=0.05
     ):
-        if axis[0]:
-            plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 0], scale=scale, edgecolor="red")
-        if axis[1]:
-            plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 1], scale=scale, edgecolor="green")
-        if axis[2]:
-            plt.plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
+        plt.render_axis(ax, pose, axis, scale)
 
     def show(self):
         self.scene_mngr.show()

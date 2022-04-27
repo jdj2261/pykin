@@ -281,6 +281,20 @@ def plot_object(ax, obj, pose=None, alpha=0.5, color='k'):
         plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=obj.color)
 
 
+def render_axis(
+        ax,
+        pose,
+        axis=[1, 1, 1],
+        scale=0.05
+    ):
+        if axis[0]:
+            plot_normal_vector(ax, pose[:3, 3], pose[:3, 0], scale=scale, edgecolor="red")
+        if axis[1]:
+            plot_normal_vector(ax, pose[:3, 3], pose[:3, 1], scale=scale, edgecolor="green")
+        if axis[2]:
+            plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
+
+
 def get_color(params):
     color = []
     if params is not None:
@@ -496,7 +510,7 @@ def plot_animation(
         
         scene_mngr.set_robot_eef_pose(trajectory[i])
         plot_robot(
-            robot=scene_mngr.scene.robot, 
+            robot=scene_mngr.robot, 
             ax=ax, 
             visible_geom=visible_geom,
             visible_text=visible_text,

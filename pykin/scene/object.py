@@ -13,15 +13,13 @@ class Object:
         gtype, 
         gparam, 
         h_mat=np.eye(4), 
-        color='k', 
-        logical_state={}
+        color='k'
     ):
         self.name = name
         self.gtype = gtype
         self.gparam = gparam
         self.h_mat = h_mat
         self.color = color
-        self.logical_state = logical_state
         
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)

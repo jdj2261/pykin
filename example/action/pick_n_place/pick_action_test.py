@@ -55,9 +55,10 @@ pick.render_points(ax, contact_points)
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 
-####### All Grasp Pose #######
+###### All Grasp Pose #######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Grasp Pose")
 grasp_poses = list(pick.get_grasp_poses("green_box"))
+
 for grasp_pose in grasp_poses:
     pick.render_axis(ax, grasp_pose)
 pick.scene_mngr.render_objects(ax)

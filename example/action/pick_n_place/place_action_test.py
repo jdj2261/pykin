@@ -40,7 +40,7 @@ box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 scene_mngr = SceneManager("collision", is_pyplot=True)
-# scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
+scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
@@ -59,7 +59,7 @@ place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=5)
 # plt.plot_basis(ax)
 # place.scene_mngr.render_objects(ax)
 
-###### Get Release Pose #######
+# ###### Get Release Pose #######
 tcp_poses = list(pick.get_tcp_poses("green_box"))
 all_release_poses = []
 for tcp_pose in tcp_poses:
@@ -70,11 +70,10 @@ for tcp_pose in tcp_poses:
         # place.render_axis(ax, release_pose, scale=0.05)
         place.scene_mngr.render_gripper(ax, alpha=0.9, pose=release_pose)
         place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
-        plt.plot_basis(ax)
         place.scene_mngr.render_objects(ax)
         place.show()
 
-# ###### Get Release Pose not Consider Gripper #######
+###### Get Release Pose not Consider Gripper #######
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
 # all_release_poses = list(place.get_release_poses("goal_box", "green_box"))
 # for release_pose, obj_pose in all_release_poses:
@@ -82,8 +81,9 @@ for tcp_pose in tcp_poses:
 # plt.plot_basis(ax)
 # place.scene_mngr.render_objects(ax)
 # print(len(all_release_poses))
+# place.show()
 
-# ###### Get Release Pose #######
+# # ###### Get Release Pose #######
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
 # tcp_poses = list(pick.get_tcp_poses("green_box"))
 # all_release_poses = []

@@ -27,10 +27,10 @@ with open(custom_fpath) as f:
 init_qpos = controller_config["init_qpos"]
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-# blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
-# green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
-green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
+blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
+green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
+# blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
+# green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -48,49 +48,72 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, init_qpos)
 
-scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["red_box"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["blue_box"]}
-scene_mngr.scene.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=5, n_directions=50)
+pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################## Action Test ##################
-actions = list(pick.get_possible_actions(level=2))
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
-for pick_actions, _, _ in actions:
-    for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-        pick.render_axis(ax, grasp_pose)
-pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+# actions = list(pick.get_possible_actions(level=2))
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
+# for pick_actions, _, _ in actions:
+#     for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
+#         pick.render_axis(ax, grasp_pose)
+# pick.scene_mngr.render_objects(ax)
+# plt.plot_basis(ax)
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level1")
-for _, pick_actions1, _ in actions:
-    for grasp_pose in pick_actions1[pick.action_info.GRASP_POSES]:
-        pick.render_axis(ax, grasp_pose)
-pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level1")
+# for _, pick_actions1, _ in actions:
+#     for grasp_pose in pick_actions1[pick.action_info.GRASP_POSES]:
+#         pick.render_axis(ax, grasp_pose)
+# pick.scene_mngr.render_objects(ax)
+# plt.plot_basis(ax)
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level2")
-for _, _, pick_actions2 in actions:
-    for grasp_pose in pick_actions2[pick.action_info.GRASP_POSES]:
-        pick.render_axis(ax, grasp_pose)
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level2")
+# for _, _, pick_actions2 in actions:
+#     for grasp_pose in pick_actions2[pick.action_info.GRASP_POSES]:
+#         pick.render_axis(ax, grasp_pose)
 
-pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
-pick.show()
+# pick.scene_mngr.render_objects(ax)
+# plt.plot_basis(ax)
+# pick.show()
 
 ################## Transitions Test ##################
-# copied_scene = scene_mngr.copy_scene(scene_mngr)
+actions = list(pick.get_possible_actions(level=2))
+for action_lev_0, action_lev_1, action_lev_2 in actions:
+    for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_1):
+        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
+        pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
+        pick.scene_mngr.render_objects(ax)
+        scene.show_logical_states()
+        pick.scene_mngr.show()
 
-
-# actions = list(pick.get_possible_actions(level=0))
+# actions = list(pick.get_possible_actions(level=2))
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
 # for action_lev_0, action_lev_1, action_lev_2 in actions:
-#     pick.get_possible_transitions(scene_mngr, action=action_lev_0)
+#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_0):
+#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
+# pick.scene_mngr.render_objects(ax)
 
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions level1")
+# for action_lev_0, action_lev_1, action_lev_2 in actions:
+#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_1):
+#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
+# pick.scene_mngr.render_objects(ax)
+
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions level2")
+# for action_lev_0, action_lev_1, action_lev_2 in actions:
+#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_2):
+#         scene.show_logical_states()
+#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
+# pick.scene_mngr.render_objects(ax)
+# pick.scene_mngr.show()
+    
 ################## Get grasp pose Test ##################
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
 # for obj in pick.scene_mngr.scene.objs:

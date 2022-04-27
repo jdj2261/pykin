@@ -13,7 +13,6 @@ class Gripper:
         self.max_width = 0.08
         self.max_depth = 0.035
         self.tcp_position = np.array([0, 0, 0.097])
-        self.logical_state = OrderedDict()
         self.info = OrderedDict()
         self.is_attached = False
         self.attached_obj_name = None

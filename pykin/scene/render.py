@@ -86,13 +86,25 @@ class RenderPyPlot(SceneRender):
             visible_text=visible_text)
 
     @staticmethod
-    def render_gripper(ax, robot, alpha=0.3, color=None, visible_tcp=True, pose=None):
-        plt.plot_basis(ax)
+    def render_gripper(ax, robot, alpha=0.3, color=None, visible_tcp=True, pose=None, only_visible_axis=False):
+        plt.plot_basis(ax) 
 
         if pose is not None:
             robot.gripper.set_gripper_pose(pose)
         gripper_info =  robot.gripper.info
-        
+
+        if visible_tcp:
+            ax.scatter(
+                robot.gripper.info["tcp"][3][0,3], 
+                robot.gripper.info["tcp"][3][1,3], 
+                robot.gripper.info["tcp"][3][2,3], s=5, c='r')
+
+        if only_visible_axis:
+            for link, info in gripper_info.items():
+                if link == "right_gripper":
+                    RenderPyPlot.render_axis(ax, info[3])
+            return
+
         for link, info in gripper_info.items():
             if info[1] == 'mesh':
                 mesh_color = color
@@ -111,11 +123,14 @@ class RenderPyPlot(SceneRender):
                         mesh_color = np.array([color for color in mesh_color.values()]).flatten()
                 plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
 
-        if visible_tcp:
-            ax.scatter(
-                robot.gripper.info["tcp"][3][0,3], 
-                robot.gripper.info["tcp"][3][1,3], 
-                robot.gripper.info["tcp"][3][2,3], s=5, c='r')
+    @staticmethod
+    def render_axis(
+        ax,
+        pose,
+        axis=[1, 1, 1],
+        scale=0.05
+    ):
+        plt.render_axis(ax, pose, axis, scale)
 
     @staticmethod
     def render_trajectory(ax, poses):

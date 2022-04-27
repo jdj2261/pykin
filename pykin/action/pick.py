@@ -1,10 +1,11 @@
+from cmath import pi
 import numpy as np
 from enum import Enum, auto
 from copy import deepcopy
 
 import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene import Scene, SceneManager
 
 class GraspPose(Enum):
     """
@@ -26,15 +27,18 @@ class PickAction(ActivityBase):
         self.n_contacts = n_contacts
         self.n_directions = n_directions
         self.limit_angle = limit_angle_for_force_closure
-        self.filter_logical_states = [ self.scene_mngr.state.support, 
-                                       self.scene_mngr.state.static]
+        self.filter_logical_states = [ scene_mngr.scene.state.support, 
+                                       scene_mngr.scene.state.static]
 
-    def get_possible_actions(self, scene_mngr:SceneManager=None, level=0):
+    def get_possible_actions(self, scene:Scene=None, level=0):
         if not 0 <= level <= 2:
-            raise ValueError("Confirm level number!!")
+            raise ValueError("Check level number!!")
 
-        if scene_mngr is not None:
-            self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
+        if scene is None:
+            scene = self.scene_mngr.scene
+
+        self.scene_mngr = self.scene_mngr.copy_scene(self.scene_mngr)
+        self.scene_mngr.scene = deepcopy(scene)
         self.scene_mngr.show_logical_states()
         
         for obj in self.scene_mngr.scene.objs:
@@ -60,28 +64,26 @@ class PickAction(ActivityBase):
         action[self.action_info.GRASP_POSES] = poses
         return action
 
-    def get_possible_transitions(self, scene_mngr:SceneManager=None, action:dict={}):        
+    def get_possible_transitions(self, scene:Scene=None, action:dict={}):        
         if not action:
             ValueError("Not found any action!!")
 
-        # pick_obj = action[self.action_info.OBJ_NAME]
-        # scene = scene_mngr.scene
+        pick_obj = action[self.action_info.OBJ_NAME]
 
-        # for grasp_pose in action[self.action_info.GRASP_POSES]:
-        #     next_scene_mngr = scene_mngr.copy_scene(scene_mngr)
-        #     print(next_scene_mngr.scene.objs)
-
-        #     # print(next_scene_mngr.__hash__)
-        #     # Attach obj to Gripper in Scene
-        #     next_scene_mngr.scene.robot.gripper.set_gripper_pose(grasp_pose)
-        #     next_scene_mngr.attach_object_on_gripper(pick_obj, True)
-
-        #     # Update logical_state
-        #     supporting_obj = next_scene_mngr.scene.logical_states[pick_obj].get(next_scene_mngr.state.on)
+        for grasp_pose in action[self.action_info.GRASP_POSES]:
+            next_scene = deepcopy(scene)
+            supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.state.on)
+            next_scene.logical_states.get(supporting_obj.name).get(next_scene.state.support).remove(next_scene.objs[pick_obj])
             
-        #     # print(supporting_obj)
-        #     # yield scene
-
+            # Clear logical_state of pick obj
+            next_scene.logical_states[pick_obj].clear()
+            next_scene.robot.gripper.set_gripper_pose(grasp_pose)
+            
+            # Add logical_state of pick obj : {'held' : True}
+            next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.state.holding] = next_scene.objs[pick_obj]
+            next_scene.update_logical_states()
+            yield next_scene
+            
     # Not consider collision
     def get_grasp_poses(self, obj_name):
         if self.scene_mngr.scene.robot.has_gripper is None:
