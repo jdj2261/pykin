@@ -92,12 +92,12 @@ class SceneManager:
         self.scene.objs[name] = Object(name, gtype, gparam, h_mat, color)
         self.obj_collision_mngr.add_object(name, gtype, gparam, h_mat)
 
-    def add_robot(self, robot, thetas=[]):
+    def add_robot(self, robot:SingleArm, thetas=[]):
         if self.scene.robot is not None:
             raise ValueError(
                 "robot {} already exists".format(robot.robot_name)
             )
-        self.scene.robot:SingleArm = robot
+        self.scene.robot = robot
         
         if np.array(thetas).size != 0:
             self.scene.robot.set_transform(thetas)

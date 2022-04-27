@@ -59,25 +59,25 @@ scene_mngr.update_logical_states()
 pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################## Action Test ##################
-actions = list(pick.get_possible_actions(level=0))
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
-for pick_actions in actions:
-    for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
-        pick.render_axis(ax, grasp_pose)
-        pick.scene_mngr.render_objects(ax)
-        plt.plot_basis(ax)
-        pick.show()
+# actions = list(pick.get_possible_actions(level=0))
+# # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
+# for pick_actions in actions:
+#     for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
+#         fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
+#         pick.render_axis(ax, grasp_pose)
+#         pick.scene_mngr.render_objects(ax)
+#         plt.plot_basis(ax)
+#         pick.show()
 
 ################## Transitions Test ##################
-# actions = list(pick.get_possible_actions(level=2))
-# for action in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
-#         fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
-#         pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
-#         pick.scene_mngr.render_objects(ax)
-#         scene.show_logical_states()
-#         pick.scene_mngr.show()
+actions = list(pick.get_possible_actions(level=1))
+for action in actions:
+    for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
+        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
+        pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
+        pick.scene_mngr.render_objects(ax)
+        scene.show_logical_states()
+        pick.scene_mngr.show()
 
 # actions = list(pick.get_possible_actions(level=2))
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")

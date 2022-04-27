@@ -39,7 +39,7 @@ class PickAction(ActivityBase):
 
         self.scene_mngr = self.scene_mngr.copy_scene(self.scene_mngr)
         self.scene_mngr.scene = deepcopy(scene)
-        self.scene_mngr.show_logical_states()
+        # self.scene_mngr.show_logical_states()
         
         for obj in self.scene_mngr.scene.objs:
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj] for logical_state in self.filter_logical_states):
@@ -77,6 +77,8 @@ class PickAction(ActivityBase):
             
             # Clear logical_state of pick obj
             next_scene.logical_states[pick_obj].clear()
+
+            # Gripper Move
             next_scene.robot.gripper.set_gripper_pose(grasp_pose)
             
             # Add logical_state of pick obj : {'held' : True}
