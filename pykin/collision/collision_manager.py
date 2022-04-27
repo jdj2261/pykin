@@ -2,7 +2,7 @@ import numpy as np
 import collections 
 import itertools
 import copy
-
+from copy import deepcopy
 
 try:
     # pip install python-fcl
@@ -39,6 +39,9 @@ class CollisionManager:
         
         if is_robot:
             self.is_robot = is_robot
+
+    # def __deepcopy__(self, memo=None):
+    #     return deepcopy(self)
 
     def __repr__(self):
         return 'pykin.collision.collision_manager.{}()'.format(type(self).__name__)

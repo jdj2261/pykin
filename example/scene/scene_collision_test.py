@@ -65,7 +65,7 @@ scene_mngr.add_robot(robot, init_qpos)
 #     for obj1, obj2 in list(names):
 #         print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
 
-# scene_mngr.render_all_scene(ax, robot_color='b')
+# scene_mngr.render_scene(ax, robot_color='b')
 # scene_mngr.show()
 
 eef_pose = green_box_pose.h_mat
@@ -83,7 +83,7 @@ eef_pose[:3, 3] = eef_pose[:3, 3] - [0.05, 0, 0]
 #     for obj1, obj2 in list(names):
 #         print(f"{sc.FAIL}Collide!! {sc.ENDC}{obj1} and {obj2}")
 
-# scene_mngr.render_all_scene(ax, robot_color='b')
+# scene_mngr.render_scene(ax, robot_color='b')
 # scene_mngr.show()
 
 ############################# Collide Gripper and Object #############################

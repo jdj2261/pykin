@@ -129,7 +129,7 @@ class SingleArm(Robot):
         self.desired_frames = super().generate_desired_frame_recursive(self.desired_base_frame, self.eef_name)
         self._revolute_joint_names = sorted(self.get_revolute_joint_names(self.desired_frames))
 
-    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=1000):
+    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=100):
         """
         Returns joint angles obtained by computing IK
         

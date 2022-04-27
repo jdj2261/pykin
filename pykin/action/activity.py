@@ -12,6 +12,7 @@ class ActionInfo:
     ACTION = "action"
     OBJ_NAME = "obj_name"
     GRASP_POSES = "grasp_poses"
+    LEVEL = "level"
     
 class ActivityBase(metaclass=ABCMeta):
     """
@@ -26,7 +27,7 @@ class ActivityBase(metaclass=ABCMeta):
         self,
         scene_mngr:SceneManager
     ):
-        self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
+        self.scene_mngr = scene_mngr
         self.action_info = ActionInfo
 
     def __repr__(self) -> str:
@@ -52,7 +53,7 @@ class ActivityBase(metaclass=ABCMeta):
             collide = self.scene_mngr.collide_objs_and_robot()
         return collide
 
-    def _solve_ik(self, pose1, pose2, eps=1e-2):
+    def _solve_ik(self, pose1, pose2, eps=1e-3):
         pose_error = self.scene_mngr.robot.get_pose_error(pose1, pose2)
         if pose_error < eps:
             return True

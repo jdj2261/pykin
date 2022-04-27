@@ -8,7 +8,7 @@ from pykin.utils.kin_utils import apply_robot_to_scene, apply_objects_to_scene, 
 class SceneRender(metaclass=ABCMeta):
 
     @abstractclassmethod
-    def render_all_scene():
+    def render_scene():
         raise NotImplementedError
 
     @abstractclassmethod
@@ -32,7 +32,7 @@ class RenderTriMesh(SceneRender):
     def __init__(self):
         self.scene = trimesh.Scene()
     
-    def render_all_scene(self, objs, robot, geom="collision"):
+    def render_scene(self, objs, robot, geom="collision"):
         self.render_objects(objs)
         self.render_robot(robot, geom)
 
@@ -57,7 +57,7 @@ class RenderTriMesh(SceneRender):
 class RenderPyPlot(SceneRender):
 
     @staticmethod
-    def render_all_scene(ax, objs, robot, alpha, robot_color, geom, visible_geom, visible_text):
+    def render_scene(ax, objs, robot, alpha, robot_color, geom, visible_geom, visible_text):
         RenderPyPlot.render_objects(ax, objs, alpha)
         RenderPyPlot.render_robot(ax, robot, alpha, robot_color, geom, visible_geom, visible_text)
 

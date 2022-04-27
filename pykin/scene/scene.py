@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import pprint
 import matplotlib.animation as animation
@@ -26,6 +27,8 @@ class SceneManager:
 
         self.objs = OrderedDict()
         self.robot = None
+
+        self.scene = {}
 
         # Logical state
         self.state = State
@@ -279,9 +282,9 @@ class SceneManager:
         pprint.pprint(self.logical_states)
         print(f"*"*63 + "\n")
 
-    def render_all_scene(
+    def render_scene(
         self, 
-        ax=None, 
+        ax=None,
         alpha=0.3, 
         robot_color=None,
         visible_geom=True,
@@ -290,7 +293,7 @@ class SceneManager:
             raise ValueError("Robot needs to be added first")
 
         if self.is_pyplot:
-            self.render.render_all_scene(
+            self.render.render_scene(
                 ax, 
                 self.objs, 
                 self.robot, 
@@ -301,7 +304,7 @@ class SceneManager:
                 visible_text=visible_text)
         else:
             self.render = RenderTriMesh()
-            self.render.render_all_scene(objs=self.objs, robot=self.robot, geom=self.geom)
+            self.render.render_scene(objs=self.objs, robot=self.robot, geom=self.geom)
             
     def render_objects_and_gripper(self, ax=None, alpha=0.3, robot_color=None, visible_tcp=True):
         if not self.robot.has_gripper:
@@ -415,7 +418,11 @@ class SceneManager:
 
     def copy_scene(self, scene_mngr):
         copied_scene = SceneManager()
-        copied_scene.__dict__ = {k:v for k,v in scene_mngr.__dict__.items()}
+        for k,v in scene_mngr.__dict__.items():
+            if not "collision_mngr" in k:
+                copied_scene.__dict__[k] = deepcopy(v)
+            else:
+                copied_scene.__dict__[k] = v
         return copied_scene
 
     @property

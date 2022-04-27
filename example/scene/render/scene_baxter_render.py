@@ -49,7 +49,7 @@ scene_mngr.add_robot(robot)
 ############################# Render Test #############################
 scene_mngr.set_robot_eef_pose(init_qpos)
 
-scene_mngr.render_all_scene(ax)
+scene_mngr.render_scene(ax)
 scene_mngr.show()
 
 

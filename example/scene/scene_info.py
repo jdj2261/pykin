@@ -62,5 +62,5 @@ scene_mngr.show_logical_states()
 # print(scene_mngr.get_gripper_info())
 # print(scene_mngr.get_robot_info())
 
-scene_mngr.render_all_scene(ax, visible_text=True)
+scene_mngr.render_scene(ax, visible_text=True)
 scene_mngr.show()

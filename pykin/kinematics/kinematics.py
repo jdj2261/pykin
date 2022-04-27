@@ -55,7 +55,7 @@ class Kinematics:
         current_joints, 
         target_pose, 
         method="LM", 
-        max_iter=1000
+        max_iter=100
     ):
         """
         Returns joint angles obtained by computing IK

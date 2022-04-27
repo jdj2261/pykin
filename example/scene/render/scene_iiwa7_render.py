@@ -47,5 +47,5 @@ init_qpos = controller_config["init_qpos"]
 
 scene_mngr.set_robot_eef_pose(init_qpos)
 
-scene_mngr.render_all_scene(ax)
+scene_mngr.render_scene(ax)
 scene_mngr.show()

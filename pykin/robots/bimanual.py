@@ -132,7 +132,7 @@ class Bimanual(Robot):
         self._revolute_joint_names[arm] = super().get_revolute_joint_names(self._frames[arm])
         self._target_pose[arm] = np.zeros(len(self._revolute_joint_names[arm]))
 
-    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=1000):
+    def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=100):
         """
         Returns joint angles obtained by computing IK
         

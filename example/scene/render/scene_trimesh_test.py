@@ -44,7 +44,7 @@ target_thetas = [0, 0.1963495375, 0.00, -2.616, 0.00, 2.9415926, 0.78539815]
 scene_mngr.set_robot_eef_pose(target_thetas)
 
 scene_mngr.set_gripper_tcp_pose(green_box_pose.h_mat)
-# scene_mngr.render_all_scene(ax, alpha=0.5, robot_color='b')
+# scene_mngr.render_scene(ax, alpha=0.5, robot_color='b')
 # scene_mngr.render_robot(ax, visible_text=False)
 # scene_mngr.render_objects(ax)
 scene_mngr.render_gripper(ax)

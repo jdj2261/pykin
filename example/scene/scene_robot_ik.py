@@ -53,5 +53,5 @@ eef_pose = fk[scene_mngr.robot.eef_name].h_mat
 target_thetas = scene_mngr.compute_ik(eef_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 
-scene_mngr.render_all_scene(ax)
+scene_mngr.render_scene(ax)
 scene_mngr.show()

@@ -60,7 +60,7 @@ target_thetas = scene_mngr.robot.get_result_qpos(init_qpos, grasp_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 scene_mngr.attach_object_on_gripper("green_box", False)
 
-# scene_mngr.render_all_scene(ax, visible_geom=True, alpha=0.7)
+# scene_mngr.render_scene(ax, visible_geom=True, alpha=0.7)
 # scene_mngr.show()
 
 

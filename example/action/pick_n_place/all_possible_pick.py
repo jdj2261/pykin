@@ -56,23 +56,42 @@ scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
 scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=10, n_directions=50)
+pick = PickAction(scene_mngr, n_contacts=5, n_directions=50)
 
-
-# actions = list(pick.get_possible_actions(level=1))
-# pick.get_possible_transitions(actions=actions)
-
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
+################## Action Test ##################
 actions = list(pick.get_possible_actions(level=2))
-for pick_actions in actions:
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
+for pick_actions, _, _ in actions:
     for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
         pick.render_axis(ax, grasp_pose)
-    # for grasp_pose in action:
-    #     pick.render_axis(ax, grasp_pose)
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
+
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level1")
+for _, pick_actions1, _ in actions:
+    for grasp_pose in pick_actions1[pick.action_info.GRASP_POSES]:
+        pick.render_axis(ax, grasp_pose)
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
+
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level2")
+for _, _, pick_actions2 in actions:
+    for grasp_pose in pick_actions2[pick.action_info.GRASP_POSES]:
+        pick.render_axis(ax, grasp_pose)
+
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()
 
+################## Transitions Test ##################
+# copied_scene = scene_mngr.copy_scene(scene_mngr)
+
+
+# actions = list(pick.get_possible_actions(level=0))
+# for action_lev_0, action_lev_1, action_lev_2 in actions:
+#     pick.get_possible_transitions(scene_mngr, action=action_lev_0)
+
+################## Get grasp pose Test ##################
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
 # for obj in pick.scene_mngr.objs:
 #     if obj == "table":
@@ -80,11 +99,11 @@ pick.show()
 #     # contact_points = list(pick.get_contact_points(obj_name=obj))
 #     # pick.render_points(ax, contact_points)
 
-#     grasp_poses = list(pick.get_grasp_poses(obj))
+#     grasp_poses = pick.get_grasp_poses(obj)
 #     # for grasp_pose in grasp_poses:
 #     #     pick.render_axis(ax, grasp_pose)
 
-#     grasp_poses_for_only_gripper = list(pick.get_grasp_poses_for_only_gripper(grasp_poses))
+#     grasp_poses_for_only_gripper = pick.get_grasp_poses_for_only_gripper(grasp_poses)
 #     # for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
 #     #     pick.render_axis(ax, grasp_pose_for_only_gripper, scale=0.05)
 
