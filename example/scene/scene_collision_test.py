@@ -55,7 +55,7 @@ scene_mngr.add_robot(robot, init_qpos)
 # scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
 
 ############################# Self Collision #############################
-# target_thetas = np.random.randn(scene_mngr.robot.arm_dof)
+# target_thetas = np.random.randn(scene_mngr.scene.robot.arm_dof)
 # scene_mngr.set_robot_eef_pose(target_thetas)
 # scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 

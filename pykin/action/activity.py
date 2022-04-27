@@ -54,7 +54,7 @@ class ActivityBase(metaclass=ABCMeta):
         return collide
 
     def _solve_ik(self, pose1, pose2, eps=1e-3):
-        pose_error = self.scene_mngr.robot.get_pose_error(pose1, pose2)
+        pose_error = self.scene_mngr.scene.robot.get_pose_error(pose1, pose2)
         if pose_error < eps:
             return True
         return False

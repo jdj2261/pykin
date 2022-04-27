@@ -52,8 +52,8 @@ class Planner(NodeData, metaclass=ABCMeta):
         
         eef_poses = []
         for step, joint in enumerate(self.joint_path):
-            fk = self._scene_mngr.robot.forward_kin(joint)
-            eef_poses.append(fk[self._scene_mngr.robot.eef_name].pos)
+            fk = self._scene_mngr.scene.robot.forward_kin(joint)
+            eef_poses.append(fk[self._scene_mngr.scene.robot.eef_name].pos)
         return eef_poses
 
     @abstractclassmethod
@@ -90,11 +90,11 @@ class Planner(NodeData, metaclass=ABCMeta):
         Setup joint limits (lower and upper)
         """
         if self.arm is not None:
-            self.q_limits_lower = self._scene_mngr.robot.joint_limits_lower[self.arm]
-            self.q_limits_upper = self._scene_mngr.robot.joint_limits_upper[self.arm]
+            self.q_limits_lower = self._scene_mngr.scene.robot.joint_limits_lower[self.arm]
+            self.q_limits_upper = self._scene_mngr.scene.robot.joint_limits_upper[self.arm]
         else:
-            self.q_limits_lower = self._scene_mngr.robot.joint_limits_lower
-            self.q_limits_upper = self._scene_mngr.robot.joint_limits_upper
+            self.q_limits_lower = self._scene_mngr.scene.robot.joint_limits_lower
+            self.q_limits_upper = self._scene_mngr.scene.robot.joint_limits_upper
 
     def _check_q_in_limits(self, q_in):
         """
@@ -121,7 +121,7 @@ class Planner(NodeData, metaclass=ABCMeta):
         Setup end-effector name
         """
         if self.arm is not None:
-            self.eef_name = self._scene_mngr.robot.eef_name[self.arm]
+            self.eef_name = self._scene_mngr.scene.robot.eef_name[self.arm]
 
     def _collide(
         self, 
@@ -149,13 +149,13 @@ class Planner(NodeData, metaclass=ABCMeta):
         for link, transform in fk.items():
             if link in self._scene_mngr.robot_collision_mngr._objs:
                 if self._scene_mngr.robot_collision_mngr.geom == "visual":
-                    h_mat = np.dot(transform.h_mat, self._scene_mngr.robot.links[link].visual.offset.h_mat)
+                    h_mat = np.dot(transform.h_mat, self._scene_mngr.scene.robot.links[link].visual.offset.h_mat)
                 else:
-                    h_mat = np.dot(transform.h_mat, self._scene_mngr.robot.links[link].collision.offset.h_mat)
+                    h_mat = np.dot(transform.h_mat, self._scene_mngr.scene.robot.links[link].collision.offset.h_mat)
                 self._scene_mngr.robot_collision_mngr.set_transform(name=link, h_mat=h_mat)
         
         if self._scene_mngr.is_attached:
-            gripper_pose = fk[self._scene_mngr.robot.eef_name].h_mat
+            gripper_pose = fk[self._scene_mngr.scene.robot.eef_name].h_mat
             h_mat = np.dot(gripper_pose, self._scene_mngr._transform_bet_gripper_n_obj)
             self._scene_mngr.robot_collision_mngr.set_transform(name=self._scene_mngr.attached_obj_name, h_mat=h_mat)
 
@@ -185,13 +185,13 @@ class Planner(NodeData, metaclass=ABCMeta):
         Returns:
             fk (OrderedDict)
         """
-        if self._scene_mngr.robot.robot_name == "sawyer":
+        if self._scene_mngr.scene.robot.robot_name == "sawyer":
             q_in = np.concatenate((np.zeros(1), q_in))
 
         if self.arm is not None:
-            fk = self._scene_mngr.robot.forward_kin(q_in, self._scene_mngr.robot.desired_frames[self.arm])
+            fk = self._scene_mngr.scene.robot.forward_kin(q_in, self._scene_mngr.scene.robot.desired_frames[self.arm])
         else:
-            fk = self._scene_mngr.robot.forward_kin(q_in)
+            fk = self._scene_mngr.scene.robot.forward_kin(q_in)
         return fk
 
     @property

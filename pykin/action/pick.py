@@ -37,8 +37,8 @@ class PickAction(ActivityBase):
             self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
         self.scene_mngr.show_logical_states()
         
-        for obj in self.scene_mngr.objs:
-            if not any(logical_state in self.scene_mngr.logical_states[obj] for logical_state in self.filter_logical_states):
+        for obj in self.scene_mngr.scene.objs:
+            if not any(logical_state in self.scene_mngr.scene.logical_states[obj] for logical_state in self.filter_logical_states):
                 grasp_poses = list(self.get_grasp_poses(obj_name=obj))
                 action = self.get_action(obj, grasp_poses)
                 if level == 0:
@@ -69,25 +69,25 @@ class PickAction(ActivityBase):
 
         # for grasp_pose in action[self.action_info.GRASP_POSES]:
         #     next_scene_mngr = scene_mngr.copy_scene(scene_mngr)
-        #     print(next_scene_mngr.objs)
+        #     print(next_scene_mngr.scene.objs)
 
         #     # print(next_scene_mngr.__hash__)
         #     # Attach obj to Gripper in Scene
-        #     next_scene_mngr.robot.gripper.set_gripper_pose(grasp_pose)
+        #     next_scene_mngr.scene.robot.gripper.set_gripper_pose(grasp_pose)
         #     next_scene_mngr.attach_object_on_gripper(pick_obj, True)
 
         #     # Update logical_state
-        #     supporting_obj = next_scene_mngr.logical_states[pick_obj].get(next_scene_mngr.state.on)
+        #     supporting_obj = next_scene_mngr.scene.logical_states[pick_obj].get(next_scene_mngr.state.on)
             
         #     # print(supporting_obj)
         #     # yield scene
 
     # Not consider collision
     def get_grasp_poses(self, obj_name):
-        if self.scene_mngr.robot.has_gripper is None:
+        if self.scene_mngr.scene.robot.has_gripper is None:
             raise ValueError("Robot doesn't have a gripper")
 
-        gripper = self.scene_mngr.robot.gripper
+        gripper = self.scene_mngr.scene.robot.gripper
         tcp_poses = self.get_tcp_poses(obj_name)
         for tcp_pose in tcp_poses:
             grasp_pose = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
@@ -105,7 +105,7 @@ class PickAction(ActivityBase):
 
     # for level wise - 2 (Consider IK and collision)
     def get_grasp_poses_for_robot(self, grasp_poses_for_only_grpper):
-        if self.scene_mngr.robot is None:
+        if self.scene_mngr.scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
         grasp_poses = grasp_poses_for_only_grpper
@@ -121,8 +121,8 @@ class PickAction(ActivityBase):
                 yield grasp_pose
 
     def get_contact_points(self, obj_name):
-        copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
-        copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
+        copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
+        copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         
         cnt = 0
         while cnt < self.n_contacts:
@@ -147,7 +147,7 @@ class PickAction(ActivityBase):
         unit_vectorBA = -1 * unit_vectorAB
         angle_B2AB = np.arccos(normalB.dot(unit_vectorBA))
 
-        if distance > self.scene_mngr.robot.gripper.max_width:
+        if distance > self.scene_mngr.scene.robot.gripper.max_width:
             return False
 
         if angle_A2AB > limit_angle or angle_B2AB > limit_angle:

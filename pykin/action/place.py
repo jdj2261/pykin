@@ -37,7 +37,7 @@ class PlaceAction(ActivityBase):
 
     # Not consider collision
     def get_release_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
-        gripper = self.scene_mngr.robot.gripper
+        gripper = self.scene_mngr.scene.robot.gripper
         transformed_tcp_poses = list(self.get_transformed_tcp_poses(support_obj_name, held_obj_name, gripper_tcp_pose))
         for tcp_pose, obj_pose_transformed in transformed_tcp_poses:
             release_pose = tcp_pose
@@ -47,7 +47,7 @@ class PlaceAction(ActivityBase):
 
     # for level wise - 1 (Consider gripper collision)
     def get_release_poses_for_only_gripper(self, release_poses):
-        if self.scene_mngr.robot.has_gripper is None:
+        if self.scene_mngr.scene.robot.has_gripper is None:
             raise ValueError("Robot doesn't have a gripper")
 
         if release_poses[0][0] is None:
@@ -60,7 +60,7 @@ class PlaceAction(ActivityBase):
 
     # for level wise - 2 (Consider IK and collision)
     def get_release_poses_for_robot(self, release_poses_for_only_grpper):
-        if self.scene_mngr.robot is None:
+        if self.scene_mngr.scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
         release_poses = release_poses_for_only_grpper
@@ -76,8 +76,8 @@ class PlaceAction(ActivityBase):
                 yield release_pose, obj_pose_transformed
 
     def get_surface_points_for_support_obj(self, obj_name):
-        copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
-        copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
+        copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
+        copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
 
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
@@ -94,8 +94,8 @@ class PlaceAction(ActivityBase):
         return weights
 
     def get_surface_points_for_held_obj(self, obj_name):
-        copied_mesh = deepcopy(self.scene_mngr.objs[obj_name].gparam)
-        copied_mesh.apply_transform(self.scene_mngr.objs[obj_name].h_mat)
+        copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
+        copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
@@ -112,7 +112,7 @@ class PlaceAction(ActivityBase):
         return weights
 
     def get_transformed_tcp_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
-        held_obj_pose = deepcopy(self.scene_mngr.objs[held_obj_name].h_mat)
+        held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
 
         support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)
         held_obj_points, held_obj_normals = self.get_surface_points_for_held_obj(held_obj_name)

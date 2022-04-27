@@ -86,8 +86,8 @@ class RRTStarPlanner(Planner):
         while True:
             cnt += 1
             for _ in range(total_cnt):
-                self.goal_q = self._scene_mngr.robot.inverse_kin(
-                    np.random.randn(self._scene_mngr.robot.arm_dof), self._goal_pose)
+                self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
+                    np.random.randn(self._scene_mngr.scene.robot.arm_dof), self._goal_pose)
                 
                 if self._check_q_in_limits(self.goal_q):
                     logger.info(f"The joint limit has been successfully checked.")

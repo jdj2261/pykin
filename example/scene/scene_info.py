@@ -46,12 +46,12 @@ scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat
 scene_mngr.add_robot(robot, init_qpos)
 ############################# Logical State #############################
 
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+scene_mngr.scene.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["red_box"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["blue_box"]}
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
 
 scene_mngr.update_logical_states()
 scene_mngr.show_scene_info()

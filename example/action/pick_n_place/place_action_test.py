@@ -69,7 +69,7 @@ for tcp_pose in tcp_poses:
         all_release_poses.append((release_pose, obj_pose))
         # place.render_axis(ax, release_pose, scale=0.05)
         place.scene_mngr.render_gripper(ax, alpha=0.9, pose=release_pose)
-        place.scene_mngr.render.render_object(ax, place.scene_mngr.objs["green_box"], obj_pose)
+        place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
         plt.plot_basis(ax)
         place.scene_mngr.render_objects(ax)
         place.show()
@@ -78,7 +78,7 @@ for tcp_pose in tcp_poses:
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
 # all_release_poses = list(place.get_release_poses("goal_box", "green_box"))
 # for release_pose, obj_pose in all_release_poses:
-#     place.scene_mngr.render.render_object(ax, place.scene_mngr.objs["green_box"], obj_pose)
+#     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
 # plt.plot_basis(ax)
 # place.scene_mngr.render_objects(ax)
 # print(len(all_release_poses))

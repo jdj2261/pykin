@@ -48,12 +48,12 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, init_qpos)
 
-scene_mngr.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.objs["table"]}
-scene_mngr.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.objs["red_box"]}
-scene_mngr.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.objs["blue_box"]}
-scene_mngr.logical_states["table"] = {scene_mngr.state.static : True}
-scene_mngr.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["red_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["red_box"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.state.on : scene_mngr.scene.objs["blue_box"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.state.holding : None}
 scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=5, n_directions=50)
@@ -93,7 +93,7 @@ pick.show()
 
 ################## Get grasp pose Test ##################
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
-# for obj in pick.scene_mngr.objs:
+# for obj in pick.scene_mngr.scene.objs:
 #     if obj == "table":
 #         continue
 #     # contact_points = list(pick.get_contact_points(obj_name=obj))

@@ -496,7 +496,7 @@ def plot_animation(
         
         scene_mngr.set_robot_eef_pose(trajectory[i])
         plot_robot(
-            robot=scene_mngr.robot, 
+            robot=scene_mngr.scene.robot, 
             ax=ax, 
             visible_geom=visible_geom,
             visible_text=visible_text,

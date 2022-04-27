@@ -76,8 +76,8 @@ class CartesianPlanner(Planner):
         self._cur_qpos = super()._convert_numpy_type(cur_q)
         self._goal_pose = super()._convert_numpy_type(goal_pose)
         
-        init_fk = self._scene_mngr.robot.kin.forward_kinematics(self._scene_mngr.robot.desired_frames, self._cur_qpos)
-        self._cur_pose = self._scene_mngr.robot.compute_eef_pose(init_fk)
+        init_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
+        self._cur_pose = self._scene_mngr.scene.robot.compute_eef_pose(init_fk)
         
         if not super()._check_robot_col_mngr():
             logger.warning(f"This Planner does not do collision checking")
@@ -106,16 +106,16 @@ class CartesianPlanner(Planner):
         while True:
             cnt += 1
             collision_pose = {}
-            cur_fk = self._scene_mngr.robot.kin.forward_kinematics(self._scene_mngr.robot.desired_frames, self._cur_qpos)
+            cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
 
-            current_transform = cur_fk[self._scene_mngr.robot.eef_name].h_mat
-            eef_position = cur_fk[self._scene_mngr.robot.eef_name].pos
+            current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
+            eef_position = cur_fk[self._scene_mngr.scene.robot.eef_name].pos
 
             joint_path = [self._cur_qpos]
             for step, (pos, ori) in enumerate(waypoints):
                 target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, self._threshold) 
-                J = jac.calc_jacobian(self._scene_mngr.robot.desired_frames, cur_fk, self._dimension)
+                J = jac.calc_jacobian(self._scene_mngr.scene.robot.desired_frames, cur_fk, self._dimension)
                 J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + self._damping**2 * np.identity(6)))
 
                 dq = np.dot(J_dls, err_pose)
@@ -128,13 +128,13 @@ class CartesianPlanner(Planner):
                     collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
                     continue
 
-                cur_fk = self._scene_mngr.robot.kin.forward_kinematics(self._scene_mngr.robot.desired_frames, self._cur_qpos)
-                current_transform = cur_fk[self._scene_mngr.robot.eef_name].h_mat
+                cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
+                current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
 
                 if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
                     joint_path.append(self._cur_qpos)
 
-            err = t_utils.compute_pose_error(self._goal_pose[:3,3], cur_fk[self._scene_mngr.robot.eef_name].pos)
+            err = t_utils.compute_pose_error(self._goal_pose[:3,3], cur_fk[self._scene_mngr.scene.robot.eef_name].pos)
             
             if collision_pose.keys():
                 logger.error(f"Failed Generate Path.. Collision may occur.")

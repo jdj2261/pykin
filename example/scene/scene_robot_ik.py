@@ -47,8 +47,8 @@ scene_mngr.add_robot(robot, init_qpos)
 
 ############################# Robot IK, FK Test #############################
 target_thetas = np.array([0, 0.1963495375, 0.0, -2.616, 0.0, 2.9415926, 0.78539815])
-fk = scene_mngr.robot.forward_kin(target_thetas)
-eef_pose = fk[scene_mngr.robot.eef_name].h_mat
+fk = scene_mngr.scene.robot.forward_kin(target_thetas)
+eef_pose = fk[scene_mngr.scene.robot.eef_name].h_mat
 
 target_thetas = scene_mngr.compute_ik(eef_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
