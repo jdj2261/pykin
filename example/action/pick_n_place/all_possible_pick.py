@@ -59,61 +59,34 @@ scene_mngr.update_logical_states()
 pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################## Action Test ##################
-# actions = list(pick.get_possible_actions(level=2))
+actions = list(pick.get_possible_actions(level=0))
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
-# for pick_actions, _, _ in actions:
-#     for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-#         pick.render_axis(ax, grasp_pose)
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level1")
-# for _, pick_actions1, _ in actions:
-#     for grasp_pose in pick_actions1[pick.action_info.GRASP_POSES]:
-#         pick.render_axis(ax, grasp_pose)
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible action level2")
-# for _, _, pick_actions2 in actions:
-#     for grasp_pose in pick_actions2[pick.action_info.GRASP_POSES]:
-#         pick.render_axis(ax, grasp_pose)
-
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-# pick.show()
+for pick_actions in actions:
+    for grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
+        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible actions")
+        pick.render_axis(ax, grasp_pose)
+        pick.scene_mngr.render_objects(ax)
+        plt.plot_basis(ax)
+        pick.show()
 
 ################## Transitions Test ##################
-actions = list(pick.get_possible_actions(level=2))
-for action_lev_0, action_lev_1, action_lev_2 in actions:
-    for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_1):
-        fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
-        pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
-        pick.scene_mngr.render_objects(ax)
-        scene.show_logical_states()
-        pick.scene_mngr.show()
+# actions = list(pick.get_possible_actions(level=2))
+# for action in actions:
+#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
+#         fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
+#         pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
+#         pick.scene_mngr.render_objects(ax)
+#         scene.show_logical_states()
+#         pick.scene_mngr.show()
 
 # actions = list(pick.get_possible_actions(level=2))
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
-# for action_lev_0, action_lev_1, action_lev_2 in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_0):
+# for action in actions:
+#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
 #         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
 # pick.scene_mngr.render_objects(ax)
 
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions level1")
-# for action_lev_0, action_lev_1, action_lev_2 in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_1):
-#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
-# pick.scene_mngr.render_objects(ax)
 
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions level2")
-# for action_lev_0, action_lev_1, action_lev_2 in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_2):
-#         scene.show_logical_states()
-#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
-# pick.scene_mngr.render_objects(ax)
-# pick.scene_mngr.show()
-    
 ################## Get grasp pose Test ##################
 # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
 # for obj in pick.scene_mngr.scene.objs:

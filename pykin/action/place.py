@@ -42,7 +42,6 @@ class PlaceAction(ActivityBase):
 
         for held_obj in self.scene_mngr.scene.objs:
             # Absolutely Need held logical state
-            tcp_pose = None
             if self.scene_mngr.scene.logical_states[held_obj].get('held'):
                 tcp_pose = self.scene_mngr.scene.robot.gripper.get_gripper_tcp_pose()
                 
@@ -51,18 +50,40 @@ class PlaceAction(ActivityBase):
                         continue
                     if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
                         release_poses = list(self.get_release_poses(sup_obj, held_obj, tcp_pose))
-                        action = self.get_action(held_obj, release_poses)
-                        yield action
+                        action = self.get_action(held_obj, sup_obj, release_poses)
+                        if level == 0:
+                            yield action
+                        elif level <= 2:
+                            release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
+                            action_level_1 = self.get_action(held_obj, sup_obj, release_poses_for_only_gripper)
+                            if level == 1:
+                                yield action_level_1
+                            else:
+                                goal_release_poses = list(self.get_release_poses_for_robot(release_poses_for_only_gripper))
+                                action_level_2 = self.get_action(held_obj, sup_obj, goal_release_poses)
+                                yield action_level_2
 
-    def get_action(self, obj_name, poses):
+    def get_action(self, held_obj_name, PLACE_OBJ_NAME, poses):
         action = {}
         action[self.action_info.ACTION] = "place"
-        action[self.action_info.OBJ_NAME] = obj_name
+        action[self.action_info.HELD_OBJ_NAME] = held_obj_name
+        action[self.action_info.PLACE_OBJ_NAME] = PLACE_OBJ_NAME
         action[self.action_info.RELEASE_POSES] = poses
         return action
     
-    def get_possible_transitions(self, scene:Scene=None):
-        pass
+    def get_possible_transitions(self, scene:Scene=None, action:dict={}):
+        if not action:
+            ValueError("Not found any action!!")
+
+        held_obj = action[self.action_info.PICK_OBJ_NAME]
+
+        for release_pose, obj_pose in action[self.action_info.RELEASE_POSES]:
+            next_scene = deepcopy(scene)
+            
+            # Clear logical_state of held obj
+
+            # Add logical_state of held obj : {'on' : sup_obj}
+            yield next_scene
 
     # Not consider collision
     def get_release_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
@@ -93,8 +114,8 @@ class PlaceAction(ActivityBase):
             raise ValueError("Robot needs to be added first")
 
         release_poses = release_poses_for_only_grpper
-        if release_poses[0][0] is None:
-            raise ValueError("Not found release poses for only gripper!")
+        if not release_poses:
+            return
 
         for release_pose, obj_pose_transformed in release_poses:
             thetas = self.scene_mngr.compute_ik(pose=release_pose, max_iter=100)

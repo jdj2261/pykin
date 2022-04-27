@@ -10,7 +10,9 @@ from pykin.utils.action_utils import surface_sampling
 @dataclass
 class ActionInfo:
     ACTION = "action"
-    OBJ_NAME = "obj_name"
+    PICK_OBJ_NAME = "pick_obj_name"
+    HELD_OBJ_NAME = "held_obj_name"
+    PLACE_OBJ_NAME = "place_obj_name"
     GRASP_POSES = "grasp_poses"
     TCP_POSES = "tcp_poses"
     RELEASE_POSES = "release_poses"

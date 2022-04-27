@@ -1,4 +1,5 @@
 from platform import release
+from re import L
 import numpy as np
 import sys, os
 import yaml
@@ -62,19 +63,19 @@ pick = PickAction(scene_mngr, n_contacts=5, n_directions=5)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 
-pick_actions = list(pick.get_possible_actions(level=2))
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
-for action_lev_0, action_lev_1, action_lev_2 in pick_actions:
-    for scene in pick.get_possible_transitions(scene_mngr.scene, action=action_lev_2):
-        place_actions = list(place.get_possible_actions(scene)) 
-        for action in place_actions:
-            for release_pose, obj_pose in action[place.action_info.RELEASE_POSES]:
-                # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
-                place.scene_mngr.set_object_pose(action[place.action_info.OBJ_NAME], obj_pose)
-                place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[action[place.action_info.OBJ_NAME]])
-                # place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[action[place.action_info.OBJ_NAME]], obj_pose)
+pick_actions = list(pick.get_possible_actions(level=1))
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+for pick_action in pick_actions:
+    for scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
+        place_actions = list(place.get_possible_actions(scene, level=1)) 
+        for place_action in place_actions:
+            for release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
+                fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+                place.scene_mngr.set_object_pose(place_action[place.action_info.HELD_OBJ_NAME], obj_pose)
+                place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place_action[place.action_info.HELD_OBJ_NAME]])
+                # place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[action[place.action_info.PICK_OBJ_NAME]], obj_pose)
                 place.scene_mngr.render_gripper(ax, pose=release_pose, alpha=0.9)
                 place.render_axis(ax, obj_pose)
                 # plt.plot_basis(ax)
-place.scene_mngr.render_objects(ax)
-place.show()
+                place.scene_mngr.render_objects(ax)
+                place.show()

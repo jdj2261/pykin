@@ -46,21 +46,21 @@ class PickAction(ActivityBase):
                 grasp_poses = list(self.get_grasp_poses(obj_name=obj))
                 action = self.get_action(obj, grasp_poses)
                 if level == 0:
-                    yield action, None, None
+                    yield action
                 elif level <= 2:
                     grasp_poses_for_only_gripper = list(self.get_grasp_poses_for_only_gripper(grasp_poses))
                     action_level_1 = self.get_action(obj, grasp_poses_for_only_gripper)
                     if level == 1:
-                        yield action, action_level_1, None
+                        yield action_level_1
                     else:
                         goal_grasp_poses = list(self.get_grasp_poses_for_robot(grasp_poses_for_only_gripper))
                         action_level_2 = self.get_action(obj, goal_grasp_poses)
-                        yield action, action_level_1, action_level_2
+                        yield action_level_2
 
     def get_action(self, obj_name, poses):
         action = {}
         action[self.action_info.ACTION] = "pick"
-        action[self.action_info.OBJ_NAME] = obj_name
+        action[self.action_info.PICK_OBJ_NAME] = obj_name
         action[self.action_info.GRASP_POSES] = poses
         return action
 
@@ -68,7 +68,7 @@ class PickAction(ActivityBase):
         if not action:
             ValueError("Not found any action!!")
 
-        pick_obj = action[self.action_info.OBJ_NAME]
+        pick_obj = action[self.action_info.PICK_OBJ_NAME]
 
         for grasp_pose in action[self.action_info.GRASP_POSES]:
             next_scene = deepcopy(scene)
