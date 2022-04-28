@@ -43,13 +43,13 @@ class PlaceAction(ActivityBase):
         for held_obj in self.scene_mngr.scene.objs:
             # Absolutely Need held logical state
             if self.scene_mngr.scene.logical_states[held_obj].get('held'):
-                tcp_pose = self.scene_mngr.scene.robot.gripper.get_gripper_tcp_pose()
+                eef_pose = self.scene_mngr.scene.robot.gripper.get_gripper_pose()
                 
                 for sup_obj in self.scene_mngr.scene.objs:
                     if sup_obj == held_obj:
                         continue
                     if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
-                        release_poses = list(self.get_release_poses(sup_obj, held_obj, tcp_pose))
+                        release_poses = list(self.get_release_poses(sup_obj, held_obj, eef_pose))
                         action = self.get_action(held_obj, sup_obj, release_poses)
                         if level == 0:
                             yield action
@@ -98,14 +98,11 @@ class PlaceAction(ActivityBase):
             yield next_scene
 
     # Not consider collision
-    def get_release_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
-        gripper = self.scene_mngr.scene.robot.gripper
-        transformed_tcp_poses = list(self.get_transformed_tcp_poses(support_obj_name, held_obj_name, gripper_tcp_pose))
-        for tcp_pose, obj_pose_transformed in transformed_tcp_poses:
-            release_pose = tcp_pose
-            if gripper_tcp_pose is not None:
-                release_pose = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
-            yield release_pose, obj_pose_transformed
+    def get_release_poses(self, support_obj_name, held_obj_name, gripper_eef_pose=None):
+        # gripper = self.scene_mngr.scene.robot.gripper
+        transformed_eef_poses = list(self.get_transformed_eef_poses(support_obj_name, held_obj_name, gripper_eef_pose))
+        for eef_pose, obj_pose_transformed in transformed_eef_poses:
+            yield eef_pose, obj_pose_transformed
 
     # for level wise - 1 (Consider gripper collision)
     def get_release_poses_for_only_gripper(self, release_poses):
@@ -173,7 +170,7 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 0.7
         return weights
 
-    def get_transformed_tcp_poses(self, support_obj_name, held_obj_name, gripper_tcp_pose=None):
+    def get_transformed_eef_poses(self, support_obj_name, held_obj_name, gripper_eef_pose=None):
         held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
 
         support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)
@@ -187,11 +184,11 @@ class PlaceAction(ActivityBase):
                 held_obj_pose_transformed, held_obj_pose_rotated = self._get_obj_pose_transformed(
                     held_obj_pose, support_obj_point, held_obj_point_transformed, rot_mat)
 
-                if gripper_tcp_pose is not None:
+                if gripper_eef_pose is not None:
                     T_obj_pose_and_obj_pose_transformed = np.dot(held_obj_pose, np.linalg.inv(held_obj_pose_rotated))
-                    tcp_pose_transformed = self._get_tcp_pose_transformed(
-                        T_obj_pose_and_obj_pose_transformed, gripper_tcp_pose, support_obj_point, held_obj_point_transformed)
-                    yield tcp_pose_transformed, held_obj_pose_transformed
+                    eef_pose_transformed = self._get_eef_pose_transformed(
+                        T_obj_pose_and_obj_pose_transformed, gripper_eef_pose, support_obj_point, held_obj_point_transformed)
+                    yield eef_pose_transformed, held_obj_pose_transformed
                 else:
                     yield None, held_obj_pose_transformed
 
@@ -205,10 +202,10 @@ class PlaceAction(ActivityBase):
         obj_pose_transformed[:3, 3] = held_obj_pose[:3, 3] + (sup_obj_point - held_obj_point_transformed) + np.array([0, 0, self.release_distance])
         return obj_pose_transformed, obj_pose_rotated
 
-    def _get_tcp_pose_transformed(self, T, tcp_pose, sup_obj_point, held_obj_point_transformed):
-        tcp_pose_transformed = np.dot(T, tcp_pose)
+    def _get_eef_pose_transformed(self, T, eef_pose, sup_obj_point, held_obj_point_transformed):
+        eef_pose_transformed = np.dot(T, eef_pose)
 
-        result_tcp_pose_transformed = np.eye(4)
-        result_tcp_pose_transformed[:3, :3] = tcp_pose_transformed[:3, :3]
-        result_tcp_pose_transformed[:3, 3] = tcp_pose_transformed[:3, 3] + (sup_obj_point - held_obj_point_transformed) + np.array([0, 0, self.release_distance])
-        return result_tcp_pose_transformed
+        result_eef_pose_transformed = np.eye(4)
+        result_eef_pose_transformed[:3, :3] = eef_pose_transformed[:3, :3]
+        result_eef_pose_transformed[:3, 3] = eef_pose_transformed[:3, 3] + (sup_obj_point - held_obj_point_transformed) + np.array([0, 0, self.release_distance])
+        return result_eef_pose_transformed

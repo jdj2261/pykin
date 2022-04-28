@@ -49,6 +49,10 @@ class Scene:
                 if self.objs[object_name] not in self.logical_states[logical_state[State.on].name][State.support]:
                     self.logical_states[logical_state[State.on].name][State.support].append(self.objs[object_name])
             
+            
+            if logical_state.get(State.support) is not None and not logical_state.get(State.support):
+                self.logical_states[object_name].pop(State.support)
+
             if logical_state.get(State.holding):
                 self.logical_states[logical_state[State.holding].name][State.held] = True
 
