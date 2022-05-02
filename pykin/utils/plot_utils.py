@@ -1,18 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib import offsetbox
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
-# Colors of each directions axes. For ex X is green
-directions_colors = ["green", "cyan", "orange"]
 
-def init_3d_figure(name=None, figsize=(15,7.5), dpi= 80):
+def init_3d_figure(name=None, figsize=(10,6), dpi=120):
     """
     Initializes 3d figure
     """
     fig = plt.figure(name, figsize=figsize, dpi= dpi)
     ax = fig.add_subplot(111, projection='3d')
+    ax._axis3don = False
+    fig.set_facecolor('beige')
+    ax.set_facecolor('beige') 
     return fig, ax
 
 
@@ -23,7 +25,7 @@ def show_figure():
     plt.show()
 
 
-def _check_color_type(color):
+def check_color_type(color):
     """
     Check color's data type
     """
@@ -57,42 +59,83 @@ def plot_basis(ax=None, robot=None):
     if robot is not None:
         offset = np.linalg.norm(robot.offset.pos)
     else:
-        offset = 1
-        
-    if offset == 0:
-        offset = 1
+        offset = 0.5
+    
+    ax.view_init(30,-10,)
+    ax.set_xlim3d([-offset, offset])
+    ax.set_ylim3d([-offset, offset])
+    ax.set_zlim3d([-offset, offset])
 
-    ax.set_xlim3d([-1.0 * offset, 1.0 * offset])
-    ax.set_xlabel('X')
-
-    ax.set_ylim3d([-1.0 * offset, 1.0 * offset])
-    ax.set_ylabel('Y')
-
-    ax.set_zlim3d([-1.0 * offset, 1.0 * offset])
-    ax.set_zlabel('Z')
-
-
-    ax.plot([0, offset * 1.5], [0, 0], [0, 0],
-            c=directions_colors[0], label="X")
-    ax.plot([0, 0], [0, offset * 1.5], [0, 0],
-            c=directions_colors[1], label="Y")
-    ax.plot([0, 0], [0, 0], [0, offset * 1.5],
-            c=directions_colors[2], label="Z")
     
 def plot_robot(
     ax=None,
     robot=None,
     geom="collision",
-    visible_geom=False, 
+    only_visible_geom=False, 
     visible_text=True,
     visible_scatter=True,
-    alpha=0.4,
+    alpha=1.0,
     color=None
 ):
+    def _plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
+        """
+        Plot baxter robot
+        """
+        torso_nodes = [nodes[0]] + [nodes[3]]
+        head_nodes = torso_nodes + nodes[7:12]
+        pedestal_nodes = torso_nodes + [nodes[6]]
+        right_nodes = torso_nodes + nodes[13:18] + nodes[20:29]
+        left_nodes = torso_nodes + nodes[31:36] + nodes[38:47]
+
+        head_lines = ax.plot([x[0] for x in head_nodes], [x[1] for x in head_nodes], [
+            x[2] for x in head_nodes], linewidth=5, label="head")
+        pedestal_lines = ax.plot([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], [
+            x[2] for x in pedestal_nodes], linewidth=5, label="pedestal")
+        right_lines = ax.plot([x[0] for x in right_nodes], [x[1] for x in right_nodes], [
+            x[2] for x in right_nodes], linewidth=5, label="right arm")
+        left_lines = ax.plot([x[0] for x in left_nodes], [x[1] for x in left_nodes], [
+            x[2] for x in left_nodes], linewidth=5, label="left arm")
+
+        if visible_text:
+            head_label = '(%0.4f, %0.4f, %0.4f)' % (
+                head_nodes[-1][0], head_nodes[-1][1], head_nodes[-1][2])
+            pedestal_label = '(%0.4f, %0.4f, %0.4f)' % (
+                pedestal_nodes[-1][0], pedestal_nodes[-1][1], pedestal_nodes[-1][2])
+            right_label = '(%0.4f, %0.4f, %0.4f)' % (
+                right_nodes[8][0], right_nodes[8][1], right_nodes[8][2])
+            left_label = '(%0.4f, %0.4f, %0.4f)' % (
+                left_nodes[8][0], left_nodes[8][1], left_nodes[8][2])
+
+            ax.text(head_nodes[-1][0], head_nodes[-1][1],
+                    head_nodes[-1][2], head_label, size="8")
+            ax.text(pedestal_nodes[-1][0], pedestal_nodes[-1][1],
+                pedestal_nodes[-1][2], pedestal_label, size="8")
+            ax.text(right_nodes[-1][0], right_nodes[-1][1],
+                    right_nodes[-1][2], right_label, size="8")
+            ax.text(left_nodes[-1][0], left_nodes[-1][1],
+                    left_nodes[-1][2], left_label, size="8")
+
+        if visible_scatter:
+            ax.scatter([x[0] for x in head_nodes], [x[1] for x in head_nodes], 
+                [x[2] for x in head_nodes], s=30, c=head_lines[0].get_color())
+            ax.scatter([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], 
+                [x[2] for x in pedestal_nodes], s=30, c=pedestal_lines[0].get_color())
+            ax.scatter([x[0] for x in right_nodes], [x[1] for x in right_nodes], 
+                [x[2] for x in right_nodes], s=30, c=right_lines[0].get_color())
+            ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
+                [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
     """
     Plot robot
     """
     name = robot.robot_name
+    
+    plot_basis(ax, robot)
+    if only_visible_geom:
+        plot_geom(ax, robot, geom, alpha=alpha, color=color)
+        return
+    
+    if robot.gripper.is_attached:
+        plot_mesh(ax, mesh=robot.info[geom][robot.gripper.attached_obj_name][2], h_mat=robot.info[geom][robot.gripper.attached_obj_name ][3], alpha=alpha, color='k')
     
     links = []
     nodes = []
@@ -128,49 +171,21 @@ def plot_robot(
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
-    if visible_geom:
-        plot_geom(ax, robot, geom, alpha=alpha, color=color)
-    else:
-        if robot.gripper.is_attached:
-            plot_mesh(ax, mesh=robot.info[geom][robot.gripper.attached_obj_name][2], h_mat=robot.info[geom][robot.gripper.attached_obj_name ][3], alpha=alpha, color='k')
-        plot_basis(ax, robot)
 
-    ax.legend()
+
 
 def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     """
     Plot robot's collision
     """
+
     plot_basis(ax, robot)
     for link, info in robot.info[geom].items():
         h_mat = info[3]
 
         if info[1] == 'mesh':
-            mesh_color = color
-            if color is None:
-                if geom == "collision":
-                    link = robot.links.get(link)
-                    if link is not None:
-                        mesh_color = link.collision.gparam.get('color')
-                    else:
-                        mesh_color = None
-
-                    if mesh_color is None:
-                        mesh_color = 'k'
-                    else:
-                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-                else:
-                    link = robot.links.get(link)
-                    if link is not None:
-                        mesh_color = link.visual.gparam.get('color')
-                    else:
-                        mesh_color = None
-
-                    if mesh_color is None:
-                        mesh_color = 'k'
-                    else:
-                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-            plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
+            mesh_color = get_mesh_color(robot, link, geom, color)
+            plot_mesh(ax, mesh=info[2], h_mat=h_mat, alpha=alpha, color=mesh_color)
 
         if info[1] == 'cylinder':
             length = float(info[2][0])
@@ -190,56 +205,7 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
             plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
     
 
-def _plot_baxter(ax, nodes, visible_text=True, visible_scatter=True):
-    """
-    Plot baxter robot
-    """
-    torso_nodes = [nodes[0]] + [nodes[3]]
-    head_nodes = torso_nodes + nodes[7:12]
-    pedestal_nodes = torso_nodes + [nodes[6]]
-    right_nodes = torso_nodes + nodes[13:18] + nodes[20:29]
-    left_nodes = torso_nodes + nodes[31:36] + nodes[38:47]
-
-    head_lines = ax.plot([x[0] for x in head_nodes], [x[1] for x in head_nodes], [
-        x[2] for x in head_nodes], linewidth=5, label="head")
-    pedestal_lines = ax.plot([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], [
-        x[2] for x in pedestal_nodes], linewidth=5, label="pedestal")
-    right_lines = ax.plot([x[0] for x in right_nodes], [x[1] for x in right_nodes], [
-        x[2] for x in right_nodes], linewidth=5, label="right arm")
-    left_lines = ax.plot([x[0] for x in left_nodes], [x[1] for x in left_nodes], [
-        x[2] for x in left_nodes], linewidth=5, label="left arm")
-
-    if visible_text:
-        head_label = '(%0.4f, %0.4f, %0.4f)' % (
-            head_nodes[-1][0], head_nodes[-1][1], head_nodes[-1][2])
-        pedestal_label = '(%0.4f, %0.4f, %0.4f)' % (
-            pedestal_nodes[-1][0], pedestal_nodes[-1][1], pedestal_nodes[-1][2])
-        right_label = '(%0.4f, %0.4f, %0.4f)' % (
-            right_nodes[8][0], right_nodes[8][1], right_nodes[8][2])
-        left_label = '(%0.4f, %0.4f, %0.4f)' % (
-            left_nodes[8][0], left_nodes[8][1], left_nodes[8][2])
-
-        ax.text(head_nodes[-1][0], head_nodes[-1][1],
-                head_nodes[-1][2], head_label, size="8")
-        ax.text(pedestal_nodes[-1][0], pedestal_nodes[-1][1],
-            pedestal_nodes[-1][2], pedestal_label, size="8")
-        ax.text(right_nodes[-1][0], right_nodes[-1][1],
-                right_nodes[-1][2], right_label, size="8")
-        ax.text(left_nodes[-1][0], left_nodes[-1][1],
-                left_nodes[-1][2], left_label, size="8")
-
-    if visible_scatter:
-        ax.scatter([x[0] for x in head_nodes], [x[1] for x in head_nodes], 
-            [x[2] for x in head_nodes], s=30, c=head_lines[0].get_color())
-        ax.scatter([x[0] for x in pedestal_nodes], [x[1] for x in pedestal_nodes], 
-            [x[2] for x in pedestal_nodes], s=30, c=pedestal_lines[0].get_color())
-        ax.scatter([x[0] for x in right_nodes], [x[1] for x in right_nodes], 
-            [x[2] for x in right_nodes], s=30, c=right_lines[0].get_color())
-        ax.scatter([x[0] for x in left_nodes], [x[1] for x in left_nodes], 
-            [x[2] for x in left_nodes], s=30, c=left_lines[0].get_color())
-
-
-def plot_objects(ax, objects, alpha=0.5, color='k'):    
+def plot_objects(ax, objects, alpha=0.5):    
     """
     Plot objects
     """
@@ -248,7 +214,11 @@ def plot_objects(ax, objects, alpha=0.5, color='k'):
         o_param = info.gparam
         o_pose = info.h_mat
         if o_type == "mesh":
-            plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=alpha, color=info.color)
+            if "table" in info.name:
+                _alpha = 0.3
+            else:
+                _alpha = alpha
+            plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=_alpha, color=info.color)
         if o_type == "sphere":
             plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=alpha, color=info.color)
         if o_type == "box":
@@ -295,6 +265,30 @@ def render_axis(
             plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
 
 
+def get_mesh_color(robot, link, geom, color=None):
+    mesh_color = None
+    if color is None:
+        if geom == "collision":
+            link = robot.links.get(link)
+            if link is not None:
+                mesh_color = link.collision.gparam.get('color')
+            
+            if mesh_color is None:
+                mesh_color = 'k'
+            else:
+                mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+        else:
+            link = robot.links.get(link)
+            if link is not None:
+                mesh_color = link.visual.gparam.get('color')
+
+            if mesh_color is None:
+                mesh_color = 'k'
+            else:
+                mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+    return mesh_color
+
+
 def get_color(params):
     color = []
     if params is not None:
@@ -316,7 +310,7 @@ def plot_cylinder(
     """
     Plot cylinder
     """
-    color = _check_color_type(color)
+    color = check_color_type(color)
     axis_start = h_mat.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  h_mat.dot(np.array([0, 0, length/2, 1]))[:3]
 
@@ -353,7 +347,7 @@ def plot_sphere(
     """
     Plot sphere
     """
-    color = _check_color_type(color)
+    color = check_color_type(color)
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = center_point[0] + radius * np.sin(phi) * np.cos(theta)
     y = center_point[1] + radius * np.sin(phi) * np.sin(theta)
@@ -366,7 +360,7 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, h_mat=np.eye(4), color="k"):
     """
     Plot box
     """
-    color = _check_color_type(color)
+    color = check_color_type(color)
     
     if not isinstance(size, np.ndarray):
         size = np.array(size)
@@ -483,7 +477,7 @@ def plot_animation(
     objects=None,
     geom="collision",
     visible_objects=False,
-    visible_geom=False,
+    only_visible_geom=False,
     visible_text=True,
     visible_scatter=True,
     interval=100, 
@@ -512,7 +506,7 @@ def plot_animation(
         plot_robot(
             robot=scene_mngr.robot, 
             ax=ax, 
-            visible_geom=visible_geom,
+            only_visible_geom=only_visible_geom,
             visible_text=visible_text,
             visible_scatter=visible_scatter,
             geom=geom)

@@ -20,7 +20,7 @@ setup(
         "tqdm",
         "pyyaml",
         "python-fcl",
-	"networkx"
+	    "networkx"
     ],
     eager_resources=['*'],
     include_package_data=True,

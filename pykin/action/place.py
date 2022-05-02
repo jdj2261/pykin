@@ -29,16 +29,14 @@ class PlaceAction(ActivityBase):
         self.filter_logical_states = [scene_mngr.scene.state.held]
                                     #   scene_mngr.scene.state.static]
 
-    def get_possible_actions(self, scene:Scene=None, level=0):
+    def get_possible_actions(self, scene:Scene=None, release_poses:list=[], level:int=1):
         if not 0 <= level <= 2:
             raise ValueError("Check level number!!")
 
         if scene is None:
             scene = self.scene_mngr.scene
 
-        self.scene_mngr = self.scene_mngr.copy_scene(self.scene_mngr)
         self.scene_mngr.scene = deepcopy(scene)
-        # self.scene_mngr.show_logical_states()
 
         for held_obj in self.scene_mngr.scene.objs:
             # Absolutely Need held logical state
@@ -50,18 +48,14 @@ class PlaceAction(ActivityBase):
                         continue
                     if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
                         release_poses = list(self.get_release_poses(sup_obj, held_obj, eef_pose))
-                        action = self.get_action(held_obj, sup_obj, release_poses)
-                        if level == 0:
-                            yield action
-                        elif level <= 2:
+                        if level == 1:
                             release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
                             action_level_1 = self.get_action(held_obj, sup_obj, release_poses_for_only_gripper)
-                            if level == 1:
-                                yield action_level_1
-                            else:
-                                goal_release_poses = list(self.get_release_poses_for_robot(release_poses_for_only_gripper))
-                                action_level_2 = self.get_action(held_obj, sup_obj, goal_release_poses)
-                                yield action_level_2
+                            yield action_level_1
+                        else:
+                            goal_release_poses = list(self.get_release_poses_for_robot(release_poses_for_only_gripper))
+                            action_level_2 = self.get_action(held_obj, sup_obj, goal_release_poses)
+                            yield action_level_2
 
     def get_action(self, held_obj_name, PLACE_OBJ_NAME, poses):
         action = {}

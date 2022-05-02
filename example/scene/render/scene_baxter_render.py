@@ -11,7 +11,7 @@ from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as plt
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+fig, ax = plt.init_3d_figure()
 
 file_path = '../../../asset/urdf/baxter/baxter.urdf'
 
@@ -39,7 +39,7 @@ green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
-scene_mngr = SceneManager("visual", False)
+scene_mngr = SceneManager("visual", True)
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
@@ -49,7 +49,5 @@ scene_mngr.add_robot(robot)
 ############################# Render Test #############################
 scene_mngr.set_robot_eef_pose(init_qpos)
 
-scene_mngr.render_scene(ax)
+scene_mngr.render_scene(ax, alpha=1.0)
 scene_mngr.show()
-
-

@@ -31,7 +31,7 @@ robot.set_transform(thetas)
 _, ax = plt.init_3d_figure("Target Pose")
 plt.plot_robot(robot=robot, 
                ax=ax,
-               visible_geom=True)
+               only_visible_geom=True)
 
 #################################################################################
 #                                Inverse Kinematics                             #
@@ -57,12 +57,12 @@ robot.set_transform(thetas_LM)
 _, ax = plt.init_3d_figure("LM IK Result")
 plt.plot_robot(robot=robot, 
                ax=ax,
-               visible_geom=True)
+               only_visible_geom=True)
 
 thetas_NR = np.concatenate((head_thetas, ik_NR_result["right"], ik_NR_result["left"]))
 robot.set_transform(thetas_NR)
 _, ax = plt.init_3d_figure("NR IK Result")
 plt.plot_robot(robot=robot, 
                ax=ax,
-               visible_geom=True)
+               only_visible_geom=True)
 plt.show_figure()

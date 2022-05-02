@@ -18,6 +18,6 @@ _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(ax=ax, 
                robot=robot,
                geom="visual",
-               visible_geom=False,
+               only_visible_geom=False,
                alpha=0.5)
 plt.show_figure()

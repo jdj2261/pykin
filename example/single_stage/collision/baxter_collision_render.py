@@ -32,7 +32,7 @@ c_manager.show_collision_info()
 # plt.plot_robot(ax=ax, 
 #                robot=robot,
 #                geom="collision",
-#                visible_geom=True)
+#                only_visible_geom=True)
 # plt.show_figure()
 
 for link, info in robot.info[c_manager.geom].items():

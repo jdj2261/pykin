@@ -24,7 +24,7 @@ _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(ax=ax, 
                robot=robot,
                geom="collision",
-               visible_geom=True)
+               only_visible_geom=True)
 
 fk = robot.forward_kin(target_thetas)
 target_pose = robot.compute_eef_pose(fk)
@@ -35,5 +35,5 @@ _, ax = plt.init_3d_figure("IK")
 plt.plot_robot(ax=ax, 
                robot=robot,
                geom="collision",
-               visible_geom=True)
+               only_visible_geom=True)
 plt.show_figure()

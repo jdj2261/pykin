@@ -67,6 +67,9 @@ class SingleArm(Robot):
         if geom == "visual":
             return self.info["visual"]
 
+    def get_gripper_init_pose(self):
+        return self.init_fk["right_gripper"].h_mat
+
     def check_limit_joint(self, q_in):
         """
         check q_in within joint limits

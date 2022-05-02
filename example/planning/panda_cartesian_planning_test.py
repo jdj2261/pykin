@@ -1,4 +1,3 @@
-from ntpath import join
 import numpy as np
 import sys, os
 import yaml
@@ -14,7 +13,7 @@ from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.utils.transform_utils import get_matrix_from_rpy
 import pykin.utils.plot_utils as plt
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+fig, ax = plt.init_3d_figure()
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -60,7 +59,7 @@ target_thetas = scene_mngr.scene.robot.get_result_qpos(init_qpos, grasp_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 scene_mngr.attach_object_on_gripper("green_box", False)
 
-# scene_mngr.render_scene(ax, visible_geom=True, alpha=0.7)
+# scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 # scene_mngr.show()
 
 
@@ -84,8 +83,9 @@ scene_mngr.animation(
     fig,
     joint_path=joint_path,
     eef_poses=eef_poses,
-    visible_geom=True,
+    only_visible_geom=True,
     visible_text=True,
+    alpha=1.0,
     interval=1,
     repeat=True
 )

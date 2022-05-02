@@ -14,7 +14,7 @@ from pykin.utils.kin_utils import ShellColors as sc
 import pykin.utils.plot_utils as plt
 
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+fig, ax = plt.init_3d_figure()
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(

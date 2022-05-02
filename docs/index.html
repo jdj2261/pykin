@@ -319,13 +319,13 @@ $ make install
 <span class="sd">Only baxter and sawyer robots can see collisions.</span>
 <span class="sd">It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># If visible_geom is True, visualize collision</span>
+<span class="c1"># If only_visible_geom is True, visualize collision</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot_robot</span><span class="p">(</span><span class="n">robot</span><span class="p">,</span>
                 <span class="n">transformations</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">transformations</span><span class="p">,</span>
                 <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">robot_name</span><span class="p">,</span>
                 <span class="n">visible_visual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">visible_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">only_visible_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">mesh_path</span><span class="o">=</span><span class="s1">&#39;../../asset/urdf/baxter/&#39;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show_figure</span><span class="p">()</span>

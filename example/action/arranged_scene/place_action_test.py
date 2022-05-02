@@ -51,7 +51,7 @@ pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=5)
 
 ###### Surface sampling held and support obj#######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
+fig, ax = plt.init_3d_figure( name="Sampling Object")
 support_points, _ = place.get_surface_points_for_support_obj("goal_box")
 place.render_points(ax, support_points)
 support_points, _ = place.get_surface_points_for_held_obj("green_box")
@@ -65,7 +65,7 @@ place.scene_mngr.render_objects(ax)
 # for eef_pose in eef_poses:
 #     release_poses = list(place.get_release_poses("goal_box", "green_box", eef_pose))
 #     for release_pose, obj_pose in release_poses:
-#         fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+#         fig, ax = plt.init_3d_figure( name="Get Release Pose")
 #         all_release_poses.append((release_pose, obj_pose))
 #         # place.render_axis(ax, release_pose, scale=0.05)
 #         place.scene_mngr.render_gripper(ax, alpha=0.9, pose=release_pose)
@@ -76,13 +76,13 @@ place.scene_mngr.render_objects(ax)
 ###### Get Release Pose not Consider Gripper #######
 # all_release_poses = list(place.get_release_poses("goal_box", "green_box"))
 # for release_pose, obj_pose in all_release_poses:
-#     fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+#     fig, ax = plt.init_3d_figure( name="Get Release Pose")
 #     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
 #     place.scene_mngr.render_objects(ax)
 #     place.show()
 
 # # # ###### Get Release Pose #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+fig, ax = plt.init_3d_figure( name="Get Release Pose")
 tcp_poses = list(pick.get_tcp_poses("green_box"))
 all_release_poses = []
 for tcp_pose in tcp_poses:
@@ -95,7 +95,7 @@ place.scene_mngr.render_objects(ax)
 print(len(all_release_poses))
 
 ##### Level wise - 1 #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name=f"Level wise 1")    
+fig, ax = plt.init_3d_figure( name=f"Level wise 1")    
 release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses))
 for release_pose_for_only_gripper, _ in release_poses_for_only_gripper:
     place.render_axis(ax, release_pose_for_only_gripper, scale=0.05)
@@ -104,7 +104,7 @@ place.scene_mngr.render_objects(ax)
 print(len(release_poses_for_only_gripper))
 
 ###### Level wise - 2 #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 2")
+fig, ax = plt.init_3d_figure( name="Level wise 2")
 goal_release_poses = list(place.get_release_poses_for_robot(release_poses_for_only_gripper))
 for goal_release_pose, _ in goal_release_poses:
     place.render_axis(ax, goal_release_pose, scale=0.05)

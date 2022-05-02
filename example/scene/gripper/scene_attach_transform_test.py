@@ -50,20 +50,22 @@ r_mat = get_matrix_from_rpy(np.array([0, np.pi/2, 0]))
 grasp_pose[:3, :3] = r_mat
 grasp_pose[:3, 3] = grasp_pose[:3, 3] - [0.1, 0, 0]
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Move grasp pose")
+fig, ax = plt.init_3d_figure( name="Move grasp pose")
 target_thetas = scene_mngr.compute_ik(grasp_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
-# scene_mngr.render_scene(ax, visible_geom=True, alpha=0.7)
+# scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Attach Object")
-scene_mngr.attach_object_on_gripper("green_box", False)
-# scene_mngr.render_scene(ax, visible_geom=True, alpha=0.7)
+fig, ax = plt.init_3d_figure( name="Attach Object")
+scene_mngr.attach_object_on_gripper("green_box", True)
+# scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Move default pose")
-scene_mngr.set_robot_eef_pose(init_qpos)
-# scene_mngr.render_scene(ax, visible_geom=True, alpha=0.7)
+fig, ax = plt.init_3d_figure( name="Move default pose")
+scene_mngr.set_gripper_pose(robot.init_fk["right_gripper"].h_mat)
+print(scene_mngr.scene.robot.gripper.info['right_gripper'])
+# scene_mngr.set_robot_eef_pose(init_qpos)
+# scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
 scene_mngr.show()

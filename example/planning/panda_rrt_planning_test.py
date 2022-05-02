@@ -13,7 +13,7 @@ from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.utils.transform_utils import get_matrix_from_rpy
 import pykin.utils.plot_utils as plt
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+fig, ax = plt.init_3d_figure()
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -78,8 +78,9 @@ scene_mngr.animation(
     fig,
     joint_path=joint_path,
     eef_poses=target_eef_poses,
-    visible_geom=True,
+    only_visible_geom=True,
     visible_text=True,
+    alpha=1,
     interval=1,
     repeat=True
 )

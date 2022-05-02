@@ -1,5 +1,3 @@
-from platform import release
-from re import L
 import numpy as np
 import sys, os
 import yaml
@@ -64,13 +62,13 @@ place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 
 # pick_actions = list(pick.get_possible_actions(level=1))
-# # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+# # fig, ax = plt.init_3d_figure( name="Get Release Pose")
 # for pick_action in pick_actions:
 #     for scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions(scene, level=1)) 
 #         for place_action in place_actions:
 #             for release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
-#                 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+#                 fig, ax = plt.init_3d_figure( name="Get Release Pose")
 #                 place.scene_mngr.set_object_pose(place_action[place.action_info.HELD_OBJ_NAME], obj_pose)
 #                 place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place_action[place.action_info.HELD_OBJ_NAME]])
 #                 # place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[action[place.action_info.PICK_OBJ_NAME]], obj_pose)
@@ -84,13 +82,13 @@ place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 ################## Transitions Test ##################
 # pick_actions = list(pick.get_possible_actions(level=1))
-# # fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+# # fig, ax = plt.init_3d_figure( name="Get Release Pose")
 # for pick_action in pick_actions:
 #     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions(pick_scene, level=1)) 
 #         for place_action in place_actions:
 #             for place_scene in place.get_possible_transitions(pick_scene, action=place_action):
-#                 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
+#                 fig, ax = plt.init_3d_figure( name="all possible transitions")
 #                 place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
 #                 place.scene_mngr.render_objects(ax, place_scene)
 #                 place_scene.show_logical_states()
@@ -98,7 +96,7 @@ place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 #                 place.scene_mngr.show()
 
 pick_actions = list(pick.get_possible_actions(level=1))
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Release Pose")
+# fig, ax = plt.init_3d_figure( name="Get Release Pose")
 for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions(pick_scene, level=1)) 
@@ -110,9 +108,9 @@ for pick_action in pick_actions:
                         place_actions2 = list(place.get_possible_actions(pick_scene_2, level=1)) 
                         for place_action2 in place_actions2:
                             for place_scene2 in place.get_possible_transitions(pick_scene_2, action=place_action2):
-                                fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="all possible transitions")
+                                fig, ax = plt.init_3d_figure( name="all possible transitions")
                                 place.scene_mngr.render_gripper(ax, place_scene2, alpha=0.9, only_visible_axis=False)
-                                place.scene_mngr.render_objects(ax, place_scene2)
+                                place.scene_mngr.render_objects(ax, place_scene2, alpha=1.0)
 
                                 place_scene2.show_logical_states()
                                 # place_scene2.show_scene_info()

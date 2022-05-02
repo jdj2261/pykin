@@ -14,6 +14,8 @@ class ActionInfo:
     HELD_OBJ_NAME = "held_obj_name"
     PLACE_OBJ_NAME = "place_obj_name"
     GRASP_POSES = "grasp_poses"
+    PRE_GRASP_POSES = "pre_grasp_poses"
+    POST_GRASP_POSES = "post_grasp_poses"
     TCP_POSES = "tcp_poses"
     RELEASE_POSES = "release_poses"
     LEVEL = "level"
@@ -38,11 +40,15 @@ class ActivityBase(metaclass=ABCMeta):
         return 'pykin.action.activity.{}()'.format(type(self).__name__)
 
     @abstractclassmethod
-    def get_possible_actions(self, scene):
+    def get_possible_actions_level_1(self):
         raise NotImplementedError
 
     @abstractclassmethod
-    def get_possible_transitions(self, scene):
+    def get_possible_ik_solve_level_2(self):
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def get_possible_transitions(self):
         raise NotImplementedError
 
     def get_surface_points_from_mesh(self, mesh, n_sampling=100, weights=None):

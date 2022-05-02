@@ -27,8 +27,8 @@ with open(custom_fpath) as f:
 init_qpos = controller_config["init_qpos"]
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
-green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
+blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
+green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -46,39 +46,43 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, init_qpos)
 
-pick = PickAction(scene_mngr, 4, 50)
+pick = PickAction(scene_mngr, 5, 50)
 
-####### All Contact Points #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get contact points")
+###### All Contact Points #######
+fig, ax = plt.init_3d_figure(name="Get contact points")
 contact_points = list(pick.get_contact_points(obj_name="green_box"))
 pick.render_points(ax, contact_points)
-pick.scene_mngr.render_objects(ax)
+pick.scene_mngr.render_objects(ax, alpha=0.5)
 plt.plot_basis(ax)
 
-###### All Grasp Pose #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Get Grasp Pose")
-grasp_poses = list(pick.get_grasp_poses("green_box"))
-
+##### All Grasp Pose #######
+grasp_poses = list(pick.get_all_grasp_poses("green_box"))
+fig, ax = plt.init_3d_figure(name="Get Grasp Pose")
 for grasp_pose in grasp_poses:
-    pick.render_axis(ax, grasp_pose)
+    # pick.render_axis(ax, grasp_pose["pre_grasp_pose"])
+    pick.render_axis(ax, grasp_pose[pick.grasp_name.GRASP])
+    # pick.render_axis(ax, grasp_pose["post_grasp_pose"])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
+# pick.show()
 
-###### Level wise - 1 #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 1")
-grasp_poses_for_only_gripper = list(pick.get_grasp_poses_for_only_gripper(grasp_poses))
+# ###### Level wise - 1 #######
+fig, ax = plt.init_3d_figure(name="Level wise 1")
+grasp_poses_for_only_gripper = list(pick.get_all_grasp_poses_for_only_gripper(grasp_poses))
 for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
-    pick.render_axis(ax, grasp_pose_for_only_gripper, scale=0.05)
-    # pick.scene_mngr.render_gripper(ax, alpha=0.3, robot_color='b', pose=grasp_pose)
+    pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.GRASP])
+    pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.PRE_GRASP])
+    pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.POST_GRASP])
+    # pick.scene_mngr.render_gripper(ax, alpha=0.7, pose=grasp_pose_for_only_gripper[pick.grasp_name.PRE_GRASP])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
+# pick.show()
 
 ####### Level wise - 2 #######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Level wise 2")
-goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses_for_only_gripper))
-for grasp_pose in goal_grasp_poses:
-    pick.render_axis(ax, grasp_pose, scale=0.05)
-
+fig, ax = plt.init_3d_figure(name="Level wise 2")
+for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
+    if pick.get_possible_ik_solve_level_2(grasp_pose=grasp_pose_for_only_gripper):
+        pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.GRASP])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()

@@ -11,7 +11,7 @@ from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as plt
 
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120)
+fig, ax = plt.init_3d_figure()
 
 file_path = '../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -48,5 +48,5 @@ init_qpos = controller_config["init_qpos"]
 
 scene_mngr.set_robot_eef_pose(init_qpos)
 
-scene_mngr.render_scene(ax)
+scene_mngr.render_scene(ax, alpha=1.0)
 scene_mngr.show()

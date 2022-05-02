@@ -113,12 +113,12 @@ You can see 4 example robot information.
     Only baxter and sawyer robots can see collisions.
     It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
     """
-    # If visible_geom is True, visualize collision
+    # If only_visible_geom is True, visualize collision
     plt.plot_robot(robot, 
                     transformations=robot.transformations,
                     ax=ax, 
                     name=robot.robot_name,
-                    visible_geom=True)
+                    only_visible_geom=True)
     ax.legend()
     plt.show_figure()
 

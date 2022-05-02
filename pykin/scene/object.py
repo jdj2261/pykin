@@ -30,8 +30,8 @@ class Object:
         return f"""{scolors.HEADER}Object{scolors.ENDC}(name={self.name}, pos={pos})"""
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.__dict__ == other.__dict__
+        if (self.name == other.name):
+            return True
         else:
             return False
 

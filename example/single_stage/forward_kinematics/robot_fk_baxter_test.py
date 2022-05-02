@@ -18,5 +18,5 @@ _, ax = plt.init_3d_figure("FK")
 plt.plot_robot(ax=ax, 
                robot=robot,
                geom="visual",
-               visible_geom=True)
+               only_visible_geom=True)
 plt.show_figure()

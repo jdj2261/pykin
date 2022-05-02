@@ -57,9 +57,9 @@ class RenderTriMesh(SceneRender):
 class RenderPyPlot(SceneRender):
 
     @staticmethod
-    def render_scene(ax, objs, robot, alpha, robot_color, geom, visible_geom, visible_text):
+    def render_scene(ax, objs, robot, alpha, robot_color, geom, only_visible_geom, visible_text):
         RenderPyPlot.render_objects(ax, objs, alpha)
-        RenderPyPlot.render_robot(ax, robot, alpha, robot_color, geom, visible_geom, visible_text)
+        RenderPyPlot.render_robot(ax, robot, alpha, robot_color, geom, only_visible_geom, visible_text)
 
     @staticmethod
     def render_objects_and_gripper(ax, objs, robot, alpha, robot_color, visible_tcp):
@@ -71,23 +71,23 @@ class RenderPyPlot(SceneRender):
         plt.plot_objects(ax, objs, alpha)
 
     @staticmethod
-    def render_object(ax, obj, pose=None, alpha=0.3):
+    def render_object(ax, obj, pose=None, alpha=1.0):
         plt.plot_object(ax, obj, pose, alpha)
 
     @staticmethod
-    def render_robot(ax, robot, alpha, color, geom="collision", visible_geom=True, visible_text=True):
+    def render_robot(ax, robot, alpha, robot_color=None, geom="collision", only_visible_geom=True, visible_text=True):
         plt.plot_robot(
             ax, 
             robot, 
             alpha=alpha, 
-            color=color,
+            color=robot_color,
             geom=geom,
-            visible_geom=visible_geom,
+            only_visible_geom=only_visible_geom,
             visible_text=visible_text)
 
     @staticmethod
-    def render_gripper(ax, robot, alpha=0.3, color=None, visible_tcp=True, pose=None, only_visible_axis=False):
-        plt.plot_basis(ax) 
+    def render_gripper(ax, robot, alpha=0.3, robot_color=None, visible_tcp=True, pose=None, only_visible_axis=False):
+        plt.plot_basis(ax, robot) 
 
         if pose is not None:
             robot.gripper.set_gripper_pose(pose)
@@ -107,20 +107,9 @@ class RenderPyPlot(SceneRender):
 
         for link, info in gripper_info.items():
             if info[1] == 'mesh':
-                mesh_color = color
-
-                if color is None:
-                    link = robot.links.get(link)
-                
-                    if link is not None:
-                        mesh_color = link.collision.gparam.get('color')
-                    else:
-                        mesh_color = None
-
-                    if mesh_color is None:
-                        mesh_color = 'k'
-                    else:
-                        mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+                mesh_color = plt.get_mesh_color(robot, link, 'collision', color=robot_color)
+                if len(info) > 4 :
+                    mesh_color = info[4]
                 plt.plot_mesh(ax, mesh=info[2], h_mat=info[3], alpha=alpha, color=mesh_color)
 
     @staticmethod
