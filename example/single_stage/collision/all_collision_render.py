@@ -104,9 +104,8 @@ c_manager.setup_robot_collision(baxter_robot, geom="visual")
 
 for link, info in baxter_robot.info[c_manager.geom].items():
     if link in c_manager._objs:
-        print(link)
         c_manager.set_transform(name=link, h_mat=info[3])
 
 scene = apply_robot_to_scene(trimesh_scene=scene, robot=baxter_robot, geom=c_manager.geom)
 
-# scene.show()
+scene.show()

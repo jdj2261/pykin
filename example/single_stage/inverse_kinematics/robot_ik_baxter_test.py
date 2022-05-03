@@ -64,5 +64,6 @@ robot.set_transform(thetas_NR)
 _, ax = plt.init_3d_figure("NR IK Result")
 plt.plot_robot(robot=robot, 
                ax=ax,
+               geom="visual",
                only_visible_geom=True)
 plt.show_figure()

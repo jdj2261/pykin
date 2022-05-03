@@ -160,6 +160,7 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None):
 
     return trimesh_scene
 
+# TODO [color]
 def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()

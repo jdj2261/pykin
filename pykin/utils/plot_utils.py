@@ -61,12 +61,15 @@ def plot_basis(ax=None, robot=None):
     else:
         offset = 0.5
     
+    if offset == 0:
+        offset = 1
+
     ax.view_init(30,-10,)
     ax.set_xlim3d([-offset, offset])
     ax.set_ylim3d([-offset, offset])
     ax.set_zlim3d([-offset, offset])
 
-    
+
 def plot_robot(
     ax=None,
     robot=None,
@@ -130,13 +133,14 @@ def plot_robot(
     name = robot.robot_name
     
     plot_basis(ax, robot)
+
     if only_visible_geom:
         plot_geom(ax, robot, geom, alpha=alpha, color=color)
+        plot_attached_object(ax, robot, alpha)
         return
-    
-    if robot.gripper.is_attached:
-        plot_mesh(ax, mesh=robot.info[geom][robot.gripper.attached_obj_name][2], h_mat=robot.info[geom][robot.gripper.attached_obj_name ][3], alpha=alpha, color='k')
-    
+
+    plot_attached_object(ax, robot, alpha)
+                    
     links = []
     nodes = []
     transformation_matrix = []
@@ -172,7 +176,15 @@ def plot_robot(
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
     
 
-
+def plot_attached_object(ax, robot, alpha):
+    if robot.has_gripper:
+        if robot.gripper.is_attached:
+            plot_mesh(
+                ax, 
+                mesh=robot.gripper.info[robot.gripper.attached_obj_name][2], 
+                h_mat=robot.gripper.info[robot.gripper.attached_obj_name][3], 
+                alpha=alpha,
+                color=robot.gripper.info[robot.gripper.attached_obj_name][4])
 
 def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     """

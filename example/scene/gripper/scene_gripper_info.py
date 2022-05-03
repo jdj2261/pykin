@@ -57,4 +57,3 @@ print(scene_mngr.get_gripper_tcp_pose())
 scene_mngr.gripper_collision_mngr.show_collision_info()
 
 scene_mngr.show()
-

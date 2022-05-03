@@ -70,6 +70,7 @@ class SceneManager:
         self.init_logical_states = OrderedDict()
 
         self.attached_obj_name = None
+        self.save_grasp_pose = {}
         # Collision Manager
         self.obj_collision_mngr = CollisionManager()
         self.robot_collision_mngr = None
@@ -126,7 +127,7 @@ class SceneManager:
         self._scene.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name, only_gripper=False):
+    def attach_object_on_gripper(self, name):
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
         
@@ -143,14 +144,13 @@ class SceneManager:
         eef_pose = self.get_gripper_pose()
         self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self._scene.objs[name].h_mat)
 
-        if not only_gripper:
-            self.robot_collision_mngr.add_object(
-                self._scene.objs[name].name,
-                self._scene.objs[name].gtype,
-                self._scene.objs[name].gparam,
-                self._scene.objs[name].h_mat)
-            self._scene.robot.info["collision"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
-            self._scene.robot.info["visual"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
+        self.robot_collision_mngr.add_object(
+            self._scene.objs[name].name,
+            self._scene.objs[name].gtype,
+            self._scene.objs[name].gparam,
+            self._scene.objs[name].h_mat)
+        self._scene.robot.info["collision"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
+        self._scene.robot.info["visual"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
 
         # TODO [gripper_collision_mngr이 필요한가??]
         self.gripper_collision_mngr.add_object(
@@ -161,14 +161,15 @@ class SceneManager:
         self._scene.robot.gripper.info[name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat, self._scene.objs[name].color]
         self._scene.objs.pop(name, None)
 
-    def detach_object_from_gripper(self, only_gripper=False):
+    def detach_object_from_gripper(self):
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        if not only_gripper:
-            self.robot_collision_mngr.remove_object(self.attached_obj_name)
-            self._scene.robot.info["collision"].pop(self.attached_obj_name)
-            self._scene.robot.info["visual"].pop(self.attached_obj_name)
+        self.revert_object()
+
+        self.robot_collision_mngr.remove_object(self.attached_obj_name)
+        self._scene.robot.info["collision"].pop(self.attached_obj_name)
+        self._scene.robot.info["visual"].pop(self.attached_obj_name)
 
         self.gripper_collision_mngr.remove_object(self.attached_obj_name)
         self._scene.robot.gripper.info.pop(self.attached_obj_name)
@@ -183,9 +184,6 @@ class SceneManager:
             self._scene.objs[self.attached_obj_name] = Object(init_obj.name, init_obj.gtype, init_obj.gparam, init_obj.h_mat, init_obj.color)
             self.obj_collision_mngr.add_object(init_obj.name, init_obj.gtype, init_obj.gparam, init_obj.h_mat)
             self._scene.logical_states = self.init_logical_states
-            # self.scene.logical_states[self.attached_obj_name] = self.init_logical_states[self.attached_obj_name]
-            # self.scene.logical_states[self.attached_obj_name] = self.init_logical_states[self.attached_obj_name]
-            # self.scene.logical_states[self.gripper_name] = self.init_logical_states[self.gripper_name]
 
     def set_logical_state(self, obj_name, state:tuple):
         if isinstance(state[1], str):

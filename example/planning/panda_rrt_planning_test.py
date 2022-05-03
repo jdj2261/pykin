@@ -56,7 +56,7 @@ grasp_pose[:3, 3] = grasp_pose[:3, 3] - [0.1, 0, 0]
 
 target_thetas = scene_mngr.scene.robot.get_result_qpos(init_qpos, grasp_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
-scene_mngr.attach_object_on_gripper("green_box", False)
+scene_mngr.attach_object_on_gripper("green_box")
 
 planner = RRTStarPlanner(
     delta_distance=0.1,

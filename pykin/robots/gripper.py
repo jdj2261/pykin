@@ -16,6 +16,8 @@ class Gripper:
         self.info = OrderedDict()
         self.is_attached = False
         self.attached_obj_name = None
+        self.grasp_poses = {}
+        self.release_pose = {}
 
         if configures:
             self._setup_gripper(configures)

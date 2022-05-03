@@ -31,9 +31,11 @@ class ActivityBase(metaclass=ABCMeta):
     """
     def __init__(
         self,
-        scene_mngr:SceneManager
+        scene_mngr:SceneManager,
+        retreat_distance=0.1
     ):
         self.scene_mngr = scene_mngr
+        self.retreat_distance = retreat_distance
         self.action_info = ActionInfo
 
     def __repr__(self) -> str:

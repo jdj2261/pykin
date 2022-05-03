@@ -57,7 +57,7 @@ scene_mngr.set_robot_eef_pose(target_thetas)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
 fig, ax = plt.init_3d_figure( name="Attach Object")
-scene_mngr.attach_object_on_gripper("green_box", True)
+scene_mngr.attach_object_on_gripper("green_box")
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 

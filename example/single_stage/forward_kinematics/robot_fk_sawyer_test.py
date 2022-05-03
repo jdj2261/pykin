@@ -23,5 +23,4 @@ plt.plot_robot(robot=robot,
                ax=ax, 
                geom="collision",
                only_visible_geom=True)
-
 plt.show_figure()
