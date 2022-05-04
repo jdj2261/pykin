@@ -65,11 +65,11 @@ actions = list(pick.get_possible_actions_level_1())
 
 
 for action in actions:
-    for idx, scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=action)):
+    for idx, pick_scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=action)):
         fig, ax = plt.init_3d_figure( name="all possible transitions")
-        pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
-        pick.scene_mngr.render_objects(ax, scene)
-        scene.show_logical_states()
+        pick.scene_mngr.render_gripper(ax, pick_scene, alpha=0.9, only_visible_axis=False)
+        pick.scene_mngr.render_objects(ax, pick_scene)
+        pick_scene.show_logical_states()
         pick.scene_mngr.show()
 
 ################## Transitions Test Action 2##################

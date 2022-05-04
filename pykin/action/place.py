@@ -38,9 +38,14 @@ class PlaceAction(ActivityBase):
         self.scene_mngr.scene = deepcopy(scene)
 
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
-        self.scene_mngr.scene.robot.gripper.set_gripper_pose(self.scene_mngr.save_grasp_pose["grasp"])
+        self.scene_mngr.scene.robot.gripper.set_gripper_pose(scene.robot.gripper.grasp_pose)
         eef_pose = self.scene_mngr.scene.robot.gripper.get_gripper_pose()
-        for sup_obj in self.scene_mngr.scene.objs:
+        self.scene_mngr.scene.objs[held_obj].h_mat = np.dot(eef_pose, self.scene_mngr.scene.robot.gripper.transform_bet_gripper_n_obj)
+
+        for sup_obj in deepcopy(self.scene_mngr.scene.objs):
+            if sup_obj == held_obj:
+                continue
+
             if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
                 release_poses = list(self.get_all_release_poses(sup_obj, held_obj, eef_pose))
                 release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
@@ -82,7 +87,6 @@ class PlaceAction(ActivityBase):
             next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
 
             # Held Object Move
-            print(next_scene.objs)
             next_scene.objs[held_obj].h_mat = obj_pose_transformed
             
             # Add logical_state of held obj : {'on' : place_obj}
@@ -115,7 +119,7 @@ class PlaceAction(ActivityBase):
         return post_release_pose
 
     # for level wise - 1 (Consider gripper collision)
-    def get_release_poses_for_only_gripper(self, release_poses):
+    def get_release_poses_for_only_gripper(self, release_poses, is_attach=True):
         if self.scene_mngr.scene.robot.has_gripper is None:
             raise ValueError("Robot doesn't have a gripper")
 
@@ -123,6 +127,9 @@ class PlaceAction(ActivityBase):
             raise ValueError("Not found release poses!!")
 
         for all_release_pose, obj_pose_transformed in release_poses:
+            if is_attach:
+                self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
+            
             for name, pose in all_release_pose.items():
                 is_collision = False
                 if name == self.release_name.RELEASE:
@@ -140,13 +147,24 @@ class PlaceAction(ActivityBase):
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
+            
+            if is_attach:
+                self.scene_mngr.detach_object_from_gripper()
+                self.scene_mngr.add_object(
+                    self.scene_mngr.scene.robot.gripper.attached_obj_name,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
+                    self.scene_mngr.scene.robot.gripper.pick_obj_pose,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
             if not is_collision:
                 yield all_release_pose, obj_pose_transformed
 
-    def compute_ik_solve_for_robot(self, release_pose:dict):
+    def compute_ik_solve_for_robot(self, release_pose:dict, is_attach=True):
         ik_sovle = {}
 
+        if is_attach:
+            self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
         for name, pose in release_pose.items():
             if name == self.release_name.RELEASE:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
@@ -166,7 +184,17 @@ class PlaceAction(ActivityBase):
                 post_release_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, post_release_pose_from_ik) and not self._collide(is_only_gripper=False):
                     ik_sovle[self.release_name.POST_RELEASE] = thetas
-        
+
+        if is_attach:
+            self.scene_mngr.detach_object_from_gripper()
+            self.scene_mngr.add_object(
+                self.scene_mngr.scene.robot.gripper.attached_obj_name,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
+                self.scene_mngr.scene.robot.gripper.pick_obj_pose,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
+
+
         if len(ik_sovle) == 3:
             return ik_sovle
         return None
@@ -208,9 +236,7 @@ class PlaceAction(ActivityBase):
         return weights
 
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, gripper_eef_pose=None):
-        # held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
-        held_obj_pose = deepcopy(self.scene_mngr.scene.robot.gripper.info[held_obj_name][3])
-
+        held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
         support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)
         held_obj_points, held_obj_normals = self.get_surface_points_for_held_obj(held_obj_name)
 

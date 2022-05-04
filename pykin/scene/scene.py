@@ -140,9 +140,7 @@ class SceneManager:
         self._scene.robot.gripper.attached_obj_name = self._scene.objs[name].name
         
         self.obj_collision_mngr.remove_object(name)
-        
-        eef_pose = self.get_gripper_pose()
-        self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self._scene.objs[name].h_mat)
+        self._transform_bet_gripper_n_obj = self.scene.robot.gripper.transform_bet_gripper_n_obj
 
         self.robot_collision_mngr.add_object(
             self._scene.objs[name].name,
@@ -165,8 +163,6 @@ class SceneManager:
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        self.revert_object()
-
         self.robot_collision_mngr.remove_object(self.attached_obj_name)
         self._scene.robot.info["collision"].pop(self.attached_obj_name)
         self._scene.robot.info["visual"].pop(self.attached_obj_name)
@@ -176,7 +172,7 @@ class SceneManager:
 
         self.is_attached = False
         self._scene.robot.gripper.is_attached = False
-        self._scene.robot.gripper.attached_obj_name = None
+        # self._scene.robot.gripper.attached_obj_name = None
 
     def revert_object(self):        
         if self.attached_obj_name:
@@ -246,6 +242,7 @@ class SceneManager:
             self._scene.robot.info["collision"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
             self._scene.robot.info["visual"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
             self._scene.robot.gripper.info[self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self.robot_collision_mngr.set_transform(self.attached_obj_name, np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj))
 
     def get_gripper_pose(self):
         if not self._scene.robot.has_gripper:
@@ -417,7 +414,7 @@ class SceneManager:
         self, 
         ax=None, 
         scene=None,
-        alpha=0.3, 
+        alpha=1.0, 
         robot_color=None, 
         visible_tcp=True, 
         pose=None,

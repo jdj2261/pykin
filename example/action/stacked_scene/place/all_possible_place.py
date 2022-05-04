@@ -24,8 +24,10 @@ file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
-green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
+# blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
+# green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
+blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
+green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -51,52 +53,24 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=1)
+pick = PickAction(scene_mngr, n_contacts=2, n_directions=5)
+place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
-###### Surface sampling held and support obj#######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
-support_points, _ = place.get_surface_points_for_support_obj("goal_box")
-place.render_points(ax, support_points)
-support_points, _ = place.get_surface_points_for_held_obj("green_box")
-place.render_points(ax, support_points)
-plt.plot_basis(ax)
-place.scene_mngr.render_objects(ax, alpha=0.5)
-
-##### All Release Pose #######
-fig, ax = plt.init_3d_figure( name="Get Release Pose")
-eef_poses = list(pick.get_all_grasp_poses("green_box"))
-all_release_poses = []
-for eef_pose in eef_poses:
-    release_poses = list(place.get_all_release_poses("goal_box", "green_box", eef_pose[pick.grasp_name.GRASP]))
-    for release_pose, obj_pose in release_poses:
-        all_release_poses.append((release_pose, obj_pose))
-        pick.render_axis(ax, release_pose[place.release_name.RELEASE])
-        # pick.render_axis(ax, release_pose[place.release_name.PRE_RELEASE])
-        # pick.render_axis(ax, release_pose[place.release_name.POST_RELEASE])
-        place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
-plt.plot_basis(ax)
-place.scene_mngr.render_objects(ax)
-
-# ###### Level wise - 1 #######
+pick_actions = list(pick.get_possible_actions_level_1())
 fig, ax = plt.init_3d_figure(name="Level wise 1")
-release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
-for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
-    # place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
-    place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
-    place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
-plt.plot_basis(ax)
+for pick_action in pick_actions:
+    for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
+        place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
+        for place_action in place_actions:
+            for all_release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
+                if place.compute_ik_solve_for_robot(all_release_pose):
+                # fig, ax = plt.init_3d_figure(name="Level wise 1")
+                    # place.scene_mngr.render_gripper(ax, pose=all_release_pose[place.release_name.RELEASE])
+                    # place.render_axis(ax, all_release_pose[place.release_name.RELEASE])
+                    place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
+                    # place.render_axis(ax, all_release_pose[place.release_name.PRE_RELEASE])
+                    # place.render_axis(ax, all_release_pose[place.release_name.POST_RELEASE])
+                    # place.scene_mngr.show_scene_info()
 place.scene_mngr.render_objects(ax)
-
-# ###### Level wise - 2 #######
-fig, ax = plt.init_3d_figure(name="Level wise 2")
-release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
-for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
-    if place.compute_ik_solve_for_robot(release_pose=release_pose_for_only_gripper, is_attach=False):
-    # place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
-        place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
-        place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
 plt.plot_basis(ax)
-place.scene_mngr.render_objects(ax)
-
-place.show()
+pick.show()

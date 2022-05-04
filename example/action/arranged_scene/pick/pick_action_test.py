@@ -41,7 +41,7 @@ scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-scene_mngr.add_robot(robot, init_qpos)
+scene_mngr.add_robot(robot, robot.init_qpos)
 
 pick = PickAction(scene_mngr, 5, 50)
 
@@ -78,7 +78,7 @@ plt.plot_basis(ax)
 ####### Level wise - 2 #######
 fig, ax = plt.init_3d_figure(name="Level wise 2")
 for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
-    if pick.get_possible_ik_solve_level_2(grasp_pose=grasp_pose_for_only_gripper):
+    if pick.compute_ik_solve_for_robot(grasp_pose=grasp_pose_for_only_gripper):
         pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.GRASP])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)

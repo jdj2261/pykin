@@ -72,6 +72,7 @@ for pick_actions in actions:
             pick.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
             pick.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
             pick.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
+            
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()
