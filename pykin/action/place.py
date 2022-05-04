@@ -87,10 +87,14 @@ class PlaceAction(ActivityBase):
             next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
 
             # Held Object Move
+            # print(held_obj, obj_pose_transformed)
             next_scene.objs[held_obj].h_mat = obj_pose_transformed
+            self.scene_mngr.obj_collision_mngr.set_transform(held_obj, obj_pose_transformed)
             
+            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
+
             # Add logical_state of held obj : {'on' : place_obj}
-            # next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
+            next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
             next_scene.update_logical_states()
             yield next_scene
 
@@ -134,6 +138,8 @@ class PlaceAction(ActivityBase):
                 is_collision = False
                 if name == self.release_name.RELEASE:
                     self.scene_mngr.set_gripper_pose(pose)
+                    # self.scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
+                    # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
@@ -154,7 +160,7 @@ class PlaceAction(ActivityBase):
                     self.scene_mngr.scene.robot.gripper.attached_obj_name,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
-                    self.scene_mngr.scene.robot.gripper.pick_obj_pose,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].h_mat,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
             if not is_collision:
@@ -191,7 +197,7 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.scene.robot.gripper.attached_obj_name,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
-                self.scene_mngr.scene.robot.gripper.pick_obj_pose,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].h_mat,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
 

@@ -51,22 +51,9 @@ scene_mngr.set_logical_state("table", ("static", True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=3)
-place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=5)
 
-# pick_actions = list(pick.get_possible_actions_level_1())
-# # fig, ax = plt.init_3d_figure(name="Level wise 1")
-# for pick_action in pick_actions:
-#     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
-#         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
-#         for place_action in place_actions:
-#             for place_scene in list(place.get_possible_transitions(scene=pick_scene, action=place_action)):
-#                 fig, ax = plt.init_3d_figure( name="all possible transitions")
-#                 place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
-#                 place.scene_mngr.render_objects(ax, place_scene)
-#                 place_scene.show_logical_states()
-#                 place.scene_mngr.show()
-
+pick = PickAction(scene_mngr, n_contacts=2, n_directions=2)
+place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=2)
 
 pick_actions = list(pick.get_possible_actions_level_1())
 # fig, ax = plt.init_3d_figure(name="Level wise 1")
@@ -78,12 +65,10 @@ for pick_action in pick_actions:
                 pick_actions2 = list(pick.get_possible_actions_level_1(place_scene))
                 for pick_action2 in pick_actions2:
                     for pick_scene_2 in pick.get_possible_transitions(place_scene, action=pick_action2):
-                        fig, ax = plt.init_3d_figure( name="all possible transitions")
-                        pick.scene_mngr.render_gripper(ax, pick_scene_2, alpha=0.9, only_visible_axis=False)
-                        pick.scene_mngr.render_objects(ax, pick_scene_2)
-                        # place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
-                        # place.scene_mngr.render_objects(ax, place_scene)
-                        
-                        pick_scene_2.show_logical_states()
-                        # plt.plot_basis(ax)
-                        pick.show()
+                        for place_action2 in list(place.get_possible_actions_level_1(pick_scene_2)):
+                            for place_scene2 in place.get_possible_transitions(pick_scene_2, action=place_action2):
+                                fig, ax = plt.init_3d_figure( name="all possible transitions")
+                                place.scene_mngr.render_gripper(ax, place_scene2, alpha=0.9, only_visible_axis=False)
+                                place.scene_mngr.render_objects(ax, place_scene2)
+                                # place_scene2.show_logical_states()
+                                place.scene_mngr.show()
