@@ -42,6 +42,9 @@ class PickAction(ActivityBase):
         self.scene_mngr.scene = deepcopy(scene)
         
         for obj in self.scene_mngr.scene.objs:
+            if obj == self.scene_mngr.scene.pick_obj:
+                continue
+            
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj] for logical_state in self.filter_logical_states):
                 grasp_poses = list(self.get_all_grasp_poses(obj_name=obj))
                 grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
@@ -74,6 +77,7 @@ class PickAction(ActivityBase):
             next_scene = deepcopy(scene)
             
             supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.state.on)
+            next_scene.place_obj = supporting_obj.name
             next_scene.logical_states.get(supporting_obj.name).get(next_scene.state.support).remove(next_scene.objs[pick_obj])
             
             # Clear logical_state of pick obj
@@ -89,7 +93,7 @@ class PickAction(ActivityBase):
             next_scene.robot.gripper.grasp_pose = gripper_pose
             next_scene.robot.gripper.transform_bet_gripper_n_obj = transform_bet_gripper_n_obj
             next_scene.robot.gripper.pick_obj_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
-            self.scene_mngr.obj_collision_mngr.set_transform(pick_obj, next_scene.objs[pick_obj].h_mat)
+            # self.scene_mngr.obj_collision_mngr.set_transform(pick_obj, deepcopy(next_scene.objs[pick_obj].h_mat))
             # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
             # Gripper Move to default pose
             next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())

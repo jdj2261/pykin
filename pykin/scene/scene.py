@@ -26,6 +26,8 @@ class Scene:
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
         self.state = State
+        self.pick_obj = None
+        self.place_obj = None
 
     def show_scene_info(self):
         print(f"*"*23 + f" {sc.OKGREEN}Scene{sc.ENDC} "+ f"*"*23)
@@ -173,13 +175,6 @@ class SceneManager:
         self.is_attached = False
         self._scene.robot.gripper.is_attached = False
         # self._scene.robot.gripper.attached_obj_name = None
-
-    def revert_object(self):        
-        if self.attached_obj_name:
-            init_obj = self.init_objects[self.attached_obj_name]
-            self._scene.objs[self.attached_obj_name] = Object(init_obj.name, init_obj.gtype, init_obj.gparam, init_obj.h_mat, init_obj.color)
-            self.obj_collision_mngr.add_object(init_obj.name, init_obj.gtype, init_obj.gparam, init_obj.h_mat)
-            self._scene.logical_states = self.init_logical_states
 
     def set_logical_state(self, obj_name, state:tuple):
         if isinstance(state[1], str):

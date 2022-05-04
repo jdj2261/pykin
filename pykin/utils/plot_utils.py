@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
 
-def init_3d_figure(name=None, figsize=(10,6), dpi=120):
+def init_3d_figure(name=None, figsize=(12,8), dpi=100):
     """
     Initializes 3d figure
     """
@@ -64,7 +64,7 @@ def plot_basis(ax=None, robot=None):
     if offset == 0:
         offset = 1
 
-    ax.view_init(30,-10,)
+    ax.view_init(20,-10,)
     ax.set_xlim3d([-offset, offset])
     ax.set_ylim3d([-offset, offset])
     ax.set_zlim3d([-offset, offset])

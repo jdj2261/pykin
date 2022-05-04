@@ -45,6 +45,10 @@ class PlaceAction(ActivityBase):
             if sup_obj == held_obj:
                 continue
 
+            if sup_obj == self.scene_mngr.scene.place_obj:
+                if not "table" in sup_obj:
+                    continue
+
             if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
                 release_poses = list(self.get_all_release_poses(sup_obj, held_obj, eef_pose))
                 release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
@@ -81,17 +85,15 @@ class PlaceAction(ActivityBase):
             # Clear logical_state of held obj
             next_scene.logical_states.get(held_obj).clear()
             next_scene.logical_states[next_scene.robot.gripper.name][next_scene.state.holding] = None
+            next_scene.pick_obj = held_obj
 
             # Gripper Move
-            next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
+            # next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
+            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
 
             # Held Object Move
-            # print(held_obj, obj_pose_transformed)
             next_scene.objs[held_obj].h_mat = obj_pose_transformed
-            self.scene_mngr.obj_collision_mngr.set_transform(held_obj, obj_pose_transformed)
             
-            # next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
-
             # Add logical_state of held obj : {'on' : place_obj}
             next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
             next_scene.update_logical_states()
@@ -132,13 +134,15 @@ class PlaceAction(ActivityBase):
         for all_release_pose, obj_pose_transformed in release_poses:
             if is_attach:
                 self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
-            
             for name, pose in all_release_pose.items():
                 is_collision = False
                 if name == self.release_name.RELEASE:
                     self.scene_mngr.set_gripper_pose(pose)
+                    for name in self.scene_mngr.scene.objs:
+                        self.scene_mngr.obj_collision_mngr.set_transform(name, self.scene_mngr.scene.objs[name].h_mat)
                     # self.scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
                     # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
+                    # self.scene_mngr.show_scene_info()
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
@@ -198,7 +202,6 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
                 self.scene_mngr.scene.robot.gripper.pick_obj_pose,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
-
 
         if len(ik_sovle) == 3:
             return ik_sovle
@@ -269,7 +272,7 @@ class PlaceAction(ActivityBase):
 
         obj_pose_transformed = np.eye(4)
         obj_pose_transformed[:3, :3] = obj_pose_rotated[:3, :3]
-        obj_pose_transformed[:3, 3] = held_obj_pose[:3, 3] + (sup_obj_point - held_obj_point_transformed) + np.array([0, 0, self.release_distance])
+        obj_pose_transformed[:3, 3] = held_obj_pose[:3, 3] + (sup_obj_point - held_obj_point_transformed)
         return obj_pose_transformed, obj_pose_rotated
 
     def _get_eef_pose_transformed(self, T, eef_pose, sup_obj_point, held_obj_point_transformed):
