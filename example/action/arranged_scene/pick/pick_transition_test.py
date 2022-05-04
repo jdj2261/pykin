@@ -1,19 +1,17 @@
 import numpy as np
 import sys, os
-import yaml
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+pykin_path = os.path.dirname((os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
-from pykin.action.place import PlaceAction
 from pykin.action.pick import PickAction
 import pykin.utils.plot_utils as plt
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -22,9 +20,8 @@ robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
 green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
@@ -54,42 +51,46 @@ scene_mngr.set_logical_state("table", ("static", True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
-pick = PickAction(scene_mngr, 3, 10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
+pick = PickAction(scene_mngr, 6, 10)
 
+################## Transitions Test Action 1 ##################
 actions = list(pick.get_possible_actions_level_1())
+# fig, ax = plt.init_3d_figure( name="all possible actions")
+# for action in actions:
+#     for idx, all_grasp_pose in enumerate(action[pick.action_info.GRASP_POSES]):    
+#         pick.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
+# pick.scene_mngr.render_objects(ax)
+# plt.plot_basis(ax)
+# pick.scene_mngr.show()
+
+
 for action in actions:
     for idx, scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=action)):
-        place_actions = list(place.get_possible_actions_level_1(scene))
-        for place_action in place_actions:
-            for release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
-                ik_solve = place.get_possible_ik_solve_level_2(scene, release_pose=release_pose)
-                if ik_solve is not None:
-                    fig, ax = plt.init_3d_figure( name="all possible transitions")
-                    place.scene_mngr.set_gripper_pose(release_pose[place.release_name.RELEASE])
-                    place.scene_mngr.render_gripper(ax, alpha=0.9, only_visible_axis=False)
-                    place.scene_mngr.render_objects(ax)
-                    place.scene_mngr.robot_collision_mngr.show_collision_info()
-                    place.render_axis(ax, release_pose[place.release_name.RELEASE])
-                    place.render_axis(ax, release_pose[place.release_name.PRE_RELEASE])
-                    place.render_axis(ax, release_pose[place.release_name.POST_RELEASE])
-                    pick.scene_mngr.show()
-        place.scene_mngr.detach_object_from_gripper()
-        
-        # place_actions = list(place.get_possible_actions_level_1(scene))
-        # for place_action in place_actions:
-        #     for release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
-        #         print(release_pose)
+        fig, ax = plt.init_3d_figure( name="all possible transitions")
+        pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
+        pick.scene_mngr.render_objects(ax, scene)
+        scene.show_logical_states()
+        pick.scene_mngr.show()
 
-
+################## Transitions Test Action 2##################
+# actions = list(pick.get_possible_actions_level_1())
 # for action in actions:
-#     for idx, scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=action)):
-#         fig, ax = plt.init_3d_figure( name="all possible transitions")
-#         pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
-#         pick.scene_mngr.render_objects(ax)
-#         pick.scene_mngr.show_logical_states()
-#         # pick.scene_mngr.show_scene_info()
-#         pick.scene_mngr.revert_object()
-#         pick.scene_mngr.show_logical_states()
-#         pick.scene_mngr.detach_object_from_gripper(True)
-#         pick.scene_mngr.show()
+#     for all_grasp_pose in action[pick.action_info.GRASP_POSES]:
+#         ik_solve = pick.get_possible_ik_solve_level_2(grasp_pose=all_grasp_pose)
+#         if ik_solve is not None:
+#             for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
+#                 fig, ax = plt.init_3d_figure( name="all possible transitions")
+#                 pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
+#                 pick.scene_mngr.render_objects(ax)
+#                 pick.scene_mngr.gripper_collision_mngr.show_collision_info()
+#                 # scene.show_logical_states()
+#                 # scene.show_scene_info()
+#                 pick.scene_mngr.revert_object()
+#                 pick.scene_mngr.show_logical_states()
+#                 pick.scene_mngr.detach_object_from_gripper(True)
+#                 pick.scene_mngr.show()
+
+
+###### Transition about action level 1 #######
+
+# fig, ax = plt.init_3d_figure(name="Level wise 1")

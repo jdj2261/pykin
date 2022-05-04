@@ -74,19 +74,19 @@ class PlaceAction(ActivityBase):
         for release_pose, obj_pose_transformed in action[self.action_info.RELEASE_POSES]:
             next_scene = deepcopy(scene)
             
-            
             # Clear logical_state of held obj
             next_scene.logical_states.get(held_obj).clear()
             next_scene.logical_states[next_scene.robot.gripper.name][next_scene.state.holding] = None
 
             # Gripper Move
-            next_scene.robot.gripper.set_gripper_pose(release_pose)
+            next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
 
             # Held Object Move
+            print(next_scene.objs)
             next_scene.objs[held_obj].h_mat = obj_pose_transformed
             
             # Add logical_state of held obj : {'on' : place_obj}
-            next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
+            # next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
             next_scene.update_logical_states()
             yield next_scene
 

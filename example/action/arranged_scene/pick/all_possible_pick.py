@@ -1,7 +1,7 @@
 import numpy as np
 import sys, os
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+pykin_path = os.path.dirname((os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
@@ -11,7 +11,7 @@ from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 import pykin.utils.plot_utils as plt
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -20,7 +20,7 @@ robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
@@ -55,63 +55,23 @@ pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
 
 ################# Action Test ##################
 actions = list(pick.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure( name="all possible actions")
+fig, ax = plt.init_3d_figure(name="Level wise 1")
+for pick_actions in actions:
+    for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
+        pick.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
+        pick.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
+        pick.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
+pick.scene_mngr.render_objects(ax)
+plt.plot_basis(ax)
 
+fig, ax = plt.init_3d_figure( name="Level wise 2")
 for pick_actions in actions:
     for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
         ik_solve = pick.get_possible_ik_solve_level_2(grasp_pose=all_grasp_pose)
         if ik_solve is not None:
             pick.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
-            # pick.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
-            # pick.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
+            pick.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
+            pick.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()
-
-# ################## Transitions Test ##################
-# actions = list(pick.get_possible_actions_level_1())
-# for action in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
-#         fig, ax = plt.init_3d_figure( name="all possible transitions")
-#         pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
-#         pick.scene_mngr.render_objects(ax)
-#         scene.show_logical_states()
-#         scene.show_logical_states()
-#         pick.scene_mngr.show()
-
-
-# actions = list(pick.get_possible_actions_level_1())
-# for action in actions:
-#     for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
-#         fig, ax = plt.init_3d_figure( name="all possible transitions")
-#         pick.scene_mngr.render_gripper(ax, scene, only_visible_axis=True)
-#         pick.scene_mngr.render_objects(ax)
-#         pick.show()
-
-################## Get grasp pose Test ##################
-# fig, ax = plt.init_3d_figure( name="Get contact points")
-# for obj in pick.scene_mngr.scene.objs:
-#     if obj == "table":
-#         continue
-#     # contact_points = list(pick.get_contact_points(obj_name=obj))
-#     # pick.render_points(ax, contact_points)
-
-#     grasp_poses = pick.get_grasp_poses(obj)
-#     # for grasp_pose in grasp_poses:
-#     #     pick.render_axis(ax, grasp_pose)
-
-#     grasp_poses_for_only_gripper = pick.get_grasp_poses_for_only_gripper(grasp_poses)
-#     # for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
-#     #     pick.render_axis(ax, grasp_pose_for_only_gripper, scale=0.05)
-
-#     if not grasp_poses_for_only_gripper:
-#         continue
-
-#     goal_grasp_poses = list(pick.get_grasp_poses_for_robot(grasp_poses_for_only_gripper))
-#     print(obj, len(goal_grasp_poses))
-#     for grasp_pose in goal_grasp_poses:
-#         pick.render_axis(ax, grasp_pose, scale=0.05)
-
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-# pick.show()

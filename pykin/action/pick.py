@@ -6,6 +6,7 @@ from copy import deepcopy
 import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
+from pykin.utils.action_utils import get_relative_transform
 
 @dataclass
 class GraspName:
@@ -67,38 +68,28 @@ class PickAction(ActivityBase):
         if not action:
             ValueError("Not found any action!!")
 
-        if scene is None:
-            scene = self.scene_mngr.scene
-        
         pick_obj = action[self.action_info.PICK_OBJ_NAME]
 
         for grasp_pose in action[self.action_info.GRASP_POSES]:
             next_scene = deepcopy(scene)
-            self.scene_mngr.scene = next_scene
-            self.scene_mngr.save_grasp_pose = deepcopy(grasp_pose)
-
-            # Remove supporting obj
             supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.state.on)
             next_scene.logical_states.get(supporting_obj.name).get(next_scene.state.support).remove(next_scene.objs[pick_obj])
-
+            
             # Clear logical_state of pick obj
             next_scene.logical_states[pick_obj].clear()
 
-            # Update gripper logical state {'holding' : pick_obj}
-            next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.state.holding] = next_scene.objs[pick_obj]
-
-            # Move Gripper to grasp pose
-            self.scene_mngr.set_gripper_pose(grasp_pose[self.grasp_name.GRASP])
+            # Gripper Move to default pose
+            next_scene.robot.gripper.set_gripper_pose(grasp_pose[self.grasp_name.GRASP])
+            gripper_pose = next_scene.robot.gripper.get_gripper_pose()
+            transform_bet_gripper_n_obj = get_relative_transform(gripper_pose, next_scene.objs[pick_obj].h_mat)
             
-            # Attach object on gripper
-            self.scene_mngr.attach_object_on_gripper(pick_obj)
-
-            # Move Gripper to init pose
-            self.scene_mngr.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
+            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
+            # pick object Move to default pose with gripper
+            next_scene.objs[pick_obj].h_mat = np.dot(next_scene.robot.gripper.get_gripper_pose(), transform_bet_gripper_n_obj)
 
             # Add logical_state of pick obj : {'held' : True}
+            next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.state.holding] = next_scene.objs[pick_obj]
             next_scene.update_logical_states()
-
             yield next_scene
             
     # Not consider collision

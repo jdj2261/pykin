@@ -1,8 +1,7 @@
 import numpy as np
 import sys, os
-import yaml
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+pykin_path = os.path.dirname((os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
@@ -12,19 +11,17 @@ from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 import pykin.utils.plot_utils as plt
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
     has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
+robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+
+file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-custom_fpath = '../../../asset/config/panda_init_params.yaml'
-with open(custom_fpath) as f:
-    controller_config = yaml.safe_load(f)
-init_qpos = controller_config["init_qpos"]
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
