@@ -38,10 +38,9 @@ class PlaceAction(ActivityBase):
         self.scene_mngr.scene = deepcopy(scene)
 
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
-        self.scene_mngr.scene.robot.gripper.set_gripper_pose(scene.robot.gripper.grasp_pose)
-        eef_pose = self.scene_mngr.scene.robot.gripper.get_gripper_pose()
-        self.scene_mngr.scene.objs[held_obj].h_mat = np.dot(eef_pose, self.scene_mngr.scene.robot.gripper.transform_bet_gripper_n_obj)
-
+        eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
+        self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
+        
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
             if sup_obj == held_obj:
                 continue
@@ -91,7 +90,7 @@ class PlaceAction(ActivityBase):
             next_scene.objs[held_obj].h_mat = obj_pose_transformed
             self.scene_mngr.obj_collision_mngr.set_transform(held_obj, obj_pose_transformed)
             
-            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
+            # next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
 
             # Add logical_state of held obj : {'on' : place_obj}
             next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
@@ -160,7 +159,7 @@ class PlaceAction(ActivityBase):
                     self.scene_mngr.scene.robot.gripper.attached_obj_name,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
-                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].h_mat,
+                    self.scene_mngr.scene.robot.gripper.pick_obj_pose,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
             if not is_collision:
@@ -197,7 +196,7 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.scene.robot.gripper.attached_obj_name,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
-                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].h_mat,
+                self.scene_mngr.scene.robot.gripper.pick_obj_pose,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
 
@@ -225,7 +224,7 @@ class PlaceAction(ActivityBase):
 
     def get_surface_points_for_held_obj(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.init_objects[obj_name].gparam)
-        copied_mesh.apply_transform(self.scene_mngr.init_objects[obj_name].h_mat)
+        copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
 
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
@@ -243,6 +242,7 @@ class PlaceAction(ActivityBase):
 
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, gripper_eef_pose=None):
         held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
+
         support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)
         held_obj_points, held_obj_normals = self.get_surface_points_for_held_obj(held_obj_name)
 

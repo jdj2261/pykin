@@ -70,5 +70,5 @@ for pick_action in pick_actions:
                                 fig, ax = plt.init_3d_figure( name="all possible transitions")
                                 place.scene_mngr.render_gripper(ax, place_scene2, alpha=0.9, only_visible_axis=False)
                                 place.scene_mngr.render_objects(ax, place_scene2)
-                                # place_scene2.show_logical_states()
+                                place_scene2.show_logical_states()
                                 place.scene_mngr.show()

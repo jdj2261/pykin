@@ -81,14 +81,14 @@ class PickAction(ActivityBase):
 
             # Gripper Move to grasp pose
             next_scene.robot.gripper.set_gripper_pose(grasp_pose[self.grasp_name.GRASP])
-            gripper_pose = next_scene.robot.gripper.get_gripper_pose()
+            gripper_pose = deepcopy(next_scene.robot.gripper.get_gripper_pose())
             transform_bet_gripper_n_obj = get_relative_transform(gripper_pose, next_scene.objs[pick_obj].h_mat)
             
             # Attach Object
             next_scene.robot.gripper.attached_obj_name = pick_obj
             next_scene.robot.gripper.grasp_pose = gripper_pose
             next_scene.robot.gripper.transform_bet_gripper_n_obj = transform_bet_gripper_n_obj
-            # next_scene.robot.gripper.pick_obj_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
+            next_scene.robot.gripper.pick_obj_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
             self.scene_mngr.obj_collision_mngr.set_transform(pick_obj, next_scene.objs[pick_obj].h_mat)
             # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
             # Gripper Move to default pose
