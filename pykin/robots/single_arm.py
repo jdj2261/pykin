@@ -145,6 +145,8 @@ class SingleArm(Robot):
         Returns:
             joints (np.array): target joint angles
         """
+        target_pose = np.asarray(target_pose)
+        
         if target_pose.shape == (4,4):
             target_pose = get_pose_from_homogeneous(target_pose)
 

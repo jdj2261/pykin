@@ -144,6 +144,10 @@ class SceneManager:
         self.obj_collision_mngr.remove_object(name)
         self._transform_bet_gripper_n_obj = self.scene.robot.gripper.transform_bet_gripper_n_obj
 
+        if self.scene.robot.gripper.transform_bet_gripper_n_obj is None:
+            eef_pose = self.get_gripper_pose()
+            self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self.scene.objs[name].h_mat)
+
         self.robot_collision_mngr.add_object(
             self._scene.objs[name].name,
             self._scene.objs[name].gtype,
@@ -460,6 +464,7 @@ class SceneManager:
             if i == len(joint_path)-1:
                 print("Animation Finished..")
             ax.clear()
+            ax._axis3don = False
 
             if scene.objs:
                 self.render.render_objects(ax, scene.objs, alpha)

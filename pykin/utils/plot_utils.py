@@ -12,7 +12,7 @@ def init_3d_figure(name=None, figsize=(12,8), dpi=100):
     """
     fig = plt.figure(name, figsize=figsize, dpi= dpi)
     ax = fig.add_subplot(111, projection='3d')
-    ax._axis3don = False
+    ax.axis('off')
     fig.set_facecolor('beige')
     ax.set_facecolor('beige') 
     return fig, ax
@@ -479,52 +479,6 @@ def plot_line(ax, vertices, linewidth=1):
         [x[0] for x in vertices], 
         [x[1] for x in vertices],
         [x[2] for x in vertices], linewidth=linewidth)
-
-def plot_animation(
-    scene_mngr, 
-    trajectory,
-    fig=None,
-    ax=None,
-    eef_poses=None,
-    objects=None,
-    geom="collision",
-    visible_objects=False,
-    only_visible_geom=False,
-    visible_text=True,
-    visible_scatter=True,
-    interval=100, 
-    repeat=False
-    ):
-
-    """
-    Plot animation
-    """
-
-    def update(i):
-        # print(f"{i/len(trajectory) * 100:.1f} %")
-    
-        if i == len(trajectory)-1:
-            # print(f"{i/(len(trajectory)-1) * 100:.1f} %")
-            print("Animation Finished..")
-        ax.clear()
-
-        if visible_objects and objects:
-            plot_objects(ax, objects)
-        
-        if eef_poses is not None:
-            plot_trajectories(ax, eef_poses)
-        
-        scene_mngr.set_robot_eef_pose(trajectory[i])
-        plot_robot(
-            robot=scene_mngr.robot, 
-            ax=ax, 
-            only_visible_geom=only_visible_geom,
-            visible_text=visible_text,
-            visible_scatter=visible_scatter,
-            geom=geom)
-
-    ani = animation.FuncAnimation(fig, update, np.arange(len(trajectory)), interval=interval, repeat=repeat)
-    show_figure()
 
 
 def plot_path_planner(ax, path):
