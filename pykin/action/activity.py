@@ -5,7 +5,8 @@ from dataclasses import dataclass
 import pykin.utils.plot_utils as plt
 from pykin.scene.scene import SceneManager
 from pykin.utils.action_utils import surface_sampling
-
+from pykin.planners.cartesian_planner import CartesianPlanner
+from pykin.planners.rrt_star_planner import RRTStarPlanner
 
 @dataclass
 class ActionInfo:
@@ -38,6 +39,10 @@ class ActivityBase(metaclass=ABCMeta):
         self.retreat_distance = retreat_distance
         self.action_info = ActionInfo
 
+        # Add Planner
+        self.cartesian_planner = CartesianPlanner()
+        self.rrt_planner = RRTStarPlanner(delta_distance=0.1, epsilon=0.2, gamma_RRT_star=1)
+
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)
 
@@ -59,6 +64,8 @@ class ActivityBase(metaclass=ABCMeta):
 
     def _collide(self, is_only_gripper:bool)->bool:
         collide = False
+        # self.scene_mngr.robot_collision_mngr.show_collision_info()
+        # self.scene_mngr.obj_collision_mngr.show_collision_info()
         if is_only_gripper:
             collide = self.scene_mngr.collide_objs_and_gripper()
         else:

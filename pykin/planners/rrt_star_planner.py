@@ -157,12 +157,13 @@ class RRTStarPlanner(Planner):
 
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
+                self.tree = None
                 break
 
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
 
-    def get_joint_path(self, goal_node=None, n_step=1):
+    def get_joint_path(self, goal_node=None, n_step=10):
         """
         Get path in joint space
 
@@ -173,7 +174,9 @@ class RRTStarPlanner(Planner):
         Returns:
             interpolate_paths(list) : interpoated paths from start joint pose to goal joint
         """
-        
+        if self.tree is None:
+            return 
+
         path = [self.goal_q]
         if goal_node is None:
             goal_node = self.goal_node

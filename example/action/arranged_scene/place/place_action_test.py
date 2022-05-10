@@ -82,8 +82,8 @@ place.scene_mngr.render_objects(ax)
 fig, ax = plt.init_3d_figure(name="Level wise 1")
 release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
 for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
-    # place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
-    place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
+    place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
+    # place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
 plt.plot_basis(ax)
 place.scene_mngr.render_objects(ax)
@@ -92,9 +92,11 @@ place.scene_mngr.render_objects(ax)
 fig, ax = plt.init_3d_figure(name="Level wise 2")
 release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
 for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
-    if place.compute_ik_solve_for_robot(release_pose=release_pose_for_only_gripper, is_attach=False):
-    # place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
-        place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
+    ik_sol, release_pose = place.compute_ik_solve_for_robot(release_pose=release_pose_for_only_gripper, is_attach=False)
+    
+    if ik_sol:
+        place.render_axis(ax, release_pose_for_only_gripper[place.release_name.RELEASE], scale=0.05)
+        # place.scene_mngr.render_gripper(ax, pose=release_pose_for_only_gripper[place.release_name.RELEASE])
         place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["green_box"], obj_pose)
 plt.plot_basis(ax)
 place.scene_mngr.render_objects(ax)

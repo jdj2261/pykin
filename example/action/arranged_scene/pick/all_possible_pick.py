@@ -67,11 +67,11 @@ plt.plot_basis(ax)
 fig, ax = plt.init_3d_figure( name="Level wise 2")
 for pick_actions in actions:
     for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-        ik_solve = pick.get_possible_ik_solve_level_2(grasp_pose=all_grasp_pose)
+        ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_pose=all_grasp_pose)
         if ik_solve is not None:
-            pick.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
-            pick.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
-            pick.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
+            pick.render_axis(ax, grasp_pose[pick.grasp_name.GRASP])
+            pick.render_axis(ax, grasp_pose[pick.grasp_name.PRE_GRASP])
+            pick.render_axis(ax, grasp_pose[pick.grasp_name.POST_GRASP])
             
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)

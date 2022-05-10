@@ -78,8 +78,9 @@ plt.plot_basis(ax)
 ####### Level wise - 2 #######
 fig, ax = plt.init_3d_figure(name="Level wise 2")
 for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
-    if pick.compute_ik_solve_for_robot(grasp_pose=grasp_pose_for_only_gripper):
-        pick.render_axis(ax, grasp_pose_for_only_gripper[pick.grasp_name.GRASP])
+    thetas, grasp_pose = pick.compute_ik_solve_for_robot(grasp_pose=grasp_pose_for_only_gripper)
+    if grasp_pose:
+        pick.render_axis(ax, grasp_pose[pick.grasp_name.GRASP])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()

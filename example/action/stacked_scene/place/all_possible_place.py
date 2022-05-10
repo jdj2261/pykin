@@ -24,8 +24,6 @@ file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-# blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
-# green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
 green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))

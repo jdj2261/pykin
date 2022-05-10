@@ -28,6 +28,8 @@ class Scene:
         self.state = State
         self.pick_obj = None
         self.place_obj = None
+        self.grasp_poses = None
+        self.release_poses = None
 
     def show_scene_info(self):
         print(f"*"*23 + f" {sc.OKGREEN}Scene{sc.ENDC} "+ f"*"*23)
@@ -103,7 +105,7 @@ class SceneManager:
         self._scene.objs[name] = Object(name, gtype, gparam, h_mat, color)
         self.obj_collision_mngr.add_object(name, gtype, gparam, h_mat)
 
-        self.init_objects[name] = deepcopy(self.scene.objs[name])
+        self.init_objects[name] = deepcopy(self._scene.objs[name])
 
     def add_robot(self, robot:SingleArm, thetas=[]):
         if self._scene.robot is not None:
@@ -129,7 +131,7 @@ class SceneManager:
         self._scene.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name):
+    def attach_object_on_gripper(self, name, is_transform_bet_gripper_n_obj=False):
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
         
@@ -142,11 +144,11 @@ class SceneManager:
         self._scene.robot.gripper.attached_obj_name = self._scene.objs[name].name
         
         self.obj_collision_mngr.remove_object(name)
-        self._transform_bet_gripper_n_obj = self.scene.robot.gripper.transform_bet_gripper_n_obj
+        self._transform_bet_gripper_n_obj = self._scene.robot.gripper.transform_bet_gripper_n_obj
 
-        if self.scene.robot.gripper.transform_bet_gripper_n_obj is None:
+        if is_transform_bet_gripper_n_obj:
             eef_pose = self.get_gripper_pose()
-            self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self.scene.objs[name].h_mat)
+            self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self._scene.objs[name].h_mat)
 
         self.robot_collision_mngr.add_object(
             self._scene.objs[name].name,
@@ -162,19 +164,23 @@ class SceneManager:
             self._scene.objs[name].gtype,
             self._scene.objs[name].gparam,
             self._scene.objs[name].h_mat)       
+        
         self._scene.robot.gripper.info[name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat, self._scene.objs[name].color]
         self._scene.objs.pop(name, None)
 
-    def detach_object_from_gripper(self):
+    def detach_object_from_gripper(self, attached_object=None):
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
 
-        self.robot_collision_mngr.remove_object(self.attached_obj_name)
-        self._scene.robot.info["collision"].pop(self.attached_obj_name)
-        self._scene.robot.info["visual"].pop(self.attached_obj_name)
+        if attached_object is None:
+            attached_object = self.attached_obj_name
 
-        self.gripper_collision_mngr.remove_object(self.attached_obj_name)
-        self._scene.robot.gripper.info.pop(self.attached_obj_name)
+        self.robot_collision_mngr.remove_object(attached_object)
+        self._scene.robot.info["collision"].pop(attached_object)
+        self._scene.robot.info["visual"].pop(attached_object)
+
+        self.gripper_collision_mngr.remove_object(attached_object)
+        self._scene.robot.gripper.info.pop(attached_object)
 
         self.is_attached = False
         self._scene.robot.gripper.is_attached = False
@@ -238,10 +244,11 @@ class SceneManager:
                     self.gripper_collision_mngr.set_transform(link, info[3])
 
         if self.is_attached:
-            self._scene.robot.info["collision"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
-            self._scene.robot.info["visual"][self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
-            self._scene.robot.gripper.info[self.attached_obj_name][3] = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
-            self.robot_collision_mngr.set_transform(self.attached_obj_name, np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj))
+            attached_obj_pose = np.dot(self.get_gripper_pose(), self._transform_bet_gripper_n_obj)
+            self._scene.robot.info["collision"][self.attached_obj_name][3] = attached_obj_pose
+            self._scene.robot.info["visual"][self.attached_obj_name][3] = attached_obj_pose
+            self._scene.robot.gripper.info[self.attached_obj_name][3] = attached_obj_pose
+            self.robot_collision_mngr.set_transform(self.attached_obj_name, attached_obj_pose)
 
     def get_gripper_pose(self):
         if not self._scene.robot.has_gripper:
@@ -448,10 +455,13 @@ class SceneManager:
         robot_color=None,
         joint_path=[], 
         eef_poses=[], 
+        only_visible_gripper=False,
         only_visible_geom=True,
         visible_text=True,
         interval=1,
-        repeat=True
+        repeat=True,
+        pick_object=None,
+        attach_idx = None,
     ):
         if not self.is_pyplot:
             ValueError("Only pyplot can render.")
@@ -460,9 +470,13 @@ class SceneManager:
         if scene is None:
             scene = self._scene
 
+        if pick_object is None:
+            pick_object = self.attached_obj_name
+
         def update(i):
             if i == len(joint_path)-1:
                 print("Animation Finished..")
+                
             ax.clear()
             ax._axis3don = False
 
@@ -471,17 +485,29 @@ class SceneManager:
             
             if eef_poses is not None:
                 self.render.render_trajectory(ax, eef_poses)
-            
+                        
             self.set_robot_eef_pose(joint_path[i])
-            self.render.render_robot(
-                ax=ax,
-                robot=scene.robot,
-                alpha=alpha,
-                robot_color=robot_color,
-                geom=self.geom,
-                only_visible_geom=only_visible_geom,
-                visible_text=visible_text,
-                )
+
+            if i == attach_idx:
+                self.attach_object_on_gripper(pick_object, True)
+
+            if only_visible_gripper:
+                self.render.render_gripper(
+                    ax=ax,
+                    robot=scene.robot,
+                    alpha=alpha,
+                    robot_color=robot_color,
+                    only_visible_axis=False)
+            else:
+                self.render.render_robot(
+                    ax=ax,
+                    robot=scene.robot,
+                    alpha=alpha,
+                    robot_color=robot_color,
+                    geom=self.geom,
+                    only_visible_geom=only_visible_geom,
+                    visible_text=visible_text,
+                    )
         
         ani = animation.FuncAnimation(fig, update, np.arange(len(joint_path)), interval=interval, repeat=repeat)
         self.show()

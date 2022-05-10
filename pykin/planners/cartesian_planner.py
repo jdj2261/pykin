@@ -30,7 +30,7 @@ class CartesianPlanner(Planner):
         dimension=7,
         damping=0.5,
         threshold=1e-12,
-        goal_tolerance=0.03,
+        goal_tolerance=0.05,
         waypoint_type="Linear",
         is_slerp=False
     ):
@@ -53,7 +53,8 @@ class CartesianPlanner(Planner):
         scene_mngr,
         cur_q,
         goal_pose,
-        resolution=1
+        resolution=1,
+        collision_check=True
     ):
         """
         Compute cartesian path
@@ -83,14 +84,14 @@ class CartesianPlanner(Planner):
             logger.warning(f"This Planner does not do collision checking")
 
         waypoints = self.generate_waypoints()
-        joint_path = self._compute_paths_and_target_positions(waypoints)
+        joint_path = self._compute_paths_and_target_positions(waypoints, collision_check)
 
         self.joint_path = joint_path
 
     def get_joint_path(self):
         return self.joint_path
 
-    def _compute_paths_and_target_positions(self, waypoints):
+    def _compute_paths_and_target_positions(self, waypoints, collision_check=True):
         """
         Compute joint paths and target positions
 
@@ -123,10 +124,11 @@ class CartesianPlanner(Planner):
                 if not self._check_q_in_limits(self._cur_qpos):
                     continue
                 
-                is_collide, col_name = self._collide(self._cur_qpos, visible_name=True)
-                if is_collide:
-                    collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
-                    continue
+                if collision_check:
+                    is_collide, col_name = self._collide(self._cur_qpos, visible_name=True)
+                    if is_collide:
+                        collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
+                        continue
 
                 cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
                 current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
@@ -136,7 +138,7 @@ class CartesianPlanner(Planner):
 
             err = t_utils.compute_pose_error(self._goal_pose[:3,3], cur_fk[self._scene_mngr.scene.robot.eef_name].pos)
             
-            if collision_pose.keys():
+            if collision_pose.keys() and collision_check:
                 logger.error(f"Failed Generate Path.. Collision may occur.")
                 for col_name, _ in collision_pose.values():
                     logger.warning(f"\n\tCollision Names : {col_name}")
