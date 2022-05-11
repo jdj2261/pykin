@@ -82,22 +82,25 @@ class RRTStarPlanner(Planner):
         
         cnt = 0
         total_cnt = 10
-
+        limit_cnt = 0
         while True:
             cnt += 1
-            for _ in range(total_cnt):
+            check_limit = False
+            while not check_limit:
+                limit_cnt += 1
+                if limit_cnt > 100:
+                    break
                 self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
                     np.random.randn(self._scene_mngr.scene.robot.arm_dof), self._goal_pose)
                 
                 if self._check_q_in_limits(self.goal_q):
+                    check_limit = True
                     logger.info(f"The joint limit has been successfully checked.")
-                    break
-
-                if cnt > total_cnt:
-                    logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
-                    break
-
                 print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
+
+            if check_limit is False:
+                self.tree = None
+                break
 
             self.goal_node = None
             self.tree = self._create_tree()

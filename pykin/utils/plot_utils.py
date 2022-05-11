@@ -495,7 +495,7 @@ def plot_path_planner(ax, path):
     ax.text(path[-1][0], path[-1][1], path[-1][2],'Goal', verticalalignment='bottom', horizontalalignment='center', size="20")
 
 
-def plot_trajectories(ax, path, size=10, color='r'):
+def plot_trajectories(ax, path, size=3, color='r'):
     """
     Plot plot_trajectories
     """

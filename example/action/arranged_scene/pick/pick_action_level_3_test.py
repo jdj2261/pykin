@@ -19,12 +19,13 @@ robot = SingleArm(
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
+
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
-green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
+blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
+green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -44,37 +45,32 @@ scene_mngr.add_robot(robot, robot.init_qpos)
 
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["red_box"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["blue_box"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=3, n_directions=10)
+pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################# Action Test ##################
 actions = list(pick.get_possible_actions_level_1())
 
-# fig, ax = plt.init_3d_figure( name="Level wise 3")
 pick_joint_all_path = []
 pick_all_objects = []
 pick_all_object_poses = []
 
-
-success_joint_path = False
 for pick_action in actions:
     for idx, pick_scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=pick_action)):
         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=pick_scene.grasp_poses)
         if ik_solve:
             pick_joint_path = pick.get_possible_joint_path_level_3(scene=pick_scene, grasp_poses=grasp_pose)
             if pick_joint_path:
-                success_joint_path = True
                 pick_joint_all_path.append(pick_joint_path)
                 pick_all_objects.append(pick.scene_mngr.attached_obj_name)
                 pick_all_object_poses.append(pick.scene_mngr.scene.robot.gripper.pick_obj_pose)
 
-result_joint = []
-eef_poses = []
+print(len(pick_joint_all_path))
 grasp_task_idx = 0
 post_grasp_task_idx = 0
 attach_idx = 0
@@ -88,7 +84,7 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
         for j, (task, joint_path) in enumerate(all_joint_path.items()):
             for k, joint in enumerate(joint_path):
                 cnt += 1
-
+                
                 if task == "grasp":
                     grasp_task_idx = cnt
                 if task == "post_grasp":
@@ -107,7 +103,7 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
             fig,
             joint_path=result_joint,
             eef_poses=eef_poses,
-            only_visible_gripper=True,
+            visible_gripper=True,
             only_visible_geom=True,
             visible_text=True,
             alpha=1.0,
@@ -123,7 +119,3 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
                                 gparam=pick.scene_mngr.init_objects[pick_object].gparam,
                                 h_mat=pick_object_pose,
                                 color=pick.scene_mngr.init_objects[pick_object].color)
-
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-# pick.show()

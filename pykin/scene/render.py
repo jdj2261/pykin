@@ -75,7 +75,7 @@ class RenderPyPlot(SceneRender):
         plt.plot_object(ax, obj, pose, alpha)
 
     @staticmethod
-    def render_robot(ax, robot, alpha, robot_color=None, geom="collision", only_visible_geom=True, visible_text=True):
+    def render_robot(ax, robot, alpha, robot_color=None, geom="collision", only_visible_geom=True, visible_text=True, visible_gripper=False):
         plt.plot_robot(
             ax, 
             robot, 
@@ -84,6 +84,8 @@ class RenderPyPlot(SceneRender):
             geom=geom,
             only_visible_geom=only_visible_geom,
             visible_text=visible_text)
+        if visible_gripper:
+            RenderPyPlot.render_gripper(ax, robot, alpha, robot_color)
 
     @staticmethod
     def render_gripper(ax, robot, alpha=0.3, robot_color=None, visible_tcp=True, pose=None, only_visible_axis=False):
@@ -122,8 +124,8 @@ class RenderPyPlot(SceneRender):
         plt.render_axis(ax, pose, axis, scale)
 
     @staticmethod
-    def render_trajectory(ax, poses):
-        plt.plot_trajectories(ax, poses)
+    def render_trajectory(ax, path, size=1, color='r'):
+        plt.plot_trajectories(ax, path, size, color)
 
     @staticmethod
     def show():

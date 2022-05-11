@@ -42,7 +42,7 @@ class PickAction(ActivityBase):
         self.scene_mngr.scene = deepcopy(scene)
         
         for obj in self.scene_mngr.scene.objs:
-            if obj == self.scene_mngr.scene.pick_obj:
+            if obj == self.scene_mngr.scene.pick_obj_name:
                 continue
             
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj] for logical_state in self.filter_logical_states):
@@ -52,13 +52,13 @@ class PickAction(ActivityBase):
                 yield action_level_1
 
     # Not Expand, only check possible action using ik
-    def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_pose:dict={}) -> bool:
+    def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:
         if scene is None:
             scene = self.scene_mngr.scene
         self.scene_mngr.scene = deepcopy(scene)
         
-        ik_solve, grasp_pose_filtered = self.compute_ik_solve_for_robot(grasp_pose)
-        return ik_solve, grasp_pose_filtered
+        ik_solve, grasp_poses_filtered = self.compute_ik_solve_for_robot(grasp_poses)
+        return ik_solve, grasp_poses_filtered
  
     def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}):
         if scene is None:
@@ -120,37 +120,39 @@ class PickAction(ActivityBase):
         for grasp_poses in action[self.action_info.GRASP_POSES]:
             next_scene = deepcopy(scene)
             
+            ## Change transition
             next_scene.grasp_poses = grasp_poses
+            next_scene.robot.gripper.grasp_pose = grasp_poses[self.grasp_name.GRASP]
+            
+            # Gripper Move to grasp pose
+            next_scene.robot.gripper.set_gripper_pose(grasp_poses[self.grasp_name.GRASP])
+            
+            # Get transform between gripper and pick object
+            gripper_pose = deepcopy(next_scene.robot.gripper.get_gripper_pose())
+            transform_bet_gripper_n_obj = get_relative_transform(gripper_pose, next_scene.objs[pick_obj].h_mat)
+            
+            # Attach Object to gripper
+            next_scene.robot.gripper.attached_obj_name = pick_obj
+            next_scene.robot.gripper.pick_obj_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
+            next_scene.robot.gripper.transform_bet_gripper_n_obj = transform_bet_gripper_n_obj
 
+            # Move a gripper to default pose
+            default_thetas = self.scene_mngr.scene.robot.init_qpos
+            default_pose = self.scene_mngr.scene.robot.forward_kin(default_thetas)["right_gripper"].h_mat
+            next_scene.robot.gripper.set_gripper_pose(default_pose)
+            
+            # Move pick object to default pose
+            next_scene.objs[pick_obj].h_mat = np.dot(next_scene.robot.gripper.get_gripper_pose(), transform_bet_gripper_n_obj)
+            next_scene.pick_obj_default_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
+            
+            ## Change Logical State
+            # Remove pick obj in logical state of support obj
             supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.state.on)
-            next_scene.place_obj = supporting_obj.name
+            next_scene.place_obj_name = supporting_obj.name
             next_scene.logical_states.get(supporting_obj.name).get(next_scene.state.support).remove(next_scene.objs[pick_obj])
             
             # Clear logical_state of pick obj
             next_scene.logical_states[pick_obj].clear()
-
-            # Gripper Move to grasp pose
-            next_scene.robot.gripper.set_gripper_pose(grasp_poses[self.grasp_name.GRASP])
-            gripper_pose = deepcopy(next_scene.robot.gripper.get_gripper_pose())
-            transform_bet_gripper_n_obj = get_relative_transform(gripper_pose, next_scene.objs[pick_obj].h_mat)
-            
-            # Attach Object
-            next_scene.robot.gripper.attached_obj_name = pick_obj
-            
-            next_scene.robot.gripper.grasp_pose = grasp_poses[self.grasp_name.GRASP]
-            
-            # Not use..
-            next_scene.robot.gripper.pre_grasp_pose = grasp_poses[self.grasp_name.PRE_GRASP]
-            next_scene.robot.gripper.post_grasp_pose = grasp_poses[self.grasp_name.POST_GRASP]
-
-            next_scene.robot.gripper.transform_bet_gripper_n_obj = transform_bet_gripper_n_obj
-            next_scene.robot.gripper.pick_obj_pose = deepcopy(next_scene.objs[pick_obj].h_mat)
-            
-            # Gripper Move to default pose
-            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
-            
-            # pick object Move to default pose with gripper
-            next_scene.objs[pick_obj].h_mat = np.dot(next_scene.robot.gripper.get_gripper_pose(), transform_bet_gripper_n_obj)
             
             # Add logical_state of pick obj : {'held' : True}
             next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.state.holding] = next_scene.objs[pick_obj]
@@ -241,15 +243,6 @@ class PickAction(ActivityBase):
         if len(ik_sovle) == 3:
             return ik_sovle, grasp_pose_for_ik
         return None, None
-
-    def get_cartesian_path(self, cur_q, goal_pose, n_step=50):
-        self.cartesian_planner._n_step = n_step
-        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, collision_check=False)
-        return self.cartesian_planner.get_joint_path()
-
-    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=10):
-        self.rrt_planner.run(self.scene_mngr, cur_q, goal_pose, max_iter)
-        return self.rrt_planner.get_joint_path(n_step=n_step)
 
     def get_contact_points(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)

@@ -26,9 +26,11 @@ class Scene:
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
         self.state = State
-        self.pick_obj = None
-        self.place_obj = None
+        self.pick_obj_name = None
+        self.pick_obj_default_pose = None
         self.grasp_poses = None
+        
+        self.place_obj_name = None
         self.release_poses = None
 
     def show_scene_info(self):
@@ -131,7 +133,7 @@ class SceneManager:
         self._scene.objs.pop(name, None)
         self.obj_collision_mngr.remove_object(name)
 
-    def attach_object_on_gripper(self, name, is_transform_bet_gripper_n_obj=False):
+    def attach_object_on_gripper(self, name, has_transform_bet_gripper_n_obj=True):
         if self._scene.robot is None:
             raise ValueError("Robot needs to be added first")
         
@@ -146,7 +148,7 @@ class SceneManager:
         self.obj_collision_mngr.remove_object(name)
         self._transform_bet_gripper_n_obj = self._scene.robot.gripper.transform_bet_gripper_n_obj
 
-        if is_transform_bet_gripper_n_obj:
+        if not has_transform_bet_gripper_n_obj:
             eef_pose = self.get_gripper_pose()
             self._transform_bet_gripper_n_obj = get_relative_transform(eef_pose, self._scene.objs[name].h_mat)
 
@@ -455,13 +457,15 @@ class SceneManager:
         robot_color=None,
         joint_path=[], 
         eef_poses=[], 
-        only_visible_gripper=False,
+        visible_gripper=False,
         only_visible_geom=True,
         visible_text=True,
         interval=1,
         repeat=True,
         pick_object=None,
         attach_idx = None,
+        detach_idx = None,
+        place_obj_pose=None
     ):
         if not self.is_pyplot:
             ValueError("Only pyplot can render.")
@@ -484,30 +488,37 @@ class SceneManager:
                 self.render.render_objects(ax, scene.objs, alpha)
             
             if eef_poses is not None:
-                self.render.render_trajectory(ax, eef_poses)
+                self.render.render_trajectory(ax, eef_poses, size=0.1)
                         
             self.set_robot_eef_pose(joint_path[i])
 
             if i == attach_idx:
-                self.attach_object_on_gripper(pick_object, True)
+                self.attach_object_on_gripper(pick_object, False)
 
-            if only_visible_gripper:
-                self.render.render_gripper(
-                    ax=ax,
-                    robot=scene.robot,
-                    alpha=alpha,
-                    robot_color=robot_color,
-                    only_visible_axis=False)
-            else:
-                self.render.render_robot(
-                    ax=ax,
-                    robot=scene.robot,
-                    alpha=alpha,
-                    robot_color=robot_color,
-                    geom=self.geom,
-                    only_visible_geom=only_visible_geom,
-                    visible_text=visible_text,
-                    )
+            if i == detach_idx:
+                object_pose = place_obj_pose
+                if place_obj_pose is None:
+                    object_pose = self.get_gripper_info()[pick_object][3]
+                self.detach_object_from_gripper(pick_object)
+                self.add_object(name=pick_object,
+                                gtype=self.init_objects[pick_object].gtype,
+                                gparam=self.init_objects[pick_object].gparam,
+                                h_mat=object_pose,
+                                color=self.init_objects[pick_object].color)
+
+            if visible_gripper:
+                only_visible_geom = False
+                
+            self.render.render_robot(
+                ax=ax,
+                robot=scene.robot,
+                alpha=alpha,
+                robot_color=robot_color,
+                geom=self.geom,
+                only_visible_geom=only_visible_geom,
+                visible_text=visible_text,
+                visible_gripper=visible_gripper,
+            )
         
         ani = animation.FuncAnimation(fig, update, np.arange(len(joint_path)), interval=interval, repeat=repeat)
         self.show()

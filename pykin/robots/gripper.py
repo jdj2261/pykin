@@ -14,19 +14,16 @@ class Gripper:
         self.max_depth = 0.035
         self.tcp_position = np.array([0, 0, 0.097])
         self.info = OrderedDict()
+        
         self.is_attached = False
         self.attached_obj_name = None
         
         self.grasp_pose = None
-        self.pre_grasp_pose = None
-        self.post_grasp_pose = None
-
         self.release_pose = None
-        self.pre_release_pose = None
-        self.post_release_pose = None
-
+    
         self.transform_bet_gripper_n_obj = None
         self.pick_obj_pose = None
+        self.place_obj_pose = None
 
         if configures:
             self._setup_gripper(configures)

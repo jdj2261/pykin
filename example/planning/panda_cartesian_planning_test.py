@@ -57,7 +57,7 @@ grasp_pose[:3, 3] = grasp_pose[:3, 3] - [0.10, 0, 0]
 target_thetas = scene_mngr.scene.robot.get_result_qpos(init_qpos, grasp_pose)
 
 scene_mngr.set_robot_eef_pose(target_thetas)
-scene_mngr.attach_object_on_gripper("green_box")
+scene_mngr.attach_object_on_gripper("green_box", False)
 
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 # scene_mngr.show()
@@ -67,7 +67,6 @@ scene_mngr.attach_object_on_gripper("green_box")
 planner = CartesianPlanner(
     n_step=100,
     dimension=7,
-    damping=0.5
 )
 
 planner.run(
@@ -83,7 +82,7 @@ scene_mngr.animation(
     fig,
     joint_path=joint_path,
     eef_poses=eef_poses,
-    only_visible_gripper=True,
+    visible_gripper=True,
     only_visible_geom=True,
     visible_text=True,
     alpha=1.0,

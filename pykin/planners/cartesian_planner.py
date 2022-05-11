@@ -28,9 +28,9 @@ class CartesianPlanner(Planner):
         self,
         n_step=500,
         dimension=7,
-        damping=0.5,
+        damping=0.01,
         threshold=1e-12,
-        goal_tolerance=0.05,
+        goal_tolerance=0.03,
         waypoint_type="Linear",
         is_slerp=False
     ):
@@ -110,8 +110,6 @@ class CartesianPlanner(Planner):
             cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
 
             current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
-            eef_position = cur_fk[self._scene_mngr.scene.robot.eef_name].pos
-
             joint_path = [self._cur_qpos]
             for step, (pos, ori) in enumerate(waypoints):
                 target_transform = t_utils.get_h_mat(pos, ori)

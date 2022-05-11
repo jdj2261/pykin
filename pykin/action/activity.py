@@ -41,7 +41,7 @@ class ActivityBase(metaclass=ABCMeta):
 
         # Add Planner
         self.cartesian_planner = CartesianPlanner()
-        self.rrt_planner = RRTStarPlanner(delta_distance=0.1, epsilon=0.2, gamma_RRT_star=1)
+        self.rrt_planner = RRTStarPlanner(delta_distance=0.08, epsilon=0.2, gamma_RRT_star=1.5)
 
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)
@@ -52,6 +52,10 @@ class ActivityBase(metaclass=ABCMeta):
 
     @abstractclassmethod
     def get_possible_ik_solve_level_2(self):
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def get_possible_joint_path_level_3(self):
         raise NotImplementedError
 
     @abstractclassmethod
@@ -77,6 +81,15 @@ class ActivityBase(metaclass=ABCMeta):
         if pose_error < eps:
             return True
         return False
+
+    def get_cartesian_path(self, cur_q, goal_pose, n_step=50):
+        self.cartesian_planner._n_step = n_step
+        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, collision_check=False)
+        return self.cartesian_planner.get_joint_path()
+
+    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=10):
+        self.rrt_planner.run(self.scene_mngr, cur_q, goal_pose, max_iter)
+        return self.rrt_planner.get_joint_path(n_step=n_step)
 
     def render_points(self, ax, points, s=5, c='r'):
         if isinstance(points, list):

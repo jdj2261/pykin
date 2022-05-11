@@ -28,10 +28,9 @@ class PlaceAction(ActivityBase):
         self.n_samples_held_obj = n_samples_held_obj
         self.n_samples_sup_obj = n_samples_support_obj
         self.release_distance = release_distance
-        self.filter_logical_states = [scene_mngr.scene.state.held]
-                                    #   scene_mngr.scene.state.static]
+        self.filter_logical_states = [scene_mngr.scene.state.held]                                    
 
-    def get_possible_actions_level_1(self, scene:Scene=None):
+    def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
         if scene is None:
             scene = self.scene_mngr.scene
 
@@ -45,7 +44,7 @@ class PlaceAction(ActivityBase):
             if sup_obj == held_obj:
                 continue
 
-            if sup_obj == self.scene_mngr.scene.place_obj:
+            if sup_obj == self.scene_mngr.scene.place_obj_name:
                 if not "table" in sup_obj:
                     continue
 
@@ -56,13 +55,76 @@ class PlaceAction(ActivityBase):
                 yield action_level_1
 
     # Not Expand, only check possible action using ik
-    def get_possible_ik_solve_level_2(self, scene:Scene=None, release_pose:dict={}) -> bool:
+    def get_possible_ik_solve_level_2(self, scene:Scene=None, release_poses:dict={}) -> bool:
         if scene is None:
             scene = self.scene_mngr.scene
         self.scene_mngr.scene = deepcopy(scene)
         
-        ik_solve, release_pose_filtered = self.compute_ik_solve_for_robot(release_pose)
-        return ik_solve, release_pose_filtered
+        ik_solve, release_poses_filtered = self.compute_ik_solve_for_robot(release_poses)
+        return ik_solve, release_poses_filtered
+
+    def get_possible_joint_path_level_3(self, scene:Scene=None, release_poses:dict={}, init_thetas=None):
+        if scene is None:
+            scene = self.scene_mngr.scene
+        self.scene_mngr.scene = deepcopy(scene)
+
+        result_all_joint_path = []
+        result_joint_path = {}
+        default_joint_path = []
+
+        default_thetas = init_thetas
+        if init_thetas is None:
+            default_thetas = self.scene_mngr.scene.robot.init_qpos
+        
+        pre_release_pose = release_poses[self.release_name.PRE_RELEASE]
+        release_pose = release_poses[self.release_name.RELEASE]
+        post_release_pose = release_poses[self.release_name.POST_RELEASE]
+        success_joint_path = False
+        # default pose -> pre_release_pose (rrt)
+        self.scene_mngr.set_robot_eef_pose(default_thetas)
+        
+        self.scene_mngr.set_object_pose(scene.pick_obj_name, scene.pick_obj_default_pose)
+        self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
+        pre_release_joint_path = self.get_rrt_star_path(default_thetas, pre_release_pose)
+        if pre_release_joint_path:
+            # pre_release_pose -> release_pose (cartesian)
+            release_joint_path = self.get_cartesian_path(pre_release_joint_path[-1], release_pose)
+            if release_joint_path:
+                success_joint_path = True
+                self.scene_mngr.detach_object_from_gripper()
+                self.scene_mngr.add_object(
+                    self.scene_mngr.scene.robot.gripper.attached_obj_name,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
+                    scene.robot.gripper.place_obj_pose,
+                    self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
+
+                # release_pose -> post_release_pose (cartesian)
+                post_release_joint_path = self.get_cartesian_path(release_joint_path[-1], post_release_pose)
+                if post_release_joint_path:
+                    # post_release_pose -> default pose (rrt)
+                    default_pose = self.scene_mngr.scene.robot.forward_kin(default_thetas)["right_gripper"].h_mat
+                    default_joint_path = self.get_rrt_star_path(post_release_joint_path[-1], default_pose)
+
+        if not success_joint_path:
+            self.scene_mngr.detach_object_from_gripper()
+            self.scene_mngr.add_object(
+                self.scene_mngr.scene.robot.gripper.attached_obj_name,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
+                scene.robot.gripper.place_obj_pose,
+                self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
+
+
+        if default_joint_path:
+            result_joint_path.update({self.release_name.PRE_RELEASE: pre_release_joint_path})
+            result_joint_path.update({self.release_name.RELEASE: release_joint_path})
+            result_joint_path.update({self.release_name.POST_RELEASE: post_release_joint_path})
+            result_joint_path.update({"default_pose": default_joint_path})
+            result_all_joint_path.append(result_joint_path)
+        
+            return result_all_joint_path
+
 
     def get_action(self, held_obj_name, place_obj_name, poses):
         action = {}
@@ -79,21 +141,29 @@ class PlaceAction(ActivityBase):
         held_obj = action[self.action_info.HELD_OBJ_NAME]
         place_obj = action[self.action_info.PLACE_OBJ_NAME]
 
-        for release_pose, obj_pose_transformed in action[self.action_info.RELEASE_POSES]:
+        for release_poses, obj_pose_transformed in action[self.action_info.RELEASE_POSES]:
             next_scene = deepcopy(scene)
             
+            ## Change transition
+            next_scene.release_poses = release_poses
+            next_scene.robot.gripper.place_obj_pose = obj_pose_transformed
+            next_scene.robot.gripper.release_pose = release_poses[self.release_name.RELEASE]
+        
+            # Move a gripper to default pose
+            default_thetas = self.scene_mngr.scene.robot.init_qpos
+            default_pose = self.scene_mngr.scene.robot.forward_kin(default_thetas)["right_gripper"].h_mat
+            next_scene.robot.gripper.set_gripper_pose(default_pose)
+
+            # Move pick object on support obj
+            next_scene.objs[held_obj].h_mat = obj_pose_transformed
+            next_scene.pick_obj_name = held_obj
+            ## Change Logical State
             # Clear logical_state of held obj
             next_scene.logical_states.get(held_obj).clear()
+
+            # Chage logical_state holding : None
             next_scene.logical_states[next_scene.robot.gripper.name][next_scene.state.holding] = None
-            next_scene.pick_obj = held_obj
 
-            # Gripper Move
-            # next_scene.robot.gripper.set_gripper_pose(release_pose[self.release_name.RELEASE])
-            next_scene.robot.gripper.set_gripper_pose(next_scene.robot.get_gripper_init_pose())
-
-            # Held Object Move
-            next_scene.objs[held_obj].h_mat = obj_pose_transformed
-            
             # Add logical_state of held obj : {'on' : place_obj}
             next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
             next_scene.update_logical_states()
@@ -140,8 +210,8 @@ class PlaceAction(ActivityBase):
                     self.scene_mngr.set_gripper_pose(pose)
                     for name in self.scene_mngr.scene.objs:
                         self.scene_mngr.obj_collision_mngr.set_transform(name, self.scene_mngr.scene.objs[name].h_mat)
-                    self.scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
-                    self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
+                    # self.scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
+                    # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
                     # self.scene_mngr.show_scene_info()
                     if self._collide(is_only_gripper=True):
                         is_collision = True
