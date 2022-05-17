@@ -54,8 +54,8 @@ scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.sta
 scene_mngr.update_logical_states()
 
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=5)
-place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=2)
+pick = PickAction(scene_mngr, n_contacts=5, n_directions=5)
+place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 # pick_actions = list(pick.get_possible_actions_level_1())
 # # fig, ax = plt.init_3d_figure(name="Level wise 1")

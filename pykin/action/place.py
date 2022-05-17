@@ -2,9 +2,14 @@ import numpy as np
 from dataclasses import dataclass
 from copy import deepcopy
 
+from trimesh import Trimesh, proximity
+
 import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
+from pykin.utils.log_utils import create_logger
+
+logger = create_logger('PlaceAction', "debug")
 
 @dataclass
 class ReleaseName:
@@ -115,7 +120,6 @@ class PlaceAction(ActivityBase):
                 scene.robot.gripper.place_obj_pose,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
-
         if default_joint_path:
             result_joint_path.update({self.release_name.PRE_RELEASE: pre_release_joint_path})
             result_joint_path.update({self.release_name.RELEASE: release_joint_path})
@@ -124,7 +128,6 @@ class PlaceAction(ActivityBase):
             result_all_joint_path.append(result_joint_path)
         
             return result_all_joint_path
-
 
     def get_action(self, held_obj_name, place_obj_name, poses):
         action = {}
@@ -138,8 +141,8 @@ class PlaceAction(ActivityBase):
         if not action:
             ValueError("Not found any action!!")
 
-        held_obj = action[self.action_info.HELD_OBJ_NAME]
-        place_obj = action[self.action_info.PLACE_OBJ_NAME]
+        held_obj_name = action[self.action_info.HELD_OBJ_NAME]
+        place_obj_name = action[self.action_info.PLACE_OBJ_NAME]
 
         for release_poses, obj_pose_transformed in action[self.action_info.RELEASE_POSES]:
             next_scene = deepcopy(scene)
@@ -155,18 +158,30 @@ class PlaceAction(ActivityBase):
             next_scene.robot.gripper.set_gripper_pose(default_pose)
 
             # Move pick object on support obj
-            next_scene.objs[held_obj].h_mat = obj_pose_transformed
-            next_scene.pick_obj_name = held_obj
+
+            next_scene.objs[held_obj_name].h_mat = obj_pose_transformed
+            next_scene.pick_obj_name = held_obj_name
             ## Change Logical State
             # Clear logical_state of held obj
-            next_scene.logical_states.get(held_obj).clear()
+            next_scene.logical_states.get(held_obj_name).clear()
 
             # Chage logical_state holding : None
             next_scene.logical_states[next_scene.robot.gripper.name][next_scene.state.holding] = None
 
             # Add logical_state of held obj : {'on' : place_obj}
-            next_scene.logical_states[held_obj][next_scene.state.on] = next_scene.objs[place_obj]
+            next_scene.logical_states[held_obj_name][next_scene.state.on] = next_scene.objs[place_obj_name]
             next_scene.update_logical_states()
+
+
+            copied_scene = deepcopy(next_scene)
+            held_obj = copied_scene.objs[held_obj_name]
+            held_obj_mesh:Trimesh = deepcopy(held_obj.gparam)
+            held_obj_mesh.apply_transform(obj_pose_transformed)
+            com = held_obj_mesh.center_mass
+
+            if not self._check_stability(next_scene, held_obj_name, com):
+                pass
+
             yield next_scene
 
     # Not consider collision
@@ -175,6 +190,9 @@ class PlaceAction(ActivityBase):
         transformed_eef_poses = list(self.get_transformed_eef_poses(support_obj_name, held_obj_name, gripper_eef_pose))
         
         for eef_pose, obj_pose_transformed in transformed_eef_poses:
+            if not self._check_support(support_obj_name, held_obj_name, obj_pose_transformed):
+                continue
+            
             release_pose = {}
             release_pose[self.release_name.RELEASE] = eef_pose
             release_pose[self.release_name.PRE_RELEASE] = self.get_pre_release_pose(eef_pose)
@@ -194,15 +212,12 @@ class PlaceAction(ActivityBase):
         return post_release_pose
 
     # for level wise - 1 (Consider gripper collision)
-    def get_release_poses_for_only_gripper(self, release_poses, is_attach=True):
+    def get_release_poses_for_only_gripper(self, release_poses, is_attached=True):
         if self.scene_mngr.scene.robot.has_gripper is None:
             raise ValueError("Robot doesn't have a gripper")
 
-        if release_poses[0][0] is None:
-            raise ValueError("Not found release poses!!")
-
         for all_release_pose, obj_pose_transformed in release_poses:
-            if is_attach:
+            if is_attached:
                 self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
             for name, pose in all_release_pose.items():
                 is_collision = False
@@ -210,9 +225,6 @@ class PlaceAction(ActivityBase):
                     self.scene_mngr.set_gripper_pose(pose)
                     for name in self.scene_mngr.scene.objs:
                         self.scene_mngr.obj_collision_mngr.set_transform(name, self.scene_mngr.scene.objs[name].h_mat)
-                    # self.scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")
-                    # self.scene_mngr.obj_collision_mngr.show_collision_info("Object")
-                    # self.scene_mngr.show_scene_info()
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
@@ -227,7 +239,7 @@ class PlaceAction(ActivityBase):
                         is_collision = True
                         break
             
-            if is_attach:
+            if is_attached:
                 self.scene_mngr.detach_object_from_gripper()
                 self.scene_mngr.add_object(
                     self.scene_mngr.scene.robot.gripper.attached_obj_name,
@@ -239,11 +251,11 @@ class PlaceAction(ActivityBase):
             if not is_collision:
                 yield all_release_pose, obj_pose_transformed
 
-    def compute_ik_solve_for_robot(self, release_pose:dict, is_attach=True):
+    def compute_ik_solve_for_robot(self, release_pose:dict, is_attached=True):
         ik_sovle = {}
         release_pose_for_ik = {}
 
-        if is_attach:
+        if is_attached:
             self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
         
         for name, pose in release_pose.items():
@@ -269,7 +281,7 @@ class PlaceAction(ActivityBase):
                     ik_sovle[name] = thetas
                     release_pose_for_ik[name] = pose
 
-        if is_attach:
+        if is_attached:
             self.scene_mngr.detach_object_from_gripper()
             self.scene_mngr.add_object(
                 self.scene_mngr.scene.robot.gripper.attached_obj_name,
@@ -357,3 +369,52 @@ class PlaceAction(ActivityBase):
         result_eef_pose_transformed[:3, :3] = eef_pose_transformed[:3, :3]
         result_eef_pose_transformed[:3, 3] = eef_pose_transformed[:3, 3] + (sup_obj_point - held_obj_point_transformed) + np.array([0, 0, self.release_distance])
         return result_eef_pose_transformed
+
+    @staticmethod
+    def _check_stability(copied_scene:Scene, held_obj_name, com):
+        if copied_scene.state.on in list(copied_scene.logical_states[held_obj_name].keys()):
+            support_obj = copied_scene.logical_states[held_obj_name][copied_scene.state.on]
+            support_obj_mesh:Trimesh = deepcopy(support_obj.gparam)
+            support_obj_mesh.apply_transform(support_obj.h_mat)
+
+            closest_points, dists, surface_idx = proximity.closest_point(support_obj_mesh, [com])
+            closest_point = closest_points[0]
+            norm_vector = a_utils.normalize(closest_point - com)
+
+            safe_com = norm_vector[2] == -1.0
+            if safe_com:
+                return PlaceAction._check_stability(copied_scene, support_obj.name, com)
+            else:
+                logger.warning("Not satisfied stability")
+                return False
+        else:
+            return True
+
+    def _check_support(self, support_obj_name, held_obj_name, obj_pose):
+        """
+        Check support pose
+        Args:
+            obj_pose (np.array): pose of support object
+        
+        Returns:
+            bool: If satisfy support pose, then true
+                  Otherwise then false
+        """
+        held_obj = self.scene_mngr.scene.objs[held_obj_name]
+        held_obj_mesh:Trimesh = deepcopy(held_obj.gparam)
+        held_obj_mesh.apply_transform(obj_pose)
+        
+        place_obj = self.scene_mngr.scene.objs[support_obj_name]
+        place_obj_mesh = deepcopy(place_obj.gparam)
+        place_obj_mesh.apply_transform(place_obj.h_mat)
+
+        locations, _, _ = place_obj_mesh.ray.intersects_location(
+                    ray_origins=[held_obj_mesh.center_mass],
+                    ray_directions=[[0, 0, -1]])
+        if len(locations) != 0:
+            return True
+        # logger.warning("Not found support point")
+        return False
+
+    def _compute_com(self):
+        pass

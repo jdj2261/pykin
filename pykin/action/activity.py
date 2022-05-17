@@ -82,32 +82,20 @@ class ActivityBase(metaclass=ABCMeta):
             return True
         return False
 
+    def _check_stability(self):
+        pass
+    
+    def _check_com(self):
+        pass
+
     def get_cartesian_path(self, cur_q, goal_pose, n_step=50):
         self.cartesian_planner._n_step = n_step
         self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, collision_check=False)
         return self.cartesian_planner.get_joint_path()
 
-    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=10):
+    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=30):
         self.rrt_planner.run(self.scene_mngr, cur_q, goal_pose, max_iter)
         return self.rrt_planner.get_joint_path(n_step=n_step)
-
-    def render_points(self, ax, points, s=5, c='r'):
-        if isinstance(points, list):
-            points = np.array(points).reshape(-1,3)
-        for point in points:
-            ax.scatter(point[0], point[1], point[2], s=5, c='r')
-
-    def render_point(self, ax, point, s=5, c='r'):
-        ax.scatter(point[0], point[1], point[2], s=5, c='r')
-
-    def render_axis(
-        self,
-        ax,
-        pose,
-        axis=[1, 1, 1],
-        scale=0.05
-    ):
-        plt.render_axis(ax, pose, axis, scale)
 
     def show(self):
         self.scene_mngr.show()

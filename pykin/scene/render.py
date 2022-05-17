@@ -67,7 +67,7 @@ class RenderPyPlot(SceneRender):
         RenderPyPlot.render_gripper(ax, robot, alpha, robot_color, visible_tcp)
 
     @staticmethod
-    def render_objects(ax, objs, alpha):
+    def render_objects(ax, objs, alpha=1.0):
         plt.plot_objects(ax, objs, alpha)
 
     @staticmethod
@@ -122,6 +122,17 @@ class RenderPyPlot(SceneRender):
         scale=0.05
     ):
         plt.render_axis(ax, pose, axis, scale)
+
+    @staticmethod
+    def render_points(ax, points, s=5, c='r'):
+        if isinstance(points, list):
+            points = np.array(points).reshape(-1,3)
+        for point in points:
+            ax.scatter(point[0], point[1], point[2], s=s, c=c)
+
+    @staticmethod
+    def render_point(ax, point, s=5, c='r'):
+        ax.scatter(point[0], point[1], point[2], s=s, c=c)
 
     @staticmethod
     def render_trajectory(ax, path, size=1, color='r'):
