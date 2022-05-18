@@ -58,9 +58,9 @@ actions = list(pick.get_possible_actions_level_1())
 fig, ax = plt.init_3d_figure(name="Level wise 1")
 for pick_actions in actions:
     for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.grasp_name.PRE_GRASP])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.grasp_name.POST_GRASP])
+        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
+        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_pre_grasp])
+        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 
@@ -71,9 +71,9 @@ for pick_actions in actions:
         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
         if ik_solve is not None:
             cnt += 1
-            pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.grasp_name.GRASP])
-            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.grasp_name.PRE_GRASP])
-            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.grasp_name.POST_GRASP])
+            pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
+            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
+            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_post_grasp])
             
 print(cnt)
 pick.scene_mngr.render_objects(ax)

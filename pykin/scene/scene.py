@@ -26,13 +26,14 @@ class Scene:
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
         self.state = State
-        self.pick_obj_name = None
-        self.pick_obj_default_pose = None
-        self.grasp_poses = None
         
-        self.place_obj_name = None
+        self.grasp_poses = None
         self.release_poses = None
-
+        
+        self.pick_obj_name = None
+        self.place_obj_name = None
+        self.pick_obj_default_pose = None
+        
     def show_scene_info(self):
         print(f"*"*23 + f" {sc.OKGREEN}Scene{sc.ENDC} "+ f"*"*23)
         pprint.pprint(self.objs)
@@ -457,8 +458,8 @@ class SceneManager:
         robot_color=None,
         joint_path=[], 
         eef_poses=[], 
-        visible_gripper=False,
         only_visible_geom=True,
+        visible_gripper=False,
         visible_text=True,
         interval=1,
         repeat=True,
@@ -506,8 +507,9 @@ class SceneManager:
                                 h_mat=object_pose,
                                 color=self.init_objects[pick_object].color)
 
+            visible_geom = only_visible_geom
             if visible_gripper:
-                only_visible_geom = False
+                visible_geom = False
                 
             self.render.render_robot(
                 ax=ax,
@@ -515,7 +517,7 @@ class SceneManager:
                 alpha=alpha,
                 robot_color=robot_color,
                 geom=self.geom,
-                only_visible_geom=only_visible_geom,
+                only_visible_geom=visible_geom,
                 visible_text=visible_text,
                 visible_gripper=visible_gripper,
             )

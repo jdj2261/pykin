@@ -63,11 +63,11 @@ for pick_action in pick_actions:
             for all_release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
                 if place.compute_ik_solve_for_robot(all_release_pose):
                 # fig, ax = plt.init_3d_figure(name="Level wise 1")
-                    # place.scene_mngr.render_gripper(ax, pose=all_release_pose[place.release_name.RELEASE])
-                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.release_name.RELEASE])
+                    # place.scene_mngr.render_gripper(ax, pose=all_release_pose[place.move_data.MOVE_release])
+                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_release])
                     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
-                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.release_name.PRE_RELEASE])
-                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.release_name.POST_RELEASE])
+                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_pre_release])
+                    # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_post_release])
                     # place.scene_mngr.show_scene_info()
 place.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)

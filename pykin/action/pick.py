@@ -8,14 +8,6 @@ from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.action_utils import get_relative_transform
 
-@dataclass
-class GraspName:
-    """
-    Grasp Status Enum class
-    """
-    PRE_GRASP = "pre_grasp"
-    GRASP = "grasp"
-    POST_GRASP = "post_grasp"
 
 class PickAction(ActivityBase):
     def __init__(
@@ -27,52 +19,51 @@ class PickAction(ActivityBase):
         retreat_distance=0.1
     ):
         super().__init__(scene_mngr, retreat_distance)
-        self.grasp_name = GraspName
         self.n_contacts = n_contacts
         self.n_directions = n_directions
         self.limit_angle = limit_angle_for_force_closure
         self.filter_logical_states = [ scene_mngr.scene.state.support, 
                                        scene_mngr.scene.state.static]
 
+
     # Expand action to tree
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
-        if scene is None:
-            scene = self.scene_mngr.scene
-
-        self.scene_mngr.scene = deepcopy(scene)
+        self.copy_scene(scene)
         
-        for obj in self.scene_mngr.scene.objs:
-            if obj == self.scene_mngr.scene.pick_obj_name:
+        for obj_name in self.scene_mngr.scene.objs:
+            if obj_name == self.scene_mngr.scene.pick_obj_name:
                 continue
             
-            if not any(logical_state in self.scene_mngr.scene.logical_states[obj] for logical_state in self.filter_logical_states):
-                grasp_poses = list(self.get_all_grasp_poses(obj_name=obj))
-                grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
-                action_level_1 = self.get_action(obj, grasp_poses_for_only_gripper)
+            if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
+                action_level_1 = self.get_action_level_1_for_single_object(self.scene_mngr.scene, obj_name)
                 yield action_level_1
+
+    def get_action_level_1_for_single_object(self, scene, obj_name:str=None) -> dict:
+        self.copy_scene(scene)
+
+        grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
+        grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
+        action_level_1 = self.get_action(obj_name, grasp_poses_for_only_gripper)
+        return action_level_1
 
     # Not Expand, only check possible action using ik
     def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:
-        if scene is None:
-            scene = self.scene_mngr.scene
-        self.scene_mngr.scene = deepcopy(scene)
+        self.copy_scene(scene)
         
         ik_solve, grasp_poses_filtered = self.compute_ik_solve_for_robot(grasp_poses)
         return ik_solve, grasp_poses_filtered
  
     def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}):
-        if scene is None:
-            scene = self.scene_mngr.scene
-        self.scene_mngr.scene = deepcopy(scene)
+        self.copy_scene(scene)
         
         result_all_joint_path = []
         result_joint_path = {}
         default_joint_path = []
 
         default_thetas = self.scene_mngr.scene.robot.init_qpos
-        pre_grasp_pose = grasp_poses[self.grasp_name.PRE_GRASP]
-        grasp_pose = grasp_poses[self.grasp_name.GRASP]
-        post_grasp_pose = grasp_poses[self.grasp_name.POST_GRASP]
+        pre_grasp_pose = grasp_poses[self.move_data.MOVE_pre_grasp]
+        grasp_pose = grasp_poses[self.move_data.MOVE_grasp]
+        post_grasp_pose = grasp_poses[self.move_data.MOVE_post_grasp]
 
         # default pose -> pre_grasp_pose (rrt)
         pre_grasp_joint_path = self.get_rrt_star_path(default_thetas, pre_grasp_pose)
@@ -96,17 +87,17 @@ class PickAction(ActivityBase):
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
         if default_joint_path:
-            result_joint_path.update({self.grasp_name.PRE_GRASP: pre_grasp_joint_path})
-            result_joint_path.update({self.grasp_name.GRASP: grasp_joint_path})
-            result_joint_path.update({self.grasp_name.POST_GRASP: post_grasp_joint_path})
-            result_joint_path.update({"default_pose": default_joint_path})
+            result_joint_path.update({self.move_data.MOVE_pre_grasp: pre_grasp_joint_path})
+            result_joint_path.update({self.move_data.MOVE_grasp: grasp_joint_path})
+            result_joint_path.update({self.move_data.MOVE_post_grasp: post_grasp_joint_path})
+            result_joint_path.update({self.move_data.MOVE_default_grasp: default_joint_path})
             result_all_joint_path.append(result_joint_path)
         
             return result_all_joint_path
 
     def get_action(self, obj_name, all_poses):
         action = {}
-        action[self.action_info.ACTION] = "pick"
+        action[self.action_info.TYPE] = "pick"
         action[self.action_info.PICK_OBJ_NAME] = obj_name
         action[self.action_info.GRASP_POSES] = all_poses
         return action
@@ -122,10 +113,10 @@ class PickAction(ActivityBase):
             
             ## Change transition
             next_scene.grasp_poses = grasp_poses
-            next_scene.robot.gripper.grasp_pose = grasp_poses[self.grasp_name.GRASP]
+            next_scene.robot.gripper.grasp_pose = grasp_poses[self.move_data.MOVE_grasp]
             
             # Gripper Move to grasp pose
-            next_scene.robot.gripper.set_gripper_pose(grasp_poses[self.grasp_name.GRASP])
+            next_scene.robot.gripper.set_gripper_pose(grasp_poses[self.move_data.MOVE_grasp])
             
             # Get transform between gripper and pick object
             gripper_pose = deepcopy(next_scene.robot.gripper.get_gripper_pose())
@@ -169,9 +160,9 @@ class PickAction(ActivityBase):
         
         for tcp_pose in tcp_poses:
             grasp_pose = {}
-            grasp_pose[self.grasp_name.GRASP] = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
-            grasp_pose[self.grasp_name.PRE_GRASP] = self.get_pre_grasp_pose(grasp_pose[self.grasp_name.GRASP])
-            grasp_pose[self.grasp_name.POST_GRASP] = self.get_post_grasp_pose(grasp_pose[self.grasp_name.GRASP])
+            grasp_pose[self.move_data.MOVE_grasp] = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+            grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
+            grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
             yield grasp_pose
 
     def get_pre_grasp_pose(self, grasp_pose):
@@ -194,17 +185,17 @@ class PickAction(ActivityBase):
         for all_grasp_pose in grasp_poses:
             for name, pose in all_grasp_pose.items():
                 is_collision = False
-                if name == self.grasp_name.GRASP:
+                if name == self.move_data.MOVE_grasp:
                     self.scene_mngr.set_gripper_pose(pose)
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
-                if name == self.grasp_name.PRE_GRASP:
+                if name == self.move_data.MOVE_pre_grasp:
                     self.scene_mngr.set_gripper_pose(pose)
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break
-                if name == self.grasp_name.POST_GRASP:
+                if name == self.move_data.MOVE_post_grasp:
                     self.scene_mngr.set_gripper_pose(pose)
                     if self._collide(is_only_gripper=True):
                         is_collision = True
@@ -218,21 +209,21 @@ class PickAction(ActivityBase):
         grasp_pose_for_ik = {}
 
         for name, pose in grasp_pose.items():
-            if name == self.grasp_name.GRASP:
+            if name == self.move_data.MOVE_grasp:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
                     ik_sovle[name] = thetas
                     grasp_pose_for_ik[name] = pose
-            if name == self.grasp_name.PRE_GRASP:
+            if name == self.move_data.MOVE_pre_grasp:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 pre_grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, pre_grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
                     ik_sovle[name] = thetas
                     grasp_pose_for_ik[name] = pose
-            if name == self.grasp_name.POST_GRASP:
+            if name == self.move_data.MOVE_post_grasp:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 post_grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()

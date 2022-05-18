@@ -45,15 +45,20 @@ class SingleArm(Robot):
                 self.joint_limits_lower.append(limit_lower)
                 self.joint_limits_upper.append(limit_upper)
 
-    def get_result_qpos(self, init_qpos, eef_pos):
+    def get_result_qpos(self, init_qpos, eef_pose, method="LM", max_iter=100):
         is_limit_qpos = False
-        result_qpos = self.inverse_kin(init_qpos, eef_pos, method="LM")
+        result_qpos = self.inverse_kin(init_qpos, eef_pose, method=method, max_iter=max_iter)
         is_limit_qpos = self.check_limit_joint(result_qpos)
+        limit_cnt = 0
+
         if is_limit_qpos:
             return result_qpos
 
         while not is_limit_qpos:
-            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pos, method="LM")
+            limit_cnt += 1
+            if limit_cnt > 3:
+                break
+            result_qpos = self.inverse_kin(np.random.randn(len(init_qpos)), eef_pose, method=method, max_iter=max_iter)
             is_limit_qpos = self.check_limit_joint(result_qpos)
         return result_qpos
 

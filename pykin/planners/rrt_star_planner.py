@@ -204,7 +204,7 @@ class RRTStarPlanner(Planner):
         interpolate_path = []
         interpolate_paths = []
         for i in range(len(unique_path)-1):
-            interpolate_path = [unique_path.tolist() for unique_path in self._get_linear_path(unique_path[i], unique_path[i+1], n_step)]
+            interpolate_path = np.array([unique_path.tolist() for unique_path in self._get_linear_path(unique_path[i], unique_path[i+1], n_step)])
             interpolate_paths.extend(interpolate_path)
         logger.info(f"Path length {len(unique_path)} --> {len(interpolate_paths)}")
         self.joint_path = interpolate_paths

@@ -64,7 +64,7 @@ for pick_action in pick_actions:
                 ik_solve, release_pose = place.get_possible_ik_solve_level_2(scene=pick_scene, release_poses=all_release_pose)
                 if ik_solve:
                     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
-                    place.scene_mngr.render.render_axis(ax, release_pose[place.release_name.RELEASE])
+                    place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
 place.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 place.show()

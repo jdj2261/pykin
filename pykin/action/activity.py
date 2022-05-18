@@ -1,6 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
+from copy import deepcopy
 
 import pykin.utils.plot_utils as plt
 from pykin.scene.scene import SceneManager
@@ -10,7 +11,7 @@ from pykin.planners.rrt_star_planner import RRTStarPlanner
 
 @dataclass
 class ActionInfo:
-    ACTION = "action"
+    TYPE = "type"
     PICK_OBJ_NAME = "pick_obj_name"
     HELD_OBJ_NAME = "held_obj_name"
     PLACE_OBJ_NAME = "place_obj_name"
@@ -20,7 +21,23 @@ class ActionInfo:
     TCP_POSES = "tcp_poses"
     RELEASE_POSES = "release_poses"
     LEVEL = "level"
+
+
+@dataclass
+class MoveData:
+    """
+    Grasp Status Enum class
+    """
+    MOVE_pre_grasp = "pre_grasp"
+    MOVE_grasp = "grasp"
+    MOVE_post_grasp = "post_grasp"
+    MOVE_default_grasp = "default_grasp"
     
+    MOVE_pre_release = "pre_release"
+    MOVE_release = "release"
+    MOVE_post_release = "post_release"
+    MOVE_default_release = "default_release"
+
 class ActivityBase(metaclass=ABCMeta):
     """
     Activity Base class
@@ -38,6 +55,7 @@ class ActivityBase(metaclass=ABCMeta):
         self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
         self.retreat_distance = retreat_distance
         self.action_info = ActionInfo
+        self.move_data = MoveData
 
         # Add Planner
         self.cartesian_planner = CartesianPlanner()
@@ -48,6 +66,10 @@ class ActivityBase(metaclass=ABCMeta):
 
     @abstractclassmethod
     def get_possible_actions_level_1(self):
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def get_action_level_1_for_single_object(self):
         raise NotImplementedError
 
     @abstractclassmethod
@@ -81,12 +103,11 @@ class ActivityBase(metaclass=ABCMeta):
         if pose_error < eps:
             return True
         return False
-
-    def _check_stability(self):
-        pass
     
-    def _check_com(self):
-        pass
+    def copy_scene(self, scene=None):
+        if scene is None:
+            scene = self.scene_mngr.scene
+        self.scene_mngr.scene = deepcopy(scene)
 
     def get_cartesian_path(self, cur_q, goal_pose, n_step=50):
         self.cartesian_planner._n_step = n_step

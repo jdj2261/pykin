@@ -58,7 +58,7 @@ actions = list(pick.get_possible_actions_level_1())
 # fig, ax = plt.init_3d_figure( name="all possible actions")
 # for action in actions:
 #     for idx, all_grasp_pose in enumerate(action[pick.action_info.GRASP_POSES]):    
-#         pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.grasp_name.GRASP])
+        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
 # pick.scene_mngr.render_objects(ax)
 # plt.plot_basis(ax)
 # pick.scene_mngr.show()

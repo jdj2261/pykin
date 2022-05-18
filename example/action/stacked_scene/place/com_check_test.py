@@ -60,7 +60,7 @@ place.scene_mngr.show_logical_states()
 
 
 test = green_box_pose.h_mat
-test[:3, 3] = test[:3, 3] + np.array([-0.02, 0, 0])
+test[:3, 3] = test[:3, 3] + np.array([0.02, 0, 0])
 scene_mngr.scene.objs["green_box"].h_mat = test
 
 copied_scene = deepcopy(scene_mngr.scene)

@@ -9,6 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
+from pykin.action.place import PlaceAction
 import pykin.utils.plot_utils as plt
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
@@ -18,7 +19,6 @@ robot = SingleArm(
     has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
-
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
@@ -43,37 +43,36 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True}
-scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
-scene_mngr.update_logical_states()
+scene_mngr.set_logical_state("goal_box", ("on", "table"))
+scene_mngr.set_logical_state("red_box", ("on", "table"))
+scene_mngr.set_logical_state("blue_box", ("on", "table"))
+scene_mngr.set_logical_state("green_box", ("on", "table"))
+scene_mngr.set_logical_state("table", ("static", True))
+scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
+scene_mngr.update_logical_states(init=True)
 
 pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
+place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
-################# Action Test ##################
-actions = list(pick.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure(name="Level wise 1")
-for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_pre_grasp])
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
-pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
-pick.show()
+pick_actions = list(pick.get_possible_actions_level_1())
 
-# fig, ax = plt.init_3d_figure( name="Level wise 2")
-# for pick_actions in actions:
-#     for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
-#         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
-#         if ik_solve is not None:
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_post_grasp])
-            
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-# pick.show()
+for pick_action in pick_actions:
+    for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
+        ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=pick_scene.grasp_poses)
+        if ik_solve:
+            place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
+            for place_action in place_actions:
+                for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
+                    ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
+                    if ik_solve:
+                        fig, ax = plt.init_3d_figure( name="all possible pick transitions")
+                        place.scene_mngr.render_gripper(ax, pick_scene, alpha=0.9, only_visible_axis=False)
+                        pick_scene.show_logical_states()    
+                        place.scene_mngr.render_objects(ax, pick_scene)
+                        place.scene_mngr.show()
+
+                        fig, ax = plt.init_3d_figure( name="all possible place transitions")
+                        place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
+                        place_scene.show_logical_states()                                
+                        place.scene_mngr.render_objects(ax, place_scene)
+                        place.scene_mngr.show()

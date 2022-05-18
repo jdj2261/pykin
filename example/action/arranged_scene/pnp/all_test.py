@@ -72,8 +72,17 @@ for pick_action in pick_actions:
                                     for pick_scene_3 in pick.get_possible_transitions(place_scene2, action=pick_action3):
                                         for place_action3 in list(place.get_possible_actions_level_1(pick_scene_3)):
                                             for place_scene3 in place.get_possible_transitions(pick_scene_3, action=place_action3):
-                                                fig, ax = plt.init_3d_figure( name="all possible transitions")
+                                                fig, ax = plt.init_3d_figure( name="init scene")
+                                                place.scene_mngr.render_gripper(ax, place_scene2, alpha=0.9, only_visible_axis=False)
+                                                place.scene_mngr.render_objects(ax, place_scene2)
+                                                place.scene_mngr.show()
+
+                                                fig, ax = plt.init_3d_figure( name="all pick possible transitions")
+                                                place.scene_mngr.render_gripper(ax, pick_scene_3, alpha=0.9, only_visible_axis=False)
+                                                place.scene_mngr.render_objects(ax, pick_scene_3)
+                                                place.scene_mngr.show()
+                                                
+                                                fig, ax = plt.init_3d_figure( name="all place possible transitions")
                                                 place.scene_mngr.render_gripper(ax, place_scene3, alpha=0.9, only_visible_axis=False)
                                                 place.scene_mngr.render_objects(ax, place_scene3)
-                                                # place_scene3.show_logical_states()
                                                 place.scene_mngr.show()

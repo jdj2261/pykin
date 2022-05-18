@@ -85,7 +85,8 @@ for pick_action in pick_actions:
                     for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
                         ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
                         if ik_solve:
-                            place_joint_path = place.get_possible_joint_path_level_3(scene=place_scene, release_poses=release_poses, init_thetas=pick_joint_path[-1]['default_pose'][-1])
+                            place_joint_path = place.get_possible_joint_path_level_3(
+                                scene=place_scene, release_poses=release_poses, init_thetas=pick_joint_path[-1][place.move_data.MOVE_default_grasp][-1])
                             if place_joint_path:
                                 success_joint_path = True
                                 place_joint_all_path.append(place_joint_path)
