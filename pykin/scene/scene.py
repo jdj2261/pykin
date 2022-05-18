@@ -453,7 +453,7 @@ class SceneManager:
         self,
         ax=None, 
         fig=None,
-        scene=None,
+        init_scene=None,
         alpha=0.3, 
         robot_color=None,
         joint_path=[], 
@@ -471,10 +471,9 @@ class SceneManager:
         if not self.is_pyplot:
             ValueError("Only pyplot can render.")
         
-        scene = scene
-        if scene is None:
-            scene = self._scene
-
+        if init_scene is not None:
+            self._scene = deepcopy(init_scene)
+        
         if pick_object is None:
             pick_object = self.attached_obj_name
 
@@ -485,8 +484,8 @@ class SceneManager:
             ax.clear()
             ax._axis3don = False
 
-            if scene.objs:
-                self.render.render_objects(ax, scene.objs, alpha)
+            if self._scene.objs:
+                self.render.render_objects(ax, self._scene.objs, alpha)
             
             if eef_poses is not None:
                 self.render.render_trajectory(ax, eef_poses, size=0.1)
@@ -513,7 +512,7 @@ class SceneManager:
                 
             self.render.render_robot(
                 ax=ax,
-                robot=scene.robot,
+                robot=self._scene.robot,
                 alpha=alpha,
                 robot_color=robot_color,
                 geom=self.geom,

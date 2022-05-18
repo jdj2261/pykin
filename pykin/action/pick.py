@@ -1,6 +1,5 @@
-
 import numpy as np
-from dataclasses import dataclass
+from collections import OrderedDict
 from copy import deepcopy
 
 import pykin.utils.action_utils as a_utils
@@ -57,7 +56,7 @@ class PickAction(ActivityBase):
         self.copy_scene(scene)
         
         result_all_joint_path = []
-        result_joint_path = {}
+        result_joint_path = OrderedDict()
         default_joint_path = []
 
         default_thetas = self.scene_mngr.scene.robot.init_qpos
@@ -205,7 +204,7 @@ class PickAction(ActivityBase):
                 yield all_grasp_pose
             
     def compute_ik_solve_for_robot(self, grasp_pose:dict):
-        ik_sovle = {}
+        ik_solve = {}
         grasp_pose_for_ik = {}
 
         for name, pose in grasp_pose.items():
@@ -214,25 +213,25 @@ class PickAction(ActivityBase):
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     grasp_pose_for_ik[name] = pose
             if name == self.move_data.MOVE_pre_grasp:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 pre_grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, pre_grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     grasp_pose_for_ik[name] = pose
             if name == self.move_data.MOVE_post_grasp:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 post_grasp_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, post_grasp_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     grasp_pose_for_ik[name] = pose
         
-        if len(ik_sovle) == 3:
-            return ik_sovle, grasp_pose_for_ik
+        if len(ik_solve) == 3:
+            return ik_solve, grasp_pose_for_ik
         return None, None
 
     def get_contact_points(self, obj_name):

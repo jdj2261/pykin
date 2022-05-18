@@ -1,5 +1,5 @@
 import numpy as np
-from dataclasses import dataclass
+from collections import OrderedDict
 from copy import deepcopy
 
 from trimesh import Trimesh, proximity
@@ -62,7 +62,7 @@ class PlaceAction(ActivityBase):
         self.copy_scene(scene)
 
         result_all_joint_path = []
-        result_joint_path = {}
+        result_joint_path = OrderedDict()
         default_joint_path = []
 
         default_thetas = init_thetas
@@ -240,7 +240,7 @@ class PlaceAction(ActivityBase):
                 yield all_release_pose, obj_pose_transformed
 
     def compute_ik_solve_for_robot(self, release_pose:dict, is_attached=True):
-        ik_sovle = {}
+        ik_solve = {}
         release_pose_for_ik = {}
 
         if is_attached:
@@ -252,21 +252,21 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 release_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, release_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     release_pose_for_ik[name] = pose
             if name == self.move_data.MOVE_pre_release:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 pre_release_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, pre_release_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     release_pose_for_ik[name] = pose
             if name == self.move_data.MOVE_post_release:
                 thetas = self.scene_mngr.compute_ik(pose=pose, max_iter=100)
                 self.scene_mngr.set_robot_eef_pose(thetas)
                 post_release_pose_from_ik = self.scene_mngr.get_robot_eef_pose()
                 if self._solve_ik(pose, post_release_pose_from_ik) and not self._collide(is_only_gripper=False):
-                    ik_sovle[name] = thetas
+                    ik_solve[name] = thetas
                     release_pose_for_ik[name] = pose
 
         if is_attached:
@@ -278,8 +278,8 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.scene.robot.gripper.pick_obj_pose,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
 
-        if len(ik_sovle) == 3:
-            return ik_sovle, release_pose_for_ik
+        if len(ik_solve) == 3:
+            return ik_solve, release_pose_for_ik
         return None, None
 
     def get_surface_points_for_support_obj(self, obj_name):
