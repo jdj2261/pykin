@@ -104,7 +104,6 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
             joint_path=result_joint,
             eef_poses=eef_poses,
             visible_gripper=True,
-            only_visible_geom=True,
             visible_text=True,
             alpha=1.0,
             interval=1,

@@ -54,15 +54,17 @@ scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
 pick = PickAction(scene_mngr, n_contacts=5, n_directions=5)
-place = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
+place = PlaceAction(scene_mngr, n_samples_held_obj=5, n_samples_support_obj=5)
 
 pnp_joint_all_pathes = []
 place_all_object_poses = []
+pick_all_objects = []
 success_joint_path = False
 # pick
 # step 1. action[type] == pick
 pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "green_box")
 
+cnt = 0
 for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
     ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=pick_scene.grasp_poses)
     if ik_solve:
@@ -78,31 +80,39 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
                         scene=place_scene, release_poses=release_poses, init_thetas=pick_joint_path[-1][place.move_data.MOVE_default_grasp][-1])
                     if place_joint_path:
                         success_joint_path = True
+                        cnt += 1
                         # pick_path = deepcopy(pick_joint_path)
                         pnp_joint_all_pathes.append((pick_joint_path + place_joint_path))
-                        place_all_object_poses.append(place_scene.objs[place_scene.pick_obj_name].h_mat)
-                        # break
-    # if success_joint_path: 
-        # break
+                        pick_all_objects.append([pick_scene.robot.gripper.attached_obj_name])
+                        place_all_object_poses.append([place_scene.objs[place_scene.pick_obj_name].h_mat])
+                        
+                        if cnt >= 2:
+                            break
+    if success_joint_path: 
+        break
 
 # pprint.pprint(pnp_joint_all_path)
 
-grasp_task_idx = 0
-post_grasp_task_idx = 0
-attach_idx = 0
-
-release_task_idx = 0
-post_release_task_idx = 0
-detach_idx = 0
-
 # print(pnp_joint_all_pathes)
 
-for pnp_joint_all_path, place_all_object_pose in zip(pnp_joint_all_pathes, place_all_object_poses):
+for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
     fig, ax = plt.init_3d_figure( name="Level wise 3")
     result_joint = []
     eef_poses = []
+    attach_idx_list = []
+    detach_idx_list = []
+
+    attach_idx = 0
+    detach_idx = 0
+
+    grasp_task_idx = 0
+    post_grasp_task_idx = 0
+
+    release_task_idx = 0
+    post_release_task_idx = 0
     cnt = 0
-    for pnp_joint_path in pnp_joint_all_path:        
+    print(pick_all_object)
+    for pnp_joint_path in pnp_joint_all_path:   
         for j, (task, joint_path) in enumerate(pnp_joint_path.items()):
             for k, joint in enumerate(joint_path):
                 cnt += 1
@@ -114,6 +124,7 @@ for pnp_joint_all_path, place_all_object_pose in zip(pnp_joint_all_pathes, place
                     
                 if post_grasp_task_idx - grasp_task_idx == 1:
                     attach_idx = grasp_task_idx
+                    attach_idx_list.append(attach_idx)
 
                 if task == place.move_data.MOVE_release:
                     release_task_idx = cnt
@@ -121,6 +132,7 @@ for pnp_joint_all_path, place_all_object_pose in zip(pnp_joint_all_pathes, place
                     post_release_task_idx = cnt
                 if post_release_task_idx - release_task_idx == 1:
                     detach_idx = release_task_idx
+                    detach_idx_list.append(detach_idx)
                 
                 result_joint.append(joint)
                 fk = pick.scene_mngr.scene.robot.forward_kin(joint)
@@ -132,50 +144,11 @@ for pnp_joint_all_path, place_all_object_pose in zip(pnp_joint_all_pathes, place
         joint_path=result_joint,
         eef_poses=eef_poses,
         visible_gripper=True,
-        only_visible_geom=True,
         visible_text=True,
         alpha=1.0,
         interval=1,
         repeat=False,
-        pick_object = "green_box",
-        attach_idx = attach_idx,
-        detach_idx = detach_idx,
+        pick_object = pick_all_object,
+        attach_idx = attach_idx_list,
+        detach_idx = detach_idx_list,
         place_obj_pose=place_all_object_pose)
-
-# pick.scene_mngr.animation(
-#     ax,
-#     fig,
-#     joint_path=result_joint,
-#     eef_poses=eef_poses,
-#     visible_gripper=True,
-#     only_visible_geom=True,
-#     visible_text=True,
-#     alpha=1.0,
-#     interval=1,
-#     repeat=False,
-#     pick_object = pick_all_objects[0],
-#     attach_idx = attach_idx,
-#     detach_idx = detach_idx)
-
-    # fig, ax = plt.init_3d_figure( name="all possible transitions")
-    # pick.scene_mngr.render_gripper(ax, pick_scene, alpha=0.9, only_visible_axis=False)
-    # pick.scene_mngr.render_objects(ax, pick_scene)
-    # pick_scene.show_logical_states()
-    # pick.scene_mngr.show()
-
-    # print(pick_scene.grasp_poses)
-
-# grasp_poses = pick_action[pick.action_info.GRASP_POSES]
-# for grasp_pose in grasp_poses:
-    # print(grasp_pose[pick.move_data.MOVE_grasp])
-
-
-# step 2. transition
-# step 3. level-wise 3
-# step 4. get joint path for pick
-
-# pick
-# step 1. action[type] == place
-# step 2. transition
-# step 3. level-wise 3
-# step 4. get joint path for place

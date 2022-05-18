@@ -52,14 +52,17 @@ class PickAction(ActivityBase):
         ik_solve, grasp_poses_filtered = self.compute_ik_solve_for_robot(grasp_poses)
         return ik_solve, grasp_poses_filtered
  
-    def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}):
+    def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}, init_thetas=None):
         self.copy_scene(scene)
         
         result_all_joint_path = []
         result_joint_path = OrderedDict()
         default_joint_path = []
 
-        default_thetas = self.scene_mngr.scene.robot.init_qpos
+        default_thetas = init_thetas
+        if init_thetas is None:
+            default_thetas = self.scene_mngr.scene.robot.init_qpos
+            
         pre_grasp_pose = grasp_poses[self.move_data.MOVE_pre_grasp]
         grasp_pose = grasp_poses[self.move_data.MOVE_grasp]
         post_grasp_pose = grasp_poses[self.move_data.MOVE_post_grasp]

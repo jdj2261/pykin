@@ -458,14 +458,13 @@ class SceneManager:
         robot_color=None,
         joint_path=[], 
         eef_poses=[], 
-        only_visible_geom=True,
         visible_gripper=False,
         visible_text=True,
         interval=1,
         repeat=True,
         pick_object=None,
-        attach_idx = None,
-        detach_idx = None,
+        attach_idx:list = None,
+        detach_idx:list = None,
         place_obj_pose=None
     ):
         if not self.is_pyplot:
@@ -492,21 +491,23 @@ class SceneManager:
                         
             self.set_robot_eef_pose(joint_path[i])
 
-            if i == attach_idx:
-                self.attach_object_on_gripper(pick_object, False)
-
-            if i == detach_idx:
-                object_pose = place_obj_pose
+            if i in attach_idx:
+                idx = attach_idx.index(i)
+                self.attach_object_on_gripper(pick_object[idx], False)
+                
+            if i in detach_idx:
+                idx = detach_idx.index(i)
+                object_pose = place_obj_pose[idx]
                 if place_obj_pose is None:
-                    object_pose = self.get_gripper_info()[pick_object][3]
-                self.detach_object_from_gripper(pick_object)
-                self.add_object(name=pick_object,
-                                gtype=self.init_objects[pick_object].gtype,
-                                gparam=self.init_objects[pick_object].gparam,
+                    object_pose = self.get_gripper_info()[pick_object[idx]][3]
+                self.detach_object_from_gripper(pick_object[idx])
+                self.add_object(name=pick_object[idx],
+                                gtype=self.init_objects[pick_object[idx]].gtype,
+                                gparam=self.init_objects[pick_object[idx]].gparam,
                                 h_mat=object_pose,
-                                color=self.init_objects[pick_object].color)
+                                color=self.init_objects[pick_object[idx]].color)
 
-            visible_geom = only_visible_geom
+            visible_geom = True
             if visible_gripper:
                 visible_geom = False
                 
