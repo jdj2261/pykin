@@ -114,7 +114,7 @@ class ActivityBase(metaclass=ABCMeta):
         self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, collision_check=False)
         return self.cartesian_planner.get_joint_path()
 
-    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=10):
+    def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=20):
         self.rrt_planner.run(self.scene_mngr, cur_q, goal_pose, max_iter)
         return self.rrt_planner.get_joint_path(n_step=n_step)
 

@@ -52,14 +52,16 @@ scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.sta
 scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=2, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=1)
+place = PlaceAction(scene_mngr, n_samples_held_obj=5, n_samples_support_obj=5)
 
 ###### Surface sampling held and support obj#######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
-support_points, _ = place.get_surface_points_for_support_obj("goal_box")
-place.scene_mngr.render.render_points(ax, support_points)
-support_points, _ = place.get_surface_points_for_held_obj("green_box")
-place.scene_mngr.render.render_points(ax, support_points)
+surface_points_for_support_obj = list(place.get_surface_points_for_support_obj("goal_box"))
+for point, normal in surface_points_for_support_obj:
+    place.scene_mngr.render.render_point(ax, point)
+surface_points_for_held_obj = list(place.get_surface_points_for_held_obj("green_box"))
+for point, normal in surface_points_for_held_obj:
+    place.scene_mngr.render.render_point(ax, point)
 plt.plot_basis(ax)
 place.scene_mngr.render_objects(ax, alpha=0.5)
 
@@ -68,7 +70,7 @@ fig, ax = plt.init_3d_figure( name="Get Release Pose")
 eef_poses = list(pick.get_all_grasp_poses("green_box"))
 all_release_poses = []
 for eef_pose in eef_poses:
-    release_poses = list(place.get_all_release_poses("goal_box", "green_box", eef_pose[pick.move_data.MOVE_release]))
+    release_poses = list(place.get_all_release_poses("goal_box", "green_box", eef_pose[pick.move_data.MOVE_grasp]))
     for release_pose, obj_pose in release_poses:
         all_release_poses.append((release_pose, obj_pose))
         pick.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])

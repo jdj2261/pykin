@@ -56,12 +56,13 @@ scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=2, n_directions=3)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=5)
-place.scene_mngr.show_logical_states()
 
 
 test = green_box_pose.h_mat
 test[:3, 3] = test[:3, 3] + np.array([0.02, 0, 0])
 scene_mngr.scene.objs["green_box"].h_mat = test
+scene_mngr.update_logical_states()
+scene_mngr.show_logical_states()
 
 copied_scene = deepcopy(scene_mngr.scene)
 held_obj = copied_scene.objs["green_box"]
@@ -72,5 +73,6 @@ com = held_obj_mesh.center_mass
 fig, ax = plt.init_3d_figure(name="Test Com Check")
 is_stability = place._check_stability(copied_scene, "green_box", com)
 print(is_stability)
+
 place.scene_mngr.render_objects(ax, copied_scene)
 place.show()

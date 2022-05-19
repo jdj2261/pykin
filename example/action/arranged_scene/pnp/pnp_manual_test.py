@@ -70,9 +70,7 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
     if ik_solve:
         pick_joint_path = pick.get_possible_joint_path_level_3(scene=pick_scene, grasp_poses=grasp_pose)
         if pick_joint_path:
-            # pnp_joint_all_path.append(pick_joint_path)
-            pick_scene.objs["green_box"].h_mat = pick_scene.robot.gripper.pick_obj_pose
-            place_action = place.get_action_level_1_for_single_object(pick_scene, "goal_box", "green_box", pick_scene.robot.gripper.grasp_pose)
+            place_action = place.get_action_level_1_for_single_object("goal_box", "green_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
             for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
                 ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
                 if ik_solve:

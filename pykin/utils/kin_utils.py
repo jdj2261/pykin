@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import trimesh
+import pykin.utils.plot_utils as plt
 
 # from pykin.kinematics.transform import Transform
 
@@ -144,23 +145,16 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None):
 
     for link, info in robot.gripper.info.items():
         if info[1] == 'mesh':
+            mesh_color = plt.get_mesh_color(robot, link, 'collision')
+            if len(info) > 4 :
+                mesh_color = info[4]
             mesh = info[2]
-            link = robot.links.get(link)
-            if link is not None:
-                color = link.collision.gparam.get('color')
-            else:
-                color = None
-
-            if color is None:
-                color = np.array([0.2, 0.2, 0.2, 1.])
-            else:
-                color = np.array([color for color in color.values()]).flatten()
-            mesh.visual.face_colors = color
-            trimesh_scene.add_geometry(info[2], transform=info[3])
+            h_mat= info[3]
+            mesh.visual.face_colors = mesh_color
+            trimesh_scene.add_geometry(mesh, transform=h_mat)
 
     return trimesh_scene
 
-# TODO [color]
 def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()
@@ -170,23 +164,11 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
         h_mat = info[3]
 
         if info[1] == "mesh":
-            link = robot.links.get(link)
-            if geom=="visual":
-                if link is not None:
-                    color = link.visual.gparam.get('color')
-                else:
-                    color = None
-            else:
-                if link is not None:
-                    color = link.collision.gparam.get('color')
-                else:
-                    color = None
-
-            if color is None:
-                color = np.array([0.2, 0.2, 0.2, 1.])
-            else:
-                color = np.array([color for color in color.values()]).flatten()
-            mesh.visual.face_colors = color
+            mesh_color = plt.get_mesh_color(robot, link, geom)
+            if len(info) > 4:
+                mesh_color = info[4]
+            print(mesh_color)
+            mesh.visual.face_colors = mesh_color
             trimesh_scene.add_geometry(mesh, transform=h_mat)
     
         if info[1] == "box":

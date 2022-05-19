@@ -491,21 +491,24 @@ class SceneManager:
                         
             self.set_robot_eef_pose(joint_path[i])
 
-            if i in attach_idx:
-                idx = attach_idx.index(i)
-                self.attach_object_on_gripper(pick_object[idx], False)
-                
-            if i in detach_idx:
-                idx = detach_idx.index(i)
-                object_pose = place_obj_pose[idx]
-                if place_obj_pose is None:
-                    object_pose = self.get_gripper_info()[pick_object[idx]][3]
-                self.detach_object_from_gripper(pick_object[idx])
-                self.add_object(name=pick_object[idx],
-                                gtype=self.init_objects[pick_object[idx]].gtype,
-                                gparam=self.init_objects[pick_object[idx]].gparam,
-                                h_mat=object_pose,
-                                color=self.init_objects[pick_object[idx]].color)
+            if attach_idx is not None:
+                if i in attach_idx:
+                    idx = attach_idx.index(i)
+                    self.attach_object_on_gripper(pick_object[idx], False)
+            
+            if detach_idx is not None:
+                if i in detach_idx:
+                    idx = detach_idx.index(i)
+                    if place_obj_pose is None:
+                        object_pose = self.get_gripper_info()[pick_object[idx]][3]
+                    else:
+                        object_pose = place_obj_pose[idx]
+                    self.detach_object_from_gripper(pick_object[idx])
+                    self.add_object(name=pick_object[idx],
+                                    gtype=self.init_objects[pick_object[idx]].gtype,
+                                    gparam=self.init_objects[pick_object[idx]].gparam,
+                                    h_mat=object_pose,
+                                    color=self.init_objects[pick_object[idx]].color)
 
             visible_geom = True
             if visible_gripper:

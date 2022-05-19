@@ -30,7 +30,6 @@ class PlaceAction(ActivityBase):
 
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
         eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
-        self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
         
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
             if sup_obj == held_obj:
@@ -41,10 +40,11 @@ class PlaceAction(ActivityBase):
                     continue
 
             if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
-                action_level_1 = self.get_action_level_1_for_single_object(self.scene_mngr.scene, sup_obj, held_obj, eef_pose)
+                action_level_1 = self.get_action_level_1_for_single_object(sup_obj, held_obj, eef_pose)
                 yield action_level_1
 
-    def get_action_level_1_for_single_object(self, scene:Scene, sup_obj_name, held_obj_name, eef_pose=None):
+    def get_action_level_1_for_single_object(self, sup_obj_name, held_obj_name, eef_pose=None, scene:Scene=None):
+        scene.objs[held_obj_name].h_mat = scene.robot.gripper.pick_obj_pose
         self.copy_scene(scene)
         release_poses = list(self.get_all_release_poses(sup_obj_name, held_obj_name, eef_pose))
         release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
@@ -285,10 +285,18 @@ class PlaceAction(ActivityBase):
     def get_surface_points_for_support_obj(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
+        center_point = copied_mesh.center_mass
+        alpha=0.9
 
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
-        return sample_points, normals
+        
+        for point, normal_vector in zip(sample_points, normals):
+            len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
+            len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
+            if center_point[0] - len_x * alpha <= point[0] <= center_point[0] + len_x * alpha:
+                if center_point[1] - len_y * alpha <= point[1] <= center_point[1] + len_y * alpha:
+                    yield point, normal_vector
 
     @staticmethod
     def _get_weights_for_support_obj(obj_mesh):
@@ -306,7 +314,8 @@ class PlaceAction(ActivityBase):
 
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
-        return sample_points, normals
+        for point, normal_vector in zip(sample_points, normals):
+            yield point, normal_vector
 
     @staticmethod
     def _get_weights_for_held_obj(obj_mesh):
@@ -321,11 +330,11 @@ class PlaceAction(ActivityBase):
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, eef_pose=None):
         held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
 
-        support_obj_points, support_obj_normals = self.get_surface_points_for_support_obj(support_obj_name)
-        held_obj_points, held_obj_normals = self.get_surface_points_for_held_obj(held_obj_name)
+        surface_points_for_sup_obj = list(self.get_surface_points_for_support_obj(support_obj_name))
+        surface_points_for_held_obj = list(self.get_surface_points_for_held_obj(held_obj_name))
 
-        for support_obj_point, support_obj_normal in zip(support_obj_points, support_obj_normals):
-            for held_obj_point, held_obj_normal in zip(held_obj_points, held_obj_normals):
+        for support_obj_point, support_obj_normal in surface_points_for_sup_obj:
+            for held_obj_point, held_obj_normal in surface_points_for_held_obj:
                 rot_mat = a_utils.get_rotation_from_vectors(held_obj_normal, -support_obj_normal)
                 held_obj_point_transformed = np.dot(held_obj_point - held_obj_pose[:3, 3], rot_mat) + held_obj_pose[:3, 3]
                 
@@ -359,7 +368,7 @@ class PlaceAction(ActivityBase):
         return result_eef_pose_transformed
 
     @staticmethod
-    def _check_stability(copied_scene:Scene, held_obj_name, com):
+    def _check_stability(copied_scene:Scene, held_obj_name:str, com:np.ndarray) -> bool:
         if copied_scene.state.on in list(copied_scene.logical_states[held_obj_name].keys()):
             support_obj = copied_scene.logical_states[held_obj_name][copied_scene.state.on]
             support_obj_mesh:Trimesh = deepcopy(support_obj.gparam)

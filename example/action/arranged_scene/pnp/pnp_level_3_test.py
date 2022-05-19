@@ -152,6 +152,6 @@ pick.scene_mngr.animation(
     alpha=1.0,
     interval=1,
     repeat=False,
-    pick_object = pick_all_objects[0],
-    attach_idx = attach_idx,
-    detach_idx = detach_idx)
+    pick_object = [pick_all_objects[0]],
+    attach_idx = [attach_idx],
+    detach_idx = [detach_idx])

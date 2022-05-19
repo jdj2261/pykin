@@ -78,7 +78,6 @@ scene_mngr.animation(
     fig,
     joint_path=joint_path,
     eef_poses=target_eef_poses,
-    only_visible_geom=False,
     visible_text=True,
     alpha=1,
     interval=1,
