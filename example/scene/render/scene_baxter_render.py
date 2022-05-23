@@ -7,7 +7,7 @@ sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.bimanual import Bimanual
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as plt
 

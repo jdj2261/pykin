@@ -7,7 +7,7 @@ sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.utils.transform_utils import get_matrix_from_rpy
 from pykin.utils.kin_utils import ShellColors as sc
@@ -56,7 +56,7 @@ target_thetas = scene_mngr.compute_ik(grasp_pose)
 print(f"{sc.OKBLUE}Attach Object to Robot{sc.ENDC}")
 fig, ax = plt.init_3d_figure( name="Attach Object")
 scene_mngr.set_robot_eef_pose(target_thetas)
-scene_mngr.attach_object_on_gripper("green_box")
+scene_mngr.attach_object_on_gripper("green_box", False)
 scene_mngr.obj_collision_mngr.show_collision_info("Object")
 scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
@@ -70,14 +70,13 @@ scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 # scene_mngr.show()
 
 # ############################ Object Attach to Gripper Test #############################
-# scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0, 1, 0])
-
 scene_mngr.detach_object_from_gripper()
+scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0, 1, 0])
 
 print(f"{sc.OKBLUE}Attach object only gripper{sc.ENDC}")
 fig, ax = plt.init_3d_figure( name="Attach object only gripper")
 scene_mngr.set_gripper_pose(grasp_pose)
-scene_mngr.attach_object_on_gripper("green_box")
+scene_mngr.attach_object_on_gripper("green_box", False)
 scene_mngr.obj_collision_mngr.show_collision_info("Object")
 scene_mngr.robot_collision_mngr.show_collision_info("Robot")
 scene_mngr.gripper_collision_mngr.show_collision_info("Gripper")

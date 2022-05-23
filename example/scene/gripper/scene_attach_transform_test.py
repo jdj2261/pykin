@@ -7,7 +7,7 @@ sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.utils.transform_utils import get_matrix_from_rpy
 import pykin.utils.plot_utils as plt
@@ -63,7 +63,6 @@ scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
 fig, ax = plt.init_3d_figure( name="Move default pose")
 scene_mngr.set_gripper_pose(robot.init_fk["right_gripper"].h_mat)
-print(scene_mngr.scene.robot.gripper.info['right_gripper'])
 # scene_mngr.set_robot_eef_pose(init_qpos)
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)

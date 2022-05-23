@@ -7,7 +7,7 @@ sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.utils.transform_utils import get_matrix_from_rpy

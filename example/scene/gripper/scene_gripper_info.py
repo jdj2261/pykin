@@ -7,7 +7,7 @@ sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as plt
 
@@ -46,10 +46,10 @@ scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat
 scene_mngr.add_robot(robot, init_qpos)
 
 ############################# Gripper Pose Test #############################
-scene_mngr.set_gripper_pose(np.eye(4))
+scene_mngr.set_gripper_pose(scene_mngr.scene.robot.init_fk["right_gripper"].h_mat)
 scene_mngr.render_objects_and_gripper(ax, robot_color='b')
 
-scene_mngr.set_gripper_tcp_pose(np.eye(4))
+scene_mngr.set_gripper_tcp_pose(scene_mngr.scene.robot.init_fk["right_gripper"].h_mat)
 scene_mngr.render_objects_and_gripper(ax, robot_color='r')
 
 print(scene_mngr.get_gripper_pose())

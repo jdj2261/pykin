@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from networkx.drawing.nx_agraph import graphviz_layout
+from pykin.scene.scene import Scene
 from pykin.utils.kin_utils import ShellColors as sc
 
 class NodeData:
@@ -13,19 +14,19 @@ class NodeData:
     REWARD = 'reward'
     VALUE = 'value'
     VISITS = 'visits' 
+    Trajectory = 'trajectory'
     VALUE_HISTORY = 'history'
 
 class MCTS(NodeData):
-
     def __init__(
         self,
-        state,
-        sampling_method=None,
-        n_iters=1200, 
-        exploration_constant=1.414,
-        max_depth=20,
-        gamma=1,
-        eps=0.01,
+        state:Scene,
+        sampling_method:dict={},
+        n_iters:int=1200, 
+        exploration_constant:float=1.414,
+        max_depth:int=20,
+        gamma:float=1,
+        eps:float=0.01,
         visible_graph=False
     ):
         self.state = state
@@ -40,7 +41,7 @@ class MCTS(NodeData):
 
         self._config = {}
         
-    def _create_tree(self, state):
+    def _create_tree(self, state:Scene):
         tree = nx.DiGraph()
         tree.add_node(0)
         tree.update(
@@ -50,6 +51,7 @@ class MCTS(NodeData):
                         NodeData.REWARD: 0,
                         NodeData.VALUE: -np.inf,
                         NodeData.VISITS: 0,
+                        NodeData.Trajectory: state.robot.init_qpos,
                         NodeData.VALUE_HISTORY: []})])
         return tree
 
@@ -64,7 +66,7 @@ class MCTS(NodeData):
         return self._get_best_action(root_node=0)
 
     def _search(self, cur_node, depth):
-        state = self.tree.nodes[cur_node][NodeData.STATE]
+        state:Scene = self.tree.nodes[cur_node][NodeData.STATE]
         # print(state)
 
         # Not use in tic-tac-toe game
@@ -96,8 +98,8 @@ class MCTS(NodeData):
         return Q_sum
 
     @staticmethod
-    def _is_terminal(state, depth):
-        if state.is_finished():
+    def _is_terminal(state:Scene, depth:int):
+        if state.is_feasible():
             return True
         return False
     

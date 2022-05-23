@@ -30,7 +30,7 @@ class PlaceAction(ActivityBase):
 
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
         eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
-        
+        scene.objs[held_obj].h_mat = scene.robot.gripper.pick_obj_pose
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
             if sup_obj == held_obj:
                 continue
@@ -44,8 +44,10 @@ class PlaceAction(ActivityBase):
                 yield action_level_1
 
     def get_action_level_1_for_single_object(self, sup_obj_name, held_obj_name, eef_pose=None, scene:Scene=None):
-        scene.objs[held_obj_name].h_mat = scene.robot.gripper.pick_obj_pose
-        self.copy_scene(scene)
+        if scene is not None:
+            scene.objs[held_obj_name].h_mat = scene.robot.gripper.pick_obj_pose
+            self.copy_scene(scene)
+            
         release_poses = list(self.get_all_release_poses(sup_obj_name, held_obj_name, eef_pose))
         release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
         action_level_1 = self.get_action(held_obj_name, sup_obj_name, release_poses_for_only_gripper)
@@ -77,7 +79,7 @@ class PlaceAction(ActivityBase):
         self.scene_mngr.set_robot_eef_pose(default_thetas)
         
         self.scene_mngr.set_object_pose(scene.pick_obj_name, scene.pick_obj_default_pose)
-        self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
+        self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name, True)
         pre_release_joint_path = self.get_rrt_star_path(default_thetas, pre_release_pose)
         if pre_release_joint_path:
             # pre_release_pose -> release_pose (cartesian)
@@ -206,7 +208,7 @@ class PlaceAction(ActivityBase):
 
         for all_release_pose, obj_pose_transformed in release_poses:
             if is_attached:
-                self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
+                self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name, True)
             for name, pose in all_release_pose.items():
                 is_collision = False
                 if name == self.move_data.MOVE_release:
@@ -244,7 +246,7 @@ class PlaceAction(ActivityBase):
         release_pose_for_ik = {}
 
         if is_attached:
-            self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
+            self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name, True)
         
         for name, pose in release_pose.items():
             if name == self.move_data.MOVE_release:

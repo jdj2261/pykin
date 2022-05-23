@@ -1,7 +1,7 @@
 import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 
 from pykin.utils.log_utils import create_logger
 from pykin.utils.error_utils import CollisionError, NotFoundError

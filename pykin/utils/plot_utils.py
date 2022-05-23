@@ -286,7 +286,7 @@ def get_mesh_color(robot, link, geom, color=None):
                 mesh_color = link.collision.gparam.get('color')
             
             if mesh_color is None:
-                mesh_color = np.array([0, 0, 0, 1])
+                mesh_color = np.array([0.2, 0.2, 0.2, 1])
             else:
                 mesh_color = np.array([color for color in mesh_color.values()]).flatten()
         else:
@@ -295,7 +295,7 @@ def get_mesh_color(robot, link, geom, color=None):
                 mesh_color = link.visual.gparam.get('color')
 
             if mesh_color is None:
-                mesh_color = np.array([0, 0, 0, 1])
+                mesh_color = np.array([0.2, 0.2, 0.2, 1])
             else:
                 mesh_color = np.array([color for color in mesh_color.values()]).flatten()
     return mesh_color

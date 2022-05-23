@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from copy import deepcopy
 
 import pykin.utils.plot_utils as plt
-from pykin.scene.scene import SceneManager
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.action_utils import surface_sampling
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.planners.rrt_star_planner import RRTStarPlanner
