@@ -51,7 +51,7 @@ class MCTS(NodeData):
                         NodeData.REWARD: 0,
                         NodeData.VALUE: -np.inf,
                         NodeData.VISITS: 0,
-                        NodeData.Trajectory: state.robot.init_qpos,
+                        # NodeData.Trajectory: state.robot.init_qpos,
                         NodeData.VALUE_HISTORY: []})])
         return tree
 
@@ -103,7 +103,7 @@ class MCTS(NodeData):
             return True
         return False
     
-    def _get_reward(self, state):
+    def _get_reward(self, state:Scene):
         # TODO
         pass
 

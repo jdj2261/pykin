@@ -12,13 +12,18 @@ from pykin.utils.action_utils import get_relative_transform
 
 
 class SceneManager:
-    def __init__(self, geom="collision", is_pyplot=True, scene=None):
+    def __init__(
+        self, 
+        geom="collision", 
+        is_pyplot=True, 
+        scene:Scene=None,
+        benchmark:int=1):
         # Element for Scene
         self.geom = geom
 
         self._scene = scene
         if scene is None:
-            self._scene = Scene()
+            self._scene = Scene(benchmark)
 
         self.init_objects = OrderedDict()
         self.init_logical_states = OrderedDict()

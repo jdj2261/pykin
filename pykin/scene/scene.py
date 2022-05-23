@@ -1,4 +1,5 @@
 import pprint
+from copy import deepcopy
 from collections import OrderedDict
 from dataclasses import dataclass
 
@@ -14,8 +15,10 @@ class State:
     holding = 'holding'
 
 class Scene:
-    def __init__(self):
-        self.objs = OrderedDict()
+    def __init__(self, benchmark:int=1):
+        self.benchmark = benchmark
+
+        self.objs = {}
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
         self.state = State
@@ -57,8 +60,40 @@ class Scene:
                 self.logical_states[logical_state[State.holding].name][State.held] = True
 
     # Add for MCTS
-    def is_feasible(self):
-        return True
-
     def is_terminal_state(self):
+        if self.benchmark == 1:
+            return self.check_terminal_state_bench_1()
+        if self.benchmark == 2:
+            pass
+        if self.benchmark == 3:
+            pass
+        if self.benchmark == 4:
+            pass
+
+    def check_terminal_state_bench_1(self):
+        objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name))
+        objs_chain_list.pop(-1)
+        sorted_chain_list = sorted(objs_chain_list, reverse=True)
+        print(objs_chain_list, sorted_chain_list)
+        if objs_chain_list == sorted_chain_list:
+            return True
+        else:
+            return False
+        
+    def get_objs_chain_list(self, held_obj_name, obj_chain=[]):
+        obj_name = held_obj_name
+
+        if obj_name not in self.objs:
+            raise ValueError(f"Not found {obj_name} in this scene")
+        
+        if self.state.on in list(self.logical_states[obj_name].keys()):
+            support_obj = self.logical_states[obj_name][self.state.on]
+            obj_chain.append(support_obj.name)
+            if support_obj.name != "table":
+                self.get_objs_chain_list(support_obj.name, obj_chain)
+        
+        return [obj_name] + obj_chain
+
+    # TODO
+    def check_matching_objs(self):
         pass
