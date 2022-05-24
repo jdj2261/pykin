@@ -317,7 +317,7 @@ class SceneManager:
         self, 
         ax=None, 
         scene=None,
-        alpha=0.3, 
+        alpha=0.8, 
         robot_color=None, 
         visible_tcp=True
     ):

@@ -60,7 +60,7 @@ scene_mngr.show_logical_states()
 # test = scene_mngr.scene.get_objs_chain_list("A_box")
 # print(test)
 scene_mngr.scene.pick_obj_name = "C_box"
-print(scene_mngr.scene.check_terminal_state_bench_1())
+print(scene_mngr.scene.is_terminal_state())
 
 
 
@@ -69,5 +69,5 @@ print(scene_mngr.scene.check_terminal_state_bench_1())
 # print(scene_mngr.get_gripper_info())
 # print(scene_mngr.get_robot_info())
 
-# scene_mngr.render_scene(ax, visible_text=True)
-# scene_mngr.show()
+scene_mngr.render_objects_and_gripper(ax)
+scene_mngr.show()

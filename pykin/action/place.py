@@ -30,7 +30,8 @@ class PlaceAction(ActivityBase):
 
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
         eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
-        scene.objs[held_obj].h_mat = scene.robot.gripper.pick_obj_pose
+        self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
+        
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
             if sup_obj == held_obj:
                 continue

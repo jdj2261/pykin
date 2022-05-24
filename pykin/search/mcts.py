@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 from networkx.drawing.nx_agraph import graphviz_layout
 from pykin.scene.scene import Scene
+from pykin.scene.scene_manager import SceneManager
+from pykin.action.pick import PickAction
+from pykin.action.place import PlaceAction
+
 from pykin.utils.kin_utils import ShellColors as sc
 
 class NodeData:
@@ -20,7 +24,7 @@ class NodeData:
 class MCTS(NodeData):
     def __init__(
         self,
-        state:Scene,
+        scene_mngr:SceneManager,
         sampling_method:dict={},
         n_iters:int=1200, 
         exploration_constant:float=1.414,
@@ -29,7 +33,10 @@ class MCTS(NodeData):
         eps:float=0.01,
         visible_graph=False
     ):
-        self.state = state
+        self.state = scene_mngr.scene
+        self.pick_action = PickAction(scene_mngr, n_contacts=10, n_directions=10)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
+
         self._sampling_method = sampling_method
         self._n_iters = n_iters
         self.c = exploration_constant
@@ -37,7 +44,7 @@ class MCTS(NodeData):
         self.gamma = gamma
         self.eps = eps
         self.visible = visible_graph
-        self.tree = self._create_tree(state)
+        self.tree = self._create_tree(self.state)
 
         self._config = {}
         
@@ -99,13 +106,13 @@ class MCTS(NodeData):
 
     @staticmethod
     def _is_terminal(state:Scene, depth:int):
-        if state.is_feasible():
+        if state.is_terminal_state():
             return True
         return False
     
-    def _get_reward(self, state:Scene):
+    def _get_reward(self, cur_state:Scene, action, next_state:Scene):
         # TODO
-        pass
+        return 0
 
     def _select_action(self, cur_node, state, depth, exploration_method="ucb"):
         # e-greedy, softmax
@@ -216,9 +223,15 @@ class MCTS(NodeData):
         pass
 
     # TODO
-    def _simulate(self, state, action):
+    def _simulate(self, state:Scene, action:dict):
+        next_scene = None
+        # if action["type"] == "pick":
+        #     next_scene = 
+        # if action["type"] == "place":
+        #     next_scene = 
+
         reward = self._get_reward(state)
-        pass
+        return next_scene, reward
 
     def _update_value(self, cur_node, Q_sum):
         self.tree.nodes[cur_node][NodeData.VISITS] += 1

@@ -74,7 +74,6 @@ class Scene:
         objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name))
         objs_chain_list.pop(-1)
         sorted_chain_list = sorted(objs_chain_list, reverse=True)
-        print(objs_chain_list, sorted_chain_list)
         if objs_chain_list == sorted_chain_list:
             return True
         else:

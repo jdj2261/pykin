@@ -20,9 +20,6 @@ robot = SingleArm(
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
-file_path = '../../../../asset/urdf/panda/panda.urdf'
-panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
 green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
@@ -51,7 +48,7 @@ scene_mngr.set_logical_state("table", ("static", True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
-pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
+pick = PickAction(scene_mngr, n_contacts=3, n_directions=3)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 pick_actions = list(pick.get_possible_actions_level_1())
@@ -75,10 +72,10 @@ pick.show()
 #                 ik_solve, release_pose = place.compute_ik_solve_for_robot(all_release_pose)
 #                 if ik_solve:
 #                     place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
-                    # place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_pre_release])
-                    # place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_post_release])
+#                     place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_pre_release])
+#                     place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_post_release])
 #                     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
-#                     place.scene_mngr.render_gripper(ax, pose=release_pose[place.move_data.MOVE_release])
+#                     # place.scene_mngr.render_gripper(ax, pose=release_pose[place.move_data.MOVE_release])
 # place.scene_mngr.render_objects(ax)
 # plt.plot_basis(ax)
 # pick.show()
