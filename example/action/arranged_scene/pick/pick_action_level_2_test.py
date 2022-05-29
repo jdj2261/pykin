@@ -43,12 +43,12 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True}
-scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
@@ -57,7 +57,7 @@ pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
 actions = list(pick.get_possible_actions_level_1())
 fig, ax = plt.init_3d_figure(name="Level wise 1")
 for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]:
+    for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
         pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
         # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_pre_grasp])
         # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
@@ -67,7 +67,7 @@ plt.plot_basis(ax)
 fig, ax = plt.init_3d_figure( name="Level wise 2")
 cnt = 0
 for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.action_info.GRASP_POSES]: 
+    for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]: 
         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
         if ik_solve is not None:
             cnt += 1

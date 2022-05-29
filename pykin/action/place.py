@@ -23,7 +23,7 @@ class PlaceAction(ActivityBase):
         self.n_samples_held_obj = n_samples_held_obj
         self.n_samples_sup_obj = n_samples_support_obj
         self.release_distance = release_distance
-        self.filter_logical_states = [scene_mngr.scene.state.held]                                    
+        self.filter_logical_states = [scene_mngr.scene.logical_state.held]                                    
 
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
         self.copy_scene(scene)
@@ -122,20 +122,20 @@ class PlaceAction(ActivityBase):
 
     def get_action(self, held_obj_name, place_obj_name, poses):
         action = {}
-        action[self.action_info.TYPE] = "place"
-        action[self.action_info.HELD_OBJ_NAME] = held_obj_name
-        action[self.action_info.PLACE_OBJ_NAME] = place_obj_name
-        action[self.action_info.RELEASE_POSES] = poses
+        action[self.info.TYPE] = "place"
+        action[self.info.HELD_OBJ_NAME] = held_obj_name
+        action[self.info.PLACE_OBJ_NAME] = place_obj_name
+        action[self.info.RELEASE_POSES] = poses
         return action
     
     def get_possible_transitions(self, scene:Scene=None, action:dict={}):
         if not action:
             ValueError("Not found any action!!")
 
-        held_obj_name = action[self.action_info.HELD_OBJ_NAME]
-        place_obj_name = action[self.action_info.PLACE_OBJ_NAME]
+        held_obj_name = action[self.info.HELD_OBJ_NAME]
+        place_obj_name = action[self.info.PLACE_OBJ_NAME]
 
-        for release_poses, obj_pose_transformed in action[self.action_info.RELEASE_POSES]:
+        for release_poses, obj_pose_transformed in action[self.info.RELEASE_POSES]:
             next_scene = deepcopy(scene)
             
             ## Change transition
@@ -157,10 +157,10 @@ class PlaceAction(ActivityBase):
             next_scene.logical_states.get(held_obj_name).clear()
 
             # Chage logical_state holding : None
-            next_scene.logical_states[next_scene.robot.gripper.name][next_scene.state.holding] = None
+            next_scene.logical_states[next_scene.robot.gripper.name][next_scene.logical_state.holding] = None
 
             # Add logical_state of held obj : {'on' : place_obj}
-            next_scene.logical_states[held_obj_name][next_scene.state.on] = next_scene.objs[place_obj_name]
+            next_scene.logical_states[held_obj_name][next_scene.logical_state.on] = next_scene.objs[place_obj_name]
             next_scene.update_logical_states()
 
             # Check stability
@@ -372,8 +372,8 @@ class PlaceAction(ActivityBase):
 
     @staticmethod
     def _check_stability(copied_scene:Scene, held_obj_name:str, com:np.ndarray) -> bool:
-        if copied_scene.state.on in list(copied_scene.logical_states[held_obj_name].keys()):
-            support_obj = copied_scene.logical_states[held_obj_name][copied_scene.state.on]
+        if copied_scene.logical_state.on in list(copied_scene.logical_states[held_obj_name].keys()):
+            support_obj = copied_scene.logical_states[held_obj_name][copied_scene.logical_state.on]
             support_obj_mesh:Trimesh = deepcopy(support_obj.gparam)
             support_obj_mesh.apply_transform(support_obj.h_mat)
 
@@ -385,7 +385,7 @@ class PlaceAction(ActivityBase):
             if safe_com:
                 return PlaceAction._check_stability(copied_scene, support_obj.name, com)
             else:
-                logger.warning("Not satisfied stability")
+                # logger.warning("Not satisfied stability")
                 return False
         else:
             return True

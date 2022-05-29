@@ -57,7 +57,7 @@ pick = PickAction(scene_mngr, 6, 10)
 actions = list(pick.get_possible_actions_level_1())
 # fig, ax = plt.init_3d_figure( name="all possible actions")
 # for action in actions:
-#     for idx, all_grasp_pose in enumerate(action[pick.action_info.GRASP_POSES]):    
+#     for idx, all_grasp_pose in enumerate(action[pick.info.GRASP_POSES]):    
         # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
 # pick.scene_mngr.render_objects(ax)
 # plt.plot_basis(ax)
@@ -75,7 +75,7 @@ for action in actions:
 ################## Transitions Test Action 2##################
 # actions = list(pick.get_possible_actions_level_1())
 # for action in actions:
-#     for all_grasp_pose in action[pick.action_info.GRASP_POSES]:
+#     for all_grasp_pose in action[pick.info.GRASP_POSES]:
 #         ik_solve = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
 #         if ik_solve is not None:
 #             for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):

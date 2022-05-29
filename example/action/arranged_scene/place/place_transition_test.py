@@ -61,7 +61,7 @@ for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
         for place_action in place_actions:
-            print(place_action[pick.action_info.HELD_OBJ_NAME])
+            print(place_action[pick.info.HELD_OBJ_NAME])
             for place_scene in list(place.get_possible_transitions(scene=pick_scene, action=place_action)):
                 fig, ax = plt.init_3d_figure( name="all possible transitions")
                 place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
@@ -104,7 +104,7 @@ for pick_action in pick_actions:
 #                     for pick_scene_2 in pick.get_possible_transitions(place_scene, action=pick_action2):
 #                         place_actions2 = list(place.get_possible_actions_level_1(pick_scene_2))
 #                         for place_action2 in place_actions2:
-#                             for all_release_pose, obj_pose in place_action2[place.action_info.RELEASE_POSES]:
+#                             for all_release_pose, obj_pose in place_action2[place.info.RELEASE_POSES]:
 #                                 fig, ax = plt.init_3d_figure(name="Level wise 2")
                                 # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_release])
                                 # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_pre_release])

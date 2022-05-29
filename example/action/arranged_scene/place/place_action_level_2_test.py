@@ -60,7 +60,7 @@ for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
         for place_action in place_actions:
-            for all_release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
+            for all_release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
                 ik_solve, release_pose = place.get_possible_ik_solve_level_2(scene=pick_scene, release_poses=all_release_pose)
                 if ik_solve:
                     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)

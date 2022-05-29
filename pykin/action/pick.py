@@ -21,8 +21,8 @@ class PickAction(ActivityBase):
         self.n_contacts = n_contacts
         self.n_directions = n_directions
         self.limit_angle = limit_angle_for_force_closure
-        self.filter_logical_states = [ scene_mngr.scene.state.support, 
-                                       scene_mngr.scene.state.static]
+        self.filter_logical_states = [ scene_mngr.scene.logical_state.support, 
+                                       scene_mngr.scene.logical_state.static]
 
 
     # Expand action to tree
@@ -99,18 +99,18 @@ class PickAction(ActivityBase):
 
     def get_action(self, obj_name, all_poses):
         action = {}
-        action[self.action_info.TYPE] = "pick"
-        action[self.action_info.PICK_OBJ_NAME] = obj_name
-        action[self.action_info.GRASP_POSES] = all_poses
+        action[self.info.TYPE] = "pick"
+        action[self.info.PICK_OBJ_NAME] = obj_name
+        action[self.info.GRASP_POSES] = all_poses
         return action
 
     def get_possible_transitions(self, scene:Scene=None, action:dict={}):        
         if not action:
             ValueError("Not found any action!!")
 
-        pick_obj = action[self.action_info.PICK_OBJ_NAME]
+        pick_obj = action[self.info.PICK_OBJ_NAME]
 
-        for grasp_poses in action[self.action_info.GRASP_POSES]:
+        for grasp_poses in action[self.info.GRASP_POSES]:
             next_scene = deepcopy(scene)
             
             ## Change transition
@@ -140,15 +140,15 @@ class PickAction(ActivityBase):
             
             ## Change Logical State
             # Remove pick obj in logical state of support obj
-            supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.state.on)
+            supporting_obj = next_scene.logical_states[pick_obj].get(next_scene.logical_state.on)
             next_scene.place_obj_name = supporting_obj.name
-            next_scene.logical_states.get(supporting_obj.name).get(next_scene.state.support).remove(next_scene.objs[pick_obj])
+            next_scene.logical_states.get(supporting_obj.name).get(next_scene.logical_state.support).remove(next_scene.objs[pick_obj])
             
             # Clear logical_state of pick obj
             next_scene.logical_states[pick_obj].clear()
             
             # Add logical_state of pick obj : {'held' : True}
-            next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.state.holding] = next_scene.objs[pick_obj]
+            next_scene.logical_states[self.scene_mngr.gripper_name][next_scene.logical_state.holding] = next_scene.objs[pick_obj]
             next_scene.update_logical_states()
             yield next_scene
             

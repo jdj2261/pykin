@@ -21,7 +21,7 @@ class Scene:
         self.objs = {}
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
-        self.state = State
+        self.logical_state = State
         
         self.grasp_poses = None
         self.release_poses = None
@@ -71,28 +71,31 @@ class Scene:
             pass
 
     def check_terminal_state_bench_1(self):
-        objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name))
-        objs_chain_list.pop(-1)
-        sorted_chain_list = sorted(objs_chain_list, reverse=True)
-        if objs_chain_list == sorted_chain_list:
-            return True
-        else:
+        if self.pick_obj_name is None:
             return False
+
+        objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name, []))
+        objs_chain_list.pop(-1)
+
+        sorted_chain_list = sorted(objs_chain_list, reverse=True)
+        
+        if "goal_box" in sorted_chain_list:
+            objs_chain_list.remove("goal_box")
+            sorted_chain_list.remove("goal_box")
+        
+            if len(objs_chain_list) == 3:
+                if objs_chain_list == sorted_chain_list:
+                    return True
+        return False
         
     def get_objs_chain_list(self, held_obj_name, obj_chain=[]):
-        obj_name = held_obj_name
-
-        if obj_name not in self.objs:
-            raise ValueError(f"Not found {obj_name} in this scene")
+        if held_obj_name not in self.objs:
+            raise ValueError(f"Not found {held_obj_name} in this scene")
         
-        if self.state.on in list(self.logical_states[obj_name].keys()):
-            support_obj = self.logical_states[obj_name][self.state.on]
+        if self.logical_state.on in list(self.logical_states[held_obj_name].keys()):
+            support_obj = self.logical_states[held_obj_name][self.logical_state.on]
             obj_chain.append(support_obj.name)
             if support_obj.name != "table":
                 self.get_objs_chain_list(support_obj.name, obj_chain)
         
-        return [obj_name] + obj_chain
-
-    # TODO
-    def check_matching_objs(self):
-        pass
+        return [held_obj_name] + obj_chain

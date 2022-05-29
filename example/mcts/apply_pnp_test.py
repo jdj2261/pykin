@@ -40,25 +40,14 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.state.static : True}
-scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.state.holding : None}
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
 mcts = MCTS(scene_mngr)
-
-pick_actions = list(mcts.pick_action.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure(name="Level wise 1")
-for pick_action in pick_actions:
-    for pick_scene in mcts.pick_action.get_possible_transitions(scene_mngr.scene, action=pick_action):
-        place_actions = list(mcts.place_action.get_possible_actions_level_1(pick_scene)) 
-        for place_action in place_actions:
-            for all_release_pose, obj_pose in place_action[mcts.place_action.action_info.RELEASE_POSES]:
-                mcts.place_action.scene_mngr.render.render_axis(ax, all_release_pose[mcts.place_action.move_data.MOVE_release])
-mcts.place_action.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
-mcts.pick_action.show()
-
+print(mcts.tree.nodes[0]['state'])
+print(mcts.state.logical_states[mcts.state.robot.gripper.name][mcts.state.logical_state.holding] is None)

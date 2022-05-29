@@ -54,7 +54,7 @@ class ActivityBase(metaclass=ABCMeta):
     ):
         self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
         self.retreat_distance = retreat_distance
-        self.action_info = ActionInfo
+        self.info = ActionInfo
         self.move_data = MoveData
 
         # Add Planner

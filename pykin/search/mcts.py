@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 import numpy as np
 import networkx as nx
@@ -35,7 +36,7 @@ class MCTS(NodeData):
     ):
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=10, n_directions=10)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
 
         self._sampling_method = sampling_method
         self._n_iters = n_iters
@@ -45,6 +46,8 @@ class MCTS(NodeData):
         self.eps = eps
         self.visible = visible_graph
         self.tree = self._create_tree(self.state)
+
+        self.nodes = None
 
         self._config = {}
         
@@ -66,21 +69,29 @@ class MCTS(NodeData):
         for i in range(self._n_iters):
             print(f"{sc.HEADER}=========== Search iteration : {i+1} ==========={sc.ENDC}")
             self._search(cur_node=0, depth=0)
+
+            if self.nodes:
+                break
             # if self.visible:
             #     if (i+1) % self._n_iters == 0:
             #         self.visualize("Backpropagatge")
             #         print("==="*20)
-        return self._get_best_action(root_node=0)
+        return self.nodes
+        # return self._get_best_action(root_node=0)
 
     def _search(self, cur_node, depth):
         state:Scene = self.tree.nodes[cur_node][NodeData.STATE]
-        # print(state)
+        print(state)
 
         # Not use in tic-tac-toe game
         if depth >= self._max_depth:
             return 0
 
         if self._is_terminal(state, depth):
+            if state is not None:
+                print("Success!!!!!")
+                self.nodes = self.get_nodes(cur_node, [])
+
             reward = self._get_reward(state)
             self.tree.nodes[cur_node][NodeData.VISITS] += 1
             self.tree.nodes[cur_node][NodeData.REWARD] = reward
@@ -89,6 +100,9 @@ class MCTS(NodeData):
             return reward
 
         action, next_node = self._select_action(cur_node, state, depth)
+        
+        if action is None:
+            return -10
         # self.visualize(f"SelectAction Node: {cur_node} Depth: {depth}")
         
         next_state, reward = self._simulate(state, action)
@@ -104,47 +118,73 @@ class MCTS(NodeData):
 
         return Q_sum
 
-    @staticmethod
-    def _is_terminal(state:Scene, depth:int):
+    def _is_terminal(self, state:Scene, depth:int):
+        if state is None:
+            print("Not next_state")
+            return True
+            
         if state.is_terminal_state():
             return True
         return False
     
-    def _get_reward(self, cur_state:Scene, action, next_state:Scene):
-        # TODO
-        return 0
+    def get_nodes(self, leaf_node, nodes=[]):
+        parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
+        if not parent_nodes:
+            return
+        parent_node = parent_nodes[0]
+        nodes.append(parent_node)
+        self.get_nodes(parent_node, nodes)
+        return [leaf_node] + nodes
 
-    def _select_action(self, cur_node, state, depth, exploration_method="ucb"):
+
+    def _get_reward(self, cur_state:Scene, action=None, next_state:Scene=None):
+        reward = 0
+        if cur_state is None:
+            reward = -10
+        return reward
+
+    def _select_action(self, cur_node, state, depth, exploration_method="random"):
         # e-greedy, softmax
-        cur_visit = self.tree.nodes[cur_node]['visit']
-        eps = np.maximum(np.minimum(1., 1 / np.maximum(cur_visit, 1)), self.eps)
+        cur_visits = self.tree.nodes[cur_node][NodeData.VISITS]
+        eps = np.maximum(np.minimum(1., 1 / np.maximum(cur_visits, 1)), self.eps)
         self._config["eps"] = eps 
 
         children = [child for child in self.tree.neighbors(cur_node)]
+
         if not children:
-            print(f"Cur node {cur_node} is a leaf node, So expand")
+            # print(f"Cur node {cur_node} is a leaf node, So expand")
             self._expand_node(cur_node, state, depth)
-            next_node = random.choice([child for child in self.tree.neighbors(cur_node)])
+            expanded_children = [child for child in self.tree.neighbors(cur_node)]
+            if not expanded_children:
+                return None, None
+            next_node = random.choice(expanded_children)
         else:
-            print(f"Cur node has children {children}")
+            # print(f"Cur node has children {children}")
             next_node = self._sample_child_node(children, depth, exploration_method)
         
         action = self.tree.nodes[next_node][NodeData.ACTION]
-        print(f"Get best action node is {next_node}, and Action is {action}")
+        # print(f"Get best action node is {next_node}, and Action is {action}")
         return action, next_node
 
-    def _expand_node(self, cur_node, state, depth):
-        possible_actions = state.get_all_possible_actions()
+    def _expand_node(self, cur_node, state:Scene, depth):
+        
+        is_holding = state.logical_states[state.robot.gripper.name][state.logical_state.holding] is not None
+
+        if not is_holding:
+            possible_actions = list(self.pick_action.get_possible_actions_level_1(state))
+        else:
+            possible_actions = list(self.place_action.get_possible_actions_level_1(state))
+
         for possible_action in possible_actions:
             next_node = self.tree.number_of_nodes()
             self.tree.add_node(next_node)        
             self.tree.update(nodes=[(next_node, { NodeData.DEPTH: depth+1,
-                                                  NodeData.STATE: None,
-                                                  NodeData.ACTION: possible_action,
-                                                  NodeData.REWARD: 0,
-                                                  NodeData.VALUE: -np.inf,
-                                                  NodeData.VISITS: 0,
-                                                  NodeData.VALUE_HISTORY: []})])
+                                                NodeData.STATE: state,
+                                                NodeData.ACTION: possible_action,
+                                                NodeData.REWARD: 0,
+                                                NodeData.VALUE: -np.inf,
+                                                NodeData.VISITS: 0,
+                                                NodeData.VALUE_HISTORY: []})])
             self.tree.add_edge(cur_node, next_node)
 
     def _sample_child_node(self, children, depth, exploration_method):
@@ -167,10 +207,10 @@ class MCTS(NodeData):
         return child_node
 
     def _find_best_idx_from_random(self, children):
-        eps = self._config["eps"]
-        if eps > np.random.uniform():
-            best_node_idx = np.random.choice(len([self.tree.nodes[child][NodeData.VALUE] for child in children]))
-            return best_node_idx
+        # eps = self._config["eps"]
+        # if eps > np.random.uniform():
+        best_node_idx = np.random.choice(len([self.tree.nodes[child][NodeData.VALUE] for child in children]))
+        return best_node_idx
 
     def _find_idx_from_greedy(self, children):
         best_node_idx = np.argmax([self.tree.nodes[child][NodeData.VALUE] for child in children])
@@ -224,14 +264,26 @@ class MCTS(NodeData):
 
     # TODO
     def _simulate(self, state:Scene, action:dict):
-        next_scene = None
-        # if action["type"] == "pick":
-        #     next_scene = 
-        # if action["type"] == "place":
-        #     next_scene = 
+        next_state = None
+        reward = 0
 
-        reward = self._get_reward(state)
-        return next_scene, reward
+        if action[self.pick_action.info.TYPE] == "pick":
+            next_states = self.pick_action.get_possible_transitions(state, action)
+
+        if action[self.pick_action.info.TYPE] == "place":
+            next_states = self.place_action.get_possible_transitions(state, action)
+
+        next_states = list(next_states)
+
+        if not next_states:
+            return next_state, reward
+
+        next_state_idx = np.random.choice(len(next_states))
+
+        next_state = next_states[next_state_idx]
+        reward = self._get_reward(state, action, next_state)
+
+        return next_state, reward
 
     def _update_value(self, cur_node, Q_sum):
         self.tree.nodes[cur_node][NodeData.VISITS] += 1

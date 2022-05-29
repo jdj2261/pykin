@@ -57,7 +57,7 @@ for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
         for place_action in place_actions:
-            for all_release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
+            for all_release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
                 place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_release])
 place.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
@@ -68,7 +68,7 @@ pick.show()
 #     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
 #         for place_action in place_actions:
-#             for all_release_pose, obj_pose in place_action[place.action_info.RELEASE_POSES]:
+#             for all_release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
 #                 ik_solve, release_pose = place.compute_ik_solve_for_robot(all_release_pose)
 #                 if ik_solve:
 #                     place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
