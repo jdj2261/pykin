@@ -71,7 +71,7 @@ print(nodes)
 for node in nodes:
     fig, ax = plt.init_3d_figure(name="Level wise 1")
     scene:Scene = mcts.tree.nodes[node]['state']
-    scene.show_logical_states()
+    # scene.show_logical_states()
     scene_mngr.render_objects_and_gripper(ax, scene)
     scene_mngr.show()
 

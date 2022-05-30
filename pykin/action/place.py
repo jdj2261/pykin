@@ -1,7 +1,6 @@
 import numpy as np
 from collections import OrderedDict
 from copy import deepcopy
-
 from trimesh import Trimesh, proximity
 
 import pykin.utils.action_utils as a_utils
@@ -42,6 +41,8 @@ class PlaceAction(ActivityBase):
 
             if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
                 action_level_1 = self.get_action_level_1_for_single_object(sup_obj, held_obj, eef_pose)
+                if not action_level_1[self.info.RELEASE_POSES]:
+                    continue
                 yield action_level_1
 
     def get_action_level_1_for_single_object(self, sup_obj_name, held_obj_name, eef_pose=None, scene:Scene=None):
@@ -285,18 +286,18 @@ class PlaceAction(ActivityBase):
             return ik_solve, release_pose_for_ik
         return None, None
 
-    def get_surface_points_for_support_obj(self, obj_name):
+    def get_surface_points_for_support_obj(self, obj_name, alpha=0.2):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
-        alpha=0.9
+
+        len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
+        len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
 
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
         
         for point, normal_vector in zip(sample_points, normals):
-            len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
-            len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
             if center_point[0] - len_x * alpha <= point[0] <= center_point[0] + len_x * alpha:
                 if center_point[1] - len_y * alpha <= point[1] <= center_point[1] + len_y * alpha:
                     yield point, normal_vector
@@ -311,23 +312,37 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 1.0
         return weights
 
-    def get_surface_points_for_held_obj(self, obj_name):
+    def get_surface_points_for_held_obj(self, obj_name, beta=0.2):
         copied_mesh = deepcopy(self.scene_mngr.init_objects[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
+        center_point = copied_mesh.center_mass
+
+        len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
+        len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
+        len_z = abs(center_point[2] - copied_mesh.bounds[0][2])
 
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
+        
         for point, normal_vector in zip(sample_points, normals):
-            yield point, normal_vector
+            if center_point[0] - len_x * beta <= point[0] <= center_point[0] + len_x * beta:
+                if center_point[1] - len_y * beta <= point[1] <= center_point[1] + len_y * beta:
+                    yield point, normal_vector
+            if center_point[2] - len_z * beta <= point[2] <= center_point[2] + len_z * beta:
+                if center_point[1] - len_y * beta <= point[1] <= center_point[1] + len_y * beta:
+                    yield point, normal_vector
+            if center_point[2] - len_z * beta <= point[2] <= center_point[2] + len_z * beta:
+                if center_point[0] - len_x * beta <= point[0] <= center_point[0] + len_x * beta:
+                    yield point, normal_vector
 
     @staticmethod
     def _get_weights_for_held_obj(obj_mesh):
         # heuristic
         weights = np.zeros(len(obj_mesh.faces))
         for idx, vertex in enumerate(obj_mesh.vertices[obj_mesh.faces]):
-            weights[idx]=0.3
+            weights[idx]=0.4
             if np.all(vertex[:,2] <= obj_mesh.bounds[0][2] * 1.02):                
-                weights[idx] = 0.7
+                weights[idx] = 0.6
         return weights
 
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, eef_pose=None):
@@ -405,7 +420,7 @@ class PlaceAction(ActivityBase):
         held_obj_mesh.apply_transform(obj_pose)
         
         place_obj = self.scene_mngr.scene.objs[support_obj_name]
-        place_obj_mesh = deepcopy(place_obj.gparam)
+        place_obj_mesh:Trimesh = deepcopy(place_obj.gparam)
         place_obj_mesh.apply_transform(place_obj.h_mat)
 
         locations, _, _ = place_obj_mesh.ray.intersects_location(

@@ -35,10 +35,13 @@ class PickAction(ActivityBase):
             
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
                 action_level_1 = self.get_action_level_1_for_single_object(obj_name=obj_name)
+                if not action_level_1[self.info.GRASP_POSES]:
+                    continue
                 yield action_level_1
 
     def get_action_level_1_for_single_object(self, scene=None, obj_name:str=None) -> dict:
-        self.copy_scene(scene)
+        if scene is not None:
+            self.copy_scene(scene)
 
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
         grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))

@@ -11,6 +11,8 @@ from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
 
 from pykin.utils.kin_utils import ShellColors as sc
+import pykin.utils.plot_utils as p_utils
+
 
 class NodeData:
     DEPTH = 'depth'
@@ -35,8 +37,8 @@ class MCTS(NodeData):
         visible_graph=False
     ):
         self.state = scene_mngr.scene
-        self.pick_action = PickAction(scene_mngr, n_contacts=10, n_directions=10)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
+        self.pick_action = PickAction(scene_mngr, n_contacts=5, n_directions=10)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=150, n_samples_support_obj=150)
 
         self._sampling_method = sampling_method
         self._n_iters = n_iters
@@ -81,9 +83,7 @@ class MCTS(NodeData):
 
     def _search(self, cur_node, depth):
         state:Scene = self.tree.nodes[cur_node][NodeData.STATE]
-        print(state)
-
-        # Not use in tic-tac-toe game
+    
         if depth >= self._max_depth:
             return 0
 
@@ -100,15 +100,17 @@ class MCTS(NodeData):
             return reward
 
         action, next_node = self._select_action(cur_node, state, depth)
-        
+
         if action is None:
             return -10
         # self.visualize(f"SelectAction Node: {cur_node} Depth: {depth}")
-        
+
         next_state, reward = self._simulate(state, action)
         self.tree.nodes[next_node][NodeData.STATE] = next_state
-        # print(f"Simulate Node: {cur_node} Depth: {depth}")
-        # self.visualize("Simulate")
+        print(f"Simulate Node: {cur_node} Depth: {depth}")
+        
+        self.visualize("Simulate")
+        self.render_state("next_state", next_state)
 
         Q_sum = reward + self.gamma * self._search(next_node, depth+1)
         self._update_value(cur_node, Q_sum)
@@ -136,11 +138,11 @@ class MCTS(NodeData):
         self.get_nodes(parent_node, nodes)
         return [leaf_node] + nodes
 
-
     def _get_reward(self, cur_state:Scene, action=None, next_state:Scene=None):
-        reward = 0
+        reward = -1
         if cur_state is None:
             reward = -10
+        
         return reward
 
     def _select_action(self, cur_node, state, depth, exploration_method="random"):
@@ -163,6 +165,7 @@ class MCTS(NodeData):
             next_node = self._sample_child_node(children, depth, exploration_method)
         
         action = self.tree.nodes[next_node][NodeData.ACTION]
+        # print(action[self.pick_action.info.PICK_OBJ_NAME])
         # print(f"Get best action node is {next_node}, and Action is {action}")
         return action, next_node
 
@@ -268,18 +271,26 @@ class MCTS(NodeData):
         reward = 0
 
         if action[self.pick_action.info.TYPE] == "pick":
-            next_states = self.pick_action.get_possible_transitions(state, action)
+            next_states = list(self.pick_action.get_possible_transitions(state, action)) 
 
         if action[self.pick_action.info.TYPE] == "place":
-            next_states = self.place_action.get_possible_transitions(state, action)
-
-        next_states = list(next_states)
+            next_states = list(self.place_action.get_possible_transitions(state, action))
 
         if not next_states:
             return next_state, reward
+            # fig, ax = p_utils.init_3d_figure(name="Level wise 1")
+            # if action['type'] == "pick":
+            #     print(action['type'])
+            #     print(action[self.pick_action.info.PICK_OBJ_NAME])
+            # if action['type'] == "place":
+            #     print(action['type'])
+            #     print(action[self.pick_action.info.HELD_OBJ_NAME])
+            #     print(action[self.pick_action.info.PLACE_OBJ_NAME])
+                
+            # self.pick_action.scene_mngr.render_objects_and_gripper(ax, state)
+            # self.pick_action.show()
 
         next_state_idx = np.random.choice(len(next_states))
-
         next_state = next_states[next_state_idx]
         reward = self._get_reward(state, action, next_state)
 
@@ -302,19 +313,44 @@ class MCTS(NodeData):
         return self.tree.nodes[children[best_idx]][NodeData.STATE]
 
     def visualize(self, title):
-        # visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.VISITS] > 0]
-        # visited_tree = self.tree.subgraph(visited_nodes)
-        labels = { n: 'D:{:d}\nV:{:d}\nR:{:d}\nQ:{:.2f}'.format(
-                self.tree.nodes[n][NodeData.DEPTH],
-                self.tree.nodes[n][NodeData.VISITS],
-                self.tree.nodes[n][NodeData.REWARD],
-                self.tree.nodes[n][NodeData.VALUE]) for n in self.tree.nodes}
+        labels = {}
+        for n in self.tree.nodes:
+            if self.tree.nodes[n][NodeData.ACTION] is not None:
+                if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'pick':
+                    labels.update({ n: 'D:{:d}\nV:{:d}\nR:{:d}\nQ:{:.2f}\nA:({} {})'.format(
+                        self.tree.nodes[n][NodeData.DEPTH],
+                        self.tree.nodes[n][NodeData.VISITS],
+                        self.tree.nodes[n][NodeData.REWARD],
+                        self.tree.nodes[n][NodeData.VALUE],
+                        self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
+                        self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.PICK_OBJ_NAME])})
+                
+                if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'place':
+                    labels.update({ n: 'D:{:d}\nV:{:d}\nR:{:d}\nQ:{:.2f}\nA:({} {} on {})'.format(
+                        self.tree.nodes[n][NodeData.DEPTH],
+                        self.tree.nodes[n][NodeData.VISITS],
+                        self.tree.nodes[n][NodeData.REWARD],
+                        self.tree.nodes[n][NodeData.VALUE],
+                        self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
+                        self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.HELD_OBJ_NAME],
+                        self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.PLACE_OBJ_NAME])})
+            else:
+                labels.update({ n: 'D:{:d}\nV:{:d}\nR:{:d}\nQ:{:.2f}'.format(
+                    self.tree.nodes[n][NodeData.DEPTH],
+                    self.tree.nodes[n][NodeData.VISITS],
+                    self.tree.nodes[n][NodeData.REWARD],
+                    self.tree.nodes[n][NodeData.VALUE])})
 
-        plt.figure(title, figsize=(12, 8),)
+        plt.figure(title, figsize=(14, 10),)
         pos = graphviz_layout(self.tree, prog='dot')
         nx.draw(self.tree, pos, labels=labels, node_shape="s", node_color="none",
                 bbox=dict(facecolor="skyblue", edgecolor='black', boxstyle='round,pad=0.1'))
         plt.show()
+
+    def render_state(self, title, state):
+        fig, ax = p_utils.init_3d_figure(name=title)
+        self.pick_action.scene_mngr.render_objects_and_gripper(ax, state)
+        self.pick_action.show()
 
     @property
     def sampling_method(self):
