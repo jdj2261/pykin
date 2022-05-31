@@ -46,9 +46,9 @@ scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
-scene_mngr.add_object(name="test1_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
-scene_mngr.add_object(name="test2_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
-scene_mngr.add_object(name="test3_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
+# scene_mngr.add_object(name="test1_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
+# scene_mngr.add_object(name="test2_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
+# scene_mngr.add_object(name="test3_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
@@ -56,16 +56,16 @@ scene_mngr.set_logical_state("goal_box", ("on", "table"))
 scene_mngr.set_logical_state("red_box", ("on", "table"))
 scene_mngr.set_logical_state("blue_box", ("on", "table"))
 scene_mngr.set_logical_state("green_box", ("on", "table"))
-scene_mngr.set_logical_state("test1_box", ("on", "table"))
-scene_mngr.set_logical_state("test2_box", ("on", "table"))
-scene_mngr.set_logical_state("test3_box", ("on", "table"))
+# scene_mngr.set_logical_state("test1_box", ("on", "table"))
+# scene_mngr.set_logical_state("test2_box", ("on", "table"))
+# scene_mngr.set_logical_state("test3_box", ("on", "table"))
 
 scene_mngr.set_logical_state("table", ("static", True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
 pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
+place = PlaceAction(scene_mngr, n_samples_held_obj=200, n_samples_support_obj=200)
 
 pnp_joint_all_pathes = []
 pick_all_objects = []
@@ -75,7 +75,7 @@ place_all_object_poses = []
 success_joint_path = False
 # pick
 # step 1. action[type] == pick
-pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "green_box")
+pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "red_box")
 cnt = 0
 for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
     ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=pick_scene.grasp_poses)
@@ -84,14 +84,14 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
         if pick_joint_path:
             # pnp_joint_all_path.append(pick_joint_path)
             # pick_scene.objs["green_box"].h_mat = pick_scene.robot.gripper.pick_obj_pose
-            place_action = place.get_action_level_1_for_single_object("test1_box", "green_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
+            place_action = place.get_action_level_1_for_single_object("goal_box", "red_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
             for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
                 ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
                 if ik_solve:
                     place_joint_path = place.get_possible_joint_path_level_3(
                         scene=place_scene, release_poses=release_poses, init_thetas=pick_joint_path[-1][place.move_data.MOVE_default_grasp][-1])
                     if place_joint_path:
-                        pick_action_2 = pick.get_action_level_1_for_single_object(place_scene, "green_box")
+                        pick_action_2 = pick.get_action_level_1_for_single_object(place_scene, "blue_box")
                         for pick_scene_2 in pick.get_possible_transitions(place_scene, pick_action_2):
                             ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=pick_scene_2.grasp_poses)
                             if ik_solve:
@@ -99,7 +99,7 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
                                     scene=pick_scene_2, grasp_poses=grasp_pose, init_thetas=place_joint_path[-1][place.move_data.MOVE_default_release][-1])
                                 if pick_joint_path_2:
                                     # pick_scene_2.objs["green_box"].h_mat = pick_scene_2.robot.gripper.pick_obj_pose
-                                    place_action2 = place.get_action_level_1_for_single_object("test2_box", "green_box", pick_scene_2.robot.gripper.grasp_pose, scene=pick_scene_2)
+                                    place_action2 = place.get_action_level_1_for_single_object("red_box", "blue_box", pick_scene_2.robot.gripper.grasp_pose, scene=pick_scene_2)
                                     for place_scene_2 in place.get_possible_transitions(scene=pick_scene_2, action=place_action2):
                                         ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene_2, release_poses=place_scene_2.release_poses)
                                         if ik_solve:
@@ -114,7 +114,7 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
                                                             scene=pick_scene_3, grasp_poses=grasp_pose, init_thetas=place_joint_path2[-1][place.move_data.MOVE_default_release][-1])
                                                         if pick_joint_path_3:
                                                             # pick_scene_3.objs["green_box"].h_mat = pick_scene_3.robot.gripper.pick_obj_pose
-                                                            place_action3 = place.get_action_level_1_for_single_object("test3_box", "green_box", pick_scene_3.robot.gripper.grasp_pose, scene=pick_scene_3)
+                                                            place_action3 = place.get_action_level_1_for_single_object("blue_box", "green_box", pick_scene_3.robot.gripper.grasp_pose, scene=pick_scene_3)
                                                             for place_scene_3 in place.get_possible_transitions(scene=pick_scene_3, action=place_action3):
                                                                 ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene_3, release_poses=place_scene_3.release_poses)
                                                                 if ik_solve:

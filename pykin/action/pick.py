@@ -161,9 +161,7 @@ class PickAction(ActivityBase):
             raise ValueError("Robot doesn't have a gripper")
 
         gripper = self.scene_mngr.scene.robot.gripper
-        tcp_poses = self.get_tcp_poses(obj_name)
-        
-        for tcp_pose in tcp_poses:
+        for tcp_pose in self.get_tcp_poses(obj_name):
             grasp_pose = {}
             grasp_pose[self.move_data.MOVE_grasp] = gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
             grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
@@ -243,13 +241,51 @@ class PickAction(ActivityBase):
     def get_contact_points(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
-        
+
+        center_point = copied_mesh.center_mass
+
+        len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
+        len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
+        len_z = abs(center_point[2] - copied_mesh.bounds[0][2])
+
+        weights = self._get_weights_for_held_obj(copied_mesh)
+
         cnt = 0
+        margin = 0.8
+        surface_point_list = []
         while cnt < self.n_contacts:
-            surface_points, normals = self.get_surface_points_from_mesh(copied_mesh, 2)
+            surface_points, normals = self.get_surface_points_from_mesh(copied_mesh, 2, weights)
+            is_success = False
             if self._is_force_closure(surface_points, normals, self.limit_angle):
-                cnt += 1
-                yield surface_points
+                
+                if center_point[0] - len_x * margin <= surface_points[0][0] <= center_point[0] + len_x * margin:
+                    if center_point[1] - len_y * margin <= surface_points[0][1] <= center_point[1] + len_y * margin:
+                        is_success = True
+                        
+                if center_point[2] - len_z * margin <= surface_points[0][2] <= center_point[2] + len_z * margin:
+                    if center_point[1] - len_y * margin <= surface_points[0][1] <= center_point[1] + len_y * margin:
+                        is_success = True
+
+                if center_point[2] - len_z * margin <= surface_points[0][2] <= center_point[2] + len_z * margin:
+                    if center_point[0] - len_x * margin <= surface_points[0][0] <= center_point[0] + len_x * margin:
+                        is_success = True
+                
+                if is_success:
+                    cnt += 1
+                    surface_point_list.append(surface_points)
+        
+        return surface_point_list
+                
+    @staticmethod
+    def _get_weights_for_held_obj(obj_mesh):
+        # heuristic
+        weights = np.zeros(len(obj_mesh.faces))
+        for idx, vertex in enumerate(obj_mesh.vertices[obj_mesh.faces]):
+            weights[idx]=0.4
+            if np.all(vertex[:,2] <= obj_mesh.bounds[0][2] * 1.02):                
+                weights[idx] = 0.6
+        return weights
+
 
     def _is_force_closure(self, points, normals, limit_angle):
         vectorA = points[0]
@@ -275,7 +311,7 @@ class PickAction(ActivityBase):
         return True
 
     def get_tcp_poses(self, obj_name):
-        contact_points = list(self.get_contact_points(obj_name))
+        contact_points = self.get_contact_points(obj_name)
         if not contact_points:
             raise ValueError("Cannot get tcp poses!!")
         

@@ -43,11 +43,11 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-pick = PickAction(scene_mngr, 5, 50)
+pick = PickAction(scene_mngr, 10, 50)
 
 ###### All Contact Points #######
 fig, ax = plt.init_3d_figure(name="Get contact points")
-contact_points = list(pick.get_contact_points(obj_name="green_box"))
+contact_points = pick.get_contact_points(obj_name="green_box")
 pick.scene_mngr.render.render_points(ax, contact_points)
 pick.scene_mngr.render_objects(ax, alpha=0.5)
 plt.plot_basis(ax)

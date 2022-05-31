@@ -1,0 +1,13 @@
+class NodeData:
+    DEPTH = 'depth'
+    STATE = 'state'
+    ACTION = 'action'
+    REWARD = 'reward'
+    VISITS = 'visits' 
+    Q = 'q'
+    V = 'v'
+    Q_HISTORY = 'q_history'
+    V_HISTORY = 'v_history'
+    Trajectory = 'trajectory'
+    NUMBER = 'number'
+    TYPE = 'type'
