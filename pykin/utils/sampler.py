@@ -1,10 +1,10 @@
 import numpy as np
 from pykin.search.node_data import NodeData
 
-def find_best_idx_from_random(tree, children):
+def find_best_idx_from_random(tree, children, value):
     # eps = self._config["eps"]
     # if eps > np.random.uniform():
-    best_node_idx = np.random.choice(len([tree.nodes[child][NodeData.Q] for child in children]))
+    best_node_idx = np.random.choice(len([tree.nodes[child][value] for child in children]))
     return best_node_idx
 
 def find_idx_from_greedy(tree, children):

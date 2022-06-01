@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
 
 import pykin.utils.plot_utils as p_utils
-import pykin.search.sampler as sampler
+import pykin.utils.sampler as sampler
 
 from pykin.search.node_data import NodeData
 from pykin.scene.scene import Scene
@@ -55,7 +55,8 @@ class MCTS(NodeData):
                         NodeData.VISITS: 0,
                         NodeData.NUMBER: 0,
                         NodeData.Q_HISTORY: [],
-                        NodeData.V_HISTORY: []})])
+                        NodeData.V_HISTORY: [],
+                        NodeData.TYPE: 'state'})])
         return tree
 
     def do_planning(self):
@@ -84,16 +85,16 @@ class MCTS(NodeData):
     def _search(self, cur_node, depth):
         state:Scene = self.tree.nodes[cur_node][NodeData.STATE]
     
-        reward = -10
+        reward = 0
         if depth >= self._max_depth:
             return reward
 
-        if self._is_terminal(state, depth):
+        if self._is_terminal(state):
             if state is not None:
                 print("Success!!!!!")
                 self.nodes = self.get_nodes(cur_node, [])
 
-            reward = self._get_reward(state)
+            reward = 10
             self.tree.nodes[cur_node][NodeData.VISITS] += 1
             self.tree.nodes[cur_node][NodeData.REWARD] = reward
             self.tree.nodes[cur_node][NodeData.V] = reward
@@ -104,34 +105,34 @@ class MCTS(NodeData):
 
         if action is None:
             print("Not possible action")
-            self.tree.nodes[cur_node][NodeData.V] = reward
             return reward
         # self.visualize(f"SelectAction Node: {cur_node} Depth: {depth}")
 
         next_state, state_node = self._simulate(action_node, state, action, depth)
-        reward = self._get_reward(state, action, next_state)
+        reward = self._get_reward(next_state)
+        
         if next_state is None:
             print("Not possible state")
             self.tree.nodes[cur_node][NodeData.V] = reward
             return reward
-        # self.tree.nodes[next_node][NodeData.STATE] = next_state
 
         #### For Debug ######################################################################################################################################################
         if action[self.pick_action.info.TYPE] == "pick":
             print(f"Simulate Node: {cur_node} Depth: {depth} {sc.OKGREEN}Action: Pick {action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
         if action[self.pick_action.info.TYPE] == "place":
             print(f"Simulate Node: {cur_node} Depth: {depth} {sc.OKGREEN}Action: Place {action[self.pick_action.info.HELD_OBJ_NAME]} on {action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
-        # self.visualize("Simulate")
-        # self.render_state("next_state", next_state)
+        self.visualize("Simulate")
+        self.render_state("next_state", next_state)
         ########################################################################################################################################################################
         
-        Q_sum = reward + self.gamma * self._search(state_node, depth+1)
-        self._update_value(cur_node, Q_sum)
+        V_sum = reward + self.gamma * self._search(state_node, depth+1)
+        print(state_node, V_sum)
+        self._update_value(state_node, action_node, V_sum)
 
         # print(f"Backpropagation Node: {cur_node} Depth: {depth}")
         # self.visualize("Backpropagation")
 
-        return Q_sum
+        return V_sum
 
     def _select_action(self, cur_node, state, depth, exploration_method="random"):
         # e-greedy, softmax
@@ -150,7 +151,7 @@ class MCTS(NodeData):
             next_node = random.choice(expanded_children)
         else:
             # print(f"Cur node has children {children}")
-            next_node = self._sample_child_node(children, exploration_method)
+            next_node = self._sample_child_node(children, exploration_method, NodeData.Q)
         
         action = self.tree.nodes[next_node][NodeData.ACTION]
         # print(action[self.pick_action.info.PICK_OBJ_NAME])
@@ -174,7 +175,6 @@ class MCTS(NodeData):
                                                 NodeData.ACTION: possible_action,
                                                 NodeData.REWARD: 0,
                                                 NodeData.Q: -np.inf,
-                                                NodeData.V: -np.inf,
                                                 NodeData.VISITS: 0,
                                                 NodeData.NUMBER: next_node,
                                                 NodeData.Q_HISTORY: [],
@@ -197,7 +197,7 @@ class MCTS(NodeData):
             next_node = random.choice(expanded_children)
         else:
             # print(f"Cur node has children {children}")
-            next_node = self._sample_child_node(children, exploration_method)
+            next_node = self._sample_child_node(children, exploration_method, NodeData.V)
         
         next_state = self.tree.nodes[next_node][NodeData.STATE]
         return next_state, next_node
@@ -220,21 +220,20 @@ class MCTS(NodeData):
                                                   NodeData.ACTION: action,
                                                   NodeData.REWARD: 0,
                                                   NodeData.V: -np.inf,
-                                                  NodeData.Q: -np.inf,
                                                   NodeData.V_HISTORY: [],
                                                   NodeData.TYPE: 'state'})])
             self.tree.add_edge(cur_node, next_node)
 
-    def _sample_child_node(self, children, exploration_method):
+    def _sample_child_node(self, children, exploration_method, value):
         assert len(children) != 0
         if exploration_method == "random":
-            best_idx = sampler.find_best_idx_from_random(self.tree, children)
+            best_idx = sampler.find_best_idx_from_random(self.tree, children, value)
         if exploration_method == "greedy":
             best_idx = sampler.find_idx_from_greedy(self.tree, children)
         if exploration_method == "ucb1":
             best_idx = sampler.find_idx_from_ucb1(self.tree, children, self.c)
         if exploration_method == "uct":
-            best_idx = sampler.find_idx_from_uct(self.tree, children)
+            best_idx = sampler.find_idx_from_uct(self.tree, children, self.c)
         if exploration_method == "bai_ucb":
             best_idx = sampler.find_idx_from_bai_ucb(self.tree, children)
         if exploration_method == "bai_perturb":
@@ -243,14 +242,22 @@ class MCTS(NodeData):
         child_node = children[best_idx]
         return child_node
 
-    def _update_value(self, cur_node, Q_sum):
-        self.tree.nodes[cur_node][NodeData.VISITS] += 1
-        # self.tree.nodes[cur_node][NodeData.Q_HISTORY].append(Q_sum)
-        
-        if Q_sum > self.tree.nodes[cur_node][NodeData.Q]:
-            self.tree.nodes[cur_node][NodeData.Q] = Q_sum
+    def _update_value(self, state_node, action_node, V_sum):
+        self.tree.nodes[state_node][NodeData.VISITS] += 1
+        self.tree.nodes[action_node][NodeData.VISITS] += 1
 
-    def _is_terminal(self, state:Scene, depth:int):
+        if self.tree.nodes[state_node][NodeData.TYPE] == "state":
+            if V_sum > self.tree.nodes[state_node][NodeData.V]:
+                self.tree.nodes[state_node][NodeData.V] = V_sum
+            self.tree.nodes[state_node][NodeData.V_HISTORY].append(self.tree.nodes[state_node][NodeData.V])
+
+        if self.tree.nodes[action_node][NodeData.TYPE] == "action":
+            V_list = [self.tree.nodes[child][NodeData.V] for child in self.tree.neighbors(action_node)]
+            Q = np.max(V_list)
+            self.tree.nodes[action_node][NodeData.Q] = Q
+            self.tree.nodes[action_node][NodeData.Q_HISTORY].append(Q)
+
+    def _is_terminal(self, state:Scene):
         if state is None:
             print("Not next_state")
             return True
@@ -259,10 +266,10 @@ class MCTS(NodeData):
             return True
         return False
     
-    def _get_reward(self, cur_state:Scene, action=None, next_state:Scene=None):
+    def _get_reward(self, cur_state:Scene):
         reward = -1
         if cur_state is None:
-            reward = -10
+            reward = -100
         return reward
 
     def _get_best_action(self, root_node=0):
@@ -281,11 +288,10 @@ class MCTS(NodeData):
             if self.tree.nodes[n][NodeData.ACTION] is not None:
                 if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'pick':
                     if self.tree.nodes[n][NodeData.TYPE] == 'action':
-                        labels.update({ n: 'Node:{:d}\nDepth:{:d}\nVisits:{:d}\nReward:{:d}\nQ(s,a):{:.2f}\nAction:({} {})'.format(
+                        labels.update({ n: 'Node:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}\nAction:({} {})'.format(
                             self.tree.nodes[n][NodeData.NUMBER],
                             self.tree.nodes[n][NodeData.DEPTH],
                             self.tree.nodes[n][NodeData.VISITS],
-                            self.tree.nodes[n][NodeData.REWARD],
                             self.tree.nodes[n][NodeData.Q],
                             self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
                             self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.PICK_OBJ_NAME])})
@@ -301,11 +307,10 @@ class MCTS(NodeData):
 
                 if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'place':
                     if self.tree.nodes[n][NodeData.TYPE] == 'action':
-                        labels.update({ n: 'Node:{:d}\nDepth:{:d}\nVisits:{:d}\nReward:{:d}\nQ(s,a):{:.2f}\nAction:({} {} on {})'.format(
+                        labels.update({ n: 'Node:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}\nAction:({} {} on {})'.format(
                             self.tree.nodes[n][NodeData.NUMBER],
                             self.tree.nodes[n][NodeData.DEPTH],
                             self.tree.nodes[n][NodeData.VISITS],
-                            self.tree.nodes[n][NodeData.REWARD],
                             self.tree.nodes[n][NodeData.Q],
                             self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
                             self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.HELD_OBJ_NAME],
