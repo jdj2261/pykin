@@ -66,11 +66,16 @@ scene_mngr.show_logical_states()
 
 mcts = MCTS(scene_mngr)
 nodes = mcts.do_planning()
-nodes.reverse()
-print(nodes)
-for node in nodes:
+best_nodes = mcts.get_best_node(cur_node=0)
+print(best_nodes)
+# nodes.reverse()
+# print(nodes)
+for node in best_nodes:
     fig, ax = plt.init_3d_figure(name="Level wise 1")
     scene:Scene = mcts.tree.nodes[node]['state']
+    if mcts.tree.nodes[node]['type'] == "action":
+        continue
+    print(node, scene)
     # scene.show_logical_states()
     scene_mngr.render_objects_and_gripper(ax, scene)
     scene_mngr.show()

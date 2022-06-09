@@ -52,7 +52,7 @@ scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.log
 scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=2, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=5, n_samples_support_obj=5)
+place = PlaceAction(scene_mngr, n_samples_held_obj=20, n_samples_support_obj=20)
 
 ###### Surface sampling held and support obj#######
 fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")

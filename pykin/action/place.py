@@ -286,7 +286,7 @@ class PlaceAction(ActivityBase):
             return ik_solve, release_pose_for_ik
         return None, None
 
-    def get_surface_points_for_support_obj(self, obj_name, alpha=0.2):
+    def get_surface_points_for_support_obj(self, obj_name, alpha=0.20):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
@@ -312,7 +312,7 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 1.0
         return weights
 
-    def get_surface_points_for_held_obj(self, obj_name, beta=0.2):
+    def get_surface_points_for_held_obj(self, obj_name, beta=0.20):
         copied_mesh = deepcopy(self.scene_mngr.init_objects[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass

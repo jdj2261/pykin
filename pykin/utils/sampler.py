@@ -1,10 +1,10 @@
 import numpy as np
 from pykin.search.node_data import NodeData
 
-def find_best_idx_from_random(tree, children, value):
+def find_best_idx_from_random(tree, children):
     # eps = self._config["eps"]
     # if eps > np.random.uniform():
-    best_node_idx = np.random.choice(len([tree.nodes[child][value] for child in children]))
+    best_node_idx = np.random.choice(len([tree.nodes[child][NodeData.Q] for child in children]))
     return best_node_idx
 
 def find_idx_from_greedy(tree, children):
@@ -16,7 +16,7 @@ def find_idx_from_ucb1(tree, children):
     for child in children:
         action_values = tree.nodes[child][NodeData.Q_HISTORY]
         u = np.mean(action_values)
-        n = [tree.nodes[child][NodeData.VISITS]]
+        n = tree.nodes[child][NodeData.VISITS]
         total_n = tree.nodes[0][NodeData.VISITS]
 
         if n == 0:
@@ -32,11 +32,14 @@ def find_idx_from_ucb1(tree, children):
 
 def find_idx_from_uct(tree, children, c):
     ucts = []
+    # print(children)
     for child in children:
-        action_values = tree.nodes[child][NodeData.Q_HISTORY]
-        u = np.mean(action_values)
-        n = np.mean(tree.nodes[child][NodeData.VISITS])
+        values = tree.nodes[child][NodeData.Q_HISTORY]
+        # print(child, values)
+        n = tree.nodes[child][NodeData.VISITS]
         total_n = tree.nodes[0][NodeData.VISITS]
+        
+        u = np.sum(values) / n
 
         if n == 0:
             uct = float('inf')
@@ -45,8 +48,8 @@ def find_idx_from_uct(tree, children, c):
             exploration = np.sqrt(np.log(total_n) / n)
             uct = exploitation + c * exploration
         ucts.append(uct)
-
     best_node_idx = np.argmax(ucts)
+    # print(ucts, best_node_idx)
     return best_node_idx
 
 # TODO

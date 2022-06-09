@@ -43,7 +43,7 @@ def get_grasp_directions(line, n_trials):
     v2 = e2 - projection(e2, norm_vector) - projection(e2, v1)
     v2 = normalize(v2)
 
-    for theta in np.linspace(-np.pi, np.pi, n_trials):
+    for theta in np.linspace(0, np.pi, n_trials):
         normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
         yield normal_dir
 
