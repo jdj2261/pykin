@@ -81,7 +81,6 @@ for node in best_nodes:
     scene_mngr.show()
 
 
-
 ############################# Scene Info #############################
 # print(scene_mngr.get_objs_info())
 # print(scene_mngr.get_gripper_info())

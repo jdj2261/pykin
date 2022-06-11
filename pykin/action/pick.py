@@ -24,7 +24,6 @@ class PickAction(ActivityBase):
         self.filter_logical_states = [ scene_mngr.scene.logical_state.support, 
                                        scene_mngr.scene.logical_state.static]
 
-
     # Expand action to tree
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
         self.copy_scene(scene)
@@ -44,9 +43,29 @@ class PickAction(ActivityBase):
             self.copy_scene(scene)
 
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
+        grasp_poses.extend(list(self.get_grasp_pose_from_heuristic(obj_name)))
         grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
         action_level_1 = self.get_action(obj_name, grasp_poses_for_only_gripper)
         return action_level_1
+
+    def get_grasp_pose_from_heuristic(self, obj_name, dis_z=0.01):
+        copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
+        copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
+        center_point = copied_mesh.center_mass
+
+        for theta in np.linspace(-np.pi/6 + np.pi, np.pi/6 + np.pi, 5):
+            tcp_pose = np.eye(4)
+            tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
+            tcp_pose[:3,1] = [0, 1, 0]
+            tcp_pose[:3,2] = [-np.sin(theta), 0, np.cos(theta)]
+            tcp_pose[:3,3] = center_point + [0, 0, dis_z]
+
+            grasp_pose = {}
+            grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+            grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
+            grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])        
+        
+            yield grasp_pose
 
     # Not Expand, only check possible action using ik
     def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:

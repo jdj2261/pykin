@@ -28,8 +28,8 @@ class MCTS(NodeData):
         visible_graph=False
     ):
         self.state = scene_mngr.scene
-        self.pick_action = PickAction(scene_mngr, n_contacts=10, n_directions=10)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=80)
+        self.pick_action = PickAction(scene_mngr, n_contacts=3, n_directions=3)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=80, n_samples_support_obj=80)
 
         self._sampling_method = sampling_method
         self._n_iters = n_iters
@@ -72,13 +72,13 @@ class MCTS(NodeData):
         # return self.get_best_node(root_node=0)
 
     def get_nodes(self, leaf_node, nodes=[]):
-            parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
-            if not parent_nodes:
-                return
-            parent_node = parent_nodes[0]
-            nodes.append(parent_node)
-            self.get_nodes(parent_node, nodes)
-            return [leaf_node] + nodes
+        parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
+        if not parent_nodes:
+            return
+        parent_node = parent_nodes[0]
+        nodes.append(parent_node)
+        self.get_nodes(parent_node, nodes)
+        return [leaf_node] + nodes
 
     def _search(self, state_node, depth):
         cur_state_node = state_node

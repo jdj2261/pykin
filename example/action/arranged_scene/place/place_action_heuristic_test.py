@@ -51,29 +51,25 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.stati
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=3)
+pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
 
 ################# Action Test ##################
-actions = list(pick.get_possible_actions_level_1())
 fig, ax = plt.init_3d_figure(name="Level wise 1")
-for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_pre_grasp])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
+
+# pose = pick.get_grasp_pose_from_heuristic(obj_name="green_box")
+# pick.scene_mngr.render.render_axis(ax, pose[pick.move_data.MOVE_grasp])
+# pick.scene_mngr.render_gripper(ax, pose=pose[pick.move_data.MOVE_grasp])
+# print(pose)
+
+actions = pick.get_action_level_1_for_single_object(obj_name="green_box")
+
+for grasp_pose in actions[pick.info.GRASP_POSES]:
+    pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
+    pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
+    
+    # pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_pre_grasp])
+    pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_grasp])
+
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
 pick.show()
-
-# fig, ax = plt.init_3d_figure( name="Level wise 2")
-# for pick_actions in actions:
-#     for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
-#         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
-#         if ik_solve is not None:
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
-#             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_post_grasp])
-            
-# pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
-# pick.show()
