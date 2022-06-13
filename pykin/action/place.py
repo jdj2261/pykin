@@ -287,7 +287,7 @@ class PlaceAction(ActivityBase):
             return ik_solve, release_pose_for_ik
         return None, None
 
-    def get_surface_points_for_support_obj(self, obj_name, alpha=0.1):
+    def get_surface_points_for_support_obj(self, obj_name, alpha=0.2):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
@@ -300,16 +300,18 @@ class PlaceAction(ActivityBase):
         
         if not "table" in obj_name:
             center_upper_point = np.zeros(3)
-            center_upper_point[0] = center_point[0] + random.uniform(-0.001, 0.001)
-            center_upper_point[1] = center_point[1] + random.uniform(-0.001, 0.001)
+            center_upper_point[0] = center_point[0] + random.uniform(-0.1, 0.1)
+            center_upper_point[1] = center_point[1] + random.uniform(-0.1, 0.1)
             center_upper_point[2] = copied_mesh.bounds[1, 2]
             sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
             normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
 
         for point, normal_vector in zip(sample_points, normals):
-            if center_point[0] - len_x * alpha <= point[0] <= center_point[0] + len_x * alpha:
-                if center_point[1] - len_y * alpha <= point[1] <= center_point[1] + len_y * alpha:
-                    yield point, normal_vector
+            min_x = center_point[0] - len_x * alpha
+            max_x = center_point[0] + len_x * alpha
+            min_y = center_point[1] - len_y * alpha
+            max_y = center_point[1] + len_y * alpha
+            yield point, normal_vector, (min_x, max_x, min_y, max_y)
 
     @staticmethod
     def _get_weights_for_support_obj(obj_mesh):
@@ -321,14 +323,10 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 1.0
         return weights
 
-    def get_surface_points_for_held_obj(self, obj_name, beta=0.1):
+    def get_surface_points_for_held_obj(self, obj_name):
         copied_mesh = deepcopy(self.scene_mngr.init_objects[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
-
-        len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
-        len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
-        len_z = abs(center_point[2] - copied_mesh.bounds[0][2])
 
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
@@ -340,15 +338,7 @@ class PlaceAction(ActivityBase):
         normals = np.append(normals, np.array([[0, 0, -1]]), axis=0)
 
         for point, normal_vector in zip(sample_points, normals):
-            if center_point[0] - len_x * beta <= point[0] <= center_point[0] + len_x * beta:
-                if center_point[1] - len_y * beta <= point[1] <= center_point[1] + len_y * beta:
-                    yield point, normal_vector
-            if center_point[2] - len_z * beta <= point[2] <= center_point[2] + len_z * beta:
-                if center_point[1] - len_y * beta <= point[1] <= center_point[1] + len_y * beta:
-                    yield point, normal_vector
-            if center_point[2] - len_z * beta <= point[2] <= center_point[2] + len_z * beta:
-                if center_point[0] - len_x * beta <= point[0] <= center_point[0] + len_x * beta:
-                    yield point, normal_vector
+            yield point, normal_vector
 
     @staticmethod
     def _get_weights_for_held_obj(obj_mesh):
@@ -362,18 +352,26 @@ class PlaceAction(ActivityBase):
 
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, eef_pose=None):
         held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
-
         surface_points_for_sup_obj = list(self.get_surface_points_for_support_obj(support_obj_name))
         surface_points_for_held_obj = list(self.get_surface_points_for_held_obj(held_obj_name))
-
-        for support_obj_point, support_obj_normal in surface_points_for_sup_obj:
+    
+        for support_obj_point, support_obj_normal, (min_x, max_x, min_y, max_y) in surface_points_for_sup_obj:
             for held_obj_point, held_obj_normal in surface_points_for_held_obj:
                 rot_mat = a_utils.get_rotation_from_vectors(held_obj_normal, -support_obj_normal)
                 held_obj_point_transformed = np.dot(held_obj_point - held_obj_pose[:3, 3], rot_mat) + held_obj_pose[:3, 3]
                 
                 held_obj_pose_transformed, held_obj_pose_rotated = self._get_obj_pose_transformed(
                     held_obj_pose, support_obj_point, held_obj_point_transformed, rot_mat)
+                
+                copied_mesh = deepcopy(self.scene_mngr.init_objects[held_obj_name].gparam)
+                copied_mesh.apply_transform(held_obj_pose_transformed)
+                center_point = copied_mesh.center_mass
 
+                if not (min_x <= center_point[0] <= max_x):
+                    continue
+                if not (min_y <= center_point[1] <= max_y):
+                    continue
+                
                 if eef_pose is not None:
                     T_obj_pose_and_obj_pose_transformed = np.dot(held_obj_pose, np.linalg.inv(held_obj_pose_rotated))
                     eef_pose_transformed = self._get_eef_pose_transformed(

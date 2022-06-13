@@ -17,7 +17,7 @@ class SceneManager:
         geom="collision", 
         is_pyplot=True, 
         scene:Scene=None,
-        benchmark:int=1):
+        benchmark:dict={1 : {'stack_num' : 3}}):
         # Element for Scene
         self.geom = geom
 

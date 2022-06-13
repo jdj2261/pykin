@@ -15,9 +15,9 @@ class State:
     holding = 'holding'
 
 class Scene:
-    def __init__(self, benchmark:int=1):
-        self.benchmark = benchmark
-
+    def __init__(self, benchmark:dict):
+        self.benchmark_config = benchmark
+        self.bench_num = list(self.benchmark_config.keys())[0]
         self.objs = {}
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
@@ -61,13 +61,13 @@ class Scene:
 
     # Add for MCTS
     def is_terminal_state(self):
-        if self.benchmark == 1:
+        if self.bench_num == 1:
             return self.check_terminal_state_bench_1()
-        if self.benchmark == 2:
+        if self.bench_num == 2:
             pass
-        if self.benchmark == 3:
+        if self.bench_num == 3:
             pass
-        if self.benchmark == 4:
+        if self.bench_num == 4:
             pass
 
     def check_terminal_state_bench_1(self):
@@ -83,7 +83,7 @@ class Scene:
             objs_chain_list.remove("goal_box")
             sorted_chain_list.remove("goal_box")
         
-            if len(objs_chain_list) == 3:
+            if len(objs_chain_list) == list(self.benchmark_config[self.bench_num].values())[0]:
                 if objs_chain_list == sorted_chain_list:
                     return True
         return False

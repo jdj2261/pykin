@@ -64,8 +64,8 @@ scene_mngr.set_logical_state("table", ("static", True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
-pick = PickAction(scene_mngr, n_contacts=11, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=200, n_samples_support_obj=200)
+pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
+place = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
 
 pnp_joint_all_pathes = []
 pick_all_objects = []

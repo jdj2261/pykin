@@ -51,19 +51,19 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.stati
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=10)
-place = PlaceAction(scene_mngr, n_samples_held_obj=20, n_samples_support_obj=20)
+pick = PickAction(scene_mngr, n_contacts=2, n_directions=5)
+place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=2)
 
 ###### Surface sampling held and support obj#######
-fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
-surface_points_for_support_obj = list(place.get_surface_points_for_support_obj("goal_box"))
-for point, normal in surface_points_for_support_obj:
-    place.scene_mngr.render.render_point(ax, point)
-surface_points_for_held_obj = list(place.get_surface_points_for_held_obj("green_box"))
-for point, normal in surface_points_for_held_obj:
-    place.scene_mngr.render.render_point(ax, point)
-plt.plot_basis(ax)
-place.scene_mngr.render_objects(ax, alpha=0.5)
+# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
+# surface_points_for_support_obj = list(place.get_surface_points_for_support_obj("goal_box"))
+# for point, normal, _ in surface_points_for_support_obj:
+#     place.scene_mngr.render.render_point(ax, point)
+# surface_points_for_held_obj = list(place.get_surface_points_for_held_obj("green_box"))
+# for point, normal in surface_points_for_held_obj:
+#     place.scene_mngr.render.render_point(ax, point)
+# plt.plot_basis(ax)
+# place.scene_mngr.render_objects(ax, alpha=0.5)
 
 ##### All Release Pose #######
 fig, ax = plt.init_3d_figure( name="Get Release Pose")
@@ -80,7 +80,7 @@ for eef_pose in eef_poses:
 plt.plot_basis(ax)
 place.scene_mngr.render_objects(ax)
 
-# ###### Level wise - 1 #######
+# # ###### Level wise - 1 #######
 fig, ax = plt.init_3d_figure(name="Level wise 1")
 release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
 for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
@@ -90,7 +90,7 @@ for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:
 plt.plot_basis(ax)
 place.scene_mngr.render_objects(ax)
 
-# ###### Level wise - 2 #######
+# # ###### Level wise - 2 #######
 fig, ax = plt.init_3d_figure(name="Level wise 2")
 release_poses_for_only_gripper = list(place.get_release_poses_for_only_gripper(all_release_poses, False))
 for release_pose_for_only_gripper, obj_pose in release_poses_for_only_gripper:

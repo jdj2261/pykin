@@ -51,7 +51,7 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.stati
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
+pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################# Action Test ##################
 fig, ax = plt.init_3d_figure(name="Level wise 1")
@@ -64,11 +64,11 @@ fig, ax = plt.init_3d_figure(name="Level wise 1")
 actions = pick.get_action_level_1_for_single_object(obj_name="green_box")
 
 for grasp_pose in actions[pick.info.GRASP_POSES]:
-    pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
+    # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
     pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
     
     # pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_pre_grasp])
-    pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_grasp])
+    # pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_grasp])
 
 pick.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)

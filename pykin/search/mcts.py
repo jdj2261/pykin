@@ -15,18 +15,19 @@ from pykin.action.place import PlaceAction
 from pykin.utils.kin_utils import ShellColors as sc
 
 
-class MCTS(NodeData):
+class MCTS:
     def __init__(
         self,
         scene_mngr:SceneManager,
         sampling_method:dict={},
         n_iters:int=500, 
-        exploration_constant:float=310.4,
+        exploration_constant:float=1000,
         max_depth:int=20,
         gamma:float=1,
         eps:float=0.01,
         visible_graph=False
     ):
+        self.node_data = NodeData
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
         self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
@@ -34,7 +35,7 @@ class MCTS(NodeData):
         self._sampling_method = sampling_method
         self._n_iters = n_iters
         self.c = exploration_constant
-        self._max_depth = max_depth
+        self.max_depth = max_depth
         self.gamma = gamma
         self.eps = eps
         self.visible = visible_graph
@@ -84,7 +85,7 @@ class MCTS(NodeData):
         cur_state_node = state_node
         cur_state:Scene = self.tree.nodes[cur_state_node][NodeData.STATE]
     
-        if depth >= self._max_depth:
+        if depth >= self.max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
             reward = 0
             # self._update_node(cur_state_node, reward)
@@ -107,7 +108,6 @@ class MCTS(NodeData):
 
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
         # self.visualize(f"Select Action Node: {cur_node} Depth: {depth}")
-
         next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
         next_state = self.tree.nodes[next_state_node][NodeData.STATE]
 
@@ -261,7 +261,7 @@ class MCTS(NodeData):
             
             if not is_terminal:
                 if cur_logical_action is None or next_state is None:
-                    reward = -1e+2
+                    reward = -1e+4
         
         return reward
 
