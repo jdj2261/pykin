@@ -21,15 +21,15 @@ class MCTS(NodeData):
         scene_mngr:SceneManager,
         sampling_method:dict={},
         n_iters:int=500, 
-        exploration_constant:float=1.414,
-        max_depth:int=40,
+        exploration_constant:float=310.4,
+        max_depth:int=20,
         gamma:float=1,
         eps:float=0.01,
         visible_graph=False
     ):
         self.state = scene_mngr.scene
-        self.pick_action = PickAction(scene_mngr, n_contacts=3, n_directions=3)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=80, n_samples_support_obj=80)
+        self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
 
         self._sampling_method = sampling_method
         self._n_iters = n_iters
@@ -86,8 +86,8 @@ class MCTS(NodeData):
     
         if depth >= self._max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
-            reward = -1e+2
-            self._update_node(cur_state_node, reward)
+            reward = 0
+            # self._update_node(cur_state_node, reward)
             return reward
 
         if self._is_terminal(cur_state):
@@ -108,7 +108,7 @@ class MCTS(NodeData):
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
         # self.visualize(f"Select Action Node: {cur_node} Depth: {depth}")
 
-        next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth+1)
+        next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
         next_state = self.tree.nodes[next_state_node][NodeData.STATE]
 
         #### For Debug ######################################################################################################################################################
@@ -121,7 +121,7 @@ class MCTS(NodeData):
         ########################################################################################################################################################################
         
         reward = -100.0
-        value = reward + self.gamma * self._search(next_state_node, depth+2)
+        value = reward + self.gamma * self._search(next_state_node, depth+1)
         self._update_value(cur_state_node, cur_logical_action_node, value)
 
         # print(f"Backpropagation Node: {cur_state_node} Depth: {depth}")
@@ -257,7 +257,7 @@ class MCTS(NodeData):
         reward = -1e+2
 
         if cur_state is not None:
-            reward = 1e+3
+            reward = 1e+6
             
             if not is_terminal:
                 if cur_logical_action is None or next_state is None:

@@ -16,8 +16,6 @@ class ActionInfo:
     HELD_OBJ_NAME = "held_obj_name"
     PLACE_OBJ_NAME = "place_obj_name"
     GRASP_POSES = "grasp_poses"
-    PRE_GRASP_POSES = "pre_grasp_poses"
-    POST_GRASP_POSES = "post_grasp_poses"
     TCP_POSES = "tcp_poses"
     RELEASE_POSES = "release_poses"
     LEVEL = "level"

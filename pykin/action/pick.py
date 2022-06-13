@@ -53,7 +53,7 @@ class PickAction(ActivityBase):
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
 
-        for theta in np.linspace(-np.pi/6 + np.pi, np.pi/6 + np.pi, 5):
+        for theta in np.linspace(-np.pi/6 + np.pi, np.pi/6 + np.pi, 3):
             tcp_pose = np.eye(4)
             tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
             tcp_pose[:3,1] = [0, 1, 0]

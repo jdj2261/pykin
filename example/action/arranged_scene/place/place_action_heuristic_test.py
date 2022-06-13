@@ -9,6 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
+from pykin.action.place import PlaceAction
 import pykin.utils.plot_utils as plt
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
@@ -52,24 +53,22 @@ scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.log
 scene_mngr.update_logical_states()
 
 pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
+place = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
 
 ################# Action Test ##################
+
 fig, ax = plt.init_3d_figure(name="Level wise 1")
+pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "red_box")
 
-# pose = pick.get_grasp_pose_from_heuristic(obj_name="green_box")
-# pick.scene_mngr.render.render_axis(ax, pose[pick.move_data.MOVE_grasp])
-# pick.scene_mngr.render_gripper(ax, pose=pose[pick.move_data.MOVE_grasp])
-# print(pose)
-
-actions = pick.get_action_level_1_for_single_object(obj_name="green_box")
-
-for grasp_pose in actions[pick.info.GRASP_POSES]:
-    pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
+for grasp_pose in pick_action[pick.info.GRASP_POSES]:
     pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
-    
-    # pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_pre_grasp])
-    pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_grasp])
 
-pick.scene_mngr.render_objects(ax)
+for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
+    place_action = place.get_action_level_1_for_single_object("green_box", "red_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
+    for release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
+        # place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_pre_release])
+        place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
+        place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["red_box"], obj_pose)
+place.scene_mngr.render_objects(ax)
 plt.plot_basis(ax)
-pick.show()
+place.show()

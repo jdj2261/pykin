@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from collections import OrderedDict
 from copy import deepcopy
 from trimesh import Trimesh, proximity
@@ -286,7 +287,7 @@ class PlaceAction(ActivityBase):
             return ik_solve, release_pose_for_ik
         return None, None
 
-    def get_surface_points_for_support_obj(self, obj_name, alpha=0.20):
+    def get_surface_points_for_support_obj(self, obj_name, alpha=0.1):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
@@ -297,6 +298,14 @@ class PlaceAction(ActivityBase):
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
         
+        if not "table" in obj_name:
+            center_upper_point = np.zeros(3)
+            center_upper_point[0] = center_point[0] + random.uniform(-0.001, 0.001)
+            center_upper_point[1] = center_point[1] + random.uniform(-0.001, 0.001)
+            center_upper_point[2] = copied_mesh.bounds[1, 2]
+            sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
+            normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
+
         for point, normal_vector in zip(sample_points, normals):
             if center_point[0] - len_x * alpha <= point[0] <= center_point[0] + len_x * alpha:
                 if center_point[1] - len_y * alpha <= point[1] <= center_point[1] + len_y * alpha:
@@ -312,7 +321,7 @@ class PlaceAction(ActivityBase):
                 weights[idx] = 1.0
         return weights
 
-    def get_surface_points_for_held_obj(self, obj_name, beta=0.20):
+    def get_surface_points_for_held_obj(self, obj_name, beta=0.1):
         copied_mesh = deepcopy(self.scene_mngr.init_objects[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
@@ -324,6 +333,12 @@ class PlaceAction(ActivityBase):
         weights = self._get_weights_for_held_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
         
+        center_upper_point = center_point
+        center_upper_point[-1] = copied_mesh.bounds[0, 2]
+        
+        sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
+        normals = np.append(normals, np.array([[0, 0, -1]]), axis=0)
+
         for point, normal_vector in zip(sample_points, normals):
             if center_point[0] - len_x * beta <= point[0] <= center_point[0] + len_x * beta:
                 if center_point[1] - len_y * beta <= point[1] <= center_point[1] + len_y * beta:

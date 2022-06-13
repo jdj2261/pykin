@@ -83,7 +83,7 @@ class Scene:
             objs_chain_list.remove("goal_box")
             sorted_chain_list.remove("goal_box")
         
-            if len(objs_chain_list) == 2:
+            if len(objs_chain_list) == 3:
                 if objs_chain_list == sorted_chain_list:
                     return True
         return False
