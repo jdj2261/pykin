@@ -18,6 +18,7 @@ class Scene:
     def __init__(self, benchmark:dict):
         self.benchmark_config = benchmark
         self.bench_num = list(self.benchmark_config.keys())[0]
+        self.stacked_obj_num = list(self.benchmark_config[self.bench_num].values())[0]
         self.objs = {}
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
@@ -83,7 +84,7 @@ class Scene:
             objs_chain_list.remove("goal_box")
             sorted_chain_list.remove("goal_box")
         
-            if len(objs_chain_list) == list(self.benchmark_config[self.bench_num].values())[0]:
+            if len(objs_chain_list) == self.stacked_obj_num:
                 if objs_chain_list == sorted_chain_list:
                     return True
         return False

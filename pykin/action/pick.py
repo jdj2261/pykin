@@ -33,7 +33,7 @@ class PickAction(ActivityBase):
                 continue
             
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
-                # print(f"pick : {obj_name}")
+                print(f"pick : {obj_name}")
                 action_level_1 = self.get_action_level_1_for_single_object(obj_name=obj_name)
                 if not action_level_1[self.info.GRASP_POSES]:
                     continue

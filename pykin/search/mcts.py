@@ -20,7 +20,7 @@ class MCTS:
         self,
         scene_mngr:SceneManager,
         sampling_method:dict={},
-        n_iters:int=500, 
+        budgets:int=500, 
         exploration_constant:float=1000,
         max_depth:int=20,
         gamma:float=1,
@@ -33,7 +33,7 @@ class MCTS:
         self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
         self._sampling_method = sampling_method
-        self._n_iters = n_iters
+        self._budgets = budgets
         self.c = exploration_constant
         self.max_depth = max_depth
         self.gamma = gamma
@@ -59,14 +59,14 @@ class MCTS:
         return tree
 
     def do_planning(self):
-        for i in range(self._n_iters):
+        for i in range(self._budgets):
             print(f"{sc.HEADER}=========== Search iteration : {i+1} ==========={sc.ENDC}")
             self._search(state_node=0, depth=0)
 
             # if self.nodes:
             #     break
             # if self.visible:
-            #     if (i+1) % self._n_iters == 0:
+            #     if (i+1) % self._budgets == 0:
             #         self.visualize("Backpropagatge")
             #         print("==="*20)
         # return self.nodes

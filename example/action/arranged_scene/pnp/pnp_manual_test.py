@@ -22,9 +22,6 @@ robot = SingleArm(
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
-file_path = '../../../../asset/urdf/panda/panda.urdf'
-panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
 green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
@@ -138,7 +135,7 @@ for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_
     pick.scene_mngr.animation(
         ax,
         fig,
-        init_scene=pick_scene,
+        init_scene=scene_mngr.scene,
         joint_path=result_joint,
         eef_poses=eef_poses,
         visible_gripper=True,

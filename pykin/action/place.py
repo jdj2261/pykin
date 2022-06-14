@@ -33,7 +33,7 @@ class PlaceAction(ActivityBase):
         self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
         
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
-            # print(f"place : {sup_obj}")
+            print(f"place : {sup_obj}")
             if sup_obj == held_obj:
                 continue
 
