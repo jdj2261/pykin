@@ -55,15 +55,15 @@ pick = PickAction(scene_mngr, n_contacts=2, n_directions=5)
 place = PlaceAction(scene_mngr, n_samples_held_obj=2, n_samples_support_obj=2)
 
 ###### Surface sampling held and support obj#######
-# fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
-# surface_points_for_support_obj = list(place.get_surface_points_for_support_obj("goal_box"))
-# for point, normal, _ in surface_points_for_support_obj:
-#     place.scene_mngr.render.render_point(ax, point)
-# surface_points_for_held_obj = list(place.get_surface_points_for_held_obj("green_box"))
-# for point, normal in surface_points_for_held_obj:
-#     place.scene_mngr.render.render_point(ax, point)
-# plt.plot_basis(ax)
-# place.scene_mngr.render_objects(ax, alpha=0.5)
+fig, ax = plt.init_3d_figure(figsize=(10,6), dpi=120, name="Sampling Object")
+surface_points_for_support_obj = list(place.get_surface_points_for_support_obj("goal_box"))
+for point, normal, _ in surface_points_for_support_obj:
+    place.scene_mngr.render.render_point(ax, point)
+surface_points_for_held_obj = list(place.get_surface_points_for_held_obj("green_box"))
+for point, normal in surface_points_for_held_obj:
+    place.scene_mngr.render.render_point(ax, point)
+plt.plot_basis(ax)
+place.scene_mngr.render_objects(ax, alpha=0.5)
 
 ##### All Release Pose #######
 fig, ax = plt.init_3d_figure( name="Get Release Pose")

@@ -6,7 +6,7 @@ import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.action_utils import get_relative_transform
-
+# import pykin.utils.plot_utils as plt
 
 class PickAction(ActivityBase):
     def __init__(
@@ -33,17 +33,26 @@ class PickAction(ActivityBase):
                 continue
             
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
+                # print(f"pick : {obj_name}")
                 action_level_1 = self.get_action_level_1_for_single_object(obj_name=obj_name)
                 if not action_level_1[self.info.GRASP_POSES]:
                     continue
                 yield action_level_1
-
+    
     def get_action_level_1_for_single_object(self, scene=None, obj_name:str=None) -> dict:
         if scene is not None:
             self.copy_scene(scene)
 
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
         grasp_poses.extend(list(self.get_grasp_pose_from_heuristic(obj_name)))
+        
+        # fig, ax = plt.init_3d_figure(name="Get Grasp Pose")
+        # for grasp_pose in grasp_poses:
+        #     self.scene_mngr.render.render_axis(ax, grasp_pose[self.move_data.MOVE_grasp])
+        # self.scene_mngr.render_objects(ax)
+        # plt.plot_basis(ax)
+        # self.show()
+        
         grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
         action_level_1 = self.get_action(obj_name, grasp_poses_for_only_gripper)
         return action_level_1

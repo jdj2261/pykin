@@ -30,7 +30,7 @@ class MCTS:
         self.node_data = NodeData
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
         self._sampling_method = sampling_method
         self._n_iters = n_iters
@@ -105,10 +105,16 @@ class MCTS:
             reward = self._get_reward(cur_state, cur_logical_action=None)
             self._update_node(cur_state_node, reward)
             return reward
-
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
-        # self.visualize(f"Select Action Node: {cur_node} Depth: {depth}")
+
         next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
+        if next_state_node is None:
+            print(f"{sc.FAIL}Not possible state{sc.ENDC}")
+            # reward = -inf
+            reward = self._get_reward(cur_state, cur_logical_action, next_state=None)
+            self._update_node(cur_logical_action_node, reward)
+            return reward
+
         next_state = self.tree.nodes[next_state_node][NodeData.STATE]
 
         #### For Debug ######################################################################################################################################################
@@ -116,7 +122,8 @@ class MCTS:
             print(f"Currenct State Node: {cur_state_node} Currenct Action Node: {cur_logical_action_node} Next State Node: {next_state_node} {sc.OKGREEN}Action: Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
         if cur_logical_action[self.pick_action.info.TYPE] == "place":
             print(f"Currenct State Node: {cur_state_node} Currenct Action Node: {cur_logical_action_node} Next State Node: {next_state_node} {sc.OKGREEN}Action: Place {cur_logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {cur_logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
-        # self.visualize("Next Scene")
+        # self.visualize_tree("Next Scene")
+        # self.visualize_tree("Subgraph", is_subgraph=True)
         # self.render_state("next_state", next_state)
         ########################################################################################################################################################################
         
@@ -125,7 +132,7 @@ class MCTS:
         self._update_value(cur_state_node, cur_logical_action_node, value)
 
         # print(f"Backpropagation Node: {cur_state_node} Depth: {depth}")
-        # self.visualize("Backpropagation")
+        # self.visualize_tree("Backpropagation")
 
         return value
 
@@ -151,14 +158,15 @@ class MCTS:
         return logical_action_node
 
     def _expand_action_node(self, cur_state_node, cur_state:Scene, depth):
-        
         is_holding = cur_state.logical_states[cur_state.robot.gripper.name][cur_state.logical_state.holding] is not None
 
         if not is_holding:
             possible_actions = list(self.pick_action.get_possible_actions_level_1(cur_state))
+            # self.render_action("Pick Action", cur_state, possible_actions, is_holding)
         else:
             possible_actions = list(self.place_action.get_possible_actions_level_1(cur_state))
-
+            # self.render_action("Place Action", cur_state, possible_actions, is_holding)
+        
         for possible_action in possible_actions:
             action_node = self.tree.number_of_nodes()
             self.tree.add_node(action_node)        
@@ -258,11 +266,9 @@ class MCTS:
 
         if cur_state is not None:
             reward = 1e+6
-            
             if not is_terminal:
                 if cur_logical_action is None or next_state is None:
                     reward = -1e+4
-        
         return reward
 
     def get_nodes_from_leaf_node(self, leaf_node, nodes=[]):
@@ -288,56 +294,80 @@ class MCTS:
             next_node = children[best_idx]
             return [cur_node] + self.get_best_node(next_node)
 
-    def visualize(self, title):
+    def visualize_tree(self, title, is_subgraph=False):
+        tree = self.tree
+        if is_subgraph:
+            visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.VISITS] > 0]
+            tree = self.tree.subgraph(visited_nodes)
+        
         labels = {}
-        for n in self.tree.nodes:
-            if self.tree.nodes[n][NodeData.ACTION] is not None:
-                if self.tree.nodes[n][NodeData.TYPE] == "action":
+        for n in tree.nodes:
+            if tree.nodes[n][NodeData.ACTION] is not None:
+                if tree.nodes[n][NodeData.TYPE] == "action":
                     if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'pick':
                         labels.update({ n: 'Type:{}\nNode:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}\nAction:({} {})'.format(
-                            self.tree.nodes[n][NodeData.TYPE],
-                            self.tree.nodes[n][NodeData.NUMBER],
-                            self.tree.nodes[n][NodeData.DEPTH],
-                            self.tree.nodes[n][NodeData.VISITS],
-                            self.tree.nodes[n][NodeData.Q],
-                            self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
-                            self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.PICK_OBJ_NAME])})
+                            tree.nodes[n][NodeData.TYPE],
+                            tree.nodes[n][NodeData.NUMBER],
+                            tree.nodes[n][NodeData.DEPTH],
+                            tree.nodes[n][NodeData.VISITS],
+                            tree.nodes[n][NodeData.Q],
+                            tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
+                            tree.nodes[n][NodeData.ACTION][self.pick_action.info.PICK_OBJ_NAME])})
 
-                    if self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'place':
+                    if tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE] == 'place':
                         labels.update({ n: 'Type:{}\nNode:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}\nAction:({} {} on {})'.format(
-                            self.tree.nodes[n][NodeData.TYPE],
-                            self.tree.nodes[n][NodeData.NUMBER],
-                            self.tree.nodes[n][NodeData.DEPTH],
-                            self.tree.nodes[n][NodeData.VISITS],
-                            self.tree.nodes[n][NodeData.Q],
-                            self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
-                            self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.HELD_OBJ_NAME],
-                            self.tree.nodes[n][NodeData.ACTION][self.pick_action.info.PLACE_OBJ_NAME])})
+                            tree.nodes[n][NodeData.TYPE],
+                            tree.nodes[n][NodeData.NUMBER],
+                            tree.nodes[n][NodeData.DEPTH],
+                            tree.nodes[n][NodeData.VISITS],
+                            tree.nodes[n][NodeData.Q],
+                            tree.nodes[n][NodeData.ACTION][self.pick_action.info.TYPE],
+                            tree.nodes[n][NodeData.ACTION][self.pick_action.info.HELD_OBJ_NAME],
+                            tree.nodes[n][NodeData.ACTION][self.pick_action.info.PLACE_OBJ_NAME])})
                 
-                if self.tree.nodes[n][NodeData.TYPE] == "state":
+                if tree.nodes[n][NodeData.TYPE] == "state":
                     labels.update({ n: 'Type:{}\nNode:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}'.format(
-                        self.tree.nodes[n][NodeData.TYPE],
-                        self.tree.nodes[n][NodeData.NUMBER],
-                        self.tree.nodes[n][NodeData.DEPTH],
-                        self.tree.nodes[n][NodeData.VISITS],
-                        self.tree.nodes[n][NodeData.Q],)})
+                        tree.nodes[n][NodeData.TYPE],
+                        tree.nodes[n][NodeData.NUMBER],
+                        tree.nodes[n][NodeData.DEPTH],
+                        tree.nodes[n][NodeData.VISITS],
+                        tree.nodes[n][NodeData.Q],)})
             else:
                 labels.update({ n: 'Type:{}\nNode:{:d}\nDepth:{:d}\nVisits:{:d}\nQ(s,a):{:.2f}'.format(
-                    self.tree.nodes[n][NodeData.TYPE],
-                    self.tree.nodes[n][NodeData.NUMBER],
-                    self.tree.nodes[n][NodeData.DEPTH],
-                    self.tree.nodes[n][NodeData.VISITS],
-                    self.tree.nodes[n][NodeData.Q],)})
+                    tree.nodes[n][NodeData.TYPE],
+                    tree.nodes[n][NodeData.NUMBER],
+                    tree.nodes[n][NodeData.DEPTH],
+                    tree.nodes[n][NodeData.VISITS],
+                    tree.nodes[n][NodeData.Q],)})
 
         plt.figure(title, figsize=(14, 10),)
-        pos = graphviz_layout(self.tree, prog='dot')
-        nx.draw(self.tree, pos, labels=labels, node_shape="s", node_color="none",
+        pos = graphviz_layout(tree, prog='dot')
+        nx.draw(tree, pos, labels=labels, node_shape="s", node_color="none",
                 bbox=dict(facecolor="skyblue", edgecolor='black', boxstyle='round,pad=0.1'))
         plt.show()
 
     def render_state(self, title, state):
         fig, ax = p_utils.init_3d_figure(name=title)
         self.pick_action.scene_mngr.render_objects_and_gripper(ax, state)
+        self.pick_action.show()
+
+    def render_action(self, title, scene, actions, is_holding):
+        fig, ax = p_utils.init_3d_figure(name=title)
+
+        if not is_holding:
+            for pick_action in actions:
+                for grasp_pose in pick_action[self.pick_action.info.GRASP_POSES]:
+                    self.pick_action.scene_mngr.render.render_axis(ax, grasp_pose[self.pick_action.move_data.MOVE_grasp])
+                    self.pick_action.scene_mngr.render_gripper(ax, pose=grasp_pose[self.pick_action.move_data.MOVE_grasp])
+        else:   
+            for place_action in actions:
+                for release_pose, obj_pose in place_action[self.place_action.info.RELEASE_POSES]:
+                    self.place_action.scene_mngr.render.render_axis(ax, release_pose[self.place_action.move_data.MOVE_release])
+                    self.place_action.scene_mngr.render.render_object(ax, self.place_action.scene_mngr.scene.objs[self.place_action.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
+                    self.place_action.scene_mngr.render_gripper(ax, pose=release_pose[self.place_action.move_data.MOVE_release])
+
+        self.pick_action.scene_mngr.render_objects(ax, scene)
+        p_utils.plot_basis(ax)
         self.pick_action.show()
 
     @property

@@ -1,9 +1,7 @@
-import numpy as np
 from abc import abstractclassmethod, ABCMeta
 from dataclasses import dataclass
 from copy import deepcopy
 
-import pykin.utils.plot_utils as plt
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.action_utils import surface_sampling
 from pykin.planners.cartesian_planner import CartesianPlanner
@@ -50,7 +48,7 @@ class ActivityBase(metaclass=ABCMeta):
         scene_mngr:SceneManager,
         retreat_distance=0.1
     ):
-        self.scene_mngr = scene_mngr
+        self.scene_mngr = scene_mngr.copy_scene(scene_mngr)
         self.retreat_distance = retreat_distance
         self.info = ActionInfo
         self.move_data = MoveData

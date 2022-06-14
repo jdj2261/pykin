@@ -17,10 +17,10 @@ class SceneManager:
         geom="collision", 
         is_pyplot=True, 
         scene:Scene=None,
-        benchmark:dict={1 : {'stack_num' : 3}}):
+        benchmark:dict={1 : {'stack_num' : 3}}
+    ):
         # Element for Scene
         self.geom = geom
-
         self._scene = scene
         if scene is None:
             self._scene = Scene(benchmark)
@@ -114,7 +114,6 @@ class SceneManager:
         self._scene.robot.info["collision"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
         self._scene.robot.info["visual"][name] = [self._scene.objs[name].name, self._scene.objs[name].gtype, self._scene.objs[name].gparam, self._scene.objs[name].h_mat]
 
-        # TODO [gripper_collision_mngr이 필요한가??]
         self.gripper_collision_mngr.add_object(
             self._scene.objs[name].name,
             self._scene.objs[name].gtype,

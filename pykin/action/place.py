@@ -8,6 +8,7 @@ import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.log_utils import create_logger
+# import pykin.utils.plot_utils as plt
 
 logger = create_logger('PlaceAction', "debug")
 
@@ -27,12 +28,12 @@ class PlaceAction(ActivityBase):
 
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
         self.copy_scene(scene)
-
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
         eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
         self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
         
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
+            # print(f"place : {sup_obj}")
             if sup_obj == held_obj:
                 continue
 
@@ -44,6 +45,7 @@ class PlaceAction(ActivityBase):
                 action_level_1 = self.get_action_level_1_for_single_object(sup_obj, held_obj, eef_pose)
                 if not action_level_1[self.info.RELEASE_POSES]:
                     continue
+
                 yield action_level_1
 
     def get_action_level_1_for_single_object(self, sup_obj_name, held_obj_name, eef_pose=None, scene:Scene=None):
@@ -52,6 +54,15 @@ class PlaceAction(ActivityBase):
             self.copy_scene(scene)
             
         release_poses = list(self.get_all_release_poses(sup_obj_name, held_obj_name, eef_pose))
+        
+        # fig, ax = plt.init_3d_figure(name="Get Grasp Pose")
+        # for release_pose, obj_pose in release_poses:
+        #     self.scene_mngr.render.render_axis(ax, release_pose[self.move_data.MOVE_release])
+        #     self.scene_mngr.render.render_object(ax, self.scene_mngr.scene.objs[self.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
+        # self.scene_mngr.render_objects(ax)
+        # plt.plot_basis(ax)
+        # self.show()
+
         release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
         action_level_1 = self.get_action(held_obj_name, sup_obj_name, release_poses_for_only_gripper)
         return action_level_1
@@ -78,11 +89,11 @@ class PlaceAction(ActivityBase):
         release_pose = release_poses[self.move_data.MOVE_release]
         post_release_pose = release_poses[self.move_data.MOVE_post_release]
         success_joint_path = False
-        # default pose -> pre_release_pose (rrt)
-        self.scene_mngr.set_robot_eef_pose(default_thetas)
-        
+
+        self.scene_mngr.set_robot_eef_pose(default_thetas)        
         self.scene_mngr.set_object_pose(scene.pick_obj_name, scene.pick_obj_default_pose)
         self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name, True)
+        
         pre_release_joint_path = self.get_rrt_star_path(default_thetas, pre_release_pose)
         if pre_release_joint_path:
             # pre_release_pose -> release_pose (cartesian)
@@ -300,12 +311,12 @@ class PlaceAction(ActivityBase):
         
         if not "table" in obj_name:
             center_upper_point = np.zeros(3)
-            center_upper_point[0] = center_point[0] + random.uniform(-0.1, 0.1)
-            center_upper_point[1] = center_point[1] + random.uniform(-0.1, 0.1)
+            center_upper_point[0] = center_point[0] + random.uniform(-0.01, 0.01)
+            center_upper_point[1] = center_point[1] + random.uniform(-0.01, 0.01)
             center_upper_point[2] = copied_mesh.bounds[1, 2]
             sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
             normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
-
+    
         for point, normal_vector in zip(sample_points, normals):
             min_x = center_point[0] - len_x * alpha
             max_x = center_point[0] + len_x * alpha
@@ -367,10 +378,16 @@ class PlaceAction(ActivityBase):
                 copied_mesh.apply_transform(held_obj_pose_transformed)
                 center_point = copied_mesh.center_mass
 
-                if not (min_x <= center_point[0] <= max_x):
-                    continue
-                if not (min_y <= center_point[1] <= max_y):
-                    continue
+                if "table" in support_obj_name:
+                    if not (min_x - 0.2 <= center_point[0] <= min_x):
+                        continue
+                    if not (min_y - 0.1 <= center_point[1] <= max_y + 0.1):
+                        continue
+                else:
+                    if not (min_x <= center_point[0] <= max_x):
+                        continue
+                    if not (min_y <= center_point[1] <= max_y):
+                        continue
                 
                 if eef_pose is not None:
                     T_obj_pose_and_obj_pose_transformed = np.dot(held_obj_pose, np.linalg.inv(held_obj_pose_rotated))
