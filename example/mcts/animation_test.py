@@ -71,6 +71,14 @@ mcts.max_depth = 20
 nodes = mcts.do_planning()
 best_nodes = mcts.get_best_node(cur_node=0)
 
+result = [best_nodes[0]]
+for idx, node in enumerate(best_nodes[1:]):
+    if idx % 2 == 0:
+        action_node = node
+    else:
+        state_node = node
+        result.append((action_node, state_node))
+
 # nodes.reverse()
 # print(nodes)
 init_theta = None
@@ -82,20 +90,20 @@ pick_all_objects = []
 test = []
 test2 = []
 test3 = []
-for node in best_nodes:
-    # fig, ax = plt.init_3d_figure(name="Level wise 1")
-    scene:Scene = mcts.tree.nodes[node]['state']
-    if mcts.tree.nodes[node]['type'] == "action":
-        continue
-    
-    action = mcts.tree.nodes[node].get(mcts.node_data.ACTION)
-    # scene_mngr.render_objects_and_gripper(ax, scene)
-    # scene_mngr.show()
+for node in result:
+    if not isinstance(node, tuple):
+        scene:Scene = mcts.tree.nodes[node]['state']
+        init_scene = scene
+    else:
+        state_node = node[1]
+        scene:Scene = mcts.tree.nodes[state_node]['state']
 
-    if action:
+        action = mcts.tree.nodes[state_node].get(mcts.node_data.ACTION)
+        # scene_mngr.render_objects_and_gripper(ax, scene)
+        # scene_mngr.show()
         if list(action.keys())[0] == 'grasp':
             success_pick = False
-            pick_scene:Scene = mcts.tree.nodes[node]['state']
+            pick_scene:Scene = mcts.tree.nodes[state_node]['state']
             # ik_solve, grasp_poses = mcts.pick_action.get_possible_ik_solve_level_2(scene=pick_scene, grasp_poses=pick_scene.grasp_poses)
             # if ik_solve:
             print("pick")
@@ -111,7 +119,7 @@ for node in best_nodes:
                 success_pick = True
         else:
             success_place = False
-            place_scene:Scene = mcts.tree.nodes[node]['state']
+            place_scene:Scene = mcts.tree.nodes[state_node]['state']
             # ik_solve, release_poses = mcts.place_action.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
             # if ik_solve:
             print("place")
@@ -136,8 +144,6 @@ for node in best_nodes:
                 print("Place joint Fail")
                 success_pnp = False
                 break
-    else:
-        init_scene = scene
 
 if success_pnp:
     pnp_joint_all_pathes.append((test))
@@ -185,7 +191,7 @@ if success_pnp:
                     fk = mcts.pick_action.scene_mngr.scene.robot.forward_kin(joint)
                     eef_poses.append(fk[mcts.place_action.scene_mngr.scene.robot.eef_name].pos)
 
-    print(best_nodes)
+    print(result)
     fig, ax = plt.init_3d_figure( name="Level wise 3")
     mcts.place_action.scene_mngr.animation(
         ax,

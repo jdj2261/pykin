@@ -88,7 +88,7 @@ class Scene:
                 if objs_chain_list == sorted_chain_list:
                     return True
         return False
-        
+
     def get_objs_chain_list(self, held_obj_name, obj_chain=[]):
         if held_obj_name not in self.objs:
             raise ValueError(f"Not found {held_obj_name} in this scene")

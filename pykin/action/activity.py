@@ -55,7 +55,7 @@ class ActivityBase(metaclass=ABCMeta):
 
         # Add Planner
         self.cartesian_planner = CartesianPlanner()
-        self.rrt_planner = RRTStarPlanner(delta_distance=0.08, epsilon=0.2, gamma_RRT_star=1.5)
+        self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=2)
 
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)
@@ -105,9 +105,9 @@ class ActivityBase(metaclass=ABCMeta):
             scene = self.scene_mngr.scene
         self.scene_mngr.scene = deepcopy(scene)
 
-    def get_cartesian_path(self, cur_q, goal_pose, n_step=50):
+    def get_cartesian_path(self, cur_q, goal_pose, n_step=50, collision_check=False):
         self.cartesian_planner._n_step = n_step
-        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, collision_check=False)
+        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, resolution=1, collision_check=collision_check)
         return self.cartesian_planner.get_joint_path()
 
     def get_rrt_star_path(self, cur_q, goal_pose, max_iter=500, n_step=20):

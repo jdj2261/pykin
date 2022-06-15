@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import pykin.utils.transform_utils as t_utils
 import pykin.utils.kin_utils as k_utils
 import pykin.kinematics.jacobian as jac
@@ -30,7 +31,7 @@ class CartesianPlanner(Planner):
         dimension=7,
         damping=0.01,
         threshold=1e-12,
-        goal_tolerance=0.03,
+        goal_tolerance=0.07,
         waypoint_type="Linear",
         is_slerp=False
     ):
@@ -104,13 +105,16 @@ class CartesianPlanner(Planner):
         """
         cnt = 0
         total_cnt = 10
+        init_cur_qpos = self._cur_qpos
         while True:
             cnt += 1
             collision_pose = {}
-            cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
+            cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, init_cur_qpos)
 
             current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
-            joint_path = [self._cur_qpos]
+            joint_path = [init_cur_qpos]
+            cur_qpos = init_cur_qpos
+
             for step, (pos, ori) in enumerate(waypoints):
                 target_transform = t_utils.get_h_mat(pos, ori)
                 err_pose = k_utils.calc_pose_error(target_transform, current_transform, self._threshold) 
@@ -118,21 +122,21 @@ class CartesianPlanner(Planner):
                 J_dls = np.dot(J.T, np.linalg.inv(np.dot(J, J.T) + self._damping**2 * np.identity(6)))
 
                 dq = np.dot(J_dls, err_pose)
-                self._cur_qpos = np.array([(self._cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
-                if not self._check_q_in_limits(self._cur_qpos):
+                cur_qpos = np.array([(cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
+                if not self._check_q_in_limits(cur_qpos):
                     continue
                 
                 if collision_check:
-                    is_collide, col_name = self._collide(self._cur_qpos, visible_name=True)
+                    is_collide, col_name = self._collide(cur_qpos, visible_name=True)
                     if is_collide:
                         collision_pose[step] = (col_name, np.round(target_transform[:3,3], 6))
                         continue
 
-                cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, self._cur_qpos)
+                cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, cur_qpos)
                 current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
 
                 if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
-                    joint_path.append(self._cur_qpos)
+                    joint_path.append(cur_qpos)
 
             err = t_utils.compute_pose_error(self._goal_pose[:3,3], cur_fk[self._scene_mngr.scene.robot.eef_name].pos)
             
@@ -154,6 +158,7 @@ class CartesianPlanner(Planner):
 
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
+            self._damping = random.uniform(0, 0.1)
         return joint_path
 
     # TODO
@@ -191,7 +196,6 @@ class CartesianPlanner(Planner):
             ori = init_pose[3:]
             if is_slerp:
                 ori = get_quaternion_slerp(init_pose[3:], goal_pose[:3, 3], delta_t)
-
             yield (pos, ori)
 
     def _get_cubic_path(self):

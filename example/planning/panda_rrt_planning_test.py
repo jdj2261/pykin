@@ -59,7 +59,7 @@ scene_mngr.set_robot_eef_pose(target_thetas)
 scene_mngr.attach_object_on_gripper("green_box", False)
 
 planner = RRTStarPlanner(
-    delta_distance=0.1,
+    delta_distance=0.5,
     epsilon=0.2, 
     gamma_RRT_star=2,
 )

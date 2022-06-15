@@ -33,7 +33,7 @@ class PlaceAction(ActivityBase):
         self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
         
         for sup_obj in deepcopy(self.scene_mngr.scene.objs):
-            print(f"place : {sup_obj}")
+            # print(f"place : {sup_obj}")
             if sup_obj == held_obj:
                 continue
 
@@ -88,7 +88,7 @@ class PlaceAction(ActivityBase):
         pre_release_pose = release_poses[self.move_data.MOVE_pre_release]
         release_pose = release_poses[self.move_data.MOVE_release]
         post_release_pose = release_poses[self.move_data.MOVE_post_release]
-        success_joint_path = False
+        success_joint_path = True
 
         self.scene_mngr.set_robot_eef_pose(default_thetas)        
         self.scene_mngr.set_object_pose(scene.pick_obj_name, scene.pick_obj_default_pose)
@@ -99,7 +99,6 @@ class PlaceAction(ActivityBase):
             # pre_release_pose -> release_pose (cartesian)
             release_joint_path = self.get_cartesian_path(pre_release_joint_path[-1], release_pose)
             if release_joint_path:
-                success_joint_path = True
                 self.scene_mngr.detach_object_from_gripper()
                 self.scene_mngr.add_object(
                     self.scene_mngr.scene.robot.gripper.attached_obj_name,
@@ -114,6 +113,12 @@ class PlaceAction(ActivityBase):
                     # post_release_pose -> default pose (rrt)
                     default_pose = self.scene_mngr.scene.robot.forward_kin(default_thetas)["right_gripper"].h_mat
                     default_joint_path = self.get_rrt_star_path(post_release_joint_path[-1], default_pose)
+                else:
+                    success_joint_path = False  
+            else:
+                success_joint_path = False    
+        else:
+            success_joint_path = False
 
         if not success_joint_path:
             self.scene_mngr.detach_object_from_gripper()
@@ -123,6 +128,7 @@ class PlaceAction(ActivityBase):
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
                 scene.robot.gripper.place_obj_pose,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
+            return result_all_joint_path
 
         if default_joint_path:
             result_joint_path.update({self.move_data.MOVE_pre_release: pre_release_joint_path})

@@ -33,7 +33,7 @@ class PickAction(ActivityBase):
                 continue
             
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
-                print(f"pick : {obj_name}")
+                # print(f"pick : {obj_name}")
                 action_level_1 = self.get_action_level_1_for_single_object(obj_name=obj_name)
                 if not action_level_1[self.info.GRASP_POSES]:
                     continue
@@ -313,7 +313,6 @@ class PickAction(ActivityBase):
             if np.all(vertex[:,2] <= obj_mesh.bounds[0][2] * 1.02):                
                 weights[idx] = 0.6
         return weights
-
 
     def _is_force_closure(self, points, normals, limit_angle):
         vectorA = points[0]

@@ -3,7 +3,6 @@ import numpy as np
 import networkx as nx
 
 from pykin.planners.planner import NodeData, Planner
-from pykin.scene.scene_manager import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
@@ -25,7 +24,7 @@ class RRTStarPlanner(Planner):
     def __init__(
         self, 
         delta_distance=0.5,
-        epsilon=0.2,
+        epsilon=0.4,
         gamma_RRT_star=300, # At least gamma_RRT > delta_distance,
         dimension=7,
     ):
@@ -88,8 +87,9 @@ class RRTStarPlanner(Planner):
             check_limit = False
             while not check_limit:
                 limit_cnt += 1
-                if limit_cnt > 100:
+                if limit_cnt > 200:
                     break
+                
                 self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
                     np.random.randn(self._scene_mngr.scene.robot.arm_dof), self._goal_pose)
                 
@@ -100,6 +100,7 @@ class RRTStarPlanner(Planner):
 
             if check_limit is False:
                 self.tree = None
+                logger.warning("Not found IK solution")
                 break
 
             self.goal_node = None
@@ -159,9 +160,10 @@ class RRTStarPlanner(Planner):
                 break 
 
             if cnt > total_cnt:
-                logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
+                logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")    
                 self.tree = None
                 break
+            self._max_iter += 100
 
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
@@ -234,8 +236,8 @@ class RRTStarPlanner(Planner):
             q_outs(np.array)
         """
         q_outs = np.zeros(self.dimension)
-        
-        if np.random.random() > self.epsilon:
+        random_value = np.random.random()
+        if random_value > self.epsilon:
             for i, (q_min, q_max) in enumerate(zip(self.q_limits_lower, self.q_limits_upper)):
                 q_outs[i] = np.random.uniform(q_min, q_max)
         else:
@@ -328,7 +330,7 @@ class RRTStarPlanner(Planner):
             bool
         """
         dist = self._get_distance(point, self.goal_q)
-        if dist <= 0.5:
+        if dist <= 1.0:
             return True
         return False
 
