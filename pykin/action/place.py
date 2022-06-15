@@ -8,7 +8,6 @@ import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.log_utils import create_logger
-# import pykin.utils.plot_utils as plt
 
 logger = create_logger('PlaceAction', "debug")
 
@@ -54,15 +53,6 @@ class PlaceAction(ActivityBase):
             self.copy_scene(scene)
             
         release_poses = list(self.get_all_release_poses(sup_obj_name, held_obj_name, eef_pose))
-        
-        # fig, ax = plt.init_3d_figure(name="Get Grasp Pose")
-        # for release_pose, obj_pose in release_poses:
-        #     self.scene_mngr.render.render_axis(ax, release_pose[self.move_data.MOVE_release])
-        #     self.scene_mngr.render.render_object(ax, self.scene_mngr.scene.objs[self.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
-        # self.scene_mngr.render_objects(ax)
-        # plt.plot_basis(ax)
-        # self.show()
-
         release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
         action_level_1 = self.get_action(held_obj_name, sup_obj_name, release_poses_for_only_gripper)
         return action_level_1
@@ -202,7 +192,7 @@ class PlaceAction(ActivityBase):
         for eef_pose, obj_pose_transformed in transformed_eef_poses:
             if not self._check_support(support_obj_name, held_obj_name, obj_pose_transformed):
                 continue
-            
+
             release_pose = {}
             release_pose[self.move_data.MOVE_release] = eef_pose
             release_pose[self.move_data.MOVE_pre_release] = self.get_pre_release_pose(eef_pose)
@@ -315,6 +305,7 @@ class PlaceAction(ActivityBase):
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
         
+        # heuristic
         if not "table" in obj_name:
             center_upper_point = np.zeros(3)
             center_upper_point[0] = center_point[0] + random.uniform(-0.01, 0.01)
@@ -351,6 +342,7 @@ class PlaceAction(ActivityBase):
         center_upper_point = center_point
         center_upper_point[-1] = copied_mesh.bounds[0, 2]
         
+        # heuristic
         sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
         normals = np.append(normals, np.array([[0, 0, -1]]), axis=0)
 
@@ -380,6 +372,7 @@ class PlaceAction(ActivityBase):
                 held_obj_pose_transformed, held_obj_pose_rotated = self._get_obj_pose_transformed(
                     held_obj_pose, support_obj_point, held_obj_point_transformed, rot_mat)
                 
+                # heuristic
                 copied_mesh = deepcopy(self.scene_mngr.init_objects[held_obj_name].gparam)
                 copied_mesh.apply_transform(held_obj_pose_transformed)
                 center_point = copied_mesh.center_mass

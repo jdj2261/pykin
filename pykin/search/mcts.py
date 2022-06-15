@@ -72,15 +72,6 @@ class MCTS:
         # return self.nodes
         # return self.get_best_node(root_node=0)
 
-    def get_nodes(self, leaf_node, nodes=[]):
-        parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
-        if not parent_nodes:
-            return
-        parent_node = parent_nodes[0]
-        nodes.append(parent_node)
-        self.get_nodes(parent_node, nodes)
-        return [leaf_node] + nodes
-
     def _search(self, state_node, depth):
         cur_state_node = state_node
         cur_state:Scene = self.tree.nodes[cur_state_node][NodeData.STATE]
@@ -122,18 +113,13 @@ class MCTS:
             print(f"Currenct State Node: {cur_state_node} Currenct Action Node: {cur_logical_action_node} Next State Node: {next_state_node} {sc.OKGREEN}Action: Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
         if cur_logical_action[self.pick_action.info.TYPE] == "place":
             print(f"Currenct State Node: {cur_state_node} Currenct Action Node: {cur_logical_action_node} Next State Node: {next_state_node} {sc.OKGREEN}Action: Place {cur_logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {cur_logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
-        # self.visualize_tree("Next Scene")
-        # self.visualize_tree("Subgraph", is_subgraph=True)
+        # self.visualize_tree("Next Scene", self.tree)
         # self.render_state("next_state", next_state)
         ########################################################################################################################################################################
         
         reward = -100.0
         value = reward + self.gamma * self._search(next_state_node, depth+1)
         self._update_value(cur_state_node, cur_logical_action_node, value)
-
-        # print(f"Backpropagation Node: {cur_state_node} Depth: {depth}")
-        # self.visualize_tree("Backpropagation")
-
         return value
 
     def _select_logical_action_node(self, cur_state_node, cur_state, depth, exploration_method="uct"):
@@ -265,20 +251,19 @@ class MCTS:
         reward = -1e+2
 
         if cur_state is not None:
-            reward = 1e+6
+            reward = 1e+8
             if not is_terminal:
                 if cur_logical_action is None or next_state is None:
                     reward = -1e+4
         return reward
 
-    def get_nodes_from_leaf_node(self, leaf_node, nodes=[]):
-            parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
-            if not parent_nodes:
-                return
+    def get_nodes_from_leaf_node(self, leaf_node):
+        parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
+        if not parent_nodes:
+            return [leaf_node]
+        else:
             parent_node = parent_nodes[0]
-            nodes.append(parent_node)
-            self.get_nodes(parent_node, nodes)
-            return [leaf_node] + nodes
+            return [leaf_node] + self.get_nodes_from_leaf_node(parent_node)
 
     def get_best_node(self, cur_node=0):
         children = [child for child in self.tree.neighbors(cur_node)]
@@ -294,12 +279,17 @@ class MCTS:
             next_node = children[best_idx]
             return [cur_node] + self.get_best_node(next_node)
 
-    def visualize_tree(self, title, is_subgraph=False):
-        tree = self.tree
-        if is_subgraph:
-            visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.VISITS] > 0]
-            tree = self.tree.subgraph(visited_nodes)
+    def get_subtree(self):
+        visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.Q] > 0]
+        subtree:nx.DiGraph = self.tree.subgraph(visited_nodes)
+        return subtree
         
+    def get_leaf_nodes(self, tree:nx.DiGraph):
+        leaf_nodes = [node for node in tree.nodes if not [c for c in tree.neighbors(node)]]
+        leaf_nodes.sort()
+        return leaf_nodes
+
+    def visualize_tree(self, title, tree):
         labels = {}
         for n in tree.nodes:
             if tree.nodes[n][NodeData.ACTION] is not None:

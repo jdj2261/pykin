@@ -109,6 +109,10 @@ for node in best_nodes:
                 # pick_all_objects.append([pick_scene.robot.gripper.attached_obj_name])
                 init_theta = pick_joint_path[-1][mcts.pick_action.move_data.MOVE_default_grasp][-1]
                 success_pick = True
+            else:
+                print("Pick joint Fail")
+                success_pnp = False
+                break
         else:
             success_place = False
             place_scene:Scene = mcts.tree.nodes[node]['state']

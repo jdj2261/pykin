@@ -6,7 +6,6 @@ import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.action_utils import get_relative_transform
-# import pykin.utils.plot_utils as plt
 
 class PickAction(ActivityBase):
     def __init__(
@@ -45,14 +44,6 @@ class PickAction(ActivityBase):
 
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
         grasp_poses.extend(list(self.get_grasp_pose_from_heuristic(obj_name)))
-        
-        # fig, ax = plt.init_3d_figure(name="Get Grasp Pose")
-        # for grasp_pose in grasp_poses:
-        #     self.scene_mngr.render.render_axis(ax, grasp_pose[self.move_data.MOVE_grasp])
-        # self.scene_mngr.render_objects(ax)
-        # plt.plot_basis(ax)
-        # self.show()
-        
         grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
         action_level_1 = self.get_action(obj_name, grasp_poses_for_only_gripper)
         return action_level_1
@@ -62,7 +53,7 @@ class PickAction(ActivityBase):
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
 
-        for theta in np.linspace(-np.pi/6 + np.pi, np.pi/6 + np.pi, 3):
+        for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 3):
             tcp_pose = np.eye(4)
             tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
             tcp_pose[:3,1] = [0, 1, 0]
@@ -97,6 +88,7 @@ class PickAction(ActivityBase):
         pre_grasp_pose = grasp_poses[self.move_data.MOVE_pre_grasp]
         grasp_pose = grasp_poses[self.move_data.MOVE_grasp]
         post_grasp_pose = grasp_poses[self.move_data.MOVE_post_grasp]
+        success_joint_path = True
 
         # default pose -> pre_grasp_pose (rrt)
         pre_grasp_joint_path = self.get_rrt_star_path(default_thetas, pre_grasp_pose)
@@ -111,6 +103,8 @@ class PickAction(ActivityBase):
                     # post_grasp_pose -> default pose (rrt)
                     default_pose = self.scene_mngr.scene.robot.forward_kin(default_thetas)["right_gripper"].h_mat
                     default_joint_path = self.get_rrt_star_path(post_grasp_joint_path[-1], default_pose)
+                else:
+                    success_joint_path = False
                 self.scene_mngr.detach_object_from_gripper()
                 self.scene_mngr.add_object(
                     self.scene_mngr.scene.robot.gripper.attached_obj_name,
@@ -118,6 +112,13 @@ class PickAction(ActivityBase):
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gparam,
                     self.scene_mngr.scene.robot.gripper.pick_obj_pose,
                     self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].color)
+            else:
+                success_joint_path = False
+        else:
+            success_joint_path = False
+
+        if not success_joint_path:
+            return result_all_joint_path
 
         if default_joint_path:
             result_joint_path.update({self.move_data.MOVE_pre_grasp: pre_grasp_joint_path})
@@ -125,7 +126,6 @@ class PickAction(ActivityBase):
             result_joint_path.update({self.move_data.MOVE_post_grasp: post_grasp_joint_path})
             result_joint_path.update({self.move_data.MOVE_default_grasp: default_joint_path})
             result_all_joint_path.append(result_joint_path)
-        
             return result_all_joint_path
 
     def get_action(self, obj_name, all_poses):
