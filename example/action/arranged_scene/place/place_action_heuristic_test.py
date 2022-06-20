@@ -51,8 +51,8 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.stati
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=1, n_directions=20)
-place = PlaceAction(scene_mngr, n_samples_held_obj=10, n_samples_support_obj=10)
+pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
+place = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=1)
 
 ################# Action Test ##################
 
@@ -65,7 +65,6 @@ for grasp_pose in pick_action[pick.info.GRASP_POSES]:
 for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
     place_action = place.get_action_level_1_for_single_object("green_box", "red_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
     for release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
-        # place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_pre_release])
         place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
         place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["red_box"], obj_pose)
 place.scene_mngr.render_objects(ax)

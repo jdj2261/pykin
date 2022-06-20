@@ -26,7 +26,7 @@ class PlaceAction(ActivityBase):
         self.filter_logical_states = [scene_mngr.scene.logical_state.held]                                    
 
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
         held_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
         eef_pose = self.scene_mngr.scene.robot.gripper.grasp_pose
         self.scene_mngr.scene.objs[held_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
@@ -50,22 +50,22 @@ class PlaceAction(ActivityBase):
     def get_action_level_1_for_single_object(self, sup_obj_name, held_obj_name, eef_pose=None, scene:Scene=None):
         if scene is not None:
             scene.objs[held_obj_name].h_mat = scene.robot.gripper.pick_obj_pose
-            self.copy_scene(scene)
+            self.deepcopy_scene(scene)
             
         release_poses = list(self.get_all_release_poses(sup_obj_name, held_obj_name, eef_pose))
-        release_poses_for_only_gripper = list(self.get_release_poses_for_only_gripper(release_poses))
-        action_level_1 = self.get_action(held_obj_name, sup_obj_name, release_poses_for_only_gripper)
+        release_poses_not_collision = list(self.get_release_poses_not_collision(release_poses))
+        action_level_1 = self.get_action(held_obj_name, sup_obj_name, release_poses_not_collision)
         return action_level_1
 
     # Not Expand, only check possible action using ik
     def get_possible_ik_solve_level_2(self, scene:Scene=None, release_poses:dict={}):
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
         
         ik_solve, release_poses_filtered = self.compute_ik_solve_for_robot(release_poses)
         return ik_solve, release_poses_filtered
 
     def get_possible_joint_path_level_3(self, scene:Scene=None, release_poses:dict={}, init_thetas=None):
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
 
         result_all_joint_path = []
         result_joint_path = OrderedDict()
@@ -212,7 +212,7 @@ class PlaceAction(ActivityBase):
         return post_release_pose
 
     # for level wise - 1 (Consider gripper collision)
-    def get_release_poses_for_only_gripper(self, release_poses, is_attached=True):
+    def get_release_poses_not_collision(self, release_poses, is_attached=True):
         if self.scene_mngr.scene.robot.has_gripper is None:
             raise ValueError("Robot doesn't have a gripper")
 
@@ -302,24 +302,26 @@ class PlaceAction(ActivityBase):
         len_x = abs(center_point[0] - copied_mesh.bounds[0][0])
         len_y = abs(center_point[1] - copied_mesh.bounds[0][1])
 
+        min_x = center_point[0] - len_x * alpha
+        max_x = center_point[0] + len_x * alpha
+        min_y = center_point[1] - len_y * alpha
+        max_y = center_point[1] + len_y * alpha
+        margin = (min_x, max_x, min_y, max_y)
+
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
         
         # heuristic
         if not "table" in obj_name:
             center_upper_point = np.zeros(3)
-            center_upper_point[0] = center_point[0] + random.uniform(-0.01, 0.01)
-            center_upper_point[1] = center_point[1] + random.uniform(-0.01, 0.01)
+            center_upper_point[0] = center_point[0] + random.uniform(-0.001, 0.001)
+            center_upper_point[1] = center_point[1] + random.uniform(-0.001, 0.001)
             center_upper_point[2] = copied_mesh.bounds[1, 2]
             sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
             normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
     
         for point, normal_vector in zip(sample_points, normals):
-            min_x = center_point[0] - len_x * alpha
-            max_x = center_point[0] + len_x * alpha
-            min_y = center_point[1] - len_y * alpha
-            max_y = center_point[1] + len_y * alpha
-            yield point, normal_vector, (min_x, max_x, min_y, max_y)
+            yield point, normal_vector, margin
 
     @staticmethod
     def _get_weights_for_support_obj(obj_mesh):
@@ -378,9 +380,9 @@ class PlaceAction(ActivityBase):
                 center_point = copied_mesh.center_mass
 
                 if "table" in support_obj_name:
-                    if not (min_x - 0.2 <= center_point[0] <= min_x):
+                    if not (min_x - 0.5 <= center_point[0] <= min_x):
                         continue
-                    if not (min_y - 0.1 <= center_point[1] <= max_y + 0.1):
+                    if not (min_y - 0.5 <= center_point[1] <= max_y + 0.5):
                         continue
                 else:
                     if not (min_x <= center_point[0] <= max_x):

@@ -51,7 +51,7 @@ scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.stati
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=2, n_directions=3)
+pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
 
 ################# Action Test ##################
 actions = list(pick.get_possible_actions_level_1())

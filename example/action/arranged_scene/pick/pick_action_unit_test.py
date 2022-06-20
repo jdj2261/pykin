@@ -65,7 +65,7 @@ plt.plot_basis(ax)
 
 # ###### Level wise - 1 #######
 fig, ax = plt.init_3d_figure(name="Level wise 1")
-grasp_poses_for_only_gripper = list(pick.get_all_grasp_poses_for_only_gripper(grasp_poses))
+grasp_poses_for_only_gripper = list(pick.get_all_grasp_poses_not_collision(grasp_poses))
 for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
     pick.scene_mngr.render.render_axis(ax, grasp_pose_for_only_gripper[pick.move_data.MOVE_grasp])
     pick.scene_mngr.render.render_axis(ax, grasp_pose_for_only_gripper[pick.move_data.MOVE_pre_grasp])

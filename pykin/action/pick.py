@@ -25,7 +25,7 @@ class PickAction(ActivityBase):
 
     # Expand action to tree
     def get_possible_actions_level_1(self, scene:Scene=None) -> dict:
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
         
         for obj_name in self.scene_mngr.scene.objs:
             if obj_name == self.scene_mngr.scene.pick_obj_name:
@@ -40,12 +40,12 @@ class PickAction(ActivityBase):
     
     def get_action_level_1_for_single_object(self, scene=None, obj_name:str=None) -> dict:
         if scene is not None:
-            self.copy_scene(scene)
+            self.deepcopy_scene(scene)
 
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
         grasp_poses.extend(list(self.get_grasp_pose_from_heuristic(obj_name)))
-        grasp_poses_for_only_gripper = list(self.get_all_grasp_poses_for_only_gripper(grasp_poses))
-        action_level_1 = self.get_action(obj_name, grasp_poses_for_only_gripper)
+        grasp_poses_not_collision = list(self.get_all_grasp_poses_not_collision(grasp_poses))
+        action_level_1 = self.get_action(obj_name, grasp_poses_not_collision)
         return action_level_1
 
     def get_grasp_pose_from_heuristic(self, obj_name, dis_z=0.01):
@@ -53,7 +53,7 @@ class PickAction(ActivityBase):
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
 
-        for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 3):
+        for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 1):
             tcp_pose = np.eye(4)
             tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
             tcp_pose[:3,1] = [0, 1, 0]
@@ -69,13 +69,13 @@ class PickAction(ActivityBase):
 
     # Not Expand, only check possible action using ik
     def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
         
         ik_solve, grasp_poses_filtered = self.compute_ik_solve_for_robot(grasp_poses)
         return ik_solve, grasp_poses_filtered
  
     def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}, init_thetas=None):
-        self.copy_scene(scene)
+        self.deepcopy_scene(scene)
         
         result_all_joint_path = []
         result_joint_path = OrderedDict()
@@ -209,7 +209,7 @@ class PickAction(ActivityBase):
         return post_grasp_pose
 
     # for level wise - 1 (Consider gripper collision)
-    def get_all_grasp_poses_for_only_gripper(self, grasp_poses):
+    def get_all_grasp_poses_not_collision(self, grasp_poses):
         if not grasp_poses:
             raise ValueError("Not found grasp poses!")
 

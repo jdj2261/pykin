@@ -82,6 +82,7 @@ class RRTStarPlanner(Planner):
         cnt = 0
         total_cnt = 10
         limit_cnt = 0
+        init_q = self._cur_qpos
         while True:
             cnt += 1
             check_limit = False
@@ -91,12 +92,16 @@ class RRTStarPlanner(Planner):
                     break
                 
                 self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
-                    np.random.randn(self._scene_mngr.scene.robot.arm_dof), self._goal_pose)
+                    init_q, self._goal_pose)
                 
                 if self._check_q_in_limits(self.goal_q):
                     check_limit = True
                     logger.info(f"The joint limit has been successfully checked.")
-                print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
+                
+                init_q = np.random.randn(self._scene_mngr.scene.robot.arm_dof)
+                
+                if limit_cnt > 1:
+                    print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
             if check_limit is False:
                 self.tree = None
@@ -330,7 +335,7 @@ class RRTStarPlanner(Planner):
             bool
         """
         dist = self._get_distance(point, self.goal_q)
-        if dist <= 1.0:
+        if dist <= 1.5:
             return True
         return False
 

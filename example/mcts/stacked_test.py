@@ -21,12 +21,8 @@ robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
-green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
-test1_box_pose = Transform(pos=np.array([0.5, 0.2, 0.77]))
-test2_box_pose = Transform(pos=np.array([0.5, 0.35, 0.77]))
-test3_box_pose = Transform(pos=np.array([0.5, 0.05, 0.77]))
-
+blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
+green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -45,25 +41,19 @@ scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=re
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
-# scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
-# scene_mngr.add_object(name="F_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
-############################# Logical State #############################
 
+############################# Logical State #############################
 scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["A_box"]}
+scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["B_box"]}
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-# scene_mngr.set_logical_state("D_box", ("on", "table"))
-# scene_mngr.set_logical_state("E_box", ("on", "table"))
-# scene_mngr.set_logical_state("F_box", ("on", "table"))
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 
 scene_mngr.update_logical_states()
-scene_mngr.show_scene_info()
-scene_mngr.show_logical_states()
+
+
 
 mcts = MCTS(scene_mngr)
 mcts.budgets = 500

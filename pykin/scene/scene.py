@@ -1,4 +1,8 @@
 import pprint
+import numpy as np
+import string
+
+from itertools import takewhile
 from copy import deepcopy
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -16,9 +20,14 @@ class State:
 
 class Scene:
     def __init__(self, benchmark:dict):
-        self.benchmark_config = benchmark
-        self.bench_num = list(self.benchmark_config.keys())[0]
-        self.stacked_obj_num = list(self.benchmark_config[self.bench_num].values())[0]
+
+        self.benchmark_config:int = benchmark
+        self.bench_num:int = list(self.benchmark_config.keys())[0]
+        self.stacked_obj_num:int = self.benchmark_config[self.bench_num]["stack_num"]
+        self.top_box:str = self.benchmark_config[self.bench_num]["top_box"]
+        self.alphabet_list = sorted(list(takewhile(lambda x: x <= self.top_box.split('_')[0], list(string.ascii_uppercase))), reverse=True)
+        self.goal_box_list = [alphabet + '_box' for alphabet in self.alphabet_list]
+        
         self.objs = {}
         self.robot:SingleArm = None
         self.logical_states = OrderedDict()
@@ -72,22 +81,32 @@ class Scene:
             pass
 
     def check_terminal_state_bench_1(self):
+        if self.check_state_bench_1() == self.stacked_obj_num:
+            return True
+        return False
+
+    def check_state_bench_1(self):
         if self.pick_obj_name is None:
-            return False
+            return 0
 
         objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name, []))
         objs_chain_list.pop(-1)
+        success_cnt = 0
 
-        sorted_chain_list = sorted(objs_chain_list, reverse=True)
-        
-        if "goal_box" in sorted_chain_list:
+        if "goal_box" in objs_chain_list:
             objs_chain_list.remove("goal_box")
-            sorted_chain_list.remove("goal_box")
-        
-            if len(objs_chain_list) == self.stacked_obj_num:
-                if objs_chain_list == sorted_chain_list:
-                    return True
-        return False
+            stacked_num = len(objs_chain_list)
+            
+            objs_chains = np.array(objs_chain_list)[::-1]
+            sorted_chains = np.array(self.goal_box_list[len(self.goal_box_list)- stacked_num : ])[::-1]
+            
+            for i, goal_box in enumerate(sorted_chains):
+                if goal_box != objs_chains[i]:
+                    break
+                success_cnt += 1
+            return success_cnt
+
+        return success_cnt
 
     def get_objs_chain_list(self, held_obj_name, obj_chain=[]):
         if held_obj_name not in self.objs:
