@@ -314,8 +314,8 @@ class PlaceAction(ActivityBase):
         # heuristic
         if not "table" in obj_name:
             center_upper_point = np.zeros(3)
-            center_upper_point[0] = center_point[0] + random.uniform(-0.001, 0.001)
-            center_upper_point[1] = center_point[1] + random.uniform(-0.001, 0.001)
+            center_upper_point[0] = center_point[0] + random.uniform(-0.005, 0.005)
+            center_upper_point[1] = center_point[1] + random.uniform(-0.005, 0.005)
             center_upper_point[2] = copied_mesh.bounds[1, 2]
             sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
             normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
@@ -380,9 +380,9 @@ class PlaceAction(ActivityBase):
                 center_point = copied_mesh.center_mass
 
                 if "table" in support_obj_name:
-                    if not (min_x - 0.5 <= center_point[0] <= min_x):
+                    if not (min_x - 0.2 <= center_point[0] <= min_x):
                         continue
-                    if not (min_y - 0.5 <= center_point[1] <= max_y + 0.5):
+                    if not (min_y - 0.1 <= center_point[1] <= max_y + 0.1):
                         continue
                 else:
                     if not (min_x <= center_point[0] <= max_x):

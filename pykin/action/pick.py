@@ -77,6 +77,10 @@ class PickAction(ActivityBase):
     def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}, init_thetas=None):
         self.deepcopy_scene(scene)
         
+        for obj_name in self.scene_mngr.scene.objs:
+            obj_pose = self.scene_mngr.scene.objs[obj_name].h_mat
+            self.scene_mngr.obj_collision_mngr.set_transform(obj_name, obj_pose)
+
         result_all_joint_path = []
         result_joint_path = OrderedDict()
         default_joint_path = []

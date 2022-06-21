@@ -65,7 +65,7 @@ scene_mngr.attach_object_on_gripper("green_box", False)
 
 ############################ Show collision info #############################
 planner = CartesianPlanner(
-    n_step=100,
+    n_step=500,
     dimension=7,
 )
 

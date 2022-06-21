@@ -55,7 +55,7 @@ class ActivityBase(metaclass=ABCMeta):
 
         # Add Planner
         self.cartesian_planner = CartesianPlanner()
-        self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=3)
+        self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=2)
 
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)
@@ -86,8 +86,6 @@ class ActivityBase(metaclass=ABCMeta):
 
     def _collide(self, is_only_gripper:bool)->bool:
         collide = False
-        # self.scene_mngr.robot_collision_mngr.show_collision_info()
-        # self.scene_mngr.obj_collision_mngr.show_collision_info()
         if is_only_gripper:
             collide = self.scene_mngr.collide_objs_and_gripper()
         else:
@@ -105,9 +103,9 @@ class ActivityBase(metaclass=ABCMeta):
             scene = self.scene_mngr.scene
         self.scene_mngr.scene = deepcopy(scene)
 
-    def get_cartesian_path(self, cur_q, goal_pose, n_step=50, collision_check=False):
+    def get_cartesian_path(self, cur_q, goal_pose, n_step=500, collision_check=False):
         self.cartesian_planner._n_step = n_step
-        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, resolution=1, collision_check=collision_check)
+        self.cartesian_planner.run(self.scene_mngr, cur_q, goal_pose, resolution=0.1, collision_check=collision_check)
         return self.cartesian_planner.get_joint_path()
 
     def get_rrt_star_path(self, cur_q, goal_pose, max_iter=300, n_step=20):

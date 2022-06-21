@@ -30,11 +30,11 @@ class MCTS:
         self.node_data = NodeData
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=10)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=5)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
-        self.c = exploration_constant
+        self.exploration_c = exploration_constant
         self.max_depth = max_depth
         self.gamma = gamma
         self.eps = eps
@@ -118,11 +118,10 @@ class MCTS:
         # self.render_state("next_state", next_state)
         ########################################################################################################################################################################
 
-        # reward = self._get_reward(cur_state, cur_logical_action, next_state, is_terminal=False)        
-        # print(reward)
+        reward = self._get_reward(cur_state, cur_logical_action, next_state, is_terminal=False)  
         # reward -= 100.0
-
-        value = -100 + self.gamma * self._search(next_state_node, depth+1)
+        
+        value = reward + self.gamma * self._search(next_state_node, depth+1)
         self._update_value(cur_state_node, cur_logical_action_node, value)
         return value
 
@@ -225,7 +224,7 @@ class MCTS:
         if exploration_method == "ucb1":
             best_idx = sampler.find_idx_from_ucb1(self.tree, children)
         if exploration_method == "uct":
-            best_idx = sampler.find_idx_from_uct(self.tree, children, self.c)
+            best_idx = sampler.find_idx_from_uct(self.tree, children, self.exploration_c)
         if exploration_method == "bai_ucb":
             best_idx = sampler.find_idx_from_bai_ucb(self.tree, children)
         if exploration_method == "bai_perturb":
@@ -272,10 +271,14 @@ class MCTS:
                     logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
                     if logical_action_type == 'place':
                         success_stacked_objs_num = next_state.check_state_bench_1()
-                        # print(success_stacked_objs_num)
-                        reward = 1e+2 * success_stacked_objs_num
+                        reward = 1e+4 * success_stacked_objs_num -1e+2
+                        if success_stacked_objs_num != 0:
+                            # if cur_logical_action[self.pick_action.info.TYPE] == "pick":
+                            #     print(f"{sc.OKGREEN}Action: Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
+                            # if cur_logical_action[self.pick_action.info.TYPE] == "place":
+                            #     print(f"{sc.OKGREEN}Action: Place {cur_logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {cur_logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
+                            print(f"Reward: {reward}")
                         return reward
-        # print(cur_state)
         return reward
 
     def get_nodes_from_leaf_node(self, leaf_node):
@@ -310,6 +313,13 @@ class MCTS:
         leaf_nodes.sort()
         return leaf_nodes
 
+    def show_logical_action(self, node):
+        logical_action = self.tree.nodes[node][NodeData.ACTION]
+        if logical_action[self.pick_action.info.TYPE] == "pick":
+            print(f"Currenct Node: {node} {sc.OKGREEN}Action: Pick {logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
+        if logical_action[self.pick_action.info.TYPE] == "place":
+            print(f"Currenct Node: {node}  {sc.OKGREEN}Action: Place {logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
+    
     def visualize_tree(self, title, tree):
         labels = {}
         for n in tree.nodes:

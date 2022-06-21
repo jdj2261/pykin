@@ -126,6 +126,7 @@ class Planner(NodeData, metaclass=ABCMeta):
     def _collide(
         self, 
         new_q, 
+        only_robot=False,
         visible_name=False
     ):
         """
@@ -140,7 +141,10 @@ class Planner(NodeData, metaclass=ABCMeta):
             result (bool): If collision free, return True
             names (set of 2-tup): The set of pairwise collisions. 
         """
- 
+        is_attached = self._scene_mngr.is_attached
+        if only_robot:
+            is_attached = False
+
         if self._scene_mngr.robot_collision_mngr is None:
             return False
 
@@ -154,7 +158,7 @@ class Planner(NodeData, metaclass=ABCMeta):
                     h_mat = np.dot(transform.h_mat, self._scene_mngr.scene.robot.links[link].collision.offset.h_mat)
                 self._scene_mngr.robot_collision_mngr.set_transform(name=link, h_mat=h_mat)
         
-        if self._scene_mngr.is_attached:
+        if is_attached:
             gripper_pose = fk[self._scene_mngr.scene.robot.eef_name].h_mat
             h_mat = np.dot(gripper_pose, self._scene_mngr._transform_bet_gripper_n_obj)
             self._scene_mngr.robot_collision_mngr.set_transform(name=self._scene_mngr.attached_obj_name, h_mat=h_mat)

@@ -7,7 +7,7 @@ import pykin.kinematics.jacobian as jac
 from pykin.planners.planner import Planner
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.log_utils import create_logger
-from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp
+from pykin.utils.transform_utils import get_linear_interpoation, get_quaternion_slerp, get_quaternion_from_matrix
 
 logger = create_logger('Cartesian Planner', "debug")
 
@@ -27,11 +27,11 @@ class CartesianPlanner(Planner):
     """
     def __init__(
         self,
-        n_step=500,
+        n_step=1000,
         dimension=7,
         damping=0.01,
         threshold=1e-12,
-        goal_tolerance=0.07,
+        goal_tolerance=0.1,
         waypoint_type="Linear",
         is_slerp=False
     ):
@@ -124,7 +124,7 @@ class CartesianPlanner(Planner):
                 dq = np.dot(J_dls, err_pose)
                 cur_qpos = np.array([(cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
                 if not self._check_q_in_limits(cur_qpos):
-                    continue
+                    cur_qpos = np.clip(cur_qpos, self.q_limits_lower, self.q_limits_upper)
                 
                 if collision_check:
                     is_collide, col_name = self._collide(cur_qpos, visible_name=True)
@@ -195,7 +195,8 @@ class CartesianPlanner(Planner):
             pos = get_linear_interpoation(init_pose[:3], goal_pose[:3, 3], delta_t)
             ori = init_pose[3:]
             if is_slerp:
-                ori = get_quaternion_slerp(init_pose[3:], goal_pose[:3, 3], delta_t)
+                goal_q = get_quaternion_from_matrix(goal_pose[:3, :3])
+                ori = get_quaternion_slerp(init_pose[3:], goal_q, delta_t)
             yield (pos, ori)
 
     def _get_cubic_path(self):

@@ -59,7 +59,7 @@ scene_mngr.set_robot_eef_pose(target_thetas)
 scene_mngr.attach_object_on_gripper("green_box", False)
 
 planner = RRTStarPlanner(
-    delta_distance=0.5,
+    delta_distance=0.05,
     epsilon=0.2, 
     gamma_RRT_star=2,
 )
@@ -68,7 +68,7 @@ planner.run(
     scene_mngr=scene_mngr,
     cur_q=target_thetas, 
     goal_pose=init_pose,
-    max_iter=1000)
+    max_iter=300)
 
 joint_path = planner.get_joint_path(n_step=10)
 target_eef_poses = planner.get_target_eef_poses()

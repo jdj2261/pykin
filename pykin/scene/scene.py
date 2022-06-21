@@ -104,8 +104,11 @@ class Scene:
                 if goal_box != objs_chains[i]:
                     break
                 success_cnt += 1
-            return success_cnt
+            
+            if success_cnt == len(sorted_chains):
+                return success_cnt
 
+        success_cnt = 0
         return success_cnt
 
     def get_objs_chain_list(self, held_obj_name, obj_chain=[]):

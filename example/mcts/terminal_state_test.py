@@ -45,8 +45,8 @@ scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=re
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
-# scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
+scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
+scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
 # scene_mngr.add_object(name="F_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 ############################# Logical State #############################
@@ -55,8 +55,8 @@ scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : 
 scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-# scene_mngr.set_logical_state("D_box", ("on", "table"))
-# scene_mngr.set_logical_state("E_box", ("on", "table"))
+scene_mngr.set_logical_state("D_box", ("on", "table"))
+scene_mngr.set_logical_state("E_box", ("on", "table"))
 # scene_mngr.set_logical_state("F_box", ("on", "table"))
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
@@ -66,8 +66,8 @@ scene_mngr.show_scene_info()
 scene_mngr.show_logical_states()
 
 mcts = MCTS(scene_mngr)
-mcts.budgets = 500
-mcts.c = 1000
+mcts.budgets = 1000
+mcts.exploration_c = 10000
 mcts.max_depth = 40
 nodes = mcts.do_planning()
 best_nodes = mcts.get_best_node(cur_node=0)
@@ -190,7 +190,9 @@ if success_pnp:
                     fk = mcts.pick_action.scene_mngr.scene.robot.forward_kin(joint)
                     eef_poses.append(fk[mcts.place_action.scene_mngr.scene.robot.eef_name].pos)
 
-    print(best_nodes)
+    for node in best_nodes:
+        mcts.show_logical_action(node)
+
     fig, ax = plt.init_3d_figure( name="Level wise 3")
     mcts.place_action.scene_mngr.animation(
         ax,

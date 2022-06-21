@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 
 from pykin.planners.planner import NodeData, Planner
+from pykin.scene.scene_manager import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
@@ -49,7 +50,7 @@ class RRTStarPlanner(Planner):
     @logging_time
     def run(
         self,
-        scene_mngr,
+        scene_mngr:SceneManager,
         cur_q,
         goal_pose, 
         max_iter=1000
@@ -81,31 +82,46 @@ class RRTStarPlanner(Planner):
         
         cnt = 0
         total_cnt = 10
-        limit_cnt = 0
         init_q = self._cur_qpos
+
         while True:
             cnt += 1
-            check_limit = False
-            while not check_limit:
+            limit_cnt = 0
+            success_check_limit = False
+            while not success_check_limit:
                 limit_cnt += 1
+
                 if limit_cnt > 200:
                     break
                 
                 self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
-                    init_q, self._goal_pose)
+                    init_q, self._goal_pose, max_iter=500)
+                self.goal_q = np.clip(self.goal_q, self.q_limits_lower, self.q_limits_upper)
                 
-                if self._check_q_in_limits(self.goal_q):
-                    check_limit = True
-                    logger.info(f"The joint limit has been successfully checked.")
+                self._scene_mngr.set_robot_eef_pose(self.goal_q)
+                grasp_pose_from_ik = self._scene_mngr.get_robot_eef_pose()
+                pose_error = self._scene_mngr.scene.robot.get_pose_error(goal_pose, grasp_pose_from_ik)
                 
+                if pose_error < 0.01:
+                    success_check_limit = True
+                    logger.info(f"The joint limit has been successfully checked. Pose error is {pose_error:6f}")
+                
+                    result, names = self._collide(self.goal_q, only_robot=True, visible_name=True)
+                    if result:
+                        print(names)
+                        self._scene_mngr.show_scene_info()
+                        self._scene_mngr.obj_collision_mngr.show_collision_info("Object")
+                        logger.warning("Occur Collision for goal joints")
+                        success_check_limit = False
+
                 init_q = np.random.randn(self._scene_mngr.scene.robot.arm_dof)
-                
+                init_q = np.clip(init_q, self.q_limits_lower, self.q_limits_upper)
                 if limit_cnt > 1:
                     print(f"{sc.WARNING}Retry compute IK{sc.ENDC}")
 
-            if check_limit is False:
+            if not success_check_limit:
                 self.tree = None
-                logger.warning("Not found IK solution")
+                logger.error("Not found IK solution")
                 break
 
             self.goal_node = None
@@ -122,8 +138,8 @@ class RRTStarPlanner(Planner):
                 
                 nearest_node, q_nearest = self._nearest(q_rand)
                 q_new = self._steer(q_nearest, q_rand)
-    
-                if not self._collide(q_new) and self._check_q_in_limits(q_new):
+
+                if not self._collide(q_new):
                     near_nodes = self._near(q_new)
 
                     new_node = self.tree.number_of_nodes()
@@ -169,7 +185,7 @@ class RRTStarPlanner(Planner):
                 self.tree = None
                 break
             self._max_iter += 100
-
+            self.epsilon += 0.05
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
 
@@ -299,6 +315,7 @@ class RRTStarPlanner(Planner):
         step = min(self.delta_dis, dist)
         unit_vector = vector / np.linalg.norm(vector)
         q_new = q_nearest + unit_vector * step
+        q_new = np.clip(q_new, self.q_limits_lower, self.q_limits_upper)
 
         return q_new
 
