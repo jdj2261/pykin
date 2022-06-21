@@ -96,10 +96,14 @@ class Scene:
         if "goal_box" in objs_chain_list:
             objs_chain_list.remove("goal_box")
             stacked_num = len(objs_chain_list)
+            goal_stacked_num = len(self.goal_box_list)
+
+            if stacked_num > goal_stacked_num:
+                return success_cnt
             
             objs_chains = np.array(objs_chain_list)[::-1]
-            sorted_chains = np.array(self.goal_box_list[len(self.goal_box_list)- stacked_num : ])[::-1]
-            
+            sorted_chains = np.array(self.goal_box_list[goal_stacked_num - stacked_num: ])[::-1]
+
             for i, goal_box in enumerate(sorted_chains):
                 if goal_box != objs_chains[i]:
                     break

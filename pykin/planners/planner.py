@@ -169,7 +169,6 @@ class Planner(NodeData, metaclass=ABCMeta):
             is_object_collision, col_name = self._scene_mngr.robot_collision_mngr.in_collision_other(
                 other_manager=self._scene_mngr.obj_collision_mngr, return_names=visible_name)  
             if is_self_collision or is_object_collision:
-                print(col_name)
                 return True, col_name
             return False, col_name
             

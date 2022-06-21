@@ -109,6 +109,7 @@ class CartesianPlanner(Planner):
         while True:
             cnt += 1
             collision_pose = {}
+            success_limit_check = True
             cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, init_cur_qpos)
 
             current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
@@ -124,8 +125,9 @@ class CartesianPlanner(Planner):
                 dq = np.dot(J_dls, err_pose)
                 cur_qpos = np.array([(cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
                 if not self._check_q_in_limits(cur_qpos):
+                    success_limit_check = False
                     cur_qpos = np.clip(cur_qpos, self.q_limits_lower, self.q_limits_upper)
-                
+                    
                 if collision_check:
                     is_collide, col_name = self._collide(cur_qpos, visible_name=True)
                     if is_collide:
@@ -135,8 +137,10 @@ class CartesianPlanner(Planner):
                 cur_fk = self._scene_mngr.scene.robot.kin.forward_kinematics(self._scene_mngr.scene.robot.desired_frames, cur_qpos)
                 current_transform = cur_fk[self._scene_mngr.scene.robot.eef_name].h_mat
 
-                if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
-                    joint_path.append(cur_qpos)
+                if success_limit_check:
+                    if step % (1/self._resolution) == 0 or step == len(waypoints)-1:
+                        joint_path.append(cur_qpos)
+                success_limit_check = True
 
             err = t_utils.compute_pose_error(self._goal_pose[:3,3], cur_fk[self._scene_mngr.scene.robot.eef_name].pos)
             

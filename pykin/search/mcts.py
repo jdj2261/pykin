@@ -30,7 +30,7 @@ class MCTS:
         self.node_data = NodeData
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=5)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=3)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -315,10 +315,12 @@ class MCTS:
 
     def show_logical_action(self, node):
         logical_action = self.tree.nodes[node][NodeData.ACTION]
-        if logical_action[self.pick_action.info.TYPE] == "pick":
-            print(f"Currenct Node: {node} {sc.OKGREEN}Action: Pick {logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
-        if logical_action[self.pick_action.info.TYPE] == "place":
-            print(f"Currenct Node: {node}  {sc.OKGREEN}Action: Place {logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
+        if logical_action is not None:
+            if self.tree.nodes[node][NodeData.TYPE] == "action":
+                if logical_action[self.pick_action.info.TYPE] == "pick":
+                    print(f"Action Node: {node} {sc.OKGREEN}Action: Pick {logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
+                if logical_action[self.pick_action.info.TYPE] == "place":
+                    print(f"Action Node: {node}  {sc.OKGREEN}Action: Place {logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
     
     def visualize_tree(self, title, tree):
         labels = {}
