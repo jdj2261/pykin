@@ -8,6 +8,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
+import pykin.utils.plot_utils as plt
 
 logger = create_logger('RRT Star Planner', "debug")
 
@@ -96,13 +97,16 @@ class RRTStarPlanner(Planner):
                     break
                 
                 self.goal_q = self._scene_mngr.scene.robot.inverse_kin(
-                    init_q, self._goal_pose, max_iter=100)
-                self.goal_q = np.clip(self.goal_q, self.q_limits_lower, self.q_limits_upper)
+                    init_q, self._goal_pose, max_iter=300)
+                
+                if not self._check_q_in_limits(self.goal_q):
+                    init_q = np.random.randn(self._scene_mngr.scene.robot.arm_dof)
+                    continue
                 
                 self._scene_mngr.set_robot_eef_pose(self.goal_q)
                 grasp_pose_from_ik = self._scene_mngr.get_robot_eef_pose()
                 pose_error = self._scene_mngr.scene.robot.get_pose_error(goal_pose, grasp_pose_from_ik)
-                
+
                 if pose_error < 0.01:
                     success_check_limit = True
                     logger.info(f"The joint limit has been successfully checked. Pose error is {pose_error:6f}")
@@ -110,14 +114,23 @@ class RRTStarPlanner(Planner):
                     result, names = self._collide(self.goal_q, visible_name=True)
                     if result:
                         print(names)
-                        # self._scene_mngr.robot_collision_mngr.show_collision_info()
-                        # self._scene_mngr.obj_collision_mngr.show_collision_info("Object")
                         logger.warning("Occur Collision for goal joints")
                         success_check_limit = False
+                                
+                        self._scene_mngr.show_scene_info()
+                        self._scene_mngr.robot_collision_mngr.show_collision_info()
+                        self._scene_mngr.obj_collision_mngr.show_collision_info("Object")
+
+                        fig, ax = plt.init_3d_figure(name="Collision Scene")
+                        self._scene_mngr.render_scene(ax)
+                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["grasp"])
+                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["pre_grasp"])
+                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["post_grasp"])
+                        self._scene_mngr.show()
                 else:
-                    init_q = np.random.randn(self._scene_mngr.scene.robot.arm_dof)
                     if limit_cnt > 1:
                         print(f"{sc.WARNING}Retry compute IK.. Pose error is {pose_error:6f}{sc.ENDC} ")
+                init_q = np.random.randn(self._scene_mngr.scene.robot.arm_dof)
 
             if not success_check_limit:
                 self.tree = None

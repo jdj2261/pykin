@@ -37,7 +37,7 @@ green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
-param = {'stack_num' : 2}
+param = {'stack_num' : 3, 'top_box' : "C_box"}
 benchmark_config={1 : param}
 
 scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
@@ -46,9 +46,6 @@ scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=re
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
-# scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
-# scene_mngr.add_object(name="F_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 ############################# Logical State #############################
 
@@ -56,15 +53,9 @@ scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : 
 scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-# scene_mngr.set_logical_state("D_box", ("on", "table"))
-# scene_mngr.set_logical_state("E_box", ("on", "table"))
-# scene_mngr.set_logical_state("F_box", ("on", "table"))
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
-
 scene_mngr.update_logical_states()
-scene_mngr.show_scene_info()
-scene_mngr.show_logical_states()
 
 mcts = MCTS(scene_mngr)
 mcts.budgets = 500
@@ -77,10 +68,6 @@ print(subtree.nodes)
 # mcts.visualize_tree("Subtree", subtree)
 leaf_nodes = mcts.get_leaf_nodes(subtree)
 print(leaf_nodes)
-
-# leaf_nodes = [node for node in subtree.nodes if not [c for c in subtree.neighbors(node)]]
-# leaf_nodes.sort()
-# print(leaf_nodes)
 
 for leaf_node in leaf_nodes:
     nodes = mcts.get_nodes_from_leaf_node(leaf_node)[::-1]

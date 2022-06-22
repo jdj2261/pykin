@@ -30,7 +30,7 @@ class MCTS:
         self.node_data = NodeData
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=1, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=3)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=5)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -79,7 +79,8 @@ class MCTS:
         if depth >= self.max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
             reward = 0
-            # self._update_reward(cur_state_node, reward)
+            reward = -1e+4
+            self._update_reward(cur_state_node, reward)
             return reward
 
         if self._is_terminal(cur_state):
@@ -221,8 +222,6 @@ class MCTS:
             best_idx = sampler.find_best_idx_from_random(self.tree, children)
         if exploration_method == "greedy":
             best_idx = sampler.find_idx_from_greedy(self.tree, children)
-        if exploration_method == "ucb1":
-            best_idx = sampler.find_idx_from_ucb1(self.tree, children)
         if exploration_method == "uct":
             best_idx = sampler.find_idx_from_uct(self.tree, children, self.exploration_c)
         if exploration_method == "bai_ucb":

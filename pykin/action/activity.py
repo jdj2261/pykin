@@ -55,7 +55,7 @@ class ActivityBase(metaclass=ABCMeta):
 
         # Add Planner
         self.cartesian_planner = CartesianPlanner()
-        self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=1)
+        self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=2)
 
     def __repr__(self) -> str:
         return 'pykin.action.activity.{}()'.format(type(self).__name__)

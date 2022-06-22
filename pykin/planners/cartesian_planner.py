@@ -124,9 +124,9 @@ class CartesianPlanner(Planner):
 
                 dq = np.dot(J_dls, err_pose)
                 cur_qpos = np.array([(cur_qpos[i] + dq[i]) for i in range(self._dimension)]).reshape(self._dimension,)
+                
                 if not self._check_q_in_limits(cur_qpos):
                     success_limit_check = False
-                    cur_qpos = np.clip(cur_qpos, self.q_limits_lower, self.q_limits_upper)
                     
                 if collision_check:
                     is_collide, col_name = self._collide(cur_qpos, visible_name=True)

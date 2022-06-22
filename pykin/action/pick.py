@@ -13,7 +13,7 @@ class PickAction(ActivityBase):
         scene_mngr,
         n_contacts=10,
         n_directions=10,
-        limit_angle_for_force_closure=0.05,
+        limit_angle_for_force_closure=0.2,
         retreat_distance=0.1
     ):
         super().__init__(scene_mngr, retreat_distance)
@@ -77,8 +77,12 @@ class PickAction(ActivityBase):
     def get_possible_joint_path_level_3(self, scene:Scene=None, grasp_poses:dict={}, init_thetas=None):
         self.deepcopy_scene(scene)
         
+        pick_obj = self.scene_mngr.scene.robot.gripper.attached_obj_name
+        self.scene_mngr.scene.objs[pick_obj].h_mat = self.scene_mngr.scene.robot.gripper.pick_obj_pose
         for obj_name in self.scene_mngr.scene.objs:
             obj_pose = self.scene_mngr.scene.objs[obj_name].h_mat
+            if obj_name == pick_obj:
+                obj_pose = self.scene_mngr.scene.robot.gripper.pick_obj_pose
             self.scene_mngr.obj_collision_mngr.set_transform(obj_name, obj_pose)
 
         result_all_joint_path = []
@@ -101,6 +105,7 @@ class PickAction(ActivityBase):
             grasp_joint_path = self.get_cartesian_path(pre_grasp_joint_path[-1], grasp_pose)
             if grasp_joint_path:
                 # grasp_pose -> post_grasp_pose (cartesian)
+                self.scene_mngr.set_robot_eef_pose(grasp_joint_path[-1])
                 self.scene_mngr.attach_object_on_gripper(self.scene_mngr.scene.robot.gripper.attached_obj_name)
                 post_grasp_joint_path = self.get_cartesian_path(grasp_joint_path[-1], post_grasp_pose)
                 if post_grasp_joint_path:
@@ -313,9 +318,9 @@ class PickAction(ActivityBase):
         # heuristic
         weights = np.zeros(len(obj_mesh.faces))
         for idx, vertex in enumerate(obj_mesh.vertices[obj_mesh.faces]):
-            weights[idx]=0.4
+            weights[idx]=0.05
             if np.all(vertex[:,2] <= obj_mesh.bounds[0][2] * 1.02):                
-                weights[idx] = 0.6
+                weights[idx] = 0.95
         return weights
 
     def _is_force_closure(self, points, normals, limit_angle):
@@ -343,8 +348,6 @@ class PickAction(ActivityBase):
 
     def get_tcp_poses(self, obj_name):
         contact_points = self.get_contact_points(obj_name)
-        if not contact_points:
-            raise ValueError("Cannot get tcp poses!!")
         
         for contact_point in contact_points:
             p1, p2 = contact_point
