@@ -19,10 +19,6 @@ robot = SingleArm(
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
-
-file_path = '../../../../asset/urdf/panda/panda.urdf'
-panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
 green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
@@ -32,7 +28,7 @@ table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 red_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 blue_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
+goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 scene_mngr = SceneManager("collision", is_pyplot=True)
@@ -40,7 +36,7 @@ scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
-scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
+scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}

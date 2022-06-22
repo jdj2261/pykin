@@ -34,7 +34,7 @@ table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 red_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 blue_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
+goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 param = {'stack_num' : 3, 'start_box' : "A_box", 'top_box' : "C_box"}
@@ -49,7 +49,7 @@ table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 red_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 blue_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
+goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
@@ -58,7 +58,7 @@ scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=re
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
-scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
+scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}

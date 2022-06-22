@@ -8,7 +8,6 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.log_utils import create_logger
 from pykin.utils.kin_utils import ShellColors as sc, logging_time
 from pykin.utils.transform_utils import get_linear_interpoation
-import pykin.utils.plot_utils as plt
 
 logger = create_logger('RRT Star Planner', "debug")
 
@@ -62,7 +61,7 @@ class RRTStarPlanner(Planner):
 
         Args:
             cur_q (sequence of float): current joints
-            goal_pose (sequence of float): goal pose
+            goal_pose (h_mat): goal pose
             max_iter(int): maximum number of iterations
         """
         if not scene_mngr:
@@ -76,7 +75,6 @@ class RRTStarPlanner(Planner):
 
         self._cur_qpos = super()._convert_numpy_type(cur_q)
         self._goal_pose = super()._convert_numpy_type(goal_pose)
-        
         self._max_iter = max_iter
 
         if not super()._check_robot_col_mngr():
@@ -105,9 +103,9 @@ class RRTStarPlanner(Planner):
                 
                 self._scene_mngr.set_robot_eef_pose(self.goal_q)
                 grasp_pose_from_ik = self._scene_mngr.get_robot_eef_pose()
-                pose_error = self._scene_mngr.scene.robot.get_pose_error(goal_pose, grasp_pose_from_ik)
+                pose_error = self._scene_mngr.scene.robot.get_pose_error(self._goal_pose, grasp_pose_from_ik)
 
-                if pose_error < 0.01:
+                if pose_error < 0.02:
                     success_check_limit = True
                     logger.info(f"The joint limit has been successfully checked. Pose error is {pose_error:6f}")
                 
@@ -121,12 +119,8 @@ class RRTStarPlanner(Planner):
                         self._scene_mngr.robot_collision_mngr.show_collision_info()
                         self._scene_mngr.obj_collision_mngr.show_collision_info("Object")
 
-                        fig, ax = plt.init_3d_figure(name="Collision Scene")
-                        self._scene_mngr.render_scene(ax)
-                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["grasp"])
-                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["pre_grasp"])
-                        self._scene_mngr.render.render_axis(ax, self._scene_mngr.scene.grasp_poses["post_grasp"])
-                        self._scene_mngr.show()
+                        # ![DEBUG]
+                        self._scene_mngr.render_debug(title="Collision Fail")
                 else:
                     if limit_cnt > 1:
                         print(f"{sc.WARNING}Retry compute IK.. Pose error is {pose_error:6f}{sc.ENDC} ")
@@ -135,6 +129,7 @@ class RRTStarPlanner(Planner):
             if not success_check_limit:
                 self.tree = None
                 logger.error("Not found IK solution")
+                self._scene_mngr.render_debug(title="IK Fail")
                 break
 
             self.goal_node = None
@@ -269,7 +264,7 @@ class RRTStarPlanner(Planner):
         Returns:
             q_outs(np.array)
         """
-        q_outs = np.zeros(self.dimension)
+        q_outs = np.zeros(self._dimension)
         random_value = np.random.random()
         if random_value > self.epsilon:
             for i, (q_min, q_max) in enumerate(zip(self.q_limits_lower, self.q_limits_upper)):

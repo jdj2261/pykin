@@ -29,15 +29,15 @@ table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 red_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 blue_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-box_goal_mesh = get_object_mesh('box_goal.stl', 0.001)
+goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
-scene_mngr = SceneManager("visual", is_pyplot=False)
+scene_mngr = SceneManager("collisions", is_pyplot=False)
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
-scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=box_goal_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
+scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot)
 
 ############################# Render Test #############################
