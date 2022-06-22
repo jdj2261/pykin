@@ -9,3 +9,4 @@ class NodeData:
     Trajectory = 'trajectory'
     NUMBER = 'number'
     TYPE = 'type'
+    GOAL = 'goal'

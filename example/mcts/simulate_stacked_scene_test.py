@@ -57,7 +57,7 @@ scene_mngr.update_logical_states()
 
 mcts = MCTS(scene_mngr)
 mcts.budgets = 1000
-mcts.c = 100000
+mcts.c = 10000
 mcts.max_depth = 40
 nodes = mcts.do_planning()
 best_nodes = mcts.get_best_node(cur_node=0)

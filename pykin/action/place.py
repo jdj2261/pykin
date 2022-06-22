@@ -159,6 +159,7 @@ class PlaceAction(ActivityBase):
 
             # Move pick object on support obj
             next_scene.objs[held_obj_name].h_mat = obj_pose_transformed
+            self.scene_mngr.obj_collision_mngr.set_transform(held_obj_name, obj_pose_transformed)
             next_scene.pick_obj_name = held_obj_name
             
             ## Change Logical State

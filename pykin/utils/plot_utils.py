@@ -165,7 +165,7 @@ def plot_robot(
             x[2] for x in nodes], linewidth=2, label=name)
 
         if visible_text:
-            label = '(%0.4f, %0.4f, %0.4f)' % (
+            label = '(%0.6f, %0.6f, %0.6f)' % (
                 nodes[eef_idx][0], nodes[eef_idx][1], nodes[eef_idx][2])
 
             ax.text(nodes[eef_idx][0], nodes[eef_idx][1],

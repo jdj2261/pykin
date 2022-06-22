@@ -193,7 +193,7 @@ class RRTStarPlanner(Planner):
                 self.tree = None
                 break
             self._max_iter += 100
-            self.epsilon += 0.05
+
             logger.error(f"Failed Generate Path..")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
 

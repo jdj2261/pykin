@@ -21,9 +21,9 @@ def find_idx_from_uct(tree, children, c):
         if n == 0:
             uct = float('inf')
         else:
-            # u = np.max(values)
-            u = np.mean(values)
-            exploitation = u
+            exploitation = np.max(values)
+            
+            # exploitation = np.mean(values)
             exploration = np.sqrt(np.log(total_n) / n)
             uct = exploitation + c * exploration
         ucts.append(uct)
