@@ -17,7 +17,7 @@ class SceneManager:
         geom="collision", 
         is_pyplot=True, 
         scene:Scene=None,
-        benchmark:dict={1 : {'stack_num': 3, 'top_box': 'C_box'}}
+        benchmark:dict={1 : {'stack_num': 3}}
     ):
         # Element for Scene
         self.geom = geom
@@ -450,7 +450,6 @@ class SceneManager:
             if eef_poses is not None:
                 self.render.render_trajectory(ax, eef_poses, size=0.1)
                         
-            print(joint_path[i])
             self.set_robot_eef_pose(joint_path[i])
 
             if attach_idx is not None:

@@ -2,7 +2,6 @@ import pprint
 import numpy as np
 import string
 
-from itertools import takewhile
 from copy import deepcopy
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -23,15 +22,15 @@ class Scene:
 
         self.benchmark_config:int = benchmark
         self.bench_num:int = list(self.benchmark_config.keys())[0]
-        self.stacked_obj_num:int = self.benchmark_config[self.bench_num]["stack_num"]
-        self.top_box:str = self.benchmark_config[self.bench_num]["top_box"]
-        self.alphabet_list = sorted(list(takewhile(lambda x: x <= self.top_box.split('_')[0], list(string.ascii_uppercase))), reverse=True)
-        self.goal_box_list = [alphabet + '_box' for alphabet in self.alphabet_list]
-        
-        self.objs = {}
+        self.goal_stacked_num:int = self.benchmark_config[self.bench_num]["stack_num"]
+        self.alphabet_list:list = list(string.ascii_uppercase)[:self.goal_stacked_num]
+        self.goal_box_list:list = [alphabet + '_box' for alphabet in self.alphabet_list]
+        self.success_cnt = 0
+
+        self.objs:dict = {}
         self.robot:SingleArm = None
-        self.logical_states = OrderedDict()
-        self.logical_state = State
+        self.logical_states:OrderedDict = OrderedDict()
+        self.logical_state:State = State
         
         self.grasp_poses = None
         self.release_poses = None
@@ -81,48 +80,31 @@ class Scene:
             pass
 
     def check_terminal_state_bench_1(self):
-        if self.check_state_bench_1() == self.stacked_obj_num:
+        is_success, stacked_obj_num = self.check_success_stacked_bench_1(is_terminal=True)
+
+        if is_success and stacked_obj_num == self.goal_stacked_num:
             return True
         return False
 
-    def check_state_bench_1(self):
-        if self.pick_obj_name is None:
-            return 0
+    def check_success_stacked_bench_1(self, is_terminal=False):
+        is_success = False
 
-        objs_chain_list = deepcopy(self.get_objs_chain_list(self.pick_obj_name, []))
-        objs_chain_list.pop(-1)
-        success_cnt = 0
+        stacked_objs = self.get_objs_chain_list_from_bottom("goal_box")[1:]
+        stacked_num = len(stacked_objs)
 
-        if "goal_box" in objs_chain_list:
-            objs_chain_list.remove("goal_box")
-            stacked_num = len(objs_chain_list)
-            goal_stacked_num = len(self.goal_box_list)
-
-            if stacked_num > goal_stacked_num:
-                return success_cnt
-            
-            objs_chains = np.array(objs_chain_list)[::-1]
-            sorted_chains = np.array(self.goal_box_list[goal_stacked_num - stacked_num: ])[::-1]
-
-            for i, goal_box in enumerate(sorted_chains):
-                if goal_box != objs_chains[i]:
-                    break
-                success_cnt += 1
-            
-            if success_cnt == len(sorted_chains):
-                return success_cnt
-
-        success_cnt = 0
-        return success_cnt
-
-    def get_objs_chain_list(self, held_obj_name, obj_chain=[]):
-        if held_obj_name not in self.objs:
-            raise ValueError(f"Not found {held_obj_name} in this scene")
+        if stacked_num <= self.goal_stacked_num:
+            cur_goal_list = self.goal_box_list[:stacked_num]
+            if stacked_objs == cur_goal_list:
+                is_success = True
+                if not is_terminal:
+                    self.success_cnt = stacked_num
         
-        if self.logical_state.on in list(self.logical_states[held_obj_name].keys()):
-            support_obj = self.logical_states[held_obj_name][self.logical_state.on]
-            obj_chain.append(support_obj.name)
-            if support_obj.name != "table":
-                self.get_objs_chain_list(support_obj.name, obj_chain)
-        
-        return [held_obj_name] + obj_chain
+        return is_success, stacked_num
+
+    def get_objs_chain_list_from_bottom(self, bottom_obj):
+        support_objs:list = self.logical_states[bottom_obj].get(self.logical_state.support)
+        if not support_objs:
+            return [bottom_obj]
+        else:
+            upper_obj = support_objs[0].name
+            return [bottom_obj] + self.get_objs_chain_list_from_bottom(upper_obj)

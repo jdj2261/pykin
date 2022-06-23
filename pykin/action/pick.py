@@ -45,6 +45,7 @@ class PickAction(ActivityBase):
         grasp_poses = list(self.get_all_grasp_poses(obj_name=obj_name))
         grasp_poses.extend(list(self.get_grasp_pose_from_heuristic(obj_name)))
         grasp_poses_not_collision = list(self.get_all_grasp_poses_not_collision(grasp_poses))
+
         action_level_1 = self.get_action(obj_name, grasp_poses_not_collision)
         return action_level_1
 
@@ -227,6 +228,8 @@ class PickAction(ActivityBase):
                 is_collision = False
                 if name == self.move_data.MOVE_grasp:
                     self.scene_mngr.set_gripper_pose(pose)
+                    for name in self.scene_mngr.scene.objs:
+                        self.scene_mngr.obj_collision_mngr.set_transform(name, self.scene_mngr.scene.objs[name].h_mat)
                     if self._collide(is_only_gripper=True):
                         is_collision = True
                         break

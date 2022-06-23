@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
+from copy import deepcopy
 
 import pykin.utils.plot_utils as p_utils
 import pykin.utils.sampler as sampler
@@ -31,7 +32,7 @@ class MCTS:
         self.scene_mngr = scene_mngr
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=1)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=1)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -65,15 +66,6 @@ class MCTS:
             print(f"{sc.HEADER}=========== Search iteration : {i+1} ==========={sc.ENDC}")
             self._search(state_node=0, depth=0)
 
-            # if self.nodes:
-            #     break
-            # if self.visible:
-            #     if (i+1) % self._budgets == 0:
-            #         self.visualize("Backpropagatge")
-            #         print("==="*20)
-        # return self.nodes
-        # return self.get_best_node(root_node=0)
-
     def _search(self, state_node, depth):
         cur_state_node = state_node
         cur_state:Scene = self.tree.nodes[cur_state_node][NodeData.STATE]
@@ -81,14 +73,14 @@ class MCTS:
         if depth >= self.max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
             reward = 0
-            reward = -1e+4
+            reward = -1e+5
             self._update_value(cur_state_node, reward)
             return reward
 
         if self._is_terminal(cur_state):
             print(f"{sc.OKBLUE}Success!!!!!{sc.ENDC}")
             # reward = self._get_reward(cur_state, is_terminal=True)
-            reward = 1e+4
+            reward = 500
             self.tree.nodes[state_node][NodeData.GOAL] = True
             self._update_value(cur_state_node, reward)
             return reward
@@ -98,7 +90,7 @@ class MCTS:
         if cur_logical_action_node is None:
             print(f"{sc.WARNING}Not possible action{sc.ENDC}")
             # reward = self._get_reward(cur_state, cur_logical_action=None)
-            reward = -1e+4
+            reward = -1e+5
             self._update_value(cur_state_node, reward)
             return reward
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
@@ -107,7 +99,7 @@ class MCTS:
         if next_state_node is None:
             print(f"{sc.FAIL}Not possible state{sc.ENDC}")
             # reward = self._get_reward(cur_state, cur_logical_action, next_state=None)
-            reward = -1e+4
+            reward = -1e+5
             self._update_value(cur_logical_action_node, reward)
             return reward
 
@@ -124,10 +116,9 @@ class MCTS:
         ##########################################################################################################################################################
 
         reward = self._get_reward(cur_state, cur_logical_action, next_state, depth, is_terminal=False)  
-        # reward -= 100.0
-        
         value = reward + self.gamma * self._search(next_state_node, depth+1)
         self._update_value(cur_state_node, value)
+
         return value
 
     def _select_logical_action_node(self, cur_state_node, cur_state, depth, exploration_method="uct"):
@@ -141,9 +132,9 @@ class MCTS:
 
         if not children:
             visit = self.tree.nodes[cur_state_node][NodeData.VISIT]
-            if visit == 0:
+            # if visit == 0:
                 # print(f"Current state node {cur_state_node} isq a leaf node, So expand")
-                self._expand_action_node(cur_state_node, cur_state, depth)
+            self._expand_action_node(cur_state_node, cur_state, depth)
             expanded_children = [child for child in self.tree.neighbors(cur_state_node)]
             if not expanded_children:
                 return logical_action_node
@@ -182,12 +173,11 @@ class MCTS:
         next_state_node = None
         children = [child for child in self.tree.neighbors(cur_logical_action_node)]
         
-
         if not children:
             visit = self.tree.nodes[cur_logical_action_node][NodeData.VISIT]
-            if visit == 0:
+            # if visit == 0:
                 # print(f"Logical action node {cur_logical_action_node} is a leaf node, So expand")
-                self._expand_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
+            self._expand_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
             expanded_children = [child for child in self.tree.neighbors(cur_logical_action_node)]
             if not expanded_children:
                 return next_state_node
@@ -267,10 +257,10 @@ class MCTS:
         return False
     
     def _get_reward(self, cur_state:Scene=None, cur_logical_action:dict={}, next_state:Scene=None, depth=None, is_terminal:bool=False) -> float:
-        reward = -1e+2
+        reward = -1e+4
         if cur_state is not None:
             if is_terminal:
-                reward = 1e+6
+                reward = 1e+4
                 return reward
             else:
                 if cur_logical_action is None:
@@ -283,17 +273,43 @@ class MCTS:
 
                 if next_state is not None:
                     logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
+                    
                     if logical_action_type == 'place':
-                        success_stacked_objs_num = next_state.check_state_bench_1()
-                        reward = 1e+3 * (self.scene_mngr.scene.stacked_obj_num - success_stacked_objs_num - depth) + 1e+2
+                        prev_success_cnt = cur_state.success_cnt
+                        next_is_success, next_stacked_num = next_state.check_success_stacked_bench_1()
+                        
+
+                        # print(f"Success Cnt: {prev_success_cnt}")
+                        # self.render_state("cur_state", cur_state)
+                        # print(f"Success is {next_is_success}, Cnt : {next_stacked_num}")
+                        # self.render_state("next_state", next_state)
+
+                        # print(next_is_success, cur_state_stacked_num, next_stacked_num)
+
+                        if next_is_success:
+                            if next_stacked_num - prev_success_cnt == 1:
+                                print("Good")
+                                reward = 50000
+                                print(f"Reward: {reward}")
+                            if next_stacked_num - prev_success_cnt == -1:
+                                print("Bad")
+                                reward = -1e+2
+                                print(f"Reward: {reward}")
+                        else:
+                            # print("Fail")
+                            reward = -1e+2
+
+                        # reward = 1e+3 * (self.scene_mngr.scene.goal_stacked_num - success_stacked_objs_num - depth) + 1e+2
                         # reward = 1e+3 * (self.max_depth - depth)
-                        if success_stacked_objs_num != 0:
+                        
+                        # if next_state_stacked_num != 0:
                             # if cur_logical_action[self.pick_action.info.TYPE] == "pick":
                             #     print(f"{sc.OKGREEN}Action: Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
                             # if cur_logical_action[self.pick_action.info.TYPE] == "place":
                             #     print(f"{sc.OKGREEN}Action: Place {cur_logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {cur_logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
-                            print(f"Reward: {reward}")
+                        # print(f"Reward: {reward}")
                         return reward
+        print(f"Reward: {reward}")
         return reward
 
     def get_nodes_from_leaf_node(self, leaf_node):
@@ -331,6 +347,10 @@ class MCTS:
         leaf_nodes.sort()
         return leaf_nodes
 
+    # def minmax_normlize(value):
+    #     value = (value - np.min(value)) / (np.max(value) - np.min(value))
+    #     return value
+
     def show_logical_action(self, node):
         logical_action = self.tree.nodes[node][NodeData.ACTION]
         if logical_action is not None:
@@ -340,7 +360,9 @@ class MCTS:
                 if logical_action[self.pick_action.info.TYPE] == "place":
                     print(f"Action Node: {node}  {sc.OKGREEN}Action: Place {logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
     
-    def visualize_tree(self, title, tree):
+    def visualize_tree(self, title, tree=None):
+        if tree is None:
+            tree = self.tree
         labels = {}
         for n in tree.nodes:
             if tree.nodes[n][NodeData.ACTION] is not None:

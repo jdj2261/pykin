@@ -21,10 +21,11 @@ def find_idx_from_uct(tree, children, c):
         if n == 0:
             uct = float('inf')
         else:
-            exploitation = np.max(values)
-            
-            # exploitation = np.mean(values)
+            # exploitation = np.max(values)
+            exploitation = np.mean(values) / 1000
             exploration = np.sqrt(np.log(total_n) / n)
+
+            # print(exploitation, c * exploration)
             uct = exploitation + c * exploration
         ucts.append(uct)
     best_node_idx = np.argmax(ucts)
