@@ -38,7 +38,7 @@ goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 param = {'stack_num' : 3}
-benchmark_config={1 : param}
+benchmark_config = {1 : param}
 
 scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
@@ -60,9 +60,10 @@ scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.log
 scene_mngr.update_logical_states()
 
 mcts = MCTS(scene_mngr)
-mcts.budgets = 200
-mcts.max_depth = 20
-mcts.exploration_c = 1e+6
+mcts.debug_mode = False
+mcts.budgets = 50
+mcts.max_depth = 10
+mcts.exploration_c = 2
 nodes = mcts.do_planning()
 
 subtree = mcts.get_subtree()
