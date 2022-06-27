@@ -8,7 +8,20 @@ def find_best_idx_from_random(tree, children):
     return best_node_idx
 
 def find_idx_from_greedy(tree, children):
-    best_node_idx = np.argmax([tree.nodes[child][NodeData.VALUE] for child in children])
+    best_node_idx = 0
+    max_value = -float('inf')
+    for idx, child in enumerate(children):
+        value = tree.nodes[child][NodeData.VALUE]
+        n = tree.nodes[child][NodeData.VISIT]
+        if n == 0:
+            best_node_idx = idx
+        else:
+            if value > max_value:
+                max_value = value
+                best_node_idx = idx
+    
+    # print(len(children), best_node_idx)
+    # best_node_idx = np.argmax([tree.nodes[child][NodeData.VALUE] for child in children if n = tree.nodes[child][NodeData.VISIT] == 0])
     return best_node_idx
 
 def find_idx_from_uct(tree, children, c):
@@ -21,16 +34,19 @@ def find_idx_from_uct(tree, children, c):
         if n == 0:
             uct = float('inf')
         else:
-            # exploitation = np.max(values)
-            exploitation = np.mean(values)
+            exploitation = np.max(values)
+            # exploitation = np.mean(values)
             exploration = np.sqrt(np.log(total_n) / n)
 
             # print(exploitation, c * exploration)
             uct = exploitation + c * exploration
         ucts.append(uct)
+    
     best_node_idx = np.argmax(ucts)
+    print(ucts, best_node_idx)
     return best_node_idx
 
+# TODO
 def find_idx_from_bai_ucb(self, children):
     pass
 
