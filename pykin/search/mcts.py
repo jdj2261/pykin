@@ -78,14 +78,14 @@ class MCTS:
             # reward = 100 * depth
             self.tree.nodes[state_node][NodeData.GOAL] = True
             self._update_value(cur_state_node, reward)
-            return reward / 1000
+            return reward
         
         if depth >= self.max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
             # reward = self._get_reward(cur_state, depth=depth, is_terminal=False)
-            reward = -10 * self.max_depth
+            reward = -10 * self.max_depth / 100
             self._update_value(cur_state_node, reward)
-            return reward / 1000
+            return reward
         #? Select Logical Action
         #*======================================================================================================================== #
         cur_logical_action_node = self._select_logical_action_node(cur_state_node, cur_state, depth)
@@ -100,7 +100,7 @@ class MCTS:
             reward = self._get_reward(cur_state, depth=depth, cur_logical_action=None)
             # reward = -100
             self._update_value(cur_state_node, reward)
-            return reward / 1000
+            return reward
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
         
         # ![DEBUG]
@@ -123,7 +123,7 @@ class MCTS:
             reward = self._get_reward(cur_state, cur_logical_action, depth=depth, next_state=None)
             # reward = -100
             self._update_value(cur_logical_action_node, reward)
-            return reward / 1000
+            return reward
         next_state = self.tree.nodes[next_state_node][NodeData.STATE]
         
         ##########################################################################################################################################################
@@ -139,7 +139,7 @@ class MCTS:
 
         #? Get reward
         #*======================================================================================================================== #
-        reward = (self._get_reward(cur_state, cur_logical_action, next_state, depth) - 10) / 1000
+        reward = self._get_reward(cur_state, cur_logical_action, next_state, depth) - 0.01
         print(f"{sc.MAGENTA}[Reward]{sc.ENDC} S({cur_state_node}) -> A({cur_logical_action_node}) -> S'({next_state_node}) Reward : {reward}")
         value = reward + self.gamma * self._search(next_state_node, depth+1)
         # self._update_value(cur_state_node, value, cur_logical_action_node)
@@ -262,6 +262,16 @@ class MCTS:
         child_node = children[best_idx]
         return child_node
 
+    def _update_value(self, cur_state_node, value):
+        self._update_node(cur_state_node, value)
+        if cur_state_node != 0:
+            action_node = [node for node in self.tree.predecessors(cur_state_node)][0]
+            self._update_node(action_node, value)
+            
+            children = [node for node in self.tree.neighbors(cur_state_node)]
+            if children:
+                pass
+
     def _update_node(self, node, reward):
         if node != 0:
             parent_node = [node for node in self.tree.predecessors(node)][0]
@@ -272,13 +282,6 @@ class MCTS:
         self.tree.nodes[node][NodeData.VALUE_HISTORY].append(reward)
         if reward > self.tree.nodes[node][NodeData.VALUE]:
             self.tree.nodes[node][NodeData.VALUE] = reward
-
-    def _update_value(self, cur_state_node, value):
-        self._update_node(cur_state_node, value)
-        if cur_state_node != 0:
-            action_node = [node for node in self.tree.predecessors(cur_state_node)][0]
-            self._update_node(action_node, value)
-
 
     # def _update_value(self, cur_state_node, value, next_logical_action_node=None):
     #     print(cur_state_node, next_logical_action_node)
@@ -315,26 +318,27 @@ class MCTS:
     
     def _get_reward(self, cur_state:Scene=None, cur_logical_action:dict={}, next_state:Scene=None, depth=None, is_terminal:bool=False) -> float:
         reward = 0
+        scaler = 100
         if cur_state is not None:
             if is_terminal:
                 # reward = 10 * (self.max_depth - depth)
                 reward = 20 * (self.max_depth - depth + 1)
-                return reward
+                return reward / scaler
             else:
                 if cur_logical_action is None:
                     # reward = -1 * depth
                     reward = -10 * depth
-                    return reward
+                    return reward / scaler
 
                 if next_state is None:
                     # reward = -1 * depth
                     reward = -10 * depth
-                    return reward
+                    return reward / scaler
 
                 if next_state is not None:
                     logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
                     
-                    if logical_action_type == 'place':
+                    if logical_action_type == 'pick':
                         prev_success_cnt = cur_state.success_cnt
                         next_is_success, next_stacked_num = next_state.check_success_stacked_bench_1()
 
@@ -342,15 +346,17 @@ class MCTS:
                             if next_stacked_num - prev_success_cnt == 1:
                                 print("Good Action")
                                 # reward = 10 * (self.max_depth - depth)
-                                reward = np.exp(-depth) * 100000
+                                reward = np.exp(-depth) * 20000
+                                reward = np.clip(reward, 1.0 * (self.max_depth - depth), float('inf'))
                             if next_stacked_num - prev_success_cnt == -1:
                                 print("Bad Action") 
-                                reward = -5 * depth
+                                reward = -10 * (self.max_depth - depth)
+                                # reward = (-5 * depth) / scaler
                         # else:
                         #     print("Wrong Action")
-                        #     reward = -5 * depth
-                        return reward
-        return reward
+                        #     reward = -10 * (self.max_depth - depth)
+                        return reward / scaler
+        return reward / scaler
 
     def get_nodes_from_leaf_node(self, leaf_node):
         parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
@@ -379,11 +385,8 @@ class MCTS:
             next_node = children[best_idx]
             return [cur_node] + self.get_best_node(tree, next_node)
 
-    def get_subtree(self, only_goal=True):        
-        if only_goal:
-            visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.GOAL] is True]
-        else:
-            visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.VISIT] > 0]
+    def get_subtree(self):
+        visited_nodes = [n for n in self.tree.nodes if self.tree.nodes[n][NodeData.GOAL] is True]
         
         subtree:nx.DiGraph = self.tree.subgraph(visited_nodes)
         return subtree

@@ -34,16 +34,16 @@ def find_idx_from_uct(tree, children, c):
         if n == 0:
             uct = float('inf')
         else:
-            exploitation = np.max(values)
-            # exploitation = np.mean(values)
+            # exploitation = np.max(values)
+            exploitation = np.mean(values)
             exploration = np.sqrt(np.log(total_n) / n)
 
             # print(exploitation, c * exploration)
             uct = exploitation + c * exploration
         ucts.append(uct)
-    
-    best_node_idx = np.argmax(ucts)
-    print(ucts, best_node_idx)
+
+    best_node_list = np.argwhere(ucts == np.amax(ucts)).flatten().tolist()
+    best_node_idx = np.random.choice(best_node_list)
     return best_node_idx
 
 # TODO
