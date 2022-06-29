@@ -36,7 +36,7 @@ green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
-param = {'stack_num' : 3, 'top_box' : "C_box"}
+param = {'stack_num' : 4}
 benchmark_config={1 : param}
 
 scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
@@ -45,7 +45,7 @@ scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=re
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
+scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test1_box_pose.h_mat, color=[1.0, 1.0, 0.0])
 # scene_mngr.add_object(name="E_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test2_box_pose.h_mat, color=[0.0, 1.0, 1.0])
 # scene_mngr.add_object(name="F_box", gtype="mesh", gparam=green_cube_mesh, h_mat=test3_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
@@ -55,7 +55,7 @@ scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : 
 scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-# scene_mngr.set_logical_state("D_box", ("on", "table"))
+scene_mngr.set_logical_state("D_box", ("on", "table"))
 # scene_mngr.set_logical_state("E_box", ("on", "table"))
 # scene_mngr.set_logical_state("F_box", ("on", "table"))
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
@@ -65,10 +65,11 @@ scene_mngr.update_logical_states()
 scene_mngr.show_scene_info()
 scene_mngr.show_logical_states()
 
-mcts = MCTS(scene_mngr)
-mcts.budgets = 1000
-mcts.c = 100000
-mcts.max_depth = 40
+mcts = MCTS(scene_mngr, sampling_method='greedy')
+mcts.debug_mode = False
+mcts.budgets = 100
+mcts.max_depth = 10
+mcts.exploration_c = 1.4
 nodes = mcts.do_planning()
 best_nodes = mcts.get_best_node(cur_node=0)
 

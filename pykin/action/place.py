@@ -111,7 +111,8 @@ class PlaceAction(ActivityBase):
             success_joint_path = False
 
         if not success_joint_path:
-            self.scene_mngr.detach_object_from_gripper()
+            if self.scene_mngr.is_attached:
+                self.scene_mngr.detach_object_from_gripper()
             self.scene_mngr.add_object(
                 self.scene_mngr.scene.robot.gripper.attached_obj_name,
                 self.scene_mngr.init_objects[self.scene_mngr.scene.robot.gripper.attached_obj_name].gtype,

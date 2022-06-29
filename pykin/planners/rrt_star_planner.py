@@ -225,7 +225,7 @@ class RRTStarPlanner(Planner):
 
         unique_path = []
         for joints in path:
-            if not any(np.array_equal(np.round(joints, 8), np.round(unique_joints, 8)) for unique_joints in unique_path):
+            if not any(np.array_equal(np.round(joints, 2), np.round(unique_joints, 2)) for unique_joints in unique_path):
                 unique_path.append(joints)
 
         if n_step == 1:

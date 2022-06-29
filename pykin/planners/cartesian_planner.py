@@ -154,6 +154,9 @@ class CartesianPlanner(Planner):
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")
                 joint_path = []
+
+                # ![DEBUG]
+                self._scene_mngr.render_debug(title="Failed Cartesian Path")
                 break
             
             if err < self._goal_tolerance:
@@ -163,6 +166,7 @@ class CartesianPlanner(Planner):
             logger.error(f"Failed Generate Path.. Position Error is {err:6f}")
             print(f"{sc.BOLD}Retry Generate Path, the number of retries is {cnt}/{total_cnt} {sc.ENDC}\n")
             self._damping = random.uniform(0, 0.1)
+        
         return joint_path
 
     # TODO

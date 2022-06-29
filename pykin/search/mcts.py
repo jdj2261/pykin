@@ -19,7 +19,7 @@ class MCTS:
     def __init__(
         self,
         scene_mngr:SceneManager,
-        sampling_method:dict={},
+        sampling_method:str='uct',
         budgets:int=500, 
         exploration_constant:float=100000,
         max_depth:int=20,
@@ -31,7 +31,7 @@ class MCTS:
         self.scene_mngr = scene_mngr
         self.state = scene_mngr.scene
         self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=10)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=5)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -43,6 +43,7 @@ class MCTS:
 
         self.tree = self._create_tree(self.state)
         self.nodes = None
+        self.rewards = []
         self._config = {}
         
     def _create_tree(self, state:Scene):
@@ -62,9 +63,11 @@ class MCTS:
         return tree
 
     def do_planning(self):
+        
         for i in range(self._budgets):
             print(f"{sc.HEADER}=========== Search iteration : {i+1} ==========={sc.ENDC}")
             self._search(state_node=0, depth=0)
+            self.rewards.append(self.get_max_reward())
 
     def _search(self, state_node, depth):
         cur_state_node = state_node
@@ -83,12 +86,12 @@ class MCTS:
         if depth >= self.max_depth:
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
             # reward = self._get_reward(cur_state, depth=depth, is_terminal=False)
-            reward = -10 * self.max_depth / 100
+            reward = -10 * self.max_depth / 10
             self._update_value(cur_state_node, reward)
-            return reward
+            return 0
         #? Select Logical Action
         #*======================================================================================================================== #
-        cur_logical_action_node = self._select_logical_action_node(cur_state_node, cur_state, depth)
+        cur_logical_action_node = self._select_logical_action_node(cur_state_node, cur_state, depth, self._sampling_method)
         
         #! [DEBUG]
         if self.debug_mode:
@@ -103,7 +106,7 @@ class MCTS:
             return reward
         cur_logical_action = self.tree.nodes[cur_logical_action_node][NodeData.ACTION]
         
-        # ![DEBUG]
+        #! [DEBUG]
         if cur_logical_action[self.pick_action.info.TYPE] == "pick":
             print(f"{sc.MAGENTA}[Action]{sc.ENDC} {sc.OKGREEN}Action: Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
         if cur_logical_action[self.pick_action.info.TYPE] == "place":
@@ -111,7 +114,7 @@ class MCTS:
         
         #? Select Next State
         #*======================================================================================================================== #
-        next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth)
+        next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth, self._sampling_method)
         
         #! [DEBUG]
         if self.debug_mode:
@@ -139,8 +142,8 @@ class MCTS:
 
         #? Get reward
         #*======================================================================================================================== #
-        reward = self._get_reward(cur_state, cur_logical_action, next_state, depth) - 0.01
-        print(f"{sc.MAGENTA}[Reward]{sc.ENDC} S({cur_state_node}) -> A({cur_logical_action_node}) -> S'({next_state_node}) Reward : {reward}")
+        reward = self._get_reward(cur_state, cur_logical_action, next_state, depth) - 0.1
+        print(f"{sc.MAGENTA}[Reward]{sc.ENDC} S({cur_state_node}) -> A({cur_logical_action_node}) -> S'({next_state_node}) Reward : {np.round(reward,3)}")
         value = reward + self.gamma * self._search(next_state_node, depth+1)
         # self._update_value(cur_state_node, value, cur_logical_action_node)
         self._update_value(cur_state_node, value)
@@ -150,7 +153,7 @@ class MCTS:
 
         return value
 
-    def _select_logical_action_node(self, cur_state_node, cur_state, depth, exploration_method="uct"):
+    def _select_logical_action_node(self, cur_state_node, cur_state, depth, exploration_method="bai_ucb"):
         # e-greedy, softmax
         cur_Visit = self.tree.nodes[cur_state_node][NodeData.VISIT]
         eps = np.maximum(np.minimum(1., 1 / np.maximum(cur_Visit, 1)), self.eps)
@@ -198,7 +201,7 @@ class MCTS:
                                                 NodeData.GOAL: False})])
             self.tree.add_edge(cur_state_node, action_node)
 
-    def _select_next_state_node(self, cur_logical_action_node:int, cur_state:Scene, cur_logical_action:dict, depth, exploration_method="uct"):
+    def _select_next_state_node(self, cur_logical_action_node:int, cur_state:Scene, cur_logical_action:dict, depth, exploration_method="bai_ucb"):
         next_state_node = None
         children = [child for child in self.tree.neighbors(cur_logical_action_node)]
         
@@ -255,9 +258,9 @@ class MCTS:
         if exploration_method == "uct":
             best_idx = sampler.find_idx_from_uct(self.tree, children, self.exploration_c)
         if exploration_method == "bai_ucb":
-            best_idx = sampler.find_idx_from_bai_ucb(self.tree, children)
+            best_idx = sampler.find_idx_from_bai_ucb(self.tree, children, self.exploration_c)
         if exploration_method == "bai_perturb":
-            best_idx = sampler.find_idx_from_bai_perturb(self.tree, children)
+            best_idx = sampler.find_idx_from_bai_perturb(self.tree, children, self.exploration_c)
         
         child_node = children[best_idx]
         return child_node
@@ -283,33 +286,6 @@ class MCTS:
         if reward > self.tree.nodes[node][NodeData.VALUE]:
             self.tree.nodes[node][NodeData.VALUE] = reward
 
-    # def _update_value(self, cur_state_node, value, next_logical_action_node=None):
-    #     print(cur_state_node, next_logical_action_node)
-    #     self._update_node(cur_state_node, value)
-    #     children = [node for node in self.tree.neighbors(cur_state_node)]
-    #     if children and next_logical_action_node is not None:
-    #         self._update_node(next_logical_action_node, value)
-    #         # self.tree.nodes[next_logical_action_node][NodeData.VISIT] += 1
-    #         # self.tree.nodes[next_logical_action_node][NodeData.VALUE_HISTORY].append(value)
-    #         # if value > self.tree.nodes[next_logical_action_node][NodeData.VALUE]:
-    #         #     self.tree.nodes[next_logical_action_node][NodeData.VALUE] = value
-
-    #     # self.tree.nodes[cur_state_node][NodeData.VISIT] += 1
-    #     # self.tree.nodes[cur_state_node][NodeData.VALUE_HISTORY].append(value)
-    #     # if value > self.tree.nodes[cur_state_node][NodeData.VALUE]:
-    #     #     self.tree.nodes[cur_state_node][NodeData.VALUE] = value
-        
-    # def _update_node(self, node, value):
-    #     if node != 0:
-    #         parent_node = [node for node in self.tree.predecessors(node)][0]
-    #         if self.tree.nodes[node][NodeData.GOAL] is True :
-    #             self.tree.nodes[parent_node][NodeData.GOAL] = True
-
-    #     self.tree.nodes[node][NodeData.VISIT] += 1
-    #     self.tree.nodes[node][NodeData.VALUE_HISTORY].append(value)
-    #     if value > self.tree.nodes[node][NodeData.VALUE]:
-    #         self.tree.nodes[node][NodeData.VALUE] = value
-
     @staticmethod
     def _is_terminal(state:Scene):
         if state.is_terminal_state():
@@ -318,11 +294,11 @@ class MCTS:
     
     def _get_reward(self, cur_state:Scene=None, cur_logical_action:dict={}, next_state:Scene=None, depth=None, is_terminal:bool=False) -> float:
         reward = 0
-        scaler = 100
+        scaler = 1000
         if cur_state is not None:
             if is_terminal:
                 # reward = 10 * (self.max_depth - depth)
-                reward = 20 * (self.max_depth - depth + 1)
+                reward = 1000 * (self.max_depth - depth + 1)
                 return reward / scaler
             else:
                 if cur_logical_action is None:
@@ -346,15 +322,17 @@ class MCTS:
                             if next_stacked_num - prev_success_cnt == 1:
                                 print("Good Action")
                                 # reward = 10 * (self.max_depth - depth)
-                                reward = np.exp(-depth) * 20000
-                                reward = np.clip(reward, 1.0 * (self.max_depth - depth), float('inf'))
+                                reward = np.exp(-depth) * 50000
+                                # reward = (depth - self.max_depth)**4
+                                print(reward, 10.0 * (self.max_depth - depth))
+                                reward = np.clip(reward, 10.0 * (self.max_depth - depth), float('inf'))
                             if next_stacked_num - prev_success_cnt == -1:
                                 print("Bad Action") 
-                                reward = -10 * (self.max_depth - depth)
+                                reward = -5 * depth
                                 # reward = (-5 * depth) / scaler
-                        # else:
-                        #     print("Wrong Action")
-                        #     reward = -10 * (self.max_depth - depth)
+                        else:
+                            print("Wrong Action")
+                            reward = -5 * depth
                         return reward / scaler
         return reward / scaler
 
@@ -395,6 +373,10 @@ class MCTS:
         leaf_nodes = [node for node in tree.nodes if not [c for c in tree.neighbors(node)]]
         leaf_nodes.sort()
         return leaf_nodes
+
+    def get_max_reward(self):
+        root_max_reward = self.tree.nodes[0][NodeData.VALUE]
+        return root_max_reward
 
     def show_logical_action(self, node):
         logical_action = self.tree.nodes[node][NodeData.ACTION]

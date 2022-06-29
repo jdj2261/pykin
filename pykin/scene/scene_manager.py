@@ -438,9 +438,6 @@ class SceneManager:
             pick_object = self.attached_obj_name
 
         def update(i):
-            if i == len(joint_path)-1:
-                print("Animation Finished..")
-                
             ax.clear()
             ax._axis3don = False
 
@@ -449,7 +446,7 @@ class SceneManager:
             
             if eef_poses is not None:
                 self.render.render_trajectory(ax, eef_poses, size=0.1)
-                        
+            
             self.set_robot_eef_pose(joint_path[i])
 
             if attach_idx is not None:
@@ -485,7 +482,9 @@ class SceneManager:
                 visible_text=visible_text,
                 visible_gripper=visible_gripper,
             )
-        
+            
+            if i == len(joint_path)-1:
+                print("Animation Finished..")
         ani = animation.FuncAnimation(fig, update, np.arange(len(joint_path)), interval=interval, repeat=repeat)
         self.show()
 
