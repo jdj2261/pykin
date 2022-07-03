@@ -37,6 +37,7 @@ def find_idx_from_uct(tree, children, c):
     selected_values[np.where(np.asarray(selected_visits) == 0)] = sys.maxsize
     
     ucts = selected_values + c * np.sqrt(total_visits / np.maximum(1., selected_visits))
+    # print(ucts, selected_values , c * np.sqrt(total_visits / np.maximum(1., selected_visits)))
     best_node_idx = np.argmax(ucts)
 
     return best_node_idx
