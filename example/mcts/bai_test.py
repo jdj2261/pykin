@@ -1,3 +1,4 @@
+from pickle import TRUE
 import numpy as np
 import sys, os
 import networkx as nx
@@ -72,10 +73,11 @@ scene_mngr.update_logical_states()
 
 mcts = MCTS(scene_mngr)
 mcts.debug_mode = False
-mcts.budgets = 300
+mcts.budgets = 100
 mcts.max_depth = 16
 mcts.exploration_c = 1.4
 # mcts.sampling_method = 'bai_ucb'
+# mcts.sampling_method = 'bai_perturb'
 mcts.sampling_method = 'uct'
 nodes = mcts.do_planning()
 
@@ -83,16 +85,21 @@ nodes = mcts.do_planning()
 subtree = mcts.get_subtree()
 mcts.visualize_tree("MCTS", subtree)
 
+best_nodes = mcts.get_best_node(subtree)
+if best_nodes:
+    print("\nBest Action Node")
+    for node in best_nodes:
+        mcts.show_logical_action(node)
+
 rewards = mcts.rewards
+max_iter = np.argmax(rewards)
+print(max_iter)
 plt.plot(rewards)
 plt.show()
 
 
-# subtree = mcts.get_subtree()
-# print(subtree.nodes)
-# leaf_nodes = mcts.get_leaf_nodes(subtree)
 
-
+# Do planning
 # best_nodes = mcts.get_best_node(subtree)
 # if best_nodes:
 #     for node in best_nodes:

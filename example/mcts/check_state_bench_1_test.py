@@ -40,9 +40,9 @@ table_mesh = get_object_mesh('custom_table.stl', 0.01)
 param = {'stack_num' : 3}
 benchmark_config={1 : param}
 
-red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
-green_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.12]))
+red_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77+0.06]))
+blue_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77 + 0.12]))
+green_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77 + 0.18]))
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
@@ -57,22 +57,26 @@ scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table
 scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
-scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
+# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["goal_box"]}
 scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["A_box"]}
-scene_mngr.scene.logical_states["D_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["B_box"]}
+scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["B_box"]}
 # scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["E_box"]}
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
 scene_mngr.update_logical_states()
 
 scene_mngr.scene.pick_obj_name = "C_box"
-print(scene_mngr.scene.alphabet_list)
-print(scene_mngr.scene.goal_box_list)
-# print(scene_mngr.scene.get_objs_chain_list_from_bottom("goal_box"))
-print(scene_mngr.scene.check_terminal_state_bench_1())
-# print(scene_mngr.scene.check_success_stacked_bench_1())
+# print(scene_mngr.scene.goal_boxes)
+print(scene_mngr.scene.get_objs_chain_list_from_bottom("goal_box"))
+
+# print(scene_mngr.scene.check_terminal_state_bench_1())
+# print(scene_mngr.scene.succes_stacked_box_num)
+fig, ax = plt.init_3d_figure(name="Level wise 1")
+scene_mngr.render_objects(ax)
+scene_mngr.show()
+# # print(scene_mngr.scene.check_success_stacked_bench_1())

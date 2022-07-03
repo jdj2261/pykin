@@ -53,7 +53,6 @@ class ActivityBase(metaclass=ABCMeta):
         self.info = ActionInfo
         self.move_data = MoveData
 
-        # Add Planner
         self.cartesian_planner = CartesianPlanner()
         self.rrt_planner = RRTStarPlanner(delta_distance=0.05, epsilon=0.2, gamma_RRT_star=2)
 
