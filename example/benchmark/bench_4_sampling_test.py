@@ -48,5 +48,4 @@ for point, normal, (min_x, max_x, min_y, max_y) in surface_points_for_support_ob
         continue
     place_action.scene_mngr.render.render_point(ax, point)
 
-
 place_action.show()

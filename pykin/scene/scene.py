@@ -22,6 +22,7 @@ class Scene:
         
         # TODO
         if self.bench_num == 1:
+            self.goal_box = self.benchmark_config[self.bench_num]["goal_box"]
             self.goal_stacked_num:int = self.benchmark_config[self.bench_num]["stack_num"]
             self.alphabet_list:list = list(string.ascii_uppercase)[:self.goal_stacked_num]
             self.goal_boxes:list = [alphabet + '_box' for alphabet in self.alphabet_list]
@@ -89,7 +90,7 @@ class Scene:
     def check_success_stacked_bench_1(self, is_terminal=False):
         is_success = False
 
-        stacked_boxes = self.get_objs_chain_list_from_bottom("goal_box")[1:]
+        stacked_boxes = self.get_objs_chain_list_from_bottom(self.goal_box)[1:]
         stacked_box_num = len(stacked_boxes)
         self.stacked_box_num = stacked_box_num
 

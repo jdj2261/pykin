@@ -114,8 +114,9 @@ class MCTS:
             #? Select Next State
             #*======================================================================================================================== #
             next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth, self._sampling_method)
-            assert next_state_node is not None, f"Next state node is None... Why??"
-            next_state = self.tree.nodes.get(next_state_node).get(NodeData.STATE)
+            # assert next_state_node is not None, f"Next state node is None... Why??"
+            if next_state_node is not None:
+                next_state = self.tree.nodes.get(next_state_node).get(NodeData.STATE)
 
         #! [DEBUG]
         if self.debug_mode:
@@ -126,7 +127,7 @@ class MCTS:
         reward = self._get_reward(cur_state, cur_logical_action, next_state, depth)
         print(f"{sc.MAGENTA}[Reward]{sc.ENDC} S({cur_state_node}) -> A({cur_logical_action_node}) -> S'({next_state_node}) Reward : {sc.UNDERLINE}{np.round(reward,3)}{sc.ENDC}")
 
-        if cur_logical_action_node is None:
+        if cur_logical_action_node is None or next_state_node is None:
             value = reward
         else:
             discount_value = -0.1
@@ -288,7 +289,11 @@ class MCTS:
         if cur_logical_action is None:
             print(f"Current logical action is None.. Reward is {self.infeasible_reward}")
             return self.infeasible_reward
-        
+
+        if next_state is None:
+            print(f"Next state is None.. Reward is {self.infeasible_reward}")
+            return self.infeasible_reward
+
         logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
 
         if logical_action_type == 'place':
@@ -438,6 +443,137 @@ class MCTS:
         self.pick_action.scene_mngr.render_objects(ax, scene)
         p_utils.plot_basis(ax)
         self.pick_action.show()
+
+    def simulate_path(self, nodes):
+        if nodes:
+            for node in nodes:
+                self.show_logical_action(node)
+
+            init_theta = None
+            init_scene = None
+            success_pnp = True
+            pnp_joint_all_pathes = []
+            place_all_object_poses = []
+            pick_all_objects = []
+            test = []
+            test2 = []
+            test3 = []
+            for node in nodes:
+                if self.tree.nodes[node]['type'] == "action":
+                    continue
+                action = self.tree.nodes[node].get(self.node_data.ACTION)
+
+                if action:
+                    if list(action.keys())[0] == 'grasp':
+                        success_pick = False
+                        pick_scene:Scene = self.tree.nodes[node]['state']
+                        # ik_solve, grasp_poses = mcts.pick_action.get_possible_ik_solve_level_2(scene=pick_scene, grasp_poses=pick_scene.grasp_poses)
+                        # if ik_solve:
+                        print("pick")
+                        if init_theta is None:
+                            init_theta = self.pick_action.scene_mngr.scene.robot.init_qpos
+                        pick_joint_path = self.pick_action.get_possible_joint_path_level_3(
+                            scene=pick_scene, 
+                            grasp_poses=pick_scene.grasp_poses,
+                            init_thetas=init_theta)
+                        if pick_joint_path:
+                            # pick_all_objects.append([pick_scene.robot.gripper.attached_obj_name])
+                            init_theta = pick_joint_path[-1][self.pick_action.move_data.MOVE_default_grasp][-1]
+                            success_pick = True
+                        else:
+                            print("Pick joint Fail")
+                            success_pnp = False
+                            break
+                    else:
+                        success_place = False
+                        place_scene:Scene = self.tree.nodes[node]['state']
+                        # ik_solve, release_poses = mcts.place_action.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
+                        # if ik_solve:
+                        print("place")
+                        place_joint_path = self.place_action.get_possible_joint_path_level_3(
+                            scene=place_scene, 
+                            release_poses=place_scene.release_poses, 
+                            init_thetas=init_theta)
+                        if place_joint_path:
+                            success_place = True
+                            init_theta = place_joint_path[-1][self.place_action.move_data.MOVE_default_release][-1]
+                            if success_pick and success_place:
+                                test += pick_joint_path + place_joint_path
+                                test2.append(pick_scene.robot.gripper.attached_obj_name)
+                                test3.append(place_scene.objs[place_scene.pick_obj_name].h_mat)
+                                print("Success pnp")
+                                success_pnp = True
+                            else:
+                                print("PNP Fail")
+                                success_pnp = False
+                                break
+                        else:
+                            print("Place joint Fail")
+                            success_pnp = False
+                            break
+
+            if success_pnp:
+                pnp_joint_all_pathes.append((test))
+                pick_all_objects.append(test2)
+                place_all_object_poses.append(test3)
+                for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
+                    # fig, ax = p_utils.init_3d_figure( name="Level wise 3")
+                    result_joint = []
+                    eef_poses = []
+                    attach_idxes = []
+                    detach_idxes = []
+
+                    attach_idx = 0
+                    detach_idx = 0
+
+                    grasp_task_idx = 0
+                    post_grasp_task_idx = 0
+
+                    release_task_idx = 0
+                    post_release_task_idx = 0
+                    cnt = 0
+                    for pnp_joint_path in pnp_joint_all_path:        
+                        for j, (task, joint_path) in enumerate(pnp_joint_path.items()):
+                            for k, joint in enumerate(joint_path):
+                                cnt += 1
+                                
+                                if task == self.pick_action.move_data.MOVE_grasp:
+                                    grasp_task_idx = cnt
+                                if task == self.pick_action.move_data.MOVE_post_grasp:
+                                    post_grasp_task_idx = cnt
+                                    
+                                if post_grasp_task_idx - grasp_task_idx == 1:
+                                    attach_idx = grasp_task_idx
+                                    attach_idxes.append(attach_idx)
+
+                                if task == self.place_action.move_data.MOVE_release:
+                                    release_task_idx = cnt
+                                if task == self.place_action.move_data.MOVE_post_release:
+                                    post_release_task_idx = cnt
+                                if post_release_task_idx - release_task_idx == 1:
+                                    detach_idx = release_task_idx
+                                    detach_idxes.append(detach_idx)
+                                
+                                result_joint.append(joint)
+                                fk = self.pick_action.scene_mngr.scene.robot.forward_kin(joint)
+                                eef_poses.append(fk[self.place_action.scene_mngr.scene.robot.eef_name].pos)
+
+                fig, ax = p_utils.init_3d_figure( name="Level wise 3")
+                self.place_action.scene_mngr.animation(
+                    ax,
+                    fig,
+                    init_scene=self.scene_mngr.scene,
+                    joint_path=result_joint,
+                    eef_poses=None,
+                    visible_gripper=True,
+                    visible_text=True,
+                    alpha=1.0,
+                    interval=1,
+                    repeat=False,
+                    pick_object = pick_all_object,
+                    attach_idx = attach_idxes,
+                    detach_idx = detach_idxes,
+                    place_obj_pose= place_all_object_pose)
 
     @property
     def sampling_method(self):

@@ -39,7 +39,7 @@ ceiling_mesh = get_object_mesh('ben_table_ceiling.stl')
 tray_red_mesh = get_object_mesh('ben_tray_red.stl')
 tray_blue_mesh = get_object_mesh('ben_tray_blue.stl')
 
-param = {'stack_num' : 6}
+param = {'stack_num' : 6, 'goal_box':'tray_red'}
 benchmark_config = {1 : param}
 
 scene_mngr = SceneManager("visual", is_pyplot=False, benchmark=benchmark_config)

@@ -17,7 +17,7 @@ class SceneManager:
         geom="collision", 
         is_pyplot=True, 
         scene:Scene=None,
-        benchmark:dict={1 : {'stack_num': 3}}
+        benchmark:dict={1 : {'stack_num': 3, 'goal_box':'goal_box'}}
     ):
         # Element for Scene
         self.geom = geom
@@ -504,7 +504,7 @@ class SceneManager:
             self._scene.robot.gripper = None
 
     def deepcopy_scene(self, scene_mngr=None):
-        copied_scene = SceneManager()
+        copied_scene = SceneManager(benchmark=self.scene.benchmark_config)
         if scene_mngr is None:
             scene_mngr = self
         for k,v in scene_mngr.__dict__.items():
