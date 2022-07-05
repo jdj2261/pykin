@@ -1,8 +1,5 @@
 import pprint
-import numpy as np
 import string
-
-from copy import deepcopy
 from collections import OrderedDict
 from dataclasses import dataclass
 
@@ -22,10 +19,14 @@ class Scene:
 
         self.benchmark_config:int = benchmark
         self.bench_num:int = list(self.benchmark_config.keys())[0]
-        self.goal_stacked_num:int = self.benchmark_config[self.bench_num]["stack_num"]
-        self.alphabet_list:list = list(string.ascii_uppercase)[:self.goal_stacked_num]
-        self.goal_boxes:list = [alphabet + '_box' for alphabet in self.alphabet_list]
-        self.succes_stacked_box_num = 0
+        
+        # TODO
+        if self.bench_num == 1:
+            self.goal_stacked_num:int = self.benchmark_config[self.bench_num]["stack_num"]
+            self.alphabet_list:list = list(string.ascii_uppercase)[:self.goal_stacked_num]
+            self.goal_boxes:list = [alphabet + '_box' for alphabet in self.alphabet_list]
+            self.stacked_box_num = 0
+            self.success_stacked_box_num = 0
 
         self.objs:dict = {}
         self.robot:SingleArm = None
@@ -80,25 +81,25 @@ class Scene:
             pass
 
     def check_terminal_state_bench_1(self):
-        is_success = self.check_success_stacked_bench_1()
-        if is_success and self.succes_stacked_box_num == self.goal_stacked_num:
+        is_success = self.check_success_stacked_bench_1(is_terminal=True)
+        if is_success and self.stacked_box_num == self.goal_stacked_num:
             return True
         return False
 
-    def check_success_stacked_bench_1(self):
+    def check_success_stacked_bench_1(self, is_terminal=False):
         is_success = False
 
         stacked_boxes = self.get_objs_chain_list_from_bottom("goal_box")[1:]
         stacked_box_num = len(stacked_boxes)
+        self.stacked_box_num = stacked_box_num
 
-        if stacked_box_num == 0:
-            return is_success
-
-        cur_stacked_boxes = self.goal_boxes[:stacked_box_num]
-        if stacked_boxes == cur_stacked_boxes:
-            is_success = True
-            self.succes_stacked_box_num = stacked_box_num
-    
+        if stacked_box_num <= self.goal_stacked_num:
+            goal_stacked_boxes = self.goal_boxes[:stacked_box_num]
+            if stacked_boxes == goal_stacked_boxes:
+                is_success = True
+                if not is_terminal:
+                    self.success_stacked_box_num = stacked_box_num
+                
         return is_success
 
     def get_objs_chain_list_from_bottom(self, bottom_obj):

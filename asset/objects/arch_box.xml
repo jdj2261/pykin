@@ -2,9 +2,12 @@
   <worldbody>
     <body name="arch_box">
       <body name="collision">
-        <geom pos="0 0 0" mesh="arch_box_0" type="mesh" density="3" rgba="0 1 0 1" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="arch_box_0" type="mesh" density="3" rgba="0 1 0 1" group="0" condim="6"/>
+        <geom pos="0 0 0" mesh="arch_box_1" type="mesh" density="3" rgba="0 1 0 1" group="0" condim="6"/>
+        <geom pos="0 0 0" mesh="arch_box_2" type="mesh" density="3" rgba="0 1 0 1" group="0" condim="6"/>
+        <!-- <geom pos="0 0 0" mesh="arch_box_0" type="mesh" density="3" rgba="0 1 0 1" group="1" condim="6"/>
         <geom pos="0 0 0" mesh="arch_box_1" type="mesh" density="3" rgba="0 1 0 1" group="1" condim="6"/>
-        <geom pos="0 0 0" mesh="arch_box_2" type="mesh" density="3" rgba="0 1 0 1" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="arch_box_2" type="mesh" density="3" rgba="0 1 0 1" group="1" condim="6"/> -->
       </body>
       <body name="visual">
         <geom pos="0 0 0" mesh="arch_box_0" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="0" mass="0.0001"/>

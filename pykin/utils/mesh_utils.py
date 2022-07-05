@@ -11,7 +11,7 @@ def get_mesh_path(mesh_path, robot_name):
     result_path = result_path + mesh_path
     return result_path
 
-def get_object_mesh(mesh_name, scale=1.0):
+def get_object_mesh(mesh_name, scale=[1.0, 1.0, 1.0]):
     file_path = pykin_path + '/asset/objects/meshes/'
     mesh = trimesh.load(file_path + mesh_name)
     mesh.apply_scale(scale)

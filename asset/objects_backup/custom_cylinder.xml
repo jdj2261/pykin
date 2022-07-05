@@ -1,0 +1,12 @@
+<mujoco model="custom_cylinder">
+    <worldbody>
+      <body>
+        <body name="object">
+          <geom size="0.05 0.10" pos="0 0 0" type="cylinder" rgba="1 1 1 1" group="1"/>
+        </body>
+        <site name="bottom_site" pos="0 0 -0.3" rgba="0 0 0 0" size="0.005"/>
+        <site name="top_site" pos="0 0 0.3" rgba="0 0 0 0" size="0.005"/>
+        <site name="horizontal_radius_site" pos="0.3 0 0" rgba="0 0 0 0" size="0.1"/>
+      </body>
+    </worldbody>
+</mujoco>

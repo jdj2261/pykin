@@ -34,9 +34,9 @@ def find_idx_from_uct(tree, children, c):
     
     selected_values = np.asarray(selected_values)
     # selected_values[np.isinf(selected_values)] = 0.
-    selected_values[np.where(np.asarray(selected_visits) == 0)] = sys.maxsize
+    selected_values[np.where(np.asarray(selected_visits) == 0)] = 0 #! 0
     
-    ucts = selected_values + c * np.sqrt(total_visits / np.maximum(1., selected_visits))
+    ucts = selected_values + c * np.sqrt(1 / np.maximum(1., selected_visits))
     # print(ucts, selected_values , c * np.sqrt(total_visits / np.maximum(1., selected_visits)))
     best_node_idx = np.argmax(ucts)
 
@@ -50,7 +50,7 @@ def find_idx_from_bai_ucb(tree:nx.DiGraph, children, c):
 
     selected_values = np.asarray(selected_values)
     selected_values[np.isinf(selected_values)] = 0.
-    # selected_values[np.where(np.asarray(selected_visits) == 0)] = float('inf')
+    # selected_values[np.where(np.asarray(selected_visits) == 0)] = sys.maxsize
 
     if len(selected_visits) == 1:
         best_node_idx = 0
@@ -74,7 +74,7 @@ def find_idx_from_bai_perturb(tree, children, c):
     best_node_idx = 0
 
     selected_values = np.asarray(selected_values)
-    # selected_values[np.where(np.asarray(selected_visits) == 0)] = np.inf
+    # selected_values[np.where(np.asarray(selected_visits) == 0)] = sys.maxsize
     selected_values[np.isinf(selected_values)] = 0.
 
     if len(selected_visits) == 1:
@@ -89,9 +89,9 @@ def find_idx_from_bai_perturb(tree, children, c):
         # upper_bounds[np.where(np.isnan(np.asarray(upper_bounds)))] = float('inf')
         b = np.argmin(B_k)
         u = np.argmax(upper_bounds)
+        # print(B_k, upper_bounds)
         if selected_visits[b] > selected_visits[u]:
             best_node_idx = u
         else:
             best_node_idx = b
-
     return best_node_idx

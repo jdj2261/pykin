@@ -149,11 +149,29 @@ def apply_objects_to_scene(trimesh_scene=None, objs=None):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()
 
-    for name, info in objs.items():
-        mesh = info.gparam
+    for obj_name, obj_info in objs.items():
+        info = obj_info
         color = np.array(info.color)
-        mesh.visual.face_colors = color
-        trimesh_scene.add_geometry(mesh, transform=info.h_mat)
+
+        if info.gtype == "mesh":
+            mesh = info.gparam
+            mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(mesh, transform=info.h_mat)
+
+        if info.gtype == "box":
+            box_mesh = trimesh.creation.box(extents=info.gparam)
+            box_mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(box_mesh, transform=info.h_mat)
+
+        if info.gtype == "cylinder":
+            capsule_mesh = trimesh.creation.cylinder(height=info.gparam[0], radius=info.gparam[1])
+            capsule_mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(capsule_mesh, transform=info.h_mat)
+
+        if info.gtype == "sphere":
+            sphere_mesh = trimesh.creation.icosphere(radius=info.gparam)
+            sphere_mesh.visual.face_colors = color
+            trimesh_scene.add_geometry(sphere_mesh, transform=info.h_mat)
 
     return trimesh_scene
 

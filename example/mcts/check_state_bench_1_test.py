@@ -1,6 +1,5 @@
 import numpy as np
 import sys, os
-import networkx as nx
 
 pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
@@ -8,9 +7,7 @@ sys.path.append(pykin_path)
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
-from pykin.scene.scene import Scene
 from pykin.utils.mesh_utils import get_object_mesh
-from pykin.search.mcts import MCTS
 import pykin.utils.plot_utils as plt
 
 file_path = '../../asset/urdf/panda/panda.urdf'
@@ -56,7 +53,7 @@ scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_confi
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="A_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
-scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
+# scene_mngr.add_object(name="C_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 # scene_mngr.add_object(name="D_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
@@ -64,7 +61,7 @@ scene_mngr.add_robot(robot, robot.init_qpos)
 scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
 scene_mngr.scene.logical_states["A_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["goal_box"]}
 scene_mngr.scene.logical_states["B_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["A_box"]}
-scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["B_box"]}
+# scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["B_box"]}
 # scene_mngr.scene.logical_states["C_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["E_box"]}
 scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
 scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
@@ -74,7 +71,7 @@ scene_mngr.scene.pick_obj_name = "C_box"
 # print(scene_mngr.scene.goal_boxes)
 print(scene_mngr.scene.get_objs_chain_list_from_bottom("goal_box"))
 
-# print(scene_mngr.scene.check_terminal_state_bench_1())
+print(scene_mngr.scene.check_terminal_state_bench_1())
 # print(scene_mngr.scene.succes_stacked_box_num)
 fig, ax = plt.init_3d_figure(name="Level wise 1")
 scene_mngr.render_objects(ax)

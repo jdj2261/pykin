@@ -70,6 +70,8 @@ class MCTS:
             self._search(state_node=0, depth=0)
             self.rewards.append(self.get_max_reward())
 
+            # if (i+1) % 40 == 0:
+            #     self.visualize_tree('Test', tree=self.tree)
     def _search(self, state_node, depth):
         cur_state_node = state_node
         cur_state:Scene = self.tree.nodes[cur_state_node][NodeData.STATE]
@@ -84,19 +86,23 @@ class MCTS:
             return reward
         
         if depth == self.max_depth:
+            reward = self.infeasible_reward
+            self._update_value(cur_state_node, reward)
             print(f"{sc.WARNING}Exceeded the maximum depth!!{sc.ENDC}")
-            return 0
+            return reward
         
         #? Select Logical Action
         #*======================================================================================================================== #
         cur_logical_action_node = self._select_logical_action_node(cur_state_node, cur_state, depth, self._sampling_method)
         cur_logical_action = None
+        
         #! [DEBUG]
         if self.debug_mode:
             self.visualize_tree("Next Logical Node", self.tree)
         
         next_state_node = None
         next_state = None
+        
         if cur_logical_action_node is not None:
             cur_logical_action = self.tree.nodes.get(cur_logical_action_node).get(NodeData.ACTION)
             
@@ -127,7 +133,7 @@ class MCTS:
             value = reward + discount_value + self.gamma * self._search(next_state_node, depth+1)
 
         self._update_value(cur_state_node, value)
-        print(f"{sc.MAGENTA}[Backpropagation]{sc.ENDC} Cur state Node : {cur_state_node}, Value : {np.round(value,3)}")
+        # print(f"{sc.MAGENTA}[Backpropagation]{sc.ENDC} Cur state Node : {cur_state_node}, Value : {np.round(value,3)}")
         if self.debug_mode:
             self.visualize_tree("Backpropagation", self.tree)
 
@@ -251,11 +257,7 @@ class MCTS:
         if cur_state_node != 0:
             action_node = [node for node in self.tree.predecessors(cur_state_node)][0]
             self._update_node(action_node, value)
-            
-            children = [node for node in self.tree.neighbors(cur_state_node)]
-            if children:
-                pass
-
+        
     def _update_node(self, node, reward):
         if node != 0:
             parent_node = [node for node in self.tree.predecessors(node)][0]
@@ -274,7 +276,7 @@ class MCTS:
         return False
 
     def _get_reward(self, cur_state:Scene=None, cur_logical_action:dict={}, next_state:Scene=None, depth=None, is_terminal:bool=False) -> float:
-        reward = -0.1
+        reward = -0.05
         if is_terminal:
             print(f"Terminal State! Reward is {self.goal_reward}")
             return self.goal_reward
@@ -288,69 +290,22 @@ class MCTS:
             return self.infeasible_reward
         
         logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
-            
-        if logical_action_type == 'place':
-            prev_succes_stacked_box_num = cur_state.succes_stacked_box_num
-            next_state_is_success = next_state.check_success_stacked_bench_1()
 
+        if logical_action_type == 'place':
+            prev_succes_stacked_box_num = cur_state.success_stacked_box_num
+            next_state_is_success = next_state.check_success_stacked_bench_1()
+            
             if next_state_is_success:
-                if next_state.succes_stacked_box_num - prev_succes_stacked_box_num == 1:
+                if next_state.stacked_box_num - prev_succes_stacked_box_num == 1:
                     print(f"{sc.COLOR_CYAN}Good Action{sc.ENDC}")
                     return abs(reward)
-                    # return np.exp(-(depth+1)) * 500
-                if next_state.succes_stacked_box_num - prev_succes_stacked_box_num == -1:
+                if next_state.stacked_box_num - prev_succes_stacked_box_num == -1:
                     print(f"{sc.FAIL}Bad Action{sc.ENDC}")
-                    return reward
+                    return reward * 2
             else:
                 print(f"{sc.WARNING}Wrong Action{sc.ENDC}")
                 return reward
         return 0
-
-    # def _get_reward(self, cur_state:Scene=None, cur_logical_action:dict={}, next_state:Scene=None, depth=None, is_terminal:bool=False) -> float:
-    #     reward = 0
-    #     scaler = 10000
-    #     if cur_state is not None:
-    #         if is_terminal:
-    #             # reward = 10 * (self.max_depth - depth)
-    #             reward = 10000 * (self.max_depth - depth + 1)
-    #             return reward / scaler
-    #         else:
-    #             if cur_logical_action is None:
-    #                 # reward = -1 * depth
-    #                 reward = -10 * depth
-    #                 return reward / scaler
-
-    #             if next_state is None:
-    #                 # reward = -1 * depth
-    #                 reward = -10 * depth
-    #                 return reward / scaler
-
-    #             if next_state is not None:
-    #                 logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
-                    
-    #                 if logical_action_type == 'pick':
-    #                     prev_succes_stacked_box_num = cur_state.succes_stacked_box_num
-    #                     next_is_success, next_stacked_num = next_state.check_success_stacked_bench_1()
-
-    #                     if next_is_success:
-    #                         if next_stacked_num - prev_succes_stacked_box_num == 1:
-    #                             print("Good Action")
-    #                             # reward = 10 * (self.max_depth - depth)
-    #                             # reward = np.exp(-depth) * 10000 * next_stacked_num
-    #                             reward = np.exp(-(depth+1)) * 500000
-    #                             # reward = pow(2, (self.max_depth - depth)/2) * 100 / depth
-    #                             # reward = (depth - self.max_depth)**4
-    #                             print(reward, scaler * 0.1 * (self.max_depth - depth))
-    #                             reward = np.clip(reward, scaler * 0.1 * (self.max_depth - depth), float('inf'))
-    #                         if next_stacked_num - prev_succes_stacked_box_num == -1:
-    #                             print("Bad Action") 
-    #                             reward = -5 * depth * prev_succes_stacked_box_num
-    #                             # reward = (-5 * depth) / scaler
-    #                     else:
-    #                         print("Wrong Action")
-    #                         reward = -5 * depth
-    #                     return reward / scaler
-    #     return reward / scaler
 
     def get_nodes_from_leaf_node(self, leaf_node):
         parent_nodes = [node for node in self.tree.predecessors(leaf_node)]
@@ -457,7 +412,11 @@ class MCTS:
         plt.show()
 
     def render_state(self, title, state):
-        fig, ax = p_utils.init_3d_figure(name=title)
+
+        ax = None
+        if self.scene_mngr.is_pyplot is True:
+            fig, ax = p_utils.init_3d_figure(name=title)
+
         self.pick_action.scene_mngr.render_objects_and_gripper(ax, state)
         self.pick_action.show()
 

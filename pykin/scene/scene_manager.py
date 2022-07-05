@@ -68,6 +68,7 @@ class SceneManager:
                 "robot {} already exists".format(robot.robot_name)
             )
         self._scene.robot = robot
+        self._scene.robot.set_transform(robot.init_qpos)
         
         if np.array(thetas).size != 0:
             self._scene.robot.set_transform(thetas)
