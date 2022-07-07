@@ -52,22 +52,38 @@ class PickAction(ActivityBase):
     def get_grasp_pose_from_heuristic(self, obj_name, dis_z=0.01):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
-        center_point = copied_mesh.center_mass
-
-        for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 1):
-            tcp_pose = np.eye(4)
-            tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
-            tcp_pose[:3,1] = [0, 1, 0]
-            tcp_pose[:3,2] = [-np.sin(theta), 0, np.cos(theta)]
-            tcp_pose[:3,3] = center_point + [0, 0, dis_z]
-
-            grasp_pose = {}
-            grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
-            grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
-            grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])        
         
-            yield grasp_pose
+        if "box" in obj_name:
+            center_point = copied_mesh.center_mass
+            for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 1):
+                tcp_pose = np.eye(4)
+                tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
+                tcp_pose[:3,1] = [0, 1, 0]
+                tcp_pose[:3,2] = [-np.sin(theta), 0, np.cos(theta)]
+                tcp_pose[:3,3] = center_point + [0, 0, dis_z]
 
+                grasp_pose = {}
+                grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+                grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
+                grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])        
+            
+                yield grasp_pose
+
+        if "bottle" in obj_name:
+            center_point = copied_mesh.bounds[0] + (copied_mesh.bounds[1] - copied_mesh.bounds[0])/2
+            for theta in np.linspace(-np.pi+np.pi/(2.2), -np.pi/(2.2), 3):
+                tcp_pose = np.eye(4)
+                tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
+                tcp_pose[:3,1] = [0, 1, 0]
+                tcp_pose[:3,2] = [-np.sin(theta), 0, np.cos(theta)]
+                tcp_pose[:3,3] = center_point + [0, 0, 0.005]
+
+                grasp_pose = {}
+                grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
+                grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
+                grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])        
+            
+                yield grasp_pose
     # Not Expand, only check possible action using ik
     def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:
         self.deepcopy_scene(scene)

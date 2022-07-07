@@ -191,6 +191,7 @@ class RRTStarPlanner(Planner):
             if cnt > total_cnt:
                 logger.error(f"Failed Generate Path.. The number of retries of {cnt} exceeded")    
                 self.tree = None
+                self._scene_mngr.render_debug(title="Excess")
                 break
             self._max_iter += 100
 

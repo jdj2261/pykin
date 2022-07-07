@@ -52,8 +52,8 @@ scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
 scene_mngr.update_logical_states(init=True)
 
 
-pick = PickAction(scene_mngr, n_contacts=6, n_directions=3)
-place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
+pick = PickAction(scene_mngr, n_contacts=0, n_directions=1)
+place = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=1)
 
 pick_actions = list(pick.get_possible_actions_level_1())
 # fig, ax = plt.init_3d_figure(name="Level wise 1")

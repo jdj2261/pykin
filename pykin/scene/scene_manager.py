@@ -17,7 +17,7 @@ class SceneManager:
         geom="collision", 
         is_pyplot=True, 
         scene:Scene=None,
-        benchmark:dict={1 : {'stack_num': 3, 'goal_box':'goal_box'}}
+        benchmark:dict={1 : {'stack_num': 3, 'goal_object':'goal_box'}}
     ):
         # Element for Scene
         self.geom = geom
@@ -30,6 +30,7 @@ class SceneManager:
 
         self.attached_obj_name = None
         self.save_grasp_pose = {}
+        
         # Collision Manager
         self.obj_collision_mngr = CollisionManager()
         self.robot_collision_mngr = None
@@ -290,6 +291,10 @@ class SceneManager:
             self.render.render_axis(ax, self.scene.grasp_poses["grasp"])
             self.render.render_axis(ax, self.scene.grasp_poses["pre_grasp"])
             self.render.render_axis(ax, self.scene.grasp_poses["post_grasp"])
+        if self.scene.release_poses:
+            self.render.render_axis(ax, self.scene.release_poses["release"])
+            self.render.render_axis(ax, self.scene.release_poses["pre_release"])
+            self.render.render_axis(ax, self.scene.release_poses["post_release"])
         self.show()
 
     def render_scene(
@@ -422,7 +427,7 @@ class SceneManager:
         eef_poses=[], 
         visible_gripper=False,
         visible_text=True,
-        interval=1,
+        interval=50,
         repeat=True,
         pick_object=None,
         attach_idx:list = None,

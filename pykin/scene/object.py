@@ -19,7 +19,7 @@ class Object:
         self.gtype = gtype
         self.gparam = gparam
         self.h_mat = h_mat
-        self.color = color
+        self.color = np.asarray(color, dtype=np.float32)
         
         self._check_gtype(gtype)
         self._check_gparam(gtype, gparam)

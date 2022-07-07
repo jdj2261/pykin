@@ -22,36 +22,39 @@ robot = SingleArm(
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 robot.init_qpos = np.array([0, np.pi / 16.0, 0.00, -np.pi / 2.0 - np.pi / 3.0, 0.00, np.pi - 0.2, -np.pi/4])
 
-red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
-blue_box_pose = Transform(pos=np.array([0.6, 0.35, 0.77]))
-green_box_pose = Transform(pos=np.array([0.6, 0.05, 0.77]))
+
+bottle_meshes = []
+for i in range(3):
+    bottle_meshes.append(get_object_mesh('bottle.stl'))
+
+bottle_pose1 = Transform(pos=np.array([0.6, 0.2, 0.74 + abs(bottle_meshes[0].bounds[0][2])]))
+bottle_pose2 = Transform(pos=np.array([0.6, 0.35, 0.74 + abs(bottle_meshes[0].bounds[0][2])]))
+bottle_pose3 = Transform(pos=np.array([0.6, 0.05, 0.74 + abs(bottle_meshes[0].bounds[0][2])]))
+
 support_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([0.4, 0.24, 0.0]))
 
-red_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-blue_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
-green_cube_mesh = get_object_mesh('ben_cube.stl', 0.06)
 goal_box_mesh = get_object_mesh('goal_box.stl', 0.001)
 table_mesh = get_object_mesh('custom_table.stl', 0.01)
 
 scene_mngr = SceneManager("collision", is_pyplot=True)
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
-scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=red_box_pose.h_mat, color=[1.0, 0.0, 0.0])
-scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
-scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
+scene_mngr.add_object(name="bottle1", gtype="mesh", gparam=bottle_meshes[0], h_mat=bottle_pose1.h_mat, color=[1.0, 0.0, 0.0])
+scene_mngr.add_object(name="bottle2", gtype="mesh", gparam=bottle_meshes[1], h_mat=bottle_pose2.h_mat, color=[0.0, 0.0, 1.0])
+scene_mngr.add_object(name="bottle3", gtype="mesh", gparam=bottle_meshes[2], h_mat=bottle_pose3.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-scene_mngr.set_logical_state("goal_box", ("on", "table"))
-scene_mngr.set_logical_state("red_box", ("on", "table"))
-scene_mngr.set_logical_state("blue_box", ("on", "table"))
-scene_mngr.set_logical_state("green_box", ("on", "table"))
-scene_mngr.set_logical_state("table", ("static", True))
-scene_mngr.set_logical_state(scene_mngr.gripper_name, ("holding", None))
-scene_mngr.update_logical_states(init=True)
+scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["bottle1"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["bottle2"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["bottle3"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
+scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
+scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
+scene_mngr.update_logical_states()
 
-pick = PickAction(scene_mngr, n_contacts=5, n_directions=50)
-place = PlaceAction(scene_mngr, n_samples_held_obj=5, n_samples_support_obj=50)
+pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
+place = PlaceAction(scene_mngr, release_distance=0.005,n_samples_held_obj=1, n_samples_support_obj=1)
 
 pnp_joint_all_pathes = []
 place_all_object_poses = []
@@ -59,7 +62,7 @@ pick_all_objects = []
 success_joint_path = False
 # pick
 # step 1. action[type] == pick
-pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "green_box")
+pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "bottle1")
 
 cnt = 0
 for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
@@ -67,7 +70,7 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
     if ik_solve:
         pick_joint_path = pick.get_possible_joint_path_level_3(scene=pick_scene, grasp_poses=grasp_pose)
         if pick_joint_path:
-            place_action = place.get_action_level_1_for_single_object("goal_box", "green_box", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
+            place_action = place.get_action_level_1_for_single_object("goal_box", "bottle1", pick_scene.robot.gripper.grasp_pose, scene=pick_scene)
             for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
                 ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
                 if ik_solve:

@@ -31,7 +31,6 @@ disk_mesh_bound = get_mesh_bounds(mesh=disk_mesh)
 disk_heigh = disk_mesh_bound[1][2] - disk_mesh_bound[0][2]
 table_height = table_mesh.bounds[1][2] - table_mesh.bounds[0][2]
 
-
 table_pose = Transform(pos=np.array([1.0, -0.4, -0.03]))
 cylinder1_pose = Transform(pos=np.array([0.6, -0.25, table_height + cylinder_mesh_bound[1][2]]))
 cylinder2_pose = Transform(pos=np.array([0.6, 0, table_height + cylinder_mesh_bound[1][2]]))

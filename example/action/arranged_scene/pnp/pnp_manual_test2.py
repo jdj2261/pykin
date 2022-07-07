@@ -143,61 +143,61 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
 
 print(len(pnp_joint_all_pathes))
 print(pick_all_objects)
-# for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
-#     # fig, ax = plt.init_3d_figure( name="Level wise 3")
-#     result_joint = []
-#     eef_poses = []
-#     attach_idxes = []
-#     detach_idxes = []
+for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
+    # fig, ax = plt.init_3d_figure( name="Level wise 3")
+    result_joint = []
+    eef_poses = []
+    attach_idxes = []
+    detach_idxes = []
 
-#     attach_idx = 0
-#     detach_idx = 0
+    attach_idx = 0
+    detach_idx = 0
 
-#     grasp_task_idx = 0
-#     post_grasp_task_idx = 0
+    grasp_task_idx = 0
+    post_grasp_task_idx = 0
 
-#     release_task_idx = 0
-#     post_release_task_idx = 0
-#     cnt = 0
-#     for pnp_joint_path in pnp_joint_all_path:        
-#         for j, (task, joint_path) in enumerate(pnp_joint_path.items()):
-#             for k, joint in enumerate(joint_path):
-#                 cnt += 1
+    release_task_idx = 0
+    post_release_task_idx = 0
+    cnt = 0
+    for pnp_joint_path in pnp_joint_all_path:        
+        for j, (task, joint_path) in enumerate(pnp_joint_path.items()):
+            for k, joint in enumerate(joint_path):
+                cnt += 1
                 
-#                 if task == pick.move_data.MOVE_grasp:
-#                     grasp_task_idx = cnt
-#                 if task == pick.move_data.MOVE_post_grasp:
-#                     post_grasp_task_idx = cnt
+                if task == pick.move_data.MOVE_grasp:
+                    grasp_task_idx = cnt
+                if task == pick.move_data.MOVE_post_grasp:
+                    post_grasp_task_idx = cnt
                     
-#                 if post_grasp_task_idx - grasp_task_idx == 1:
-#                     attach_idx = grasp_task_idx
-#                     attach_idxes.append(attach_idx)
+                if post_grasp_task_idx - grasp_task_idx == 1:
+                    attach_idx = grasp_task_idx
+                    attach_idxes.append(attach_idx)
 
-#                 if task == place.move_data.MOVE_release:
-#                     release_task_idx = cnt
-#                 if task == place.move_data.MOVE_post_release:
-#                     post_release_task_idx = cnt
-#                 if post_release_task_idx - release_task_idx == 1:
-#                     detach_idx = release_task_idx
-#                     detach_idxes.append(detach_idx)
+                if task == place.move_data.MOVE_release:
+                    release_task_idx = cnt
+                if task == place.move_data.MOVE_post_release:
+                    post_release_task_idx = cnt
+                if post_release_task_idx - release_task_idx == 1:
+                    detach_idx = release_task_idx
+                    detach_idxes.append(detach_idx)
                 
-#                 result_joint.append(joint)
-#                 fk = pick.scene_mngr.scene.robot.forward_kin(joint)
-#                 eef_poses.append(fk[place.scene_mngr.scene.robot.eef_name].pos)
+                result_joint.append(joint)
+                fk = pick.scene_mngr.scene.robot.forward_kin(joint)
+                eef_poses.append(fk[place.scene_mngr.scene.robot.eef_name].pos)
 
-#     fig, ax = plt.init_3d_figure( name="Level wise 3")
-#     pick.scene_mngr.animation(
-#         ax,
-#         fig,
-#         init_scene=scene_mngr.scene,
-#         joint_path=result_joint,
-#         eef_poses=None,
-#         visible_gripper=True,
-#         visible_text=True,
-#         alpha=1.0,
-#         interval=1,
-#         repeat=False,
-#         pick_object = pick_all_object,
-#         attach_idx = attach_idxes,
-#         detach_idx = detach_idxes,
-#         place_obj_pose= place_all_object_pose)
+    fig, ax = plt.init_3d_figure( name="Level wise 3")
+    pick.scene_mngr.animation(
+        ax,
+        fig,
+        init_scene=scene_mngr.scene,
+        joint_path=result_joint,
+        eef_poses=None,
+        visible_gripper=True,
+        visible_text=True,
+        alpha=1.0,
+        interval=50,
+        repeat=False,
+        pick_object = pick_all_object,
+        attach_idx = attach_idxes,
+        detach_idx = detach_idxes,
+        place_obj_pose= place_all_object_pose)

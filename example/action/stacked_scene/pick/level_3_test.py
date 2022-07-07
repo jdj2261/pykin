@@ -110,7 +110,7 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
             only_visible_geom=True,
             visible_text=True,
             alpha=1.0,
-            interval=1,
+            interval=50,
             repeat=False,
             pick_object = pick_object,
             attach_idx = attach_idx,

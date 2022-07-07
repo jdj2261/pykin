@@ -80,6 +80,6 @@ scene_mngr.animation(
     eef_poses=target_eef_poses,
     visible_text=True,
     alpha=1,
-    interval=1,
+    interval=50,
     repeat=True
 )

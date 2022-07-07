@@ -30,8 +30,8 @@ class MCTS:
         self.node_data = NodeData
         self.scene_mngr = scene_mngr
         self.state = scene_mngr.scene
-        self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=1)
+        self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1, retreat_distance=0.02)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=10, release_distance=0.01)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -110,7 +110,7 @@ class MCTS:
                 print(f"{sc.COLOR_BROWN}[Action]{sc.ENDC} {sc.OKGREEN}Pick {cur_logical_action[self.pick_action.info.PICK_OBJ_NAME]}{sc.ENDC}")
             if cur_logical_action[self.pick_action.info.TYPE] == "place":
                 print(f"{sc.COLOR_BROWN}[Action]{sc.ENDC} {sc.OKGREEN}Place {cur_logical_action[self.pick_action.info.HELD_OBJ_NAME]} on {cur_logical_action[self.pick_action.info.PLACE_OBJ_NAME]}{sc.ENDC}")
-        
+
             #? Select Next State
             #*======================================================================================================================== #
             next_state_node = self._select_next_state_node(cur_logical_action_node, cur_state, cur_logical_action, depth, self._sampling_method)
@@ -120,6 +120,7 @@ class MCTS:
 
         #! [DEBUG]
         if self.debug_mode:
+            self.render_state("cur_state", cur_state)
             self.render_state("next_state", next_state)
         
         #? Get reward
@@ -294,22 +295,26 @@ class MCTS:
             print(f"Next state is None.. Reward is {self.infeasible_reward}")
             return self.infeasible_reward
 
-        logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
+        if self.scene_mngr.scene.bench_num == 1:
+            logical_action_type = cur_logical_action[self.pick_action.info.TYPE]
 
-        if logical_action_type == 'place':
-            prev_succes_stacked_box_num = cur_state.success_stacked_box_num
-            next_state_is_success = next_state.check_success_stacked_bench_1()
-            
-            if next_state_is_success:
-                if next_state.stacked_box_num - prev_succes_stacked_box_num == 1:
-                    print(f"{sc.COLOR_CYAN}Good Action{sc.ENDC}")
-                    return abs(reward)
-                if next_state.stacked_box_num - prev_succes_stacked_box_num == -1:
-                    print(f"{sc.FAIL}Bad Action{sc.ENDC}")
-                    return reward * 2
-            else:
-                print(f"{sc.WARNING}Wrong Action{sc.ENDC}")
-                return reward
+            if logical_action_type == 'place':
+                prev_succes_stacked_box_num = cur_state.success_stacked_box_num
+                next_state_is_success = next_state.check_success_stacked_bench_1()
+                
+                if next_state_is_success:
+                    if next_state.stacked_box_num - prev_succes_stacked_box_num == 1:
+                        print(f"{sc.COLOR_CYAN}Good Action{sc.ENDC}")
+                        return abs(reward)
+                    if next_state.stacked_box_num - prev_succes_stacked_box_num == -1:
+                        print(f"{sc.FAIL}Bad Action{sc.ENDC}")
+                        return reward * 2
+                else:
+                    print(f"{sc.WARNING}Wrong Action{sc.ENDC}")
+                    return reward
+        
+        if self.scene_mngr.scene.bench_num == 2:
+            return 0
         return 0
 
     def get_nodes_from_leaf_node(self, leaf_node):
@@ -450,7 +455,6 @@ class MCTS:
                 self.show_logical_action(node)
 
             init_theta = None
-            init_scene = None
             success_pnp = True
             pnp_joint_all_pathes = []
             place_all_object_poses = []
@@ -568,7 +572,7 @@ class MCTS:
                     visible_gripper=True,
                     visible_text=True,
                     alpha=1.0,
-                    interval=1,
+                    interval=50, #ms
                     repeat=False,
                     pick_object = pick_all_object,
                     attach_idx = attach_idxes,

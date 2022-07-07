@@ -2,6 +2,7 @@ import numpy as np
 import random
 from collections import OrderedDict
 from copy import deepcopy
+from torch import normal
 from trimesh import Trimesh, proximity
 
 import pykin.utils.action_utils as a_utils
@@ -36,8 +37,19 @@ class PlaceAction(ActivityBase):
             if sup_obj == held_obj:
                 continue
 
+            #? for benchmark 1
+            if "ceiling" in sup_obj:
+                continue
+
+            #? for benchmark 2
+            if "bin" in sup_obj or "bottle" in sup_obj:
+                continue
+        
+            if self.scene_mngr.scene.bench_num == 2 and sup_obj not in ["shelf_9"]:
+                continue
+            
             if sup_obj == self.scene_mngr.scene.place_obj_name:
-                if not "table" in sup_obj:
+                if sup_obj not in ["table", "shelf_9", "shelf_15"]:
                     continue
 
             if not any(logical_state in self.scene_mngr.scene.logical_states[sup_obj] for logical_state in self.filter_logical_states):
@@ -181,7 +193,7 @@ class PlaceAction(ActivityBase):
             held_obj_mesh.apply_transform(obj_pose_transformed)
             com = held_obj_mesh.center_mass
 
-            if not self._check_stability(next_scene, held_obj_name, com):
+            if not self._check_stability(next_scene, held_obj_name, com) and self.scene_mngr.scene.bench_num == 1:
                 continue
 
             yield next_scene
@@ -192,8 +204,9 @@ class PlaceAction(ActivityBase):
         transformed_eef_poses = list(self.get_transformed_eef_poses(support_obj_name, held_obj_name, eef_pose))
         
         for eef_pose, obj_pose_transformed in transformed_eef_poses:
-            if not self._check_support(support_obj_name, held_obj_name, obj_pose_transformed):
-                continue
+            if self.scene_mngr._scene.bench_num == 1:
+                if not self._check_support(support_obj_name, held_obj_name, obj_pose_transformed):
+                    continue
 
             release_pose = {}
             release_pose[self.move_data.MOVE_release] = eef_pose
@@ -312,16 +325,17 @@ class PlaceAction(ActivityBase):
 
         weights = self._get_weights_for_support_obj(copied_mesh)
         sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_sup_obj, weights)
-        
-        # heuristic
-        if not "table" in obj_name:
+        normals = np.tile(np.array([0., 0., 1.]), (normals.shape[0],1))
+
+        # TODO heuristic
+        if obj_name not in ["table", "shelf_9"]:
             center_upper_point = np.zeros(3)
             center_upper_point[0] = center_point[0] + random.uniform(-0.002, 0.002)
             center_upper_point[1] = center_point[1] + random.uniform(-0.002, 0.002)
             center_upper_point[2] = copied_mesh.bounds[1, 2]
             sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
             normals = np.append(normals, np.array([[0, 0, 1]]), axis=0)
-    
+            
         for point, normal_vector in zip(sample_points, normals):
             yield point, normal_vector, margin
 
@@ -340,12 +354,19 @@ class PlaceAction(ActivityBase):
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         center_point = copied_mesh.center_mass
 
-        weights = self._get_weights_for_held_obj(copied_mesh)
-        sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
-        
         center_upper_point = center_point
         center_upper_point[-1] = copied_mesh.bounds[0, 2]
         
+        if "bottle" in obj_name:
+            sample_points = np.array([center_upper_point])
+            normals = np.array([[0, 0, -1]])
+
+            for point, normal_vector in zip(sample_points, normals):
+                yield point, normal_vector
+
+        weights = self._get_weights_for_held_obj(copied_mesh)
+        sample_points, normals = self.get_surface_points_from_mesh(copied_mesh, self.n_samples_held_obj, weights)
+
         # heuristic
         sample_points = np.append(sample_points, np.array([center_upper_point]), axis=0)
         normals = np.append(normals, np.array([[0, 0, -1]]), axis=0)
@@ -364,8 +385,14 @@ class PlaceAction(ActivityBase):
         return weights
 
     def get_transformed_eef_poses(self, support_obj_name, held_obj_name, eef_pose=None):
+        bench_num = self.scene_mngr.scene.bench_num
+        if bench_num == 1:
+            alpha = 0.2
+        elif bench_num == 2:
+            alpha = 0.8
+        
         held_obj_pose = deepcopy(self.scene_mngr.scene.objs[held_obj_name].h_mat)
-        surface_points_for_sup_obj = list(self.get_surface_points_for_support_obj(support_obj_name))
+        surface_points_for_sup_obj = list(self.get_surface_points_for_support_obj(support_obj_name, alpha=alpha))
         surface_points_for_held_obj = list(self.get_surface_points_for_held_obj(held_obj_name))
     
         for support_obj_point, support_obj_normal, (min_x, max_x, min_y, max_y) in surface_points_for_sup_obj:
@@ -385,6 +412,12 @@ class PlaceAction(ActivityBase):
                     if not (min_x - 0.2 <= center_point[0] <= min_x):
                         continue
                     if not (min_y - 0.1 <= center_point[1] <= max_y + 0.1):
+                        continue
+                elif "shelf_9" in support_obj_name:
+                    center_point = copied_mesh.bounds[0] + (copied_mesh.bounds[1] - copied_mesh.bounds[0])/2
+                    if not (min_x + 0.05 <= center_point[0] <= max_x - 0.05):
+                        continue
+                    if not (min_y - 0.5 <= center_point[1] <= max_y - 0.5):
                         continue
                 else:
                     if not (min_x <= center_point[0] <= max_x):

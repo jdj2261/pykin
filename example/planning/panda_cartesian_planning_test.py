@@ -85,6 +85,6 @@ scene_mngr.animation(
     visible_gripper=True,
     visible_text=True,
     alpha=1.0,
-    interval=1,
+    interval=50,
     repeat=True
 )

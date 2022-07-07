@@ -24,15 +24,15 @@ bin_pose = Transform(pos=np.array([0.0, 1.0, 0.3864222]))
 bottle_meshes = []
 for i in range(6):
     bottle_meshes.append(get_object_mesh('bottle.stl'))
-bottle_pose1 = Transform(pos=np.array([1.05, 0, 1.29]))
-bottle_pose2 = Transform(pos=np.array([1.0, 0.05, 1.29]))
-bottle_pose3 = Transform(pos=np.array([1.0, -0.05,1.29]))
-bottle_pose4 = Transform(pos=np.array([0.95, 0.1, 1.29]))
-bottle_pose5 = Transform(pos=np.array([0.95, 0, 1.29]))
-bottle_pose6 = Transform(pos=np.array([0.95, -0.1, 1.29]))
+bottle_pose1 = Transform(pos=np.array([1.0, 0, 1.29]))
+bottle_pose2 = Transform(pos=np.array([0.95, 0.05, 1.29]))
+bottle_pose3 = Transform(pos=np.array([0.95, -0.05,1.29]))
+bottle_pose4 = Transform(pos=np.array([0.90, 0.1, 1.29]))
+bottle_pose5 = Transform(pos=np.array([0.90, 0, 1.29]))
+bottle_pose6 = Transform(pos=np.array([0.90, -0.1, 1.29]))
 
 benchmark_config = {2 : None}
-scene_mngr = SceneManager("visual", is_pyplot=False, benchmark=benchmark_config)
+scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
 
 """
 13, 8, 0

@@ -58,7 +58,7 @@ def create_logger(logger_name, logging_level="debug", file_name="test.log", is_s
     logger.addHandler(stream_handler)
 
     if is_save:
-        rotating_handler = logging.handlers.TimedRotatingFileHandler(file_name, when='h', interval=1, backupCount=0) 
+        rotating_handler = logging.handlers.TimedRotatingFileHandler(file_name, when='h', interval=50, backupCount=0) 
         rotating_handler.setFormatter(formatter)
         logger.addHandler(rotating_handler) 
 

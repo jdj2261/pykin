@@ -210,7 +210,7 @@ if best_nodes:
             visible_gripper=True,
             visible_text=True,
             alpha=1.0,
-            interval=1,
+            interval=50,
             repeat=False,
             pick_object = pick_all_object,
             attach_idx = attach_idxes,

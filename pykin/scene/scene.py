@@ -19,15 +19,21 @@ class Scene:
 
         self.benchmark_config:int = benchmark
         self.bench_num:int = list(self.benchmark_config.keys())[0]
-        
+        self.goal_object = 'goal_box'
+
         # TODO
         if self.bench_num == 1:
-            self.goal_box = self.benchmark_config[self.bench_num]["goal_box"]
+            if self.benchmark_config[self.bench_num].get("goal_object"):
+                self.goal_object = self.benchmark_config[self.bench_num]["goal_object"]
             self.goal_stacked_num:int = self.benchmark_config[self.bench_num]["stack_num"]
             self.alphabet_list:list = list(string.ascii_uppercase)[:self.goal_stacked_num]
             self.goal_boxes:list = [alphabet + '_box' for alphabet in self.alphabet_list]
             self.stacked_box_num = 0
             self.success_stacked_box_num = 0
+
+        if self.bench_num == 2 and self.benchmark_config[self.bench_num] is not None:
+            if self.benchmark_config[self.bench_num].get("goal_object"):
+                self.goal_object = self.benchmark_config[self.bench_num]["goal_object"]
 
         self.objs:dict = {}
         self.robot:SingleArm = None
@@ -75,7 +81,7 @@ class Scene:
         if self.bench_num == 1:
             return self.check_terminal_state_bench_1()
         if self.bench_num == 2:
-            pass
+            return self.check_terminal_state_bench_2()
         if self.bench_num == 3:
             pass
         if self.bench_num == 4:
@@ -90,7 +96,7 @@ class Scene:
     def check_success_stacked_bench_1(self, is_terminal=False):
         is_success = False
 
-        stacked_boxes = self.get_objs_chain_list_from_bottom(self.goal_box)[1:]
+        stacked_boxes = self.get_objs_chain_list_from_bottom(self.goal_object)[1:]
         stacked_box_num = len(stacked_boxes)
         self.stacked_box_num = stacked_box_num
 
@@ -110,3 +116,10 @@ class Scene:
         else:
             upper_obj = support_objs[0].name
             return [bottom_obj] + self.get_objs_chain_list_from_bottom(upper_obj)
+
+    def check_terminal_state_bench_2(self):
+        is_success = False
+        print(self.robot.gripper.attached_obj_name, self.goal_object)
+        if self.robot.gripper.attached_obj_name == self.goal_object:
+            is_success = True
+        return is_success

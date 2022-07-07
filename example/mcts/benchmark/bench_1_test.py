@@ -2,7 +2,7 @@ import numpy as np
 import sys, os
 import matplotlib.pyplot as plt
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
+pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
@@ -13,7 +13,7 @@ from pykin.utils.mesh_utils import get_object_mesh
 from pykin.search.mcts import MCTS
 import pykin.utils.plot_utils as p_utils
 
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = '../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -29,9 +29,9 @@ E_box_pose = Transform(pos=np.array([0.5, 0.15, 0.77]))
 F_box_pose = Transform(pos=np.array([0.5, 0.25, 0.77]))
 goal_box_pose = Transform(pos=np.array([0.6, -0.2, 0.77]), rot=np.array([0, np.pi/2, 0]))
 table_pose = Transform(pos=np.array([1.0, -0.4, -0.03]))
-ceiling_pose = Transform(pos=np.array([1.0, -0.4, 1.5]))
-tray_red_pose = Transform(pos=np.array([0.6, -0.5-0.3, 0.8]))
-tray_blue_pose = Transform(pos=np.array([0.6, 0.5, 0.8]))
+ceiling_pose = Transform(pos=np.array([1.1, -0.4, 1.5]))
+tray_red_pose = Transform(pos=np.array([0.6, -0.4-0.3, 0.9]))
+tray_blue_pose = Transform(pos=np.array([0.6, 0.4, 0.9]))
 
 box_meshes = []
 for i in range(6):
@@ -42,17 +42,16 @@ ceiling_mesh = get_object_mesh('ben_table_ceiling.stl')
 tray_red_mesh = get_object_mesh('ben_tray_red.stl')
 tray_blue_mesh = get_object_mesh('ben_tray_blue.stl')
 
-param = {'stack_num' : 6, 'goal_box' : "goal_box"}
+param = {'stack_num' : 3, 'goal_object' : "tray_red"}
 benchmark_config = {1 : param}
 
-scene_mngr = SceneManager("visual", is_pyplot=False, benchmark=benchmark_config)
+scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
 scene_mngr.add_object(name="A_box", gtype="mesh", gparam=box_meshes[0], h_mat=A_box_pose.h_mat, color=[1.0, 0.0, 0.0])
 scene_mngr.add_object(name="B_box", gtype="mesh", gparam=box_meshes[1], h_mat=B_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="C_box", gtype="mesh", gparam=box_meshes[2], h_mat=C_box_pose.h_mat, color=[0.0, 0.0, 1.0])
-scene_mngr.add_object(name="D_box", gtype="mesh", gparam=box_meshes[3], h_mat=D_box_pose.h_mat, color=[1.0, 1.0, 0.0])
-scene_mngr.add_object(name="E_box", gtype="mesh", gparam=box_meshes[4], h_mat=E_box_pose.h_mat, color=[0.0, 1.0, 1.0])
-scene_mngr.add_object(name="F_box", gtype="mesh", gparam=box_meshes[5], h_mat=F_box_pose.h_mat, color=[1.0, 0.0, 1.0])
-# scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=goal_box_pose.h_mat, color=[1.0, 1.0, 1.0])
+# scene_mngr.add_object(name="D_box", gtype="mesh", gparam=box_meshes[3], h_mat=D_box_pose.h_mat, color=[1.0, 1.0, 0.0])
+# scene_mngr.add_object(name="E_box", gtype="mesh", gparam=box_meshes[4], h_mat=E_box_pose.h_mat, color=[0.0, 1.0, 1.0])
+# scene_mngr.add_object(name="F_box", gtype="mesh", gparam=box_meshes[5], h_mat=F_box_pose.h_mat, color=[1.0, 0.0, 1.0])
 scene_mngr.add_object(name="table", gtype="mesh", gparam=table_mesh, h_mat=table_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="ceiling", gtype="mesh", gparam=ceiling_mesh, h_mat=ceiling_pose.h_mat, color=[0.39, 0.263, 0.129])
 scene_mngr.add_object(name="tray_red", gtype="mesh", gparam=tray_red_mesh, h_mat=tray_red_pose.h_mat, color=[1.0, 0, 0])
@@ -62,19 +61,28 @@ scene_mngr.add_robot(robot, robot.init_qpos)
 scene_mngr.set_logical_state("A_box", ("on", "table"))
 scene_mngr.set_logical_state("B_box", ("on", "table"))
 scene_mngr.set_logical_state("C_box", ("on", "table"))
-scene_mngr.set_logical_state("D_box", ("on", "table"))
-scene_mngr.set_logical_state("E_box", ("on", "table"))
-scene_mngr.set_logical_state("F_box", ("on", "table"))
-# scene_mngr.set_logical_state("goal_box", ("on", "table"))
+# scene_mngr.set_logical_state("D_box", ("on", "table"))
+# scene_mngr.set_logical_state("E_box", ("on", "table"))
+# scene_mngr.set_logical_state("F_box", ("on", "table"))
+scene_mngr.set_logical_state("ceiling", (scene_mngr.scene.logical_state.static, True))
+scene_mngr.set_logical_state("tray_red", (scene_mngr.scene.logical_state.static, True))
+scene_mngr.set_logical_state("tray_blue", (scene_mngr.scene.logical_state.static, True))
+
 scene_mngr.set_logical_state("table", (scene_mngr.scene.logical_state.static, True))
 scene_mngr.set_logical_state(scene_mngr.gripper_name, (scene_mngr.scene.logical_state.holding, None))
 scene_mngr.update_logical_states()
+
+# fig, ax = p_utils.init_3d_figure(name="Benchmark 1")
+# result, names = scene_mngr.collide_objs_and_robot(return_names=True)
+# print(names)
+# scene_mngr.render_scene(ax)
+# scene_mngr.show()
 
 mcts = MCTS(scene_mngr)
 mcts.debug_mode = False
 
 # 최대부터
-mcts.budgets = 1000
+mcts.budgets = 100
 mcts.max_depth = 20
 # mcts.exploration_c = 30
 mcts.exploration_c = 300
@@ -88,16 +96,12 @@ subtree = mcts.get_subtree()
 mcts.visualize_tree("MCTS", subtree)
 
 best_nodes = mcts.get_best_node(subtree)
-if best_nodes:
-    print("\nBest Action Node")
-    for node in best_nodes:
-        mcts.show_logical_action(node)
 
 rewards = mcts.rewards
 max_iter = np.argmax(rewards)
 print(max_iter)
-# plt.plot(rewards)
-# plt.show()
+plt.plot(rewards)
+plt.show()
 
 
 # Do planning
@@ -237,7 +241,7 @@ if best_nodes:
             visible_gripper=True,
             visible_text=True,
             alpha=1.0,
-            interval=1,
+            interval=50,
             repeat=False,
             pick_object = pick_all_object,
             attach_idx = attach_idxes,
