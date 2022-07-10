@@ -1,16 +1,20 @@
 import numpy as np
 import trimesh
 import yaml
+import os
 
 from pykin.robots.bimanual import Bimanual
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import apply_robot_to_scene
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
+
 file_path = 'urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 
-custom_fpath = '../../../asset/config/baxter_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/asset/config/baxter_init_params.yaml'
+print(custom_fpath)
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 
@@ -27,8 +31,7 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
-
-milk_path = "../../../asset/objects/meshes/milk.stl"
+milk_path = current_file_path + "/../../../pykin/asset/objects/meshes/milk.stl"
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()

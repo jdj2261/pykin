@@ -36,7 +36,7 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot)
 ############################# Render Test #############################
-custom_fpath = '../../../asset/config/ur5e_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/asset/config/ur5e_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]

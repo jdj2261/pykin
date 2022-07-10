@@ -199,7 +199,6 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
         
         if info[1] == "mesh":
             mesh_color = p_utils.get_mesh_color(robot, link, geom)
-            print(link, mesh_color)
             if len(info) > 4:
                 mesh_color = info[4]
             mesh.visual.face_colors = mesh_color

@@ -1,13 +1,14 @@
 import numpy as np
 import trimesh
+import os
 
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import apply_robot_to_scene
-from pykin.utils import plot_utils as p_utils
 from pykin.utils.kin_utils import ShellColors as sc
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 
 file_path = 'urdf/sawyer/sawyer.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
@@ -26,7 +27,7 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
         
-milk_path = "../../../asset/objects/meshes/milk.stl"
+milk_path = current_file_path + "/../../../pykin/asset/objects/meshes/milk.stl"
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()

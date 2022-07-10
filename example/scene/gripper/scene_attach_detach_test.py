@@ -20,7 +20,7 @@ robot.setup_link_name("panda_link_0", "panda_right_hand")
 
 file_path = 'urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
-custom_fpath = '../../../asset/config/panda_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]

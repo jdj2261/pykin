@@ -18,7 +18,7 @@ robot.setup_link_name("base", "right_wrist")
 robot.setup_link_name("base", "left_wrist")
 
 # set target joints angle
-custom_fpath = '../../../asset/config/baxter_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/asset/config/baxter_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 

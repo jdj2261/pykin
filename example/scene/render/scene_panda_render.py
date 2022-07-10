@@ -39,7 +39,7 @@ scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat
 scene_mngr.add_robot(robot)
 
 ############################# Render Test #############################
-custom_fpath = '../../../asset/config/panda_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
