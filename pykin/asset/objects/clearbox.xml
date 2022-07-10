@@ -1,0 +1,77 @@
+<mujoco model="clearbox">
+  <asset>
+    <mesh file="meshes/clearbox_0.stl" name="clearbox_0" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_1.stl" name="clearbox_1" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_2.stl" name="clearbox_2" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_3.stl" name="clearbox_3" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_4.stl" name="clearbox_4" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_5.stl" name="clearbox_5" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_6.stl" name="clearbox_6" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_7.stl" name="clearbox_7" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_8.stl" name="clearbox_8" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_9.stl" name="clearbox_9" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_10.stl" name="clearbox_10" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_11.stl" name="clearbox_11" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_12.stl" name="clearbox_12" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_13.stl" name="clearbox_13" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_14.stl" name="clearbox_14" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_15.stl" name="clearbox_15" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_16.stl" name="clearbox_16" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_17.stl" name="clearbox_17" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_18.stl" name="clearbox_18" scale="1 1 1"/>
+    <mesh file="meshes/clearbox_19.stl" name="clearbox_19" scale="1 1 1"/>
+    <texture file="../textures/yellow-plaster.png" name="dark-wood"/>
+    <material name="wood" reflectance="1.0"  texture="dark-wood" texuniform="true"/>
+  </asset>
+  <worldbody>
+    <body name="clearbox">
+      <body name="collision">
+        <geom pos="0 0 0" mesh="clearbox_0" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_1" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_2" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_3" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_4" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_5" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_6" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_7" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_8" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_9" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_10" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_11" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_12" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_13" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_14" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_15" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_16" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_17" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_18" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="clearbox_19" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="clearbox_0" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_1" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_2" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_3" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_4" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_5" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_6" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_7" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_8" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_9" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_10" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_11" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_12" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_13" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_14" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_15" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_16" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_17" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_18" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="clearbox_19" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+      </body>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.06" name="bottom_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 0.04" name="top_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0.025 0.025 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+</mujoco>

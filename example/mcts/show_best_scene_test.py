@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.scene.scene import Scene
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.search.mcts import MCTS
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -85,7 +85,7 @@ test = []
 test2 = []
 test3 = []
 for node in best_nodes:
-    fig, ax = plt.init_3d_figure(name="Level wise 1")
+    fig, ax = p_utils.init_3d_figure(name="Level wise 1")
     scene:Scene = mcts.tree.nodes[node]['state']
     if mcts.tree.nodes[node]['type'] == "action":
         continue

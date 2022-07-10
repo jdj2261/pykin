@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -65,13 +65,13 @@ for pick_action in pick_actions:
                 for place_scene in place.get_possible_transitions(scene=pick_scene, action=place_action):
                     ik_solve, release_poses = place.get_possible_ik_solve_level_2(scene=place_scene, release_poses=place_scene.release_poses)
                     if ik_solve:
-                        fig, ax = plt.init_3d_figure( name="all possible pick transitions")
+                        fig, ax = p_utils.init_3d_figure( name="all possible pick transitions")
                         place.scene_mngr.render_gripper(ax, pick_scene, alpha=0.9, only_visible_axis=False)
                         pick_scene.show_logical_states()    
                         place.scene_mngr.render_objects(ax, pick_scene)
                         place.scene_mngr.show()
 
-                        fig, ax = plt.init_3d_figure( name="all possible place transitions")
+                        fig, ax = p_utils.init_3d_figure( name="all possible place transitions")
                         place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
                         place_scene.show_logical_states()                                
                         place.scene_mngr.render_objects(ax, place_scene)

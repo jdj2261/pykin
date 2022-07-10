@@ -8,9 +8,6 @@ def handler(signum, frame):
 # Set the signal handler
 signal.signal(signal.SIGINT, handler)
 
-pykin_path = os.path.abspath(os.path.dirname(__file__)+"../" )
-sys.path.append(pykin_path)
-
 from pykin.robots.gripper import Gripper
 from pykin.kinematics.transform import Transform
 from pykin.kinematics.kinematics import Kinematics
@@ -31,18 +28,15 @@ class Robot(URDFModel):
         offset, 
         has_gripper
     ):
-        if not f_name:
-            f_name = pykin_path + "/asset/urdf/baxter/baxter.urdf"
-        
-        self.urdf_name = os.path.abspath(f_name)
-        self.mesh_path = os.path.abspath(f_name + "/../") + '/'
+        super(Robot, self).__init__(f_name)
+
         self._offset = offset
         if offset is None:
             self._offset = Transform()
         self.has_gripper = has_gripper
             
-        super(Robot, self).__init__(f_name)
-
+        self.urdf_name = os.path.abspath(self.file_path)
+        self.mesh_path = os.path.abspath(self.file_path + "/../") + '/'
         self.info = {}
         self.gripper = None
 

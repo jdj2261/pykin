@@ -1,17 +1,13 @@
 import numpy as np
-import sys, os
-
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -54,7 +50,7 @@ pick = PickAction(scene_mngr, n_contacts=1, n_directions=1)
 
 ################# Action Test ##################
 actions = list(pick.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure(name="Level wise 1")
+fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 for pick_actions in actions:
     for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
         pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
@@ -62,10 +58,10 @@ for pick_actions in actions:
         pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
         pick.scene_mngr.render_gripper(ax, pose=all_grasp_pose[pick.move_data.MOVE_grasp])
 pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
 pick.show()
 
-# fig, ax = plt.init_3d_figure( name="Level wise 2")
+# fig, ax = p_utils.init_3d_figure( name="Level wise 2")
 # for pick_actions in actions:
 #     for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
 #         ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
@@ -75,5 +71,5 @@ pick.show()
 #             pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_post_grasp])
             
 # pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
+# p_utils.plot_basis(ax)
 # pick.show()

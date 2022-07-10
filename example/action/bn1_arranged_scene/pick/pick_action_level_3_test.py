@@ -9,7 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -83,7 +83,7 @@ for step, (all_joint_pathes, pick_object, pick_object_pose) in enumerate(zip(pic
         cnt = 0
         result_joint = []
         eef_poses = []
-        fig, ax = plt.init_3d_figure( name="Level wise 3")
+        fig, ax = p_utils.init_3d_figure( name="Level wise 3")
         for j, (task, joint_path) in enumerate(all_joint_path.items()):
             for k, joint in enumerate(joint_path):
                 cnt += 1

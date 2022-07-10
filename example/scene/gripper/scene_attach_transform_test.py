@@ -2,17 +2,15 @@ import numpy as np
 import sys, os
 import yaml
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.utils.transform_utils import get_matrix_from_rpy
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -50,18 +48,18 @@ r_mat = get_matrix_from_rpy(np.array([0, np.pi/2, 0]))
 grasp_pose[:3, :3] = r_mat
 grasp_pose[:3, 3] = grasp_pose[:3, 3] - [0.1, 0, 0]
 
-fig, ax = plt.init_3d_figure( name="Move grasp pose")
+fig, ax = p_utils.init_3d_figure( name="Move grasp pose")
 target_thetas = scene_mngr.compute_ik(grasp_pose)
 scene_mngr.set_robot_eef_pose(target_thetas)
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
-fig, ax = plt.init_3d_figure( name="Attach Object")
+fig, ax = p_utils.init_3d_figure( name="Attach Object")
 scene_mngr.attach_object_on_gripper("green_box", False)
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)
 scene_mngr.render_objects_and_gripper(ax, alpha=0.7)
 
-fig, ax = plt.init_3d_figure( name="Move default pose")
+fig, ax = p_utils.init_3d_figure( name="Move default pose")
 scene_mngr.set_gripper_pose(robot.init_fk["right_gripper"].h_mat)
 # scene_mngr.set_robot_eef_pose(init_qpos)
 # scene_mngr.render_scene(ax, only_visible_geom=True, alpha=0.7)

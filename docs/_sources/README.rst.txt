@@ -98,7 +98,7 @@ You can see 4 example robot information.
     import sys
 
     from pykin.robot import Robot
-    from pykin.utils import plot_utils as plt
+    from pykin.utils import plot_utils as p_utils
 
     file_path = '../../asset/urdf/baxter/baxter.urdf'
 
@@ -107,20 +107,20 @@ You can see 4 example robot information.
         file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
     robot = Robot(file_path)
 
-    fig, ax = plt.init_3d_figure("URDF")
+    fig, ax = p_utils.init_3d_figure("URDF")
 
     """
     Only baxter and sawyer robots can see collisions.
     It is not visible unless sphere, cylinder, and box are defined in collision/geometry tags in urdf.
     """
     # If only_visible_geom is True, visualize collision
-    plt.plot_robot(robot, 
+    p_utils.plot_robot(robot, 
                     transformations=robot.transformations,
                     ax=ax, 
                     name=robot.robot_name,
                     only_visible_geom=True)
     ax.legend()
-    plt.show_figure()
+    p_utils.show_figure()
 
 - Forward Kinematics
 
@@ -146,13 +146,13 @@ You can see 4 example robot information.
 
 ::
 
-    from pykin.kinematics import transform as tf from
+    from pykin.kinematics import transform as t_utils from
     pykin.robot import Robot
 
     # import jacobian from pykin.kinematics import jacobian as jac
 
     file\_path = '../asset/urdf/baxter/baxter.urdf' robot =
-    Robot(file\_path, tf.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
+    Robot(file\_path, t_utils.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
     left\_arm\_thetas = [0, 0, 0, 0, 0, 0, 0]
 

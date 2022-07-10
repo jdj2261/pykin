@@ -2,6 +2,8 @@ import io, os
 from xml.etree import ElementTree as ET
 from collections import OrderedDict
 
+pykin_path = os.path.abspath(os.path.dirname(__file__)+"/../" )
+
 from pykin.models.robot_model import RobotModel
 from pykin.geometry.frame import Joint, Link, Frame
 from pykin.geometry.geometry import Visual, Collision
@@ -20,10 +22,11 @@ class URDFModel(RobotModel):
     def __init__(self, f_name):
         super().__init__()
 
-        if not os.path.isfile(f_name):
-            raise FileNotFoundError(f'{f_name} is not Found..')
+        self.file_path = pykin_path + "/asset/" + f_name
+        if not os.path.isfile(self.file_path):
+            raise FileNotFoundError(f'{self.file_path} is not Found..')
 
-        self.tree_xml = ET.parse(f_name)
+        self.tree_xml = ET.parse(self.file_path)
         self.root = self.tree_xml.getroot()
         self.robot_name = self.root.attrib.get('name')
 

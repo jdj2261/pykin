@@ -8,8 +8,8 @@ from pykin.scene.object import Object
 from pykin.scene.render import RenderPyPlot, RenderTriMesh
 from pykin.robots.single_arm import SingleArm
 from pykin.collision.collision_manager import CollisionManager
-from pykin.utils.action_utils import get_relative_transform
-import pykin.utils.plot_utils as plt
+from pykin.utils.mesh_utils import get_relative_transform
+import pykin.utils.plot_utils as p_utils
 
 class SceneManager:
     def __init__(
@@ -292,7 +292,7 @@ class SceneManager:
         self._scene.show_logical_states()
 
     def render_debug(self, title="Error Scene"):
-        fig, ax = plt.init_3d_figure(name=title)
+        fig, ax = p_utils.init_3d_figure(name=title)
         self.render_scene(ax)
         if self.scene.grasp_poses:
             self.render.render_axis(ax, self.scene.grasp_poses["grasp"])

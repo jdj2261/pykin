@@ -1,7 +1,6 @@
 import numpy as np
 import sys, os
 import yaml
-
 pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
 sys.path.append(pykin_path)
 
@@ -11,9 +10,9 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 from pykin.utils.transform_utils import get_matrix_from_rpy
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
-fig, ax = plt.init_3d_figure()
+fig, ax = p_utils.init_3d_figure()
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(

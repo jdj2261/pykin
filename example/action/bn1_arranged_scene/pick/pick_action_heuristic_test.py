@@ -9,7 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -54,7 +54,7 @@ scene_mngr.update_logical_states()
 pick = PickAction(scene_mngr, n_contacts=5, n_directions=10)
 
 ################# Action Test ##################
-fig, ax = plt.init_3d_figure(name="Level wise 1")
+fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 
 pose = list(pick.get_grasp_pose_from_heuristic(obj_name="green_box"))
 
@@ -72,5 +72,5 @@ for i in range(len(pose)):
 #     # pick.scene_mngr.render_gripper(ax, pose=grasp_pose[pick.move_data.MOVE_grasp])
 
 pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
 pick.show()

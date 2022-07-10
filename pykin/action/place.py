@@ -5,7 +5,7 @@ from copy import deepcopy
 from torch import normal
 from trimesh import Trimesh, proximity
 
-import pykin.utils.action_utils as a_utils
+import pykin.utils.mesh_utils as m_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.log_utils import create_logger
@@ -397,7 +397,7 @@ class PlaceAction(ActivityBase):
     
         for support_obj_point, support_obj_normal, (min_x, max_x, min_y, max_y) in surface_points_for_sup_obj:
             for held_obj_point, held_obj_normal in surface_points_for_held_obj:
-                rot_mat = a_utils.get_rotation_from_vectors(held_obj_normal, -support_obj_normal)
+                rot_mat = m_utils.get_rotation_from_vectors(held_obj_normal, -support_obj_normal)
                 held_obj_point_transformed = np.dot(held_obj_point - held_obj_pose[:3, 3], rot_mat) + held_obj_pose[:3, 3]
                 
                 held_obj_pose_transformed, held_obj_pose_rotated = self._get_obj_pose_transformed(
@@ -460,7 +460,7 @@ class PlaceAction(ActivityBase):
 
             closest_points, _, _ = proximity.closest_point(support_obj_mesh, [com])
             closest_point = closest_points[0]
-            norm_vector = a_utils.normalize(closest_point - com)
+            norm_vector = m_utils.normalize(closest_point - com)
 
             safe_com = norm_vector[2] == -1.0
             if safe_com:

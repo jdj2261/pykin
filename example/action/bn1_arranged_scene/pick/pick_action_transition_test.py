@@ -9,7 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -55,18 +55,18 @@ pick = PickAction(scene_mngr, 6, 10)
 
 ################## Transitions Test Action 1 ##################
 actions = list(pick.get_possible_actions_level_1())
-# fig, ax = plt.init_3d_figure( name="all possible actions")
+# fig, ax = p_utils.init_3d_figure( name="all possible actions")
 # for action in actions:
 #     for idx, all_grasp_pose in enumerate(action[pick.info.GRASP_POSES]):    
         # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
 # pick.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
+# p_utils.plot_basis(ax)
 # pick.scene_mngr.show()
 
 
 for action in actions:
     for idx, pick_scene in enumerate(pick.get_possible_transitions(scene_mngr.scene, action=action)):
-        fig, ax = plt.init_3d_figure( name="all possible transitions")
+        fig, ax = p_utils.init_3d_figure( name="all possible transitions")
         pick.scene_mngr.render_gripper(ax, pick_scene, alpha=0.9, only_visible_axis=False)
         pick.scene_mngr.render_objects(ax, pick_scene)
         pick_scene.show_logical_states()
@@ -79,7 +79,7 @@ for action in actions:
 #         ik_solve = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
 #         if ik_solve is not None:
 #             for scene in pick.get_possible_transitions(scene_mngr.scene, action=action):
-#                 fig, ax = plt.init_3d_figure( name="all possible transitions")
+#                 fig, ax = p_utils.init_3d_figure( name="all possible transitions")
 #                 pick.scene_mngr.render_gripper(ax, scene, alpha=0.9, only_visible_axis=False)
 #                 pick.scene_mngr.render_objects(ax)
 #                 pick.scene_mngr.gripper_collision_mngr.show_collision_info()
@@ -93,4 +93,4 @@ for action in actions:
 
 ###### Transition about action level 1 #######
 
-# fig, ax = plt.init_3d_figure(name="Level wise 1")
+# fig, ax = p_utils.init_3d_figure(name="Level wise 1")

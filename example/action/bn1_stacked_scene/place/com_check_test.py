@@ -11,7 +11,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -70,7 +70,7 @@ held_obj_mesh:Trimesh = deepcopy(held_obj.gparam)
 held_obj_mesh.apply_transform(test)
 com = held_obj_mesh.center_mass
 
-fig, ax = plt.init_3d_figure(name="Test Com Check")
+fig, ax = p_utils.init_3d_figure(name="Test Com Check")
 is_stability = place._check_stability(copied_scene, "green_box", com)
 print(is_stability)
 

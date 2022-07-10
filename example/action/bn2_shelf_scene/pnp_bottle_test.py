@@ -1,8 +1,4 @@
 import numpy as np
-import sys, os
-
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
@@ -10,9 +6,9 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
@@ -92,7 +88,7 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
 # print(pnp_joint_all_pathes)
 
 for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
-    fig, ax = plt.init_3d_figure( name="Level wise 3")
+    fig, ax = p_utils.init_3d_figure( name="Level wise 3")
     result_joint = []
     eef_poses = []
     attach_idx_list = []

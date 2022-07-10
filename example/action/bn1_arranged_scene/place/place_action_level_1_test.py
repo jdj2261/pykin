@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -52,7 +52,7 @@ pick = PickAction(scene_mngr, n_contacts=3, n_directions=10)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 pick_actions = list(pick.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure(name="Level wise 1")
+fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
@@ -60,10 +60,10 @@ for pick_action in pick_actions:
             for all_release_pose, obj_pose in place_action[place.info.RELEASE_POSES]:
                 place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_release])
 place.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
 pick.show()
 
-# fig, ax = plt.init_3d_figure(name="Level wise 2")
+# fig, ax = p_utils.init_3d_figure(name="Level wise 2")
 # for pick_action in pick_actions:
 #     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
@@ -77,5 +77,5 @@ pick.show()
 #                     place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
 #                     # place.scene_mngr.render_gripper(ax, pose=release_pose[place.move_data.MOVE_release])
 # place.scene_mngr.render_objects(ax)
-# plt.plot_basis(ax)
+# p_utils.plot_basis(ax)
 # pick.show()

@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.scene.scene import Scene
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.search.mcts import MCTS
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -88,7 +88,7 @@ test = []
 test2 = []
 test3 = []
 for node in best_nodes:
-    # fig, ax = plt.init_3d_figure(name="Level wise 1")
+    # fig, ax = p_utils.init_3d_figure(name="Level wise 1")
     scene:Scene = mcts.tree.nodes[node]['state']
     if mcts.tree.nodes[node]['type'] == "action":
         continue
@@ -153,7 +153,7 @@ if success_pnp:
     pick_all_objects.append(test2)
     place_all_object_poses.append(test3)
     for pnp_joint_all_path, pick_all_object, place_all_object_pose in zip(pnp_joint_all_pathes, pick_all_objects, place_all_object_poses):
-        # fig, ax = plt.init_3d_figure( name="Level wise 3")
+        # fig, ax = p_utils.init_3d_figure( name="Level wise 3")
         result_joint = []
         eef_poses = []
         attach_idxes = []
@@ -197,7 +197,7 @@ if success_pnp:
     for node in best_nodes:
         mcts.show_logical_action(node)
 
-    fig, ax = plt.init_3d_figure( name="Level wise 3")
+    fig, ax = p_utils.init_3d_figure( name="Level wise 3")
     mcts.place_action.scene_mngr.animation(
         ax,
         fig,

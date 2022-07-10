@@ -1,0 +1,20 @@
+<mujoco model="hanoi_cylinder">
+  <asset>
+    <mesh file="meshes/hanoi_cylinder.stl" name="hanoi_cylinder_mesh" scale="0.5 0.5 1.0"/>
+  </asset>
+  <worldbody>
+    <body>
+      <body name="collision">
+        <geom pos="0 0 0" mesh="hanoi_cylinder_mesh" rgba="0.3 0.3 1 1" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="100" friction="0.95 0.3 0.1" group="1" condim="4"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="hanoi_cylinder_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="100" friction="0.95 0.3 0.1" group="0" condim="4"/>
+        <geom pos="0 0 0" mesh="hanoi_cylinder_mesh" type="mesh" solimp="0.998 0.998 0.001" solref="0.001 1" density="100" friction="0.95 0.3 0.1" group="1" condim="4"/>
+      <!-- <joint type="free" damping="0.0005"/> -->
+        <!-- <geom pos="0 0 0" mesh="can_mesh" type="mesh" material="coke"  conaffinity="0" contype="0" group="0" mass="0.0001"/> -->
+        <!-- <geom pos="0 0 0" mesh="can_mesh" type="mesh" material="coke"  conaffinity="0" contype="0" group="1" mass="0.0001"/> -->
+      </body>
+      
+    </body>
+  </worldbody>
+</mujoco>

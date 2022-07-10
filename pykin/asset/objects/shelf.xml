@@ -1,0 +1,77 @@
+<mujoco model="shelf">
+  <asset>
+    <mesh file="meshes/shelf_0.stl" name="shelf_0" scale="1 1 1"/>
+    <mesh file="meshes/shelf_1.stl" name="shelf_1" scale="1 1 1"/>
+    <mesh file="meshes/shelf_2.stl" name="shelf_2" scale="1 1 1"/>
+    <mesh file="meshes/shelf_3.stl" name="shelf_3" scale="1 1 1"/>
+    <mesh file="meshes/shelf_4.stl" name="shelf_4" scale="1 1 1"/>
+    <mesh file="meshes/shelf_5.stl" name="shelf_5" scale="1 1 1"/>
+    <mesh file="meshes/shelf_6.stl" name="shelf_6" scale="1 1 1"/>
+    <mesh file="meshes/shelf_7.stl" name="shelf_7" scale="1 1 1"/>
+    <mesh file="meshes/shelf_8.stl" name="shelf_8" scale="1 1 1"/>
+    <mesh file="meshes/shelf_9.stl" name="shelf_9" scale="1 1 1"/>
+    <mesh file="meshes/shelf_10.stl" name="shelf_10" scale="1 1 1"/>
+    <mesh file="meshes/shelf_11.stl" name="shelf_11" scale="1 1 1"/>
+    <mesh file="meshes/shelf_12.stl" name="shelf_12" scale="1 1 1"/>
+    <mesh file="meshes/shelf_13.stl" name="shelf_13" scale="1 1 1"/>
+    <mesh file="meshes/shelf_14.stl" name="shelf_14" scale="1 1 1"/>
+    <mesh file="meshes/shelf_15.stl" name="shelf_15" scale="1 1 1"/>
+    <mesh file="meshes/shelf_16.stl" name="shelf_16" scale="1 1 1"/>
+    <mesh file="meshes/shelf_17.stl" name="shelf_17" scale="1 1 1"/>
+    <mesh file="meshes/shelf_18.stl" name="shelf_18" scale="1 1 1"/>
+    <mesh file="meshes/shelf_19.stl" name="shelf_19" scale="1 1 1"/>
+    <texture file="../textures/yellow-plaster.png" name="dark-wood"/>
+    <material name="wood" reflectance="1.0"  texture="dark-wood" texuniform="true"/>
+  </asset>
+  <worldbody>
+    <body name="shelf">
+      <body name="collision">
+        <geom pos="0 0 0" mesh="shelf_0" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_1" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_2" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_3" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_4" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_5" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_6" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_7" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_8" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_9" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_10" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_11" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_12" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_13" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_14" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_15" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_16" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_17" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_18" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="shelf_19" type="mesh" density="5000" material="wood" group="1" condim="6"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="shelf_0" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_1" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_2" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_3" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_4" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_5" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_6" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_7" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_8" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_9" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_10" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_11" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_12" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_13" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_14" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_15" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_16" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_17" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_18" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="shelf_19" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+      </body>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.06" name="bottom_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 0.04" name="top_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0.025 0.025 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+</mujoco>

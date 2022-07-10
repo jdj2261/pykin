@@ -1,0 +1,22 @@
+<mujoco model="cubeA">
+  <asset>
+    <mesh file="meshes/ben_cube.stl" name="cubeA" scale="0.06 0.06 0.06"/>
+    <texture file="../textures/A.png" name="tex-A"/>
+    <material name="A" reflectance="1.0"  texture="tex-A" texuniform="true"/>
+  </asset>
+  <worldbody>
+    <body name="cubeA">
+      <body name="collision">
+        <!-- <geom pos="0 0 0" mesh="cubeA" type="mesh" density="5000" rgba="1 1 0 1" group="0" condim="6"/> -->
+        <geom pos="0 0 0" mesh="cubeA" type="mesh" solimp="0.998 0.998 0.001" rgba="1 1 1 1" solref="0.001 1" density="500" friction="0.95 0.3 0.1" material="A" group="0" condim="6"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="cubeA" type="mesh" density="5000" rgba="1 1 0 1" group="0" condim="6"/>
+        <geom pos="0 0 0" mesh="cubeA" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+      </body>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.06" name="bottom_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 0.04" name="top_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0.025 0.025 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+</mujoco>

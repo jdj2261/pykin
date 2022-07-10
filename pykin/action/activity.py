@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from copy import deepcopy
 
 from pykin.scene.scene_manager import SceneManager
-from pykin.utils.action_utils import surface_sampling
+from pykin.utils.mesh_utils import surface_sampling
 from pykin.planners.cartesian_planner import CartesianPlanner
 from pykin.planners.rrt_star_planner import RRTStarPlanner
 

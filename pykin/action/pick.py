@@ -2,10 +2,10 @@ import numpy as np
 from collections import OrderedDict
 from copy import deepcopy
 
-import pykin.utils.action_utils as a_utils
+import pykin.utils.mesh_utils as m_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
-from pykin.utils.action_utils import get_relative_transform
+from pykin.utils.mesh_utils import get_relative_transform
 from pykin.utils.transform_utils import get_rpy_from_matrix
 
 class PickAction(ActivityBase):
@@ -365,7 +365,7 @@ class PickAction(ActivityBase):
         vectorAB = vectorB - vectorA
         distance = np.linalg.norm(vectorAB)
 
-        unit_vectorAB = a_utils.normalize(vectorAB)
+        unit_vectorAB = m_utils.normalize(vectorAB)
         angle_A2AB = np.arccos(normalA.dot(unit_vectorAB))
 
         unit_vectorBA = -1 * unit_vectorAB
@@ -386,8 +386,8 @@ class PickAction(ActivityBase):
             center_point = (p1 + p2) /2
             line = p2 - p1
 
-            for _, grasp_dir in enumerate(a_utils.get_grasp_directions(line, self.n_directions)):
-                y = a_utils.normalize(line)
+            for _, grasp_dir in enumerate(m_utils.get_grasp_directions(line, self.n_directions)):
+                y = m_utils.normalize(line)
                 z = grasp_dir
                 x = np.cross(y, z)
 

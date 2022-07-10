@@ -1,6 +1,6 @@
 import numpy as np
 
-from pykin.utils import transform_utils as tf
+from pykin.utils import transform_utils as t_utils
 from pykin.utils.kin_utils import ShellColors as sc
 
 def convert_transform(origin):
@@ -40,7 +40,7 @@ class Transform:
         return f"Transform({sc.MAGENTA}pos{sc.ENDC}={self.pos}, {sc.MAGENTA}rot{sc.ENDC}={ self.rot})"
 
     def __mul__(self, other):
-        rot = tf.quaternion_multiply(self.rot, other.rot)
+        rot = t_utils.quaternion_multiply(self.rot, other.rot)
         pos = self._to_rotation_vec(self.rot, other.pos) + self.pos
         return Transform(pos, rot)
 
@@ -49,7 +49,7 @@ class Transform:
         Returns:
             Transform : inverse transform
         """
-        rot = tf.get_quaternion_inverse(self.rot)
+        rot = t_utils.get_quaternion_inverse(self.rot)
         pos = -self._to_rotation_vec(rot, self.pos)
         return Transform(pos, rot)
 
@@ -91,7 +91,7 @@ class Transform:
         Returns:
             np.array: rotation matrix
         """
-        return tf.get_rotation_matrix(self.rot)
+        return t_utils.get_rotation_matrix(self.rot)
 
     @property
     def h_mat(self):
@@ -99,7 +99,7 @@ class Transform:
         Returns:
             np.array: homogeneous matrix
         """
-        mat = tf.get_h_mat_from_quaternion(self.rot)
+        mat = t_utils.get_h_mat_from_quaternion(self.rot)
         mat[:3, 3] = self.pos
         return mat
 
@@ -116,8 +116,8 @@ class Transform:
             np.array: rotation vector
         """
         v4 = np.hstack([np.array([0.0]), vec])
-        inv_rot = tf.get_quaternion_inverse(rot)
-        ans = tf.quaternion_multiply(tf.quaternion_multiply(rot, v4), inv_rot)
+        inv_rot = t_utils.get_quaternion_inverse(rot)
+        ans = t_utils.quaternion_multiply(t_utils.quaternion_multiply(rot, v4), inv_rot)
         return ans[1:]
 
     @staticmethod
@@ -132,7 +132,7 @@ class Transform:
             np.array: rotation (quaternion)
         """
         if len(rot) == 3:
-            rot = tf.get_quaternion_from_rpy(rot, convention='wxyz')
+            rot = t_utils.get_quaternion_from_rpy(rot, convention='wxyz')
         elif len(rot) == 4:
             rot = np.array(rot)
         else:

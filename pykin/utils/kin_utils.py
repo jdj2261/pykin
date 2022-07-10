@@ -1,9 +1,7 @@
 import numpy as np
 import time
 import trimesh
-import pykin.utils.plot_utils as plt
-
-# from pykin.kinematics.transform import Transform
+import pykin.utils.plot_utils as p_utils
 
 JOINT_TYPE_MAP = {'revolute'  : 'revolute',
                   'fixed'     : 'fixed',
@@ -181,7 +179,7 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None):
 
     for link, info in robot.gripper.info.items():
         if info[1] == 'mesh':
-            mesh_color = plt.get_mesh_color(robot, link, 'collision')
+            mesh_color = p_utils.get_mesh_color(robot, link, 'collision')
             if len(info) > 4 :
                 mesh_color = info[4]
             mesh = info[2]
@@ -198,9 +196,10 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     for link, info in robot.info[geom].items():
         mesh = info[2]
         h_mat = info[3]
-
+        
         if info[1] == "mesh":
-            mesh_color = plt.get_mesh_color(robot, link, geom)
+            mesh_color = p_utils.get_mesh_color(robot, link, geom)
+            print(link, mesh_color)
             if len(info) > 4:
                 mesh_color = info[4]
             mesh.visual.face_colors = mesh_color
@@ -208,14 +207,20 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     
         if info[1] == "box":
             box_mesh = trimesh.creation.box(extents=info[2])
+            box_color = p_utils.get_mesh_color(robot, link, geom)
+            box_mesh.visual.face_colors = box_color
             trimesh_scene.add_geometry(box_mesh, transform=h_mat)
 
         if info[1] == "cylinder":
             capsule_mesh = trimesh.creation.cylinder(height=info[2][0], radius=info[2][1])
+            capsule_color = p_utils.get_mesh_color(robot, link, geom)
+            capsule_mesh.visual.face_colors = capsule_color
             trimesh_scene.add_geometry(capsule_mesh, transform=h_mat)
 
         if info[1] == "sphere":
             sphere_mesh = trimesh.creation.icosphere(radius=info[2])
+            sphere_color = p_utils.get_mesh_color(robot, link, geom)
+            sphere_mesh.visual.face_colors = sphere_color
             trimesh_scene.add_geometry(sphere_mesh, transform=h_mat)
     return trimesh_scene
 

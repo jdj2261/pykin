@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -57,13 +57,13 @@ pick = PickAction(scene_mngr, n_contacts=2, n_directions=3)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=5)
 
 pick_actions = list(pick.get_possible_actions_level_1())
-# fig, ax = plt.init_3d_figure(name="Level wise 1")
+# fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
         for place_action in place_actions:
             for place_scene in list(place.get_possible_transitions(scene=pick_scene, action=place_action)):
-                fig, ax = plt.init_3d_figure( name="all possible transitions")
+                fig, ax = p_utils.init_3d_figure( name="all possible transitions")
                 place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
                 place.scene_mngr.render_objects(ax, place_scene)
                 place_scene.show_logical_states()
@@ -71,7 +71,7 @@ for pick_action in pick_actions:
 
 
 # pick_actions = list(pick.get_possible_actions_level_1())
-# # fig, ax = plt.init_3d_figure(name="Level wise 1")
+# # fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 # for pick_action in pick_actions:
 #     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
@@ -80,19 +80,19 @@ for pick_action in pick_actions:
 #                 pick_actions2 = list(pick.get_possible_actions_level_1(place_scene))
 #                 for pick_action2 in pick_actions2:
 #                     for pick_scene_2 in pick.get_possible_transitions(place_scene, action=pick_action2):
-#                         fig, ax = plt.init_3d_figure( name="all possible transitions")
+#                         fig, ax = p_utils.init_3d_figure( name="all possible transitions")
 #                         pick.scene_mngr.render_gripper(ax, pick_scene_2, alpha=0.9, only_visible_axis=False)
 #                         pick.scene_mngr.render_objects(ax, pick_scene_2)
 #                         # place.scene_mngr.render_gripper(ax, place_scene, alpha=0.9, only_visible_axis=False)
 #                         # place.scene_mngr.render_objects(ax, place_scene)
                         
 #                         pick_scene_2.show_logical_states()
-#                         # plt.plot_basis(ax)
+#                         # p_utils.plot_basis(ax)
 #                         pick.show()
 
 
 # pick_actions = list(pick.get_possible_actions_level_1())
-# # fig, ax = plt.init_3d_figure(name="Level wise 1")
+# # fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 # for pick_action in pick_actions:
 #     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
 #         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
@@ -104,12 +104,12 @@ for pick_action in pick_actions:
 #                         place_actions2 = list(place.get_possible_actions_level_1(pick_scene_2))
 #                         for place_action2 in place_actions2:
 #                             for all_release_pose, obj_pose in place_action2[place.info.RELEASE_POSES]:
-#                                 fig, ax = plt.init_3d_figure(name="Level wise 2")
+#                                 fig, ax = p_utils.init_3d_figure(name="Level wise 2")
                                 # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_release])
                                 # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_pre_release])
                                 # place.scene_mngr.render.render_axis(ax, all_release_pose[place.move_data.MOVE_post_release])
 #                                 place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs[place.scene_mngr.scene.robot.gripper.attached_obj_name], obj_pose, alpha=0.3)
                                 # place.scene_mngr.render_gripper(ax, pose=all_release_pose[place.move_data.MOVE_release])
 #                                 place.scene_mngr.render_objects(ax)
-#                                 plt.plot_basis(ax)
+#                                 p_utils.plot_basis(ax)
 #                                 place.show()

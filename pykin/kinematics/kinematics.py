@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from pykin.kinematics import jacobian as jac
 from pykin.kinematics.transform import Transform
-from pykin.utils import transform_utils as tf
+from pykin.utils import transform_utils as t_utils
 from pykin.utils.kin_utils import calc_pose_error, convert_thetas_to_dict, logging_time
 
 
@@ -147,7 +147,7 @@ class Kinematics:
         EPS = float(1e-6)
         dof = len(current_joints)
 
-        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
+        target_pose = t_utils.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].h_mat
@@ -201,7 +201,7 @@ class Kinematics:
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
         Wn = np.eye(dof)
 
-        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
+        target_pose = t_utils.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].h_mat

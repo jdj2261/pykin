@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import offsetbox
+
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-from pykin.utils import transform_utils as tf
+from pykin.utils import transform_utils as t_utils
 
 
 def init_3d_figure(name=None, figsize=(12,8), dpi=100, visible_axis=False):
@@ -138,10 +137,13 @@ def plot_robot(
 
     if only_visible_geom:
         plot_geom(ax, robot, geom, alpha=alpha, color=color)
-        plot_attached_object(ax, robot, alpha)
+        
+        if robot.gripper.is_attached:
+            plot_attached_object(ax, robot, alpha)
         return
 
-    plot_attached_object(ax, robot, alpha)
+    if robot.gripper.is_attached:
+        plot_attached_object(ax, robot, alpha)
                     
     links = []
     nodes = []
@@ -156,7 +158,7 @@ def plot_robot(
 
     eef_idx = 0
     for i, (link, matrix) in enumerate(zip(links, transformation_matrix)):
-        nodes.append(tf.get_pos_mat_from_homogeneous(matrix))
+        nodes.append(t_utils.get_pos_mat_from_homogeneous(matrix))
         if link == robot.eef_name:
             eef_idx=i
 
@@ -179,14 +181,12 @@ def plot_robot(
     
 
 def plot_attached_object(ax, robot, alpha):
-    if robot.has_gripper:
-        if robot.gripper.is_attached:
-            plot_mesh(
-                ax, 
-                mesh=robot.gripper.info[robot.gripper.attached_obj_name][2], 
-                h_mat=robot.gripper.info[robot.gripper.attached_obj_name][3], 
-                alpha=alpha,
-                color=robot.gripper.info[robot.gripper.attached_obj_name][4])
+    plot_mesh(
+        ax, 
+        mesh=robot.gripper.info[robot.gripper.attached_obj_name][2], 
+        h_mat=robot.gripper.info[robot.gripper.attached_obj_name][3], 
+        alpha=alpha,
+        color=robot.gripper.info[robot.gripper.attached_obj_name][4])
 
 def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     """
@@ -236,10 +236,10 @@ def plot_objects(ax, objects, alpha=0.5):
         if o_type == "sphere":
             plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=alpha, color=info.color)
         if o_type == "box":
-            h_mat = tf.get_h_mat(o_pose)
+            h_mat = t_utils.get_h_mat(o_pose)
             plot_box(ax, size=o_param, h_mat=h_mat, alpha=alpha, color=info.color)
         if o_type == "cylinder":
-            h_mat = tf.get_h_mat(o_pose)
+            h_mat = t_utils.get_h_mat(o_pose)
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=info.color)
 
 
@@ -258,10 +258,10 @@ def plot_object(ax, obj, pose=None, alpha=0.5, color='k'):
     if o_type == "sphere":
         plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=alpha, color=obj.color)
     if o_type == "box":
-        h_mat = tf.get_h_mat(o_pose)
+        h_mat = t_utils.get_h_mat(o_pose)
         plot_box(ax, size=o_param, h_mat=h_mat, alpha=alpha, color=obj.color)
     if o_type == "cylinder":
-        h_mat = tf.get_h_mat(o_pose)
+        h_mat = t_utils.get_h_mat(o_pose)
         plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=obj.color)
 
 
@@ -285,8 +285,7 @@ def get_mesh_color(robot, link, geom, color=None):
         if geom == "collision":
             link = robot.links.get(link)
             if link is not None:
-                mesh_color = link.collision.gparam.get('color')
-            
+                mesh_color = link.collision.gparam.get('color')            
             if mesh_color is None:
                 mesh_color = np.array([0.2, 0.2, 0.2, 1])
             else:
@@ -309,6 +308,7 @@ def get_color(params):
         visual_color = params.get('color')
         if visual_color is not None:
             color = list(visual_color.keys())
+    color = check_color_type(color)
     return color
     
 
@@ -324,7 +324,7 @@ def plot_cylinder(
     """
     Plot cylinder
     """
-    color = check_color_type(color)
+    # color = check_color_type(color)
     axis_start = h_mat.dot(np.array([0, 0, -length/2, 1]))[:3]
     axis_end =  h_mat.dot(np.array([0, 0, length/2, 1]))[:3]
 
@@ -361,7 +361,7 @@ def plot_sphere(
     """
     Plot sphere
     """
-    color = check_color_type(color)
+    # color = check_color_type(color)
     phi, theta = np.mgrid[0.0:np.pi:n_steps * 1j, 0.0:2.0 * np.pi:n_steps * 1j]
     x = center_point[0] + radius * np.sin(phi) * np.cos(theta)
     y = center_point[1] + radius * np.sin(phi) * np.sin(theta)
@@ -374,7 +374,7 @@ def plot_box(ax=None, size=np.ones(3), alpha=1.0, h_mat=np.eye(4), color="k"):
     """
     Plot box
     """
-    color = check_color_type(color)
+    # color = check_color_type(color)
     
     if not isinstance(size, np.ndarray):
         size = np.array(size)

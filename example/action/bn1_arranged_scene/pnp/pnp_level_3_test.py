@@ -11,7 +11,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -104,7 +104,7 @@ for pick_action in pick_actions:
 result_path = pick_joint_all_path + place_joint_all_path
 print(len(result_path))
 
-fig, ax = plt.init_3d_figure( name="Level wise 3")
+fig, ax = p_utils.init_3d_figure( name="Level wise 3")
 result_joint = []
 eef_poses = []
 cnt = 0

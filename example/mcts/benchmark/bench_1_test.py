@@ -2,8 +2,7 @@ import numpy as np
 import sys, os
 import matplotlib.pyplot as plt
 
-pykin_path = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-sys.path.append(pykin_path)
+
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
@@ -27,7 +26,7 @@ debug_mode = args.debug_mode
 seed = args.seed
 np.random.seed(seed)
 
-file_path = '../../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 

@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -56,7 +56,7 @@ pick = PickAction(scene_mngr, n_contacts=5, n_directions=5)
 place = PlaceAction(scene_mngr, n_samples_held_obj=3, n_samples_support_obj=3)
 
 pick_actions = list(pick.get_possible_actions_level_1())
-# fig, ax = plt.init_3d_figure(name="Level wise 1")
+# fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 for pick_action in pick_actions:
     for pick_scene in pick.get_possible_transitions(scene_mngr.scene, action=pick_action):
         place_actions = list(place.get_possible_actions_level_1(pick_scene)) 
@@ -72,17 +72,17 @@ for pick_action in pick_actions:
                                     for pick_scene_3 in pick.get_possible_transitions(place_scene2, action=pick_action3):
                                         for place_action3 in list(place.get_possible_actions_level_1(pick_scene_3)):
                                             for place_scene3 in place.get_possible_transitions(pick_scene_3, action=place_action3):
-                                                fig, ax = plt.init_3d_figure( name="init scene")
+                                                fig, ax = p_utils.init_3d_figure( name="init scene")
                                                 place.scene_mngr.render_gripper(ax, place_scene2, alpha=0.9, only_visible_axis=False)
                                                 place.scene_mngr.render_objects(ax, place_scene2)
                                                 place.scene_mngr.show()
 
-                                                fig, ax = plt.init_3d_figure( name="all pick possible transitions")
+                                                fig, ax = p_utils.init_3d_figure( name="all pick possible transitions")
                                                 place.scene_mngr.render_gripper(ax, pick_scene_3, alpha=0.9, only_visible_axis=False)
                                                 place.scene_mngr.render_objects(ax, pick_scene_3)
                                                 place.scene_mngr.show()
                                                 
-                                                fig, ax = plt.init_3d_figure( name="all place possible transitions")
+                                                fig, ax = p_utils.init_3d_figure( name="all place possible transitions")
                                                 place.scene_mngr.render_gripper(ax, place_scene3, alpha=0.9, only_visible_axis=False)
                                                 place.scene_mngr.render_objects(ax, place_scene3)
                                                 place.scene_mngr.show()

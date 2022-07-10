@@ -2,7 +2,7 @@ import numpy as np
 
 from pykin.kinematics.transform import Transform
 from pykin.geometry.geometry import Visual, Collision
-from pykin.utils import transform_utils as tf
+from pykin.utils import transform_utils as t_utils
 from pykin.utils.kin_utils import ShellColors as scolors
 
 
@@ -155,7 +155,7 @@ class Frame:
             Transform: Compute transform by multiplying current joint offset and transfrom obtained from input angle
         """
         if self.joint.dtype == 'revolute':
-            t = Transform(rot=tf.get_quaternion_about_axis(theta, self.joint.axis))
+            t = Transform(rot=t_utils.get_quaternion_about_axis(theta, self.joint.axis))
         elif self.joint.dtype == 'prismatic':
             t = Transform(pos=theta * self.joint.axis)
         elif self.joint.dtype == 'fixed':

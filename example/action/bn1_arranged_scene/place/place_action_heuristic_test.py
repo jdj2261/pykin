@@ -10,7 +10,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
 from pykin.action.place import PlaceAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -56,7 +56,7 @@ place = PlaceAction(scene_mngr, n_samples_held_obj=1, n_samples_support_obj=1)
 
 ################# Action Test ##################
 
-fig, ax = plt.init_3d_figure(name="Level wise 1")
+fig, ax = p_utils.init_3d_figure(name="Level wise 1")
 pick_action = pick.get_action_level_1_for_single_object(scene_mngr.scene, "red_box")
 
 for grasp_pose in pick_action[pick.info.GRASP_POSES]:
@@ -68,5 +68,5 @@ for pick_scene in pick.get_possible_transitions(scene_mngr.scene, pick_action):
         place.scene_mngr.render.render_axis(ax, release_pose[place.move_data.MOVE_release])
         place.scene_mngr.render.render_object(ax, place.scene_mngr.scene.objs["red_box"], obj_pose)
 place.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
 place.show()

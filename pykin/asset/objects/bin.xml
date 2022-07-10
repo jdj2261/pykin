@@ -1,0 +1,77 @@
+<mujoco model="bin">
+  <asset>
+    <mesh file="meshes/bin_0.stl" name="bin_0" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_1.stl" name="bin_1" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_2.stl" name="bin_2" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_3.stl" name="bin_3" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_4.stl" name="bin_4" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_5.stl" name="bin_5" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_6.stl" name="bin_6" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_7.stl" name="bin_7" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_8.stl" name="bin_8" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_9.stl" name="bin_9" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_10.stl" name="bin_10" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_11.stl" name="bin_11" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_12.stl" name="bin_12" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_13.stl" name="bin_13" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_14.stl" name="bin_14" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_15.stl" name="bin_15" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_16.stl" name="bin_16" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_17.stl" name="bin_17" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_18.stl" name="bin_18" scale="0.9 0.9 0.9"/>
+    <mesh file="meshes/bin_19.stl" name="bin_19" scale="0.9 0.9 0.9"/>
+    <texture file="../textures/white-plaster.png" name="white-bricks"/>
+    <material name="white-bricks" reflectance="1.0"  texture="white-bricks" texuniform="true"/>
+  </asset>
+  <worldbody>
+    <body name="bin">
+      <body name="collision">
+        <geom pos="0 0 0" mesh="bin_0" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_1" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_2" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_3" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_4" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_5" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_6" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_7" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_8" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_9" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_10" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_11" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_12" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_13" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_14" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_15" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_16" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_17" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_18" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+        <geom pos="0 0 0" mesh="bin_19" type="mesh" density="5000" material="white-bricks" group="1" condim="6"/>
+      </body>
+      <body name="visual">
+        <geom pos="0 0 0" mesh="bin_0" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_1" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_2" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_3" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_4" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_5" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_6" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_7" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_8" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_9" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_10" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_11" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_12" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_13" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_14" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_15" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_16" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_17" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_18" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+        <geom pos="0 0 0" mesh="bin_19" type="mesh" rgba="0 1 0 1" conaffinity="0" contype="0" group="1" mass="0.0001"/>
+      </body>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 -0.06" name="bottom_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0 0 0.04" name="top_site"/>
+      <site rgba="0 0 0 0" size="0.005" pos="0.025 0.025 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+</mujoco>

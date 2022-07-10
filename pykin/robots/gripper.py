@@ -1,6 +1,6 @@
 import numpy as np
 from collections import OrderedDict
-from pykin.utils.action_utils import get_absolute_transform
+from pykin.utils.mesh_utils import get_absolute_transform
 
 class Gripper:
     def __init__(
