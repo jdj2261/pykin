@@ -6,6 +6,7 @@ import pykin.utils.action_utils as a_utils
 from pykin.action.activity import ActivityBase
 from pykin.scene.scene import Scene
 from pykin.utils.action_utils import get_relative_transform
+from pykin.utils.transform_utils import get_rpy_from_matrix
 
 class PickAction(ActivityBase):
     def __init__(
@@ -30,9 +31,12 @@ class PickAction(ActivityBase):
         for obj_name in self.scene_mngr.scene.objs:
             if obj_name == self.scene_mngr.scene.pick_obj_name:
                 continue
-            
+
+            if self.scene_mngr.scene.bench_num == 4 and "_6" not in obj_name:
+                continue
+
             if not any(logical_state in self.scene_mngr.scene.logical_states[obj_name] for logical_state in self.filter_logical_states):
-                # print(f"pick : {obj_name}")
+                print(f"pick : {obj_name}")
                 action_level_1 = self.get_action_level_1_for_single_object(obj_name=obj_name)
                 if not action_level_1[self.info.GRASP_POSES]:
                     continue
@@ -53,14 +57,23 @@ class PickAction(ActivityBase):
         copied_mesh = deepcopy(self.scene_mngr.scene.objs[obj_name].gparam)
         copied_mesh.apply_transform(self.scene_mngr.scene.objs[obj_name].h_mat)
         
-        if "box" in obj_name:
+        if "box" in obj_name or "hanoi_disk" in obj_name:
+            obj_pose = np.eye(4)
             center_point = copied_mesh.center_mass
-            for theta in np.linspace(-np.pi/12 + np.pi, np.pi/12 + np.pi, 1):
+            obj_pose[:3, :3] = self.scene_mngr.scene.objs[obj_name].h_mat[:3, :3]
+            
+            obj_pose[1,:3] = abs(obj_pose[1,:3])
+            obj_pose[0,:3] = np.cross(obj_pose[1,:3], obj_pose[2,:3])
+            obj_pose[:3, 3] = center_point + [0, 0, dis_z]
+        
+            for theta in np.linspace(np.pi, np.pi-np.pi/24, 1):
+            # for theta in np.linspace(0, np.pi*2, 50):
                 tcp_pose = np.eye(4)
                 tcp_pose[:3,0] = [np.cos(theta), 0, np.sin(theta)]
                 tcp_pose[:3,1] = [0, 1, 0]
                 tcp_pose[:3,2] = [-np.sin(theta), 0, np.cos(theta)]
-                tcp_pose[:3,3] = center_point + [0, 0, dis_z]
+                # tcp_pose[:3, 3] = center_point + [0, 0, dis_z]
+                tcp_pose = np.dot(obj_pose, tcp_pose)
 
                 grasp_pose = {}
                 grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
@@ -82,9 +95,9 @@ class PickAction(ActivityBase):
                 grasp_pose[self.move_data.MOVE_grasp] = self.scene_mngr.scene.robot.gripper.compute_eef_pose_from_tcp_pose(tcp_pose)
                 grasp_pose[self.move_data.MOVE_pre_grasp] = self.get_pre_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])
                 grasp_pose[self.move_data.MOVE_post_grasp] = self.get_post_grasp_pose(grasp_pose[self.move_data.MOVE_grasp])        
-            
                 yield grasp_pose
     # Not Expand, only check possible action using ik
+
     def get_possible_ik_solve_level_2(self, scene:Scene=None, grasp_poses:dict={}) -> bool:
         self.deepcopy_scene(scene)
         

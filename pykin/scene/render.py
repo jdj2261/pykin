@@ -49,7 +49,7 @@ class RenderTriMesh(SceneRender):
     def render_gripper(self, robot):
         self.scene = apply_gripper_to_scene(trimesh_scene=self.scene, robot=robot)
 
-    def render_point(self, ax=None, point=np.zeros(3), radius=0.01, color=[1.0, 0.0, 0.]):
+    def render_point(self, ax=None, point=np.zeros(3), radius=0.001, color=[1.0, 0.0, 0.]):
         pose = np.eye(4)
         pose[:3, 3] = point
         sphere_mesh = trimesh.creation.icosphere(radius=radius)

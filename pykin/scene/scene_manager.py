@@ -163,8 +163,15 @@ class SceneManager:
             raise ValueError("Expecting the shape of the pose to be (4,4), instead got: "
                              "{}".format(pose.shape))
 
-        self._scene.objs[name].h_mat = pose
-        self.obj_collision_mngr.set_transform(name, pose)
+        if "hanoi_disk" in name:
+            test = '_'.join(self._scene.objs[name].name.split('_')[:-1])
+            for j in range(7):
+                disk_name = test + "_" + str(j)
+                self._scene.objs[disk_name].h_mat = pose
+                self.obj_collision_mngr.set_transform(disk_name, pose)
+        else:
+            self._scene.objs[name].h_mat = pose
+            self.obj_collision_mngr.set_transform(name, pose)
 
     def compute_ik(self, pose=np.eye(4), method="LM", max_iter=100):
         if self._scene.robot is None:

@@ -65,6 +65,7 @@ def get_rpy_from_quaternion(q, convention='wxyz'):
     rpy = np.asarray([roll, pitch, yaw]).T  # (N,3)
     return rpy
 
+
 def get_matrix_from_rpy(rpy):
     """
     Returns rotation matrix from rpy

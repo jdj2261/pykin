@@ -32,7 +32,7 @@ bottle_pose5 = Transform(pos=np.array([0.90, 0, 1.29]))
 bottle_pose6 = Transform(pos=np.array([0.90, -0.1, 1.29]))
 
 benchmark_config = {2 : None}
-scene_mngr = SceneManager("collision", is_pyplot=True, benchmark=benchmark_config)
+scene_mngr = SceneManager("visual", is_pyplot=False, benchmark=benchmark_config)
 
 """
 13, 8, 0

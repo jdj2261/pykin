@@ -9,7 +9,7 @@ from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 from pykin.action.pick import PickAction
-import pykin.utils.plot_utils as plt
+import pykin.utils.plot_utils as p_utils
 
 file_path = '../../../../asset/urdf/panda/panda.urdf'
 robot = SingleArm(
@@ -43,39 +43,44 @@ scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
 scene_mngr.add_robot(robot, robot.init_qpos)
 
-scene_mngr.scene.logical_states["goal_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["red_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["blue_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["green_box"] = {scene_mngr.scene.logical_state.on : scene_mngr.scene.objs["table"]}
-scene_mngr.scene.logical_states["table"] = {scene_mngr.scene.logical_state.static : True}
-scene_mngr.scene.logical_states[scene_mngr.gripper_name] = {scene_mngr.scene.logical_state.holding : None}
-scene_mngr.update_logical_states()
+pick = PickAction(scene_mngr, 10, 50)
 
-pick = PickAction(scene_mngr, n_contacts=10, n_directions=10)
+###### All Contact Points #######
+fig, ax = p_utils.init_3d_figure(name="Get contact points")
+contact_points = pick.get_contact_points(obj_name="green_box")
+pick.scene_mngr.render.render_points(ax, contact_points)
+pick.scene_mngr.render_objects(ax, alpha=0.5)
+p_utils.plot_basis(ax)
 
-################# Action Test ##################
-actions = list(pick.get_possible_actions_level_1())
-fig, ax = plt.init_3d_figure(name="Level wise 1")
-for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]:
-        pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_grasp])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_pre_grasp])
-        # pick.scene_mngr.render.render_axis(ax, all_grasp_pose[pick.move_data.MOVE_post_grasp])
+##### All Grasp Pose #######
+grasp_poses = list(pick.get_all_grasp_poses("green_box"))
+fig, ax = p_utils.init_3d_figure(name="Get Grasp Pose")
+for grasp_pose in grasp_poses:
+    # pick.scene_mngr.render.render_axis(ax, grasp_pose["pre_grasp_pose"])
+    pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
+    # pick.scene_mngr.render.render_axis(ax, grasp_pose["post_grasp_pose"])
 pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
+# pick.show()
 
-fig, ax = plt.init_3d_figure( name="Level wise 2")
-cnt = 0
-for pick_actions in actions:
-    for all_grasp_pose in pick_actions[pick.info.GRASP_POSES]: 
-        ik_solve, grasp_pose = pick.get_possible_ik_solve_level_2(grasp_poses=all_grasp_pose)
-        if ik_solve is not None:
-            cnt += 1
-            pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
-            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_pre_grasp])
-            # pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_post_grasp])
-            
-print(cnt)
+# ###### Level wise - 1 #######
+fig, ax = p_utils.init_3d_figure(name="Level wise 1")
+grasp_poses_for_only_gripper = list(pick.get_all_grasp_poses_not_collision(grasp_poses))
+for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
+    pick.scene_mngr.render.render_axis(ax, grasp_pose_for_only_gripper[pick.move_data.MOVE_grasp])
+    pick.scene_mngr.render.render_axis(ax, grasp_pose_for_only_gripper[pick.move_data.MOVE_pre_grasp])
+    pick.scene_mngr.render.render_axis(ax, grasp_pose_for_only_gripper[pick.move_data.MOVE_post_grasp])
+    # pick.scene_mngr.render_gripper(ax, alpha=0.7, pose=grasp_pose_for_only_gripper[pick.move_data.MOVE_grasp])
 pick.scene_mngr.render_objects(ax)
-plt.plot_basis(ax)
+p_utils.plot_basis(ax)
+# pick.show()
+
+####### Level wise - 2 #######
+fig, ax = p_utils.init_3d_figure(name="Level wise 2")
+for grasp_pose_for_only_gripper in grasp_poses_for_only_gripper:
+    thetas, grasp_pose = pick.compute_ik_solve_for_robot(grasp_pose=grasp_pose_for_only_gripper)
+    if grasp_pose:
+        pick.scene_mngr.render.render_axis(ax, grasp_pose[pick.move_data.MOVE_grasp])
+pick.scene_mngr.render_objects(ax)
+p_utils.plot_basis(ax)
 pick.show()

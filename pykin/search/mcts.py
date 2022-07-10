@@ -30,8 +30,8 @@ class MCTS:
         self.node_data = NodeData
         self.scene_mngr = scene_mngr
         self.state = scene_mngr.scene
-        self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1, retreat_distance=0.02)
-        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=10, release_distance=0.01)
+        self.pick_action = PickAction(scene_mngr, n_contacts=0, n_directions=1)
+        self.place_action = PlaceAction(scene_mngr, n_samples_held_obj=0, n_samples_support_obj=10)
 
         self._sampling_method = sampling_method
         self._budgets = budgets
@@ -563,7 +563,7 @@ class MCTS:
                                 eef_poses.append(fk[self.place_action.scene_mngr.scene.robot.eef_name].pos)
 
                 fig, ax = p_utils.init_3d_figure( name="Level wise 3")
-                self.place_action.scene_mngr.animation(
+                self.scene_mngr.animation(
                     ax,
                     fig,
                     init_scene=self.scene_mngr.scene,

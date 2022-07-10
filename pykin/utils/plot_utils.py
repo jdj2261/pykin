@@ -6,13 +6,15 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as tf
 
 
-def init_3d_figure(name=None, figsize=(12,8), dpi=100):
+def init_3d_figure(name=None, figsize=(12,8), dpi=100, visible_axis=False):
     """
     Initializes 3d figure
     """
     fig = plt.figure(name, figsize=figsize, dpi= dpi)
     ax = fig.add_subplot(111, projection='3d')
-    ax.axis('off')
+
+    if not visible_axis:
+        ax.axis('off')
     fig.set_facecolor('beige')
     ax.set_facecolor('beige') 
     return fig, ax
@@ -227,7 +229,7 @@ def plot_objects(ax, objects, alpha=0.5):
         o_pose = info.h_mat
         if o_type == "mesh":
             if info.name in ["table", "tray", "shelf_9"]:
-                _alpha = 0.3
+                _alpha = 0.2
             else:
                 _alpha = alpha
             plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=_alpha, color=info.color)
