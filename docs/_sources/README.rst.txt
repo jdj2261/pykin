@@ -100,11 +100,11 @@ You can see 4 example robot information.
     from pykin.robot import Robot
     from pykin.utils import plot_utils as p_utils
 
-    file_path = '../../asset/urdf/baxter/baxter.urdf'
+    file_path = 'urdf/baxter/baxter.urdf'
 
     if len(sys.argv) > 1:
         robot_name = sys.argv[1]
-        file_path = '../../asset/urdf/' + robot_name + '/' + robot_name + '.urdf'
+        file_path = 'urdf/' + robot_name + '/' + robot_name + '.urdf'
     robot = Robot(file_path)
 
     fig, ax = p_utils.init_3d_figure("URDF")

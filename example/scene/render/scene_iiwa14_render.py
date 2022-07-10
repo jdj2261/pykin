@@ -9,8 +9,9 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
-fig, ax = p_utils.init_3d_figure()
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 
+fig, ax = p_utils.init_3d_figure()
 urdf_path = 'urdf/iiwa14/iiwa14.urdf'
 robot = SingleArm(
     f_name=urdf_path, 

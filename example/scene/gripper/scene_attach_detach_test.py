@@ -1,5 +1,5 @@
 import numpy as np
-import sys, os
+import os
 import yaml
 
 
@@ -11,6 +11,7 @@ from pykin.utils.transform_utils import get_matrix_from_rpy
 from pykin.utils.kin_utils import ShellColors as sc
 import pykin.utils.plot_utils as p_utils
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 

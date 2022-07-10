@@ -2,7 +2,6 @@ import numpy as np
 import sys, os
 import yaml
 
-
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
 from pykin.scene.scene_manager import SceneManager
@@ -12,6 +11,7 @@ import pykin.utils.plot_utils as p_utils
 fig, ax = p_utils.init_3d_figure()
 
 file_path = 'urdf/panda/panda.urdf'
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 

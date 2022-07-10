@@ -1,8 +1,6 @@
 import numpy as np
 import sys, os
 import yaml
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
-sys.path.append(pykin_path)
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
@@ -12,17 +10,17 @@ from pykin.utils.transform_utils import get_matrix_from_rpy
 from pykin.utils.kin_utils import ShellColors as sc
 import pykin.utils.plot_utils as p_utils
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 
 fig, ax = p_utils.init_3d_figure()
-
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 
     has_gripper=True)
 robot.setup_link_name("panda_link_0", "panda_right_hand")
 
-custom_fpath = '../../asset/config/panda_init_params.yaml'
+custom_fpath = current_file_path + '/../../pykin/asset/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]

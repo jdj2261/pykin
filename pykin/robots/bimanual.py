@@ -22,7 +22,8 @@ class Bimanual(Robot):
         
         self.info = {}
         self.info= super()._init_robot_info()
-
+        self._init_qpos = np.zeros(self.arm_dof)
+        
         if has_gripper:
             self.gripper.info = super()._init_gripper_info()
 
@@ -239,3 +240,10 @@ class Bimanual(Robot):
     def active_joint_names(self):
         return self._revolute_joint_names
         
+    @property
+    def init_qpos(self):
+        return self._init_qpos
+
+    @init_qpos.setter
+    def init_qpos(self, init_qpos):
+        self._init_qpos = init_qpos

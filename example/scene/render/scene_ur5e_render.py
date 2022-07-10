@@ -9,10 +9,10 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
+
+current_file_path = os.path.abspath(os.path.dirname(__file__))
 fig, ax = p_utils.init_3d_figure()
-
 file_path = 'urdf/ur5e/ur5e.urdf'
-
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 robot.setup_link_name("ur5e_base_link", "ur5e_right_hand")
 

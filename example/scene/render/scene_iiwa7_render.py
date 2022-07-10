@@ -9,6 +9,8 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
+
 fig, ax = p_utils.init_3d_figure()
 
 urdf_path = 'urdf/iiwa7/iiwa7.urdf'

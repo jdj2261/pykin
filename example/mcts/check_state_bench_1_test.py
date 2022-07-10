@@ -1,8 +1,7 @@
 import numpy as np
 import sys, os
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
-sys.path.append(pykin_path)
+
 
 from pykin.kinematics.transform import Transform
 from pykin.robots.single_arm import SingleArm
@@ -10,7 +9,7 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
-file_path = '../../asset/urdf/panda/panda.urdf'
+file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(
     f_name=file_path, 
     offset=Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]), 

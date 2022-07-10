@@ -1,8 +1,7 @@
 import numpy as np
 import sys, os
 
-pykin_path = os.path.dirname(os.path.dirname(os.getcwd()))
-sys.path.append(pykin_path)
+
 
 from pykin.kinematics.transform import Transform
 from pykin.scene.scene_manager import SceneManager

@@ -9,12 +9,18 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
+
 fig, ax = p_utils.init_3d_figure()
-
 file_path = 'urdf/sawyer/sawyer.urdf'
-
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 robot.setup_link_name("sawyer_base", "sawyer_right_hand")
+
+custom_fpath = current_file_path + '/../../../pykin/asset/config/sawyer_init_params.yaml'
+with open(custom_fpath) as f:
+    controller_config = yaml.safe_load(f)
+init_qpos = controller_config["init_qpos"]
+# robot.init_qpos = init_qpos
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))
@@ -34,16 +40,10 @@ scene_mngr.add_object(name="red_box", gtype="mesh", gparam=red_cube_mesh, h_mat=
 scene_mngr.add_object(name="blue_box", gtype="mesh", gparam=blue_cube_mesh, h_mat=blue_box_pose.h_mat, color=[0.0, 0.0, 1.0])
 scene_mngr.add_object(name="green_box", gtype="mesh", gparam=green_cube_mesh, h_mat=green_box_pose.h_mat, color=[0.0, 1.0, 0.0])
 scene_mngr.add_object(name="goal_box", gtype="mesh", gparam=goal_box_mesh, h_mat=support_box_pose.h_mat, color=[1.0, 0, 1.0])
-scene_mngr.add_robot(robot)
+scene_mngr.add_robot(robot, init_qpos)
 ############################# Render Test #############################
 
-custom_fpath = current_file_path + '/../../../pykin/asset/config/sawyer_init_params.yaml'
-with open(custom_fpath) as f:
-    controller_config = yaml.safe_load(f)
-init_qpos = controller_config["init_qpos"]
-
 scene_mngr.set_robot_eef_pose(init_qpos)
-
 scene_mngr.render_scene(ax)
 scene_mngr.show()
 

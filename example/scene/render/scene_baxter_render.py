@@ -9,10 +9,10 @@ from pykin.scene.scene_manager import SceneManager
 from pykin.utils.mesh_utils import get_object_mesh
 import pykin.utils.plot_utils as p_utils
 
+current_file_path = os.path.abspath(os.path.dirname(__file__))
+
 fig, ax = p_utils.init_3d_figure()
-
 file_path = 'urdf/baxter/baxter.urdf'
-
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 robot.setup_link_name("base", "right_wrist")
 robot.setup_link_name("base", "left_wrist")
@@ -21,9 +21,9 @@ robot.setup_link_name("base", "left_wrist")
 custom_fpath = current_file_path + '/../../../pykin/asset/config/baxter_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
-
 init_qpos = controller_config["init_qpos"]
 init_qpos = np.concatenate((np.zeros(1), np.array(init_qpos)))
+robot.init_qpos = init_qpos
 
 red_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77]))
 blue_box_pose = Transform(pos=np.array([0.6, 0.2, 0.77 + 0.06]))

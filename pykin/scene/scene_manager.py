@@ -69,10 +69,11 @@ class SceneManager:
                 "robot {} already exists".format(robot.robot_name)
             )
         self._scene.robot = robot
-        self._scene.robot.set_transform(robot.init_qpos)
         
         if np.array(thetas).size != 0:
             self._scene.robot.set_transform(thetas)
+        else:
+            self._scene.robot.set_transform(robot.init_qpos)
 
         self.robot_collision_mngr = CollisionManager(is_robot=True)
         self.robot_collision_mngr.setup_robot_collision(robot, geom=self.geom)
