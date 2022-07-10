@@ -16,11 +16,10 @@ setup(
     install_requires=[
         "numpy",
         "matplotlib",
-        "trimesh[easy]",
+        "trimesh==3.9.43",
         "tqdm",
         "pyyaml",
         "python-fcl",
-	    "networkx"
     ],
     eager_resources=['*'],
     include_package_data=True,
