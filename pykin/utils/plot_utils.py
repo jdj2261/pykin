@@ -170,7 +170,8 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     for link, info in robot.info[geom].items():
         h_mat = info[3]
         if info[1] == 'mesh':
-            for mesh in info[2]:
+            meshes = np.array([info[2]]).reshape(-1)
+            for mesh in meshes:
                 mesh_color = get_mesh_color(robot, link, geom, color)
                 plot_mesh(ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
 
