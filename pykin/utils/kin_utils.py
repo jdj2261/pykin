@@ -2,7 +2,7 @@ import numpy as np
 import re
 import time
 import trimesh
-import pykin.utils.plot_utils as p_utils
+from pykin.utils import plot_utils as p_utils
 
 JOINT_TYPE_MAP = {'revolute'  : 'revolute',
                   'fixed'     : 'fixed',

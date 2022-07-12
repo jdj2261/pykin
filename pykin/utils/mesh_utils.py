@@ -3,7 +3,7 @@ import trimesh
 import numpy as np
 from copy import deepcopy
 
-import pykin.utils.transform_utils as t_utils
+from pykin.utils import transform_utils as t_utils
 
 np.seterr(divide='ignore', invalid='ignore')
 
