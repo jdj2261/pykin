@@ -1,5 +1,4 @@
 import numpy as np
-import re
 import time
 import trimesh
 from pykin.utils import plot_utils as p_utils
@@ -84,10 +83,7 @@ def convert_string_to_narray(str_input):
     Returns:
         np.array: Returns string to np.array
     """
-    if str_input is not None:
-        str_list = re.split(' |, ', str_input)
-        return np.array([float(data) for data in str_list])
-
+    return np.array([float(data) for data in str_input.split()])
 
 def calc_pose_error(tar_pose, cur_pose, EPS):
     """
