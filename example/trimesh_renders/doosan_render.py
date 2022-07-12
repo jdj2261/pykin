@@ -18,6 +18,7 @@ robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 c_manager = CollisionManager(is_robot=True)
 c_manager.setup_robot_collision(robot, geom="visual")
 c_manager.show_collision_info()
+robot.setup_link_name("base_0", "link6")
 
 goal_qpos = np.array([ 0,  0, 0, 0,  0,  0])
 robot.set_transform(goal_qpos)

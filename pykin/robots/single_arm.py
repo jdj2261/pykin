@@ -201,6 +201,10 @@ class SingleArm(Robot):
     def eef_name(self):
         return self._eef_name
 
+    @eef_name.setter
+    def eef_name(self, eef_name):
+        self._eef_name = eef_name
+
     @property
     def active_joint_names(self):
         return self._revolute_joint_names
