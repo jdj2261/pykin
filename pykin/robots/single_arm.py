@@ -26,7 +26,7 @@ class SingleArm(Robot):
         self._set_joint_limits_upper_and_lower()
         self._init_qpos = np.zeros(self.arm_dof)
         
-        self.info= super()._init_robot_info()
+        self.info = self._init_robot_info()
 
         if has_gripper:
             self.gripper.info = super()._init_gripper_info()

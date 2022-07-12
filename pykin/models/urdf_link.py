@@ -1,3 +1,5 @@
+from copy import deepcopy
+from pykin.geometry.frame import Frame
 from pykin.utils.kin_utils import convert_string_to_narray, LINK_TYPES
 
 class URDF_Link:
@@ -5,7 +7,7 @@ class URDF_Link:
     Class of parsing link info described in URDF
     """
     @staticmethod
-    def _set_visual(elem_link, link_frame):
+    def _set_visual(elem_link, link_frame:Frame):
         """
         Set link visual
 
@@ -19,7 +21,7 @@ class URDF_Link:
             URDF_Link._set_visual_color(elem_visual, link_frame)
 
     @staticmethod
-    def _set_collision(elem_link, link_frame):
+    def _set_collision(elem_link, link_frame:Frame):
         """
         Set link collision
 
@@ -33,7 +35,7 @@ class URDF_Link:
             URDF_Link._set_collision_color(elem_collision, link_frame)
             
     @staticmethod
-    def _set_visual_origin(elem_visual, link_frame):
+    def _set_visual_origin(elem_visual, link_frame:Frame):
         """
         Set link visual's origin
         
@@ -46,7 +48,7 @@ class URDF_Link:
             link_frame.link.visual.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
 
     @staticmethod
-    def _set_visual_geometry(elem_visual, link_frame):
+    def _set_visual_geometry(elem_visual, link_frame:Frame):
         """
         Set link visual's geometry
 
@@ -55,20 +57,21 @@ class URDF_Link:
             link_frame (Frame): link frame
         """ 
 
-        def _set_link_visual_geom(shapes, link_frame):
+        def _set_link_visual_geom(shapes, link_frame:Frame):
             if shapes.tag == "box":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
             elif shapes.tag == "cylinder":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"length" : shapes.attrib.get('length', 0),
-                                            "radius" : shapes.attrib.get('radius', 0)}
+                                                 "radius" : shapes.attrib.get('radius', 0)}
             elif shapes.tag == "sphere":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"radius" : shapes.attrib.get('radius', 0)}
             elif shapes.tag == "mesh":
                 link_frame.link.visual.gtype = shapes.tag
-                link_frame.link.visual.gparam = {"filename" : shapes.attrib.get('filename', None)}
+                link_frame.link.visual.gparam["filename"].append(shapes.attrib.get('filename', None))
+                link_frame.link.visual.gparam.update({"scale" : convert_string_to_narray(shapes.attrib.get('scale', "1. 1. 1."))})
             else:
                 link_frame.link.visual.gtype = None
                 link_frame.link.visual.gparam = None
@@ -79,7 +82,7 @@ class URDF_Link:
                     _set_link_visual_geom(shapes, link_frame)
 
     @staticmethod
-    def _set_visual_color(elem_visual, link_frame):
+    def _set_visual_color(elem_visual, link_frame:Frame):
         """
         Set link visual's color
         
@@ -93,7 +96,7 @@ class URDF_Link:
                 link_frame.link.visual.gparam['color'] = {elem_matrial.get('name') : rgba}
     
     @staticmethod
-    def _set_collision_origin(elem_collision, link_frame):
+    def _set_collision_origin(elem_collision, link_frame:Frame):
         """
         Set link collision's origin
 
@@ -138,7 +141,7 @@ class URDF_Link:
                 _set_link_collision_geom(shapes, link_frame)
 
     @staticmethod
-    def _set_collision_color(elem_collision, link_frame):
+    def _set_collision_color(elem_collision, link_frame:Frame):
         """
         Set link visual's color
 

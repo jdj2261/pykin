@@ -152,7 +152,6 @@ def plot_robot(
         if visible_scatter:
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
-    
 
 def plot_attached_object(ax, robot, alpha):
     plot_mesh(
@@ -170,27 +169,31 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     plot_basis(ax, robot)
     for link, info in robot.info[geom].items():
         h_mat = info[3]
-
         if info[1] == 'mesh':
-            mesh_color = get_mesh_color(robot, link, geom, color)
-            plot_mesh(ax, mesh=info[2], h_mat=h_mat, alpha=alpha, color=mesh_color)
+            for mesh in info[2]:
+                mesh_color = get_mesh_color(robot, link, geom, color)
+                plot_mesh(ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
 
         if info[1] == 'cylinder':
-            length = float(info[2][0])
-            radius = float(info[2][1])
-            cylinder_color = get_color(robot.links[link].visual.gparam)
-            plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=cylinder_color)
+            for param in info[2]:
+                length = float(param[0])
+                radius = float(param[1])
+                cylinder_color = get_color(robot.links[link].visual.gparam)
+                plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=cylinder_color)
 
         if info[1] == 'sphere':
-            radius = float(info[2])
-            pos = h_mat[:3,-1]
-            sphere_color = get_color(robot.links[link].visual.gparam)
-            plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
-    
+            for param in info[2]:
+                length = float(param)
+                radius = float(param)
+                pos = h_mat[:3,-1]
+                sphere_color = get_color(robot.links[link].visual.gparam)
+                plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
+        
         if info[1] == 'box':
-            size = info[2]
-            box_color = get_color(robot.links[link].visual.gparam)
-            plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
+            for param in info[2]:
+                size = param
+                box_color = get_color(robot.links[link].visual.gparam)
+                plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
     
 
 def plot_objects(ax, objects, alpha=0.5):    
@@ -268,7 +271,6 @@ def get_mesh_color(robot, link, geom, color=None):
             link = robot.links.get(link)
             if link is not None:
                 mesh_color = link.visual.gparam.get('color')
-
             if mesh_color is None:
                 mesh_color = np.array([0.2, 0.2, 0.2, 1])
             else:

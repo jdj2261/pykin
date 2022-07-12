@@ -14,12 +14,14 @@ class Visual:
     def __init__(
         self, 
         offset=Transform(), 
-        geom_type=None, 
-        geom_param=None
+        geom_type="", 
+        geom_param=dict()
     ):
         self.offset = offset
-        self.gtype = geom_type
-        self.gparam = geom_param
+        self.gtype:str = geom_type
+        self.gparam:dict = geom_param
+        self.gparam["filename"] = []
+        self.gparam["color"] = None
 
     def __str__(self):
         return f"""Visual(offset={self.offset},
@@ -47,7 +49,6 @@ class Visual:
 class Collision:
     """
     class of Collision
-
     Args:
         offset (Transform): collision offset
         geom_type (str): collision type (box, cylinder, spehre, mesh)
@@ -57,12 +58,14 @@ class Collision:
     def __init__(
         self, 
         offset=Transform(), 
-        geom_type=None, 
-        geom_param=None
+        geom_type="", 
+        geom_param=dict()
     ):
         self.offset = offset
         self.gtype = geom_type
         self.gparam = geom_param
+        self.gparam["filename"] = []
+        self.gparam["color"] = None
 
     def __str__(self):
         return f"""Collision(offset={self.offset},
@@ -80,7 +83,6 @@ class Collision:
     def offset(self, offset):
         """
         Set collision's offset
-
         Args:
             offset (Transform)
         """

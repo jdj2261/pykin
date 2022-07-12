@@ -96,37 +96,41 @@ class Robot(URDFModel):
         robot_info["visual"] = {}
 
         for link, transform in self.init_fk.items():
-            col_gparam = None
+            col_gparam = []
             col_gtype = self.links[link].collision.gtype
             
-            vis_gparam = None
+            vis_gparam = []
             vis_gtype = self.links[link].visual.gtype
 
             if col_gtype == "mesh":
                 mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
-                col_gparam = trimesh.load_mesh(mesh_path)
+                mesh = trimesh.load_mesh(mesh_path)
+                col_gparam.append(mesh)
             if col_gtype == "box":
-                col_gparam = self.links[link].collision.gparam.get('size')
+                col_gparam.append(self.links[link].collision.gparam.get('size'))
             if col_gtype == "cylinder":
                 length = float(self.links[link].collision.gparam.get('length'))
                 radius = float(self.links[link].collision.gparam.get('radius'))
-                col_gparam = (length, radius)
+                col_gparam.append((length, radius))
             if col_gtype == "sphere":
-                col_gparam = float(self.links[link].collision.gparam.get('radius'))
+                col_gparam.append(float(self.links[link].collision.gparam.get('radius')))
             col_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
             robot_info["collision"][link] = [link, col_gtype, col_gparam, col_h_mat]
             
             if vis_gtype == "mesh":
-                mesh_path = self.mesh_path + self.links[link].visual.gparam.get('filename')
-                vis_gparam = trimesh.load_mesh(mesh_path)
+                for file_name in self.links[link].visual.gparam.get('filename'):
+                    mesh_path = self.mesh_path + file_name
+                    mesh = trimesh.load_mesh(mesh_path)
+                    mesh.apply_scale(self.links.get(link).visual.gparam.get('scale'))
+                    vis_gparam.append(mesh)
             if vis_gtype == "box":
-                vis_gparam = self.links[link].visual.gparam.get('size')
+                vis_gparam.append(self.links[link].visual.gparam.get('size'))
             if vis_gtype == "cylinder":
                 length = float(self.links[link].visual.gparam.get('length'))
                 radius = float(self.links[link].visual.gparam.get('radius'))
-                vis_gparam = (length, radius)
+                vis_gparam.append((length, radius))
             if vis_gtype == "sphere":
-                vis_gparam = float(self.links[link].visual.gparam.get('radius'))
+                vis_gparam.append(float(self.links[link].visual.gparam.get('radius')))
             vis_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
             robot_info["visual"][link] = [link, vis_gtype, vis_gparam, vis_h_mat]
 

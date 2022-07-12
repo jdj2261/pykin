@@ -1,7 +1,7 @@
 import io, os
 from xml.etree import ElementTree as ET
 from collections import OrderedDict
-
+from copy import deepcopy
 pykin_path = os.path.abspath(os.path.dirname(__file__)+"/../" )
 
 from pykin.models.robot_model import RobotModel
@@ -149,7 +149,7 @@ class URDFModel(RobotModel):
         """
         for idx, elem_link in enumerate(self.root.findall('link')):
             link_frame = self._get_link_frame(idx, elem_link)
-            self._links[link_frame.link.name] = link_frame.link
+            self._links[link_frame.link.name] = deepcopy(link_frame.link)
 
     def _set_joints(self):
         """
@@ -157,7 +157,7 @@ class URDFModel(RobotModel):
         """
         for idx, elem_joint in enumerate(self.root.findall('joint')):
             joint_frame = self._get_joint_frame(idx, elem_joint)
-            self._joints[joint_frame.joint.name] = joint_frame.joint
+            self._joints[joint_frame.joint.name] = deepcopy(joint_frame.joint)
 
     def _set_root(self):
         """

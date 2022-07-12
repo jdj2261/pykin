@@ -86,7 +86,8 @@ class CollisionManager:
             geom (str): robot's geometry type name ("visual" or "collision")
         """
         for link, info in robot.info[geom].items():
-            self.add_object(info[0], info[1], info[2], info[3])
+            for mesh in info[2]:
+                self.add_object(info[0], info[1], mesh, info[3])
 
         _, names = self.in_collision_internal(return_names=True)
         self.filtered_link_names = copy.deepcopy(names)
