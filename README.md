@@ -146,4 +146,4 @@ You can see visualization using matplotlib library or trimesh.Scene class.
 
 - Visualize mesh about `visual/collision geometry` using `trimesh.Scene class`
 
-  ![baxter](img/all_robot.png)
+  ![baxter](img/all_robots.png)
