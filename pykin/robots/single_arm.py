@@ -18,8 +18,9 @@ class SingleArm(Robot):
         f_name:str,
         offset=None,
         has_gripper=False,
+        gripper_name="panda_gripper"
     ):
-        super(SingleArm, self).__init__(f_name, offset, has_gripper)
+        super(SingleArm, self).__init__(f_name, offset, has_gripper, gripper_name)
         self._base_name = ""
         self._eef_name  = ""
         self.desired_base_frame = ""

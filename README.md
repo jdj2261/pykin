@@ -69,9 +69,9 @@ You can see various examples in example directory
 
 - Robot Info
 
-  You can see 6 robot info.
+  You can see 7 robot info.
 
-  `baxter, sawyer, iiwa14, iiwa7, panda, ur5e`
+  `baxter, sawyer, iiwa14, iiwa7, panda, ur5e, doosan`
 
   ~~~shell
   $ cd example

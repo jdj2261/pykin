@@ -8,7 +8,7 @@ def handler(signum, frame):
 # Set the signal handler
 signal.signal(signal.SIGINT, handler)
 
-from pykin.robots.gripper import Gripper
+from pykin.robots.gripper import PandaGripper, Robotiq140Gripper
 from pykin.kinematics.transform import Transform
 from pykin.kinematics.kinematics import Kinematics
 from pykin.models.urdf_model import URDFModel
@@ -26,7 +26,8 @@ class Robot(URDFModel):
         self,
         f_name,
         offset, 
-        has_gripper
+        has_gripper,
+        gripper_name
     ):
         super(Robot, self).__init__(f_name)
 
@@ -34,6 +35,7 @@ class Robot(URDFModel):
         if offset is None:
             self._offset = Transform()
         self.has_gripper = has_gripper
+        self.gripper_name = gripper_name
             
         self.urdf_name = os.path.abspath(self.file_path)
         self.mesh_path = os.path.abspath(self.file_path + "/../") + '/'
@@ -41,7 +43,10 @@ class Robot(URDFModel):
         self.gripper = None
 
         if has_gripper:
-            self.gripper = Gripper()
+            if self.gripper_name == "panda_gripper":
+                self.gripper = PandaGripper()
+            else:
+                self.gripper = Robotiq140Gripper()
 
         self.joint_limits_lower = []
         self.joint_limits_upper = []
@@ -70,7 +75,7 @@ class Robot(URDFModel):
             self.info["visual"][link][3] = visual_h_mat
             
             if self.has_gripper:
-                if link in self.gripper.names:
+                if link in self.gripper.element_names:
                     self.gripper.info[link][3] = collision_h_mat
 
     def show_robot_info(self):
@@ -139,7 +144,7 @@ class Robot(URDFModel):
     def _init_gripper_info(self):
         gripper_info = {}
         for link, transform in self.init_fk.items():
-            if link in self.gripper.names:
+            if link in self.gripper.element_names:
                 gtype = self.links[link].collision.gtype
                 mesh = None
                 if gtype == "mesh":

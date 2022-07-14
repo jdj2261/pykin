@@ -14,9 +14,10 @@ class Bimanual(Robot):
         self,
         f_name: str,
         offset=None,
-        has_gripper=False
+        has_gripper=False,
+        gripper_name=None
     ):
-        super(Bimanual, self).__init__(f_name, offset, has_gripper)
+        super(Bimanual, self).__init__(f_name, offset, has_gripper, gripper_name)
         self._setup_input2dict()
         self._set_joint_limits_upper_and_lower()
         

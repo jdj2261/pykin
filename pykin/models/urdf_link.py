@@ -61,13 +61,16 @@ class URDF_Link:
             if shapes.tag == "box":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
+                link_frame.link.visual.gparam.update({"color" : []})
             elif shapes.tag == "cylinder":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"length" : shapes.attrib.get('length', 0),
                                                  "radius" : shapes.attrib.get('radius', 0)}
+                link_frame.link.visual.gparam.update({"color" : []})
             elif shapes.tag == "sphere":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam = {"radius" : shapes.attrib.get('radius', 0)}
+                link_frame.link.visual.gparam.update({"color" : []})
             elif shapes.tag == "mesh":
                 link_frame.link.visual.gtype = shapes.tag
                 link_frame.link.visual.gparam["filename"].append(shapes.attrib.get('filename', None))
@@ -75,7 +78,7 @@ class URDF_Link:
             else:
                 link_frame.link.visual.gtype = None
                 link_frame.link.visual.gparam = None
-
+            
         for elem_geometry in elem_visual.findall('geometry'):
             for shape_type in LINK_TYPES:
                 for shapes in elem_geometry.findall(shape_type):
@@ -93,8 +96,8 @@ class URDF_Link:
         for elem_matrial in elem_visual.findall('material'):
             for elem_color in elem_matrial.findall('color'):
                 rgba = convert_string_to_narray(elem_color.attrib.get('rgba'))
-                link_frame.link.visual.gparam['color'] = {elem_matrial.get('name') : rgba}
-    
+                link_frame.link.visual.gparam['color'].append({elem_matrial.get('name') : rgba})
+
     @staticmethod
     def _set_collision_origin(elem_collision, link_frame:Frame):
         """
@@ -121,16 +124,19 @@ class URDF_Link:
             if shapes.tag == "box":
                 link_frame.link.collision.gtype = shapes.tag
                 link_frame.link.collision.gparam = {"size" : convert_string_to_narray(shapes.attrib.get('size', None))}
+                link_frame.link.collision.gparam.update({"color" : []})
             elif shapes.tag == "cylinder":
                 link_frame.link.collision.gtype = shapes.tag
                 link_frame.link.collision.gparam = {"length" : shapes.attrib.get('length', 0),
                                             "radius" : shapes.attrib.get('radius', 0)}
+                link_frame.link.collision.gparam.update({"color" : []})
             elif shapes.tag == "sphere":
                 link_frame.link.collision.gtype = shapes.tag
                 link_frame.link.collision.gparam = {"radius" : shapes.attrib.get('radius', 0)}
+                link_frame.link.collision.gparam.update({"color" : []})
             elif shapes.tag == "mesh":
                 link_frame.link.collision.gtype = shapes.tag
-                link_frame.link.collision.gparam = {"filename" : shapes.attrib.get('filename', None)}
+                link_frame.link.collision.gparam.update({"filename" : shapes.attrib.get('filename', None)})
             else:
                 link_frame.link.collision.gtype = None
                 link_frame.link.collision.gparam = None
@@ -152,4 +158,4 @@ class URDF_Link:
         for elem_matrial in elem_collision.findall('material'):
             for elem_color in elem_matrial.findall('color'):
                 rgba = convert_string_to_narray(elem_color.attrib.get('rgba'))
-                link_frame.link.collision.gparam['color'] = {elem_matrial.get('name') : rgba}
+                link_frame.link.collision.gparam['color'].append({elem_matrial.get('name') : rgba})

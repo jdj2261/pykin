@@ -1,18 +1,23 @@
 import numpy as np
 from collections import OrderedDict
+
 from pykin.utils.mesh_utils import get_absolute_transform
 
 class Gripper:
     def __init__(
-        self,
-        configures=None
+        self, 
+        name, 
+        element_names,
+        max_width,
+        max_depth,
+        tcp_position,
     ):
-        # panda
-        self.name = "panda_gripper"
-        self.names = ["panda_right_hand", "right_gripper", "leftfinger", "rightfinger", "tcp"]
-        self.max_width = 0.08
-        self.max_depth = 0.035
-        self.tcp_position = np.array([0, 0, 0.097])
+        self.name = name
+        self.element_names = element_names
+        self.max_width = max_width
+        self.max_depth = max_depth
+        self.tcp_position = tcp_position
+        
         self.info = OrderedDict()
         
         self.is_attached = False
@@ -25,24 +30,13 @@ class Gripper:
         self.pick_obj_pose = None
         self.place_obj_pose = None
 
-        if configures:
-            self._setup_gripper(configures)
-
-    def _setup_gripper(self, configures):
-        self.names = configures.get("names", None)
-        self.names.insert(0, self.robot.eef_name)
-        self.names.append("tcp")
-        self.max_width = configures.get("gripper_max_width", 0.0)
-        self.max_depth = configures.get("gripper_max_depth", 0.0)
-        self.tcp_position = configures.get("tcp_position", np.zeros(3))
-
     def get_gripper_pose(self):
         return self.info["right_gripper"][3]
 
     def set_gripper_pose(self, eef_pose=np.eye(4)):
         tcp_pose = self.compute_tcp_pose_from_eef_pose(eef_pose)
         for link, info in self.info.items():
-            T = get_absolute_transform(self.info[self.names[-1]][3], tcp_pose)
+            T = get_absolute_transform(self.info[self.element_names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
 
     def get_gripper_tcp_pose(self):
@@ -50,7 +44,7 @@ class Gripper:
 
     def set_gripper_tcp_pose(self, tcp_pose=np.eye(4)):
         for link, info in self.info.items():
-            T = get_absolute_transform(self.info[self.names[-1]][3], tcp_pose)
+            T = get_absolute_transform(self.info[self.element_names[-1]][3], tcp_pose)
             self.info[link][3] = np.dot(T, info[3])
 
     def compute_eef_pose_from_tcp_pose(self, tcp_pose=np.eye(4)):
@@ -70,3 +64,21 @@ class Gripper:
         for link, info in self.info.items():
             fk[link] = info[3]
         return fk
+        
+class PandaGripper(Gripper):
+    def __init__(self):
+        gripper_name="panda_gripper"
+        element_names=["panda_right_hand", "right_gripper", "leftfinger", "rightfinger", "tcp"]
+        max_width=0.08
+        max_depth=0.035
+        tcp_position=np.array([0, 0, 0.097])
+        super(PandaGripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position)
+
+class Robotiq140Gripper(Gripper):
+    def __init__(self):
+        gripper_name="robotiq140_gripper"
+        element_names=["panda_right_hand", "right_gripper", "leftfinger", "rightfinger", "tcp"]
+        max_width=0.08
+        max_depth=0.035
+        tcp_position=np.array([0, 0, 0.097])
+        super(Robotiq140Gripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position)

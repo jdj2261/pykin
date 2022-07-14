@@ -21,7 +21,7 @@ class Visual:
         self.gtype:str = geom_type
         self.gparam:dict = geom_param
         self.gparam["filename"] = []
-        self.gparam["color"] = None
+        self.gparam["color"] = []
 
     def __str__(self):
         return f"""Visual(offset={self.offset},
@@ -65,7 +65,7 @@ class Collision:
         self.gtype = geom_type
         self.gparam = geom_param
         self.gparam["filename"] = []
-        self.gparam["color"] = None
+        self.gparam["color"] = []
 
     def __str__(self):
         return f"""Collision(offset={self.offset},

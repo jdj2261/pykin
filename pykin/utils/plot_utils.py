@@ -171,8 +171,8 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
         h_mat = info[3]
         if info[1] == 'mesh':
             meshes = np.array([info[2]]).reshape(-1)
-            for mesh in meshes:
-                mesh_color = get_mesh_color(robot, link, geom, color)
+            for idx, mesh in enumerate(meshes):
+                mesh_color = get_mesh_color(robot, link, geom, idx, color)
                 plot_mesh(ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
 
         if info[1] == 'cylinder':
@@ -221,7 +221,7 @@ def plot_objects(ax, objects, alpha=0.5):
             plot_cylinder(ax, radius=o_param[0], length=o_param[1], h_mat=h_mat, n_steps=100, alpha=alpha, color=info.color)
 
 
-def plot_object(ax, obj, pose=None, alpha=0.5, color='k'):    
+def plot_object(ax, obj, pose=None, alpha=0.5):    
     """
     Plot objects
     """
@@ -257,27 +257,21 @@ def render_axis(
             plot_normal_vector(ax, pose[:3, 3], pose[:3, 2], scale=scale, edgecolor="blue")
 
 
-def get_mesh_color(robot, link, geom, color=None):
-    mesh_color = None
+def get_mesh_color(robot, link, geom, idx=0, color=None):
+    mesh_color = np.array([0.2, 0.2, 0.2, 1])
     if color is None:
         if geom == "collision":
             link = robot.links.get(link)
-            if link is not None:
-                mesh_color = link.collision.gparam.get('color')            
-            if mesh_color is None:
-                mesh_color = np.array([0.2, 0.2, 0.2, 1])
-            else:
+            if link.collision.gparam.get('color'):
+                mesh_color = link.collision.gparam.get('color')[idx]
                 mesh_color = np.array([color for color in mesh_color.values()]).flatten()
         else:
             link = robot.links.get(link)
-            if link is not None:
-                mesh_color = link.visual.gparam.get('color')
-            if mesh_color is None:
-                mesh_color = np.array([0.2, 0.2, 0.2, 1])
-            else:
+            if link.visual.gparam.get('color'):
+                mesh_color = link.visual.gparam.get('color')[idx]
                 mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-    return mesh_color
 
+    return mesh_color
 
 def get_color(params):
     def convert_color_type(color):

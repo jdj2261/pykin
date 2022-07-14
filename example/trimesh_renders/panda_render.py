@@ -16,7 +16,7 @@ file_path = 'urdf/panda/panda.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 
 c_manager = CollisionManager(is_robot=True)
-c_manager.setup_robot_collision(robot, geom="visual")
+c_manager.setup_robot_collision(robot, geom="collision")
 c_manager.show_collision_info()
 
 goal_qpos = np.array([ 0.00872548,  0.12562256, -0.81809503, -1.53245947,  2.48667667,  2.6287517, -1.93698104])
