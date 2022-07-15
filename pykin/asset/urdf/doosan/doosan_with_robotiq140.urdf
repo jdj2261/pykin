@@ -326,11 +326,11 @@
         </visual>
     </link>
 
-    <link name="doosan_right_hand"/>
-    <joint name="doosan_right_hand_fixed" type="fixed">
+    <link name="right_hand"/>
+    <joint name="right_hand_fixed" type="fixed">
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <parent link="link6"/>
-        <child link="doosan_right_hand"/>
+        <child link="right_hand"/>
     </joint>
 
     <link name="right_gripper">
@@ -349,20 +349,26 @@
         </material>
         </visual>
         <collision>
-        <origin xyz="0 0 -0.061525" rpy="0 0 0" />
+        <origin xyz="0 0 -0.061525" quat="0 0.707388 -0.706825 0" />
         <geometry>
             <mesh filename="meshes/collision/robotiq_arg2f_base_link.stl" />
         </geometry>
         </collision>
     </link>
 
-    <joint name="doosan_right_gripper_fixed" type="fixed">
+    <joint name="right_gripper_fixed" type="fixed">
         <origin quat="0 -0.707105 0.707108 0 " xyz="0 0 -0.0625"/>
-        <parent link="doosan_right_hand"/>
+        <parent link="right_hand"/>
         <child link="right_gripper"/>
         <axis xyz="0 0 0"/>
     </joint>
 
+    <link name="tcp"/>
+    <joint name="doosan_eef_fixed" type="fixed">
+        <origin quat="0 1 0 0" xyz="0 0 -0.27"/>
+        <parent link="right_gripper"/>
+        <child link="tcp"/>
+    </joint>
 
     <joint name="finger_joint" type="fixed">
         <origin xyz="0.030601 2.43684e-05 -0.11643" quat="-0.64507 0.290316 -0.290085 0.644556"/>

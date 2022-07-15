@@ -168,34 +168,36 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
 
     plot_basis(ax, robot)
     for link, info in robot.info[geom].items():
-        h_mat = info[3]
-        if info[1] == 'mesh':
-            meshes = np.array([info[2]]).reshape(-1)
-            for idx, mesh in enumerate(meshes):
-                mesh_color = get_mesh_color(robot, link, geom, idx, color)
-                plot_mesh(ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
+        plot_geom_from_info(ax, robot, link, geom, info, alpha, color)
 
-        if info[1] == 'cylinder':
-            for param in info[2]:
-                length = float(param[0])
-                radius = float(param[1])
-                cylinder_color = get_color(robot.links[link].visual.gparam)
-                plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=cylinder_color)
+def plot_geom_from_info(ax, robot, link, geom, info, alpha, color):
+    h_mat = info[3]
+    if info[1] == 'mesh':
+        meshes = np.array([info[2]]).reshape(-1)
+        for idx, mesh in enumerate(meshes):
+            mesh_color = get_mesh_color(robot, link, geom, idx, color)
+            plot_mesh(ax, mesh=mesh, h_mat=h_mat, alpha=alpha, color=mesh_color)
 
-        if info[1] == 'sphere':
-            for param in info[2]:
-                length = float(param)
-                radius = float(param)
-                pos = h_mat[:3,-1]
-                sphere_color = get_color(robot.links[link].visual.gparam)
-                plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
-        
-        if info[1] == 'box':
-            for param in info[2]:
-                size = param
-                box_color = get_color(robot.links[link].visual.gparam)
-                plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
+    if info[1] == 'cylinder':
+        for idx, param in enumerate(info[2]):
+            length = float(param[0])
+            radius = float(param[1])
+            cylinder_color = get_color(robot.links[link].visual.gparam, idx)
+            plot_cylinder(ax, length=length, radius=radius, h_mat=h_mat, alpha=alpha, color=cylinder_color)
+
+    if info[1] == 'sphere':
+        for idx, param in enumerate(info[2]):
+            length = float(param)
+            radius = float(param)
+            pos = h_mat[:3,-1]
+            sphere_color = get_color(robot.links[link].visual.gparam, idx)
+            plot_sphere(ax, radius=radius, center_point=pos, n_steps=20, alpha=alpha, color=sphere_color)
     
+    if info[1] == 'box':
+        for idx, param in enumerate(info[2]):
+            size = param
+            box_color = get_color(robot.links[link].visual.gparam, idx)
+            plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
 
 def plot_objects(ax, objects, alpha=0.5):    
     """
@@ -258,22 +260,29 @@ def render_axis(
 
 
 def get_mesh_color(robot, link, geom, idx=0, color=None):
-    mesh_color = np.array([0.2, 0.2, 0.2, 1])
+    mesh_color = color
     if color is None:
+        mesh_color = np.array([0.2, 0.2, 0.2, 1])
+        robot_link = robot.links.get(link)
         if geom == "collision":
-            link = robot.links.get(link)
-            if link.collision.gparam.get('color'):
-                mesh_color = link.collision.gparam.get('color')[idx]
-                mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+            if robot_link:
+                if robot_link.collision.gparam.get('color'):
+                    mesh_color = robot_link.collision.gparam.get('color')[idx]
+                    mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+            else: 
+                if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
+                    mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
         else:
-            link = robot.links.get(link)
-            if link.visual.gparam.get('color'):
-                mesh_color = link.visual.gparam.get('color')[idx]
-                mesh_color = np.array([color for color in mesh_color.values()]).flatten()
-
+            if robot_link:
+                if robot_link.visual.gparam.get('color'):
+                    mesh_color = robot_link.visual.gparam.get('color')[idx]
+                    mesh_color = np.array([color for color in mesh_color.values()]).flatten()
+                else: 
+                    if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
+                        mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
     return mesh_color
 
-def get_color(params):
+def get_color(params, idx=0):
     def convert_color_type(color):
         if isinstance(color, str):
             color = color
@@ -298,10 +307,10 @@ def get_color(params):
         return color
         
     color = []
-    if params is not None:
-        visual_color = params.get('color')
+    if params is not None and params.get('color'):
+        visual_color = params.get('color')[idx]
         if visual_color is not None:
-            color = list(visual_color.keys())
+            color = list(visual_color.values())
     color = convert_color_type(color)
     return color
     

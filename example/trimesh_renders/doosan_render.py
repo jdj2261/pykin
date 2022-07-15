@@ -13,13 +13,28 @@ file_path = 'urdf/doosan/doosan_with_robotiq140.urdf'
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 print(robot.robot_name)
 c_manager = CollisionManager(is_robot=True)
-c_manager.setup_robot_collision(robot, geom="visual")
+c_manager.setup_robot_collision(robot, geom="collision")
 c_manager.show_collision_info()
 robot.setup_link_name("base_0", "link6")
 
 goal_qpos = np.array([ 0, 0, np.pi/1.5, 0, np.pi/3,  0])
 robot.set_transform(goal_qpos)
-    
+
 scene = trimesh.Scene()
 scene = apply_robot_to_scene(trimesh_scene=scene, robot=robot, geom=c_manager.geom)
+
+robot2 = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+print(robot.robot_name)
+c_manager = CollisionManager(is_robot=True)
+c_manager.setup_robot_collision(robot2, geom="visual")
+c_manager.show_collision_info()
+robot2.setup_link_name("base_0", "link6")
+
+goal_qpos = np.array([ 0, 0, np.pi/1.5, 0, np.pi/3,  0])
+robot2.set_transform(goal_qpos)
+
+# scene = trimesh.Scene()
+scene = apply_robot_to_scene(trimesh_scene=scene, robot=robot2, geom=c_manager.geom)
+# scene.show()
+
 scene.show()

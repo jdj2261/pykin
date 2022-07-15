@@ -266,11 +266,11 @@
     <limit effort="12" lower="-2.9671" upper="2.9671" velocity="2.6100"/>
   </joint>
 
-  <link name="panda_right_hand"/>
-  <joint name="panda_right_hand_fixed" type="fixed">
+  <link name="right_hand"/>
+  <joint name="right_hand_fixed" type="fixed">
     <origin rpy="0 0 -0.7858908" xyz="0 0 0.1065"/>
     <parent link="panda_link_7"/>
-    <child link="panda_right_hand"/>
+    <child link="right_hand"/>
   </joint>
 
   <link name="right_gripper">
@@ -296,7 +296,7 @@
 
   <joint name="panda_right_gripper_fixed" type="fixed">
     <origin rpy="0 0 -1.5707963" xyz="0 0 0"/>
-    <parent link="panda_right_hand"/>
+    <parent link="right_hand"/>
     <child link="right_gripper"/>
     <axis xyz="0 0 0"/>
   </joint>
@@ -304,7 +304,7 @@
   <link name="tcp"/>
   <joint name="panda_eef_fixed" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.097"/>
-    <parent link="panda_right_hand"/>
+    <parent link="right_hand"/>
     <child link="tcp"/>
   </joint>
 
@@ -349,7 +349,7 @@
     </collision>
   </link>
 
-    <joint name="panda_finger_joint1" type="prismatic">
+  <joint name="panda_finger_joint1" type="prismatic">
     <parent link="right_gripper"/>
     <child link="leftfinger"/>
     <origin rpy="0 0 1.5707963" xyz="-0.04 0 0.0524"/>

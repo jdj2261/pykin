@@ -13,7 +13,7 @@ robot = SingleArm(
 
 target_thetas = np.array([np.random.uniform(-np.pi, np.pi) for _ in range(robot.arm_dof)])
 init_thetas = np.random.randn(robot.arm_dof)
-robot.setup_link_name("panda_link_0", "panda_right_hand")
+robot.setup_link_name("panda_link_0", "right_hand")
 
 robot.set_transform(target_thetas)
 _, ax = p_utils.init_3d_figure("FK")

@@ -71,10 +71,12 @@ class CollisionManager:
                 if robot_type == "mesh":
                     if geom == "collision":
                         h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
-                        self.add_object(name, info[name][1], info[name][2], h_mat)
+                        for param in info[name][2]:
+                            self.add_object(name, info[name][1], param, h_mat)
                     else:
                         h_mat = np.dot(transform.h_mat, robot.links[name].visual.offset.h_mat)
-                        self.add_object(name, info[name][1], info[name][2], h_mat)
+                        for param in info[name][2]:
+                            self.add_object(name, info[name][1], param, h_mat)
 
     def _filter_contact_names(self, robot, geom):      
         """
@@ -86,8 +88,8 @@ class CollisionManager:
             geom (str): robot's geometry type name ("visual" or "collision")
         """
         for link, info in robot.info[geom].items():
-            for mesh in info[2]:
-                self.add_object(info[0], info[1], mesh, info[3])
+            for param in info[2]:
+                self.add_object(info[0], info[1], param, info[3])
 
         _, names = self.in_collision_internal(return_names=True)
         self.filtered_link_names = copy.deepcopy(names)

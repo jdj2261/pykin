@@ -43,9 +43,9 @@ class Robot(URDFModel):
         self.gripper = None
 
         if has_gripper:
-            if self.gripper_name == "panda_gripper":
+            if "panda" in self.gripper_name:
                 self.gripper = PandaGripper()
-            else:
+            if "robotiq140" in self.gripper_name:
                 self.gripper = Robotiq140Gripper()
 
         self.joint_limits_lower = []
@@ -144,14 +144,24 @@ class Robot(URDFModel):
     def _init_gripper_info(self):
         gripper_info = {}
         for link, transform in self.init_fk.items():
+            col_gparam = []
             if link in self.gripper.element_names:
                 gtype = self.links[link].collision.gtype
                 mesh = None
                 if gtype == "mesh":
                     mesh_path = self.mesh_path + self.links[link].collision.gparam.get('filename')
                     mesh = trimesh.load_mesh(mesh_path)
+                    col_gparam.append(mesh)
+                if gtype == "box":
+                    col_gparam.append(self.links[link].collision.gparam.get('size'))
+                if gtype == "cylinder":
+                    length = float(self.links[link].collision.gparam.get('length'))
+                    radius = float(self.links[link].collision.gparam.get('radius'))
+                    col_gparam.append((length, radius))
+                if gtype == "sphere":
+                    col_gparam.append(float(self.links[link].collision.gparam.get('radius')))
                 h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
-                gripper_info[link] = [link, gtype, mesh, h_mat]
+                gripper_info[link] = [link, gtype, col_gparam, h_mat]
         return gripper_info
 
     def _setup_kinematics(self):
