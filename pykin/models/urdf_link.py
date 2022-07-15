@@ -1,6 +1,6 @@
-from copy import deepcopy
 from pykin.geometry.frame import Frame
 from pykin.utils.kin_utils import convert_string_to_narray, LINK_TYPES
+from pykin.utils.transform_utils import get_rpy_from_quaternion
 
 class URDF_Link:
     """
@@ -45,8 +45,10 @@ class URDF_Link:
         """ 
         for elem_origin in elem_visual.findall('origin'):
             link_frame.link.visual.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
-            link_frame.link.visual.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
-
+            if elem_origin.attrib.get('rpy'):
+                link_frame.link.visual.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
+            if elem_origin.attrib.get('quat'):
+                link_frame.link.visual.offset.rot = get_rpy_from_quaternion(convert_string_to_narray(elem_origin.attrib.get('quat')))
     @staticmethod
     def _set_visual_geometry(elem_visual, link_frame:Frame):
         """
@@ -109,7 +111,10 @@ class URDF_Link:
         """  
         for elem_origin in elem_collision.findall('origin'):
             link_frame.link.collision.offset.pos = convert_string_to_narray(elem_origin.attrib.get('xyz'))
-            link_frame.link.collision.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
+            if elem_origin.attrib.get('rpy'):
+                link_frame.link.collision.offset.rot = convert_string_to_narray(elem_origin.attrib.get('rpy'))
+            if elem_origin.attrib.get('quat'):
+                link_frame.link.collision.offset.rot = get_rpy_from_quaternion(convert_string_to_narray(elem_origin.attrib.get('quat')))
 
     @staticmethod
     def _set_collision_geometry(elem_collision, link_frame):

@@ -33,7 +33,7 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=panda_robot, geom=c_mana
 scene.set_camera(np.array([np.pi/2, 0, np.pi]), 5, resolution=(1024, 512))
 ##################################################################################################
 # doosan
-file_path = 'urdf/doosan/doosan.urdf'
+file_path = 'urdf/doosan/doosan_with_robotiq140.urdf'
 doosan_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[-1, 0, 0]))
 custom_fpath = current_file_path + '/../../pykin/asset/config/doosan_init_params.yaml'
 with open(custom_fpath) as f:

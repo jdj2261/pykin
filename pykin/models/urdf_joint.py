@@ -1,4 +1,5 @@
 from pykin.utils.kin_utils import convert_string_to_narray
+from pykin.utils.transform_utils import get_rpy_from_quaternion
 
 class URDF_Joint:
     """
@@ -17,9 +18,12 @@ class URDF_Joint:
         if elem_origin is not None:
             joint_frame.joint.offset.pos = convert_string_to_narray(
                 elem_origin.attrib.get('xyz'))
-            joint_frame.joint.offset.rot = convert_string_to_narray(
-                elem_origin.attrib.get('rpy'))
-    
+            if elem_origin.attrib.get('rpy'):
+                joint_frame.joint.offset.rot = convert_string_to_narray(
+                    elem_origin.attrib.get('rpy'))
+            if elem_origin.attrib.get('quat'):
+                joint_frame.joint.offset.rot = get_rpy_from_quaternion(convert_string_to_narray(
+                    elem_origin.attrib.get('quat')))
     @staticmethod
     def _set_axis(elem_joint, joint_frame):
         """
