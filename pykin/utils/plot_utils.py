@@ -270,16 +270,18 @@ def get_mesh_color(robot, link, geom, idx=0, color=None):
                     mesh_color = robot_link.collision.gparam.get('color')[idx]
                     mesh_color = np.array([color for color in mesh_color.values()]).flatten()
             else: 
-                if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
-                    mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
+                if robot.has_gripper:
+                    if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
+                        mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
         else:
             if robot_link:
                 if robot_link.visual.gparam.get('color'):
                     mesh_color = robot_link.visual.gparam.get('color')[idx]
                     mesh_color = np.array([color for color in mesh_color.values()]).flatten()
                 else: 
-                    if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
-                        mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
+                    if robot.has_gripper:
+                        if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
+                            mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
     return mesh_color
 
 def get_color(params, idx=0):

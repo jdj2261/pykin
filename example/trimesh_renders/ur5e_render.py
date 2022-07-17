@@ -1,6 +1,7 @@
 import numpy as np
 import trimesh
 import os
+import yaml
 
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
@@ -12,16 +13,23 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 from pykin.utils import plot_utils as p_utils
 
 
-urdf_path = 'urdf/ur5e/ur5e.urdf'
-robot = SingleArm(urdf_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+urdf_path = 'urdf/ur5e/ur5e_with_robotiq140.urdf'
+robot = SingleArm(
+    urdf_path, 
+    Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]),
+    has_gripper=True,
+    gripper_name="robotiq140_gripper")
 robot.setup_link_name("ur5e_base_link", "ur5e_right_hand")
 
 c_manager = CollisionManager(is_robot=True)
 c_manager.setup_robot_collision(robot, geom="visual")
 c_manager.show_collision_info()
 
-goal_qpos = np.zeros(6)
-robot.set_transform(goal_qpos)
+custom_fpath = current_file_path + '/../../pykin/asset/config/ur5e_init_params.yaml'
+with open(custom_fpath) as f:
+    controller_config = yaml.safe_load(f)
+init_qpos = controller_config["init_qpos"]
+robot.set_transform(np.array(init_qpos))
 
 
 for link, info in robot.info[c_manager.geom].items():
