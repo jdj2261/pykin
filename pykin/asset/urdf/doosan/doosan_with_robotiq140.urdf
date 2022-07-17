@@ -328,7 +328,7 @@
 
     <link name="right_hand"/>
     <joint name="right_hand_fixed" type="fixed">
-        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <origin rpy="0 0 -1.5707963" xyz="0 0 0"/>
         <parent link="link6"/>
         <child link="right_hand"/>
     </joint>
@@ -365,8 +365,8 @@
 
     <link name="tcp"/>
     <joint name="doosan_eef_fixed" type="fixed">
-        <origin quat="0 1 0 0" xyz="0 0 -0.27"/>
-        <parent link="right_gripper"/>
+        <origin quat="1 0 0 0" xyz="0 0 0.2075"/>
+        <parent link="right_hand"/>
         <child link="tcp"/>
     </joint>
 

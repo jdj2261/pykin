@@ -82,5 +82,5 @@ class Robotiq140Gripper(Gripper):
                        "left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad", "tcp"]
         max_width=0.140
         max_depth=0.2
-        tcp_position=np.array([0, 0, -0.27+0.0625])
+        tcp_position=np.array([0, 0, 0.2075])
         super(Robotiq140Gripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position)

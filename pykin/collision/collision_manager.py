@@ -67,16 +67,14 @@ class CollisionManager:
         info = robot.gripper.info
         for name, transform in fk.items():
             if name in list(info.keys()):
-                robot_type = info[name][1]
-                if robot_type == "mesh":
-                    if geom == "collision":
-                        h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
-                        for param in info[name][2]:
-                            self.add_object(name, info[name][1], param, h_mat)
-                    else:
-                        h_mat = np.dot(transform.h_mat, robot.links[name].visual.offset.h_mat)
-                        for param in info[name][2]:
-                            self.add_object(name, info[name][1], param, h_mat)
+                if geom == "collision":
+                    h_mat = np.dot(transform.h_mat, robot.links[name].collision.offset.h_mat)
+                    for param in info[name][2]:
+                        self.add_object(name, info[name][1], param, h_mat)
+                else:
+                    h_mat = np.dot(transform.h_mat, robot.links[name].visual.offset.h_mat)
+                    for param in info[name][2]:
+                        self.add_object(name, info[name][1], param, h_mat)
 
     def _filter_contact_names(self, robot, geom):      
         """
