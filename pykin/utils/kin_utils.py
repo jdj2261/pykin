@@ -176,15 +176,15 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None):
         trimesh_scene = trimesh.Scene()
 
     for link, info in robot.gripper.info.items():
+        mesh = info[2]
+        h_mat= info[3]
         if info[1] == 'mesh':
-            mesh_color = p_utils.get_mesh_color(robot, link, 'collision', idx=0)
-            if len(info) > 4 :
-                mesh_color = info[4]
-            mesh = info[2]
-            h_mat= info[3]
-            mesh.visual.face_colors = mesh_color
-            trimesh_scene.add_geometry(mesh, transform=h_mat)
-
+            for idx, mesh in enumerate(info[2]):
+                mesh_color = p_utils.get_mesh_color(robot, link, 'collision', idx=idx)
+                if len(info) > 4 :
+                    mesh_color = info[4]
+                mesh.visual.face_colors = mesh_color
+                trimesh_scene.add_geometry(mesh, transform=h_mat)
     return trimesh_scene
 
 def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):

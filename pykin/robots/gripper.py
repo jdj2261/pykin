@@ -31,7 +31,7 @@ class Gripper:
         self.place_obj_pose = None
 
     def get_gripper_pose(self):
-        return self.info["right_gripper"][3]
+        return self.info["right_hand"][3]
 
     def set_gripper_pose(self, eef_pose=np.eye(4)):
         tcp_pose = self.compute_tcp_pose_from_eef_pose(eef_pose)
@@ -79,7 +79,7 @@ class Robotiq140Gripper(Gripper):
         gripper_name="robotiq140_gripper"
         element_names=["right_hand", "right_gripper", "left_outer_knuckle", "right_outer_knuckle", \
                        "left_outer_finger", "right_outer_finger", "left_inner_knuckle", "right_inner_knuckle", \
-                       "left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad", "tcp"]
+                       "left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad", "collision_pad", "tcp"]
         max_width=0.140
         max_depth=0.2
         tcp_position=np.array([0, 0, 0.2075])

@@ -516,7 +516,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-            <box size="0.03 0.07 0.0075"/>
+            <box size="0.03 0.07 0.0375"/>
             </geometry>
             <material name="">
             <color rgba="0.9 0.0 0.0 1" />
@@ -672,6 +672,18 @@
         </collision>
     </link>
 
+    <link name="collision_pad">
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+            <box size="0.02 0.012 0.275"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.9 0.0 0.0 1" />
+            </material>
+        </collision>
+    </link>
+
     <link name="left_inner_finger_pad">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
@@ -685,7 +697,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-            <box size="0.03 0.07 0.0075"/>
+            <box size="0.03 0.07 0.0375"/>
             </geometry>
             <material name="">
             <color rgba="0.9 0.0 0.0 1" />
@@ -722,6 +734,13 @@
         <origin xyz="0 0.0457554 -0.0272203" rpy="0 0 0" />
         <parent link="left_inner_finger" />
         <child link="left_inner_finger_pad" />
+        <axis xyz="0 0 1" />
+    </joint>
+
+    <joint name="collision_pad_joint" type="fixed">
+        <origin xyz="0 -0.0057554 -0.12203" rpy="0 0 0" />
+        <parent link="left_inner_finger" />
+        <child link="collision_pad" />
         <axis xyz="0 0 1" />
     </joint>
 
