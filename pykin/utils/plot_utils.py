@@ -208,10 +208,12 @@ def plot_objects(ax, objects, alpha=0.5):
         o_param = info.gparam
         o_pose = info.h_mat
         if o_type == "mesh":
-            if info.name in ["table", "tray", "shelf_9"]:
-                _alpha = 0.2
-            else:
-                _alpha = alpha
+            for obj_name in ["table", "tray", "shelf_9", "clearbox"]:
+                if obj_name in info.name:
+                    _alpha = 0.2
+                    break
+                else:
+                    _alpha = alpha
             plot_mesh(ax, mesh=o_param, h_mat=o_pose, alpha=_alpha, color=info.color)
         if o_type == "sphere":
             plot_sphere(ax, radius=o_param, center_point=o_pose, alpha=alpha, color=info.color)
