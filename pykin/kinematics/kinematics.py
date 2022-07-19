@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from pykin.kinematics import jacobian as jac
 from pykin.kinematics.transform import Transform
-from pykin.utils import transform_utils as t_utils
+from pykin.utils import transform_utils as tf
 from pykin.utils.kin_utils import calc_pose_error, convert_thetas_to_dict, logging_time
 
 
@@ -55,7 +55,7 @@ class Kinematics:
         current_joints, 
         target_pose, 
         method="LM", 
-        max_iter=100
+        max_iter=1000
     ):
         """
         Returns joint angles obtained by computing IK
@@ -79,6 +79,13 @@ class Kinematics:
             )
         if method == "LM":
             joints = self._compute_IK_LM(
+                frames,
+                current_joints, 
+                target_pose, 
+                max_iter=max_iter
+            )
+        if method == "LM2":
+            joints = self._compute_IK_LM2(
                 frames,
                 current_joints, 
                 target_pose, 
@@ -147,7 +154,7 @@ class Kinematics:
         EPS = float(1e-6)
         dof = len(current_joints)
 
-        target_pose = t_utils.get_h_mat(target_pose[:3], target_pose[3:])
+        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].h_mat
@@ -201,7 +208,7 @@ class Kinematics:
         We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
         Wn = np.eye(dof)
 
-        target_pose = t_utils.get_h_mat(target_pose[:3], target_pose[3:])
+        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
 
         cur_fk = self.forward_kinematics(frames, current_joints)
         cur_pose = list(cur_fk.values())[-1].h_mat
@@ -239,6 +246,72 @@ class Kinematics:
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
 
+    def _compute_IK_LM2(
+        self, 
+        frames, 
+        current_joints, 
+        target_pose, 
+        max_iter
+    ):
+        """
+        Computes inverse kinematics using Levenberg-Marquatdt method
+
+        Args:
+            frames (list or Frame()): robot's frame for inverse kinematics
+            current_joints (sequence of float): input joint angles
+            target_pose (np.array): goal pose to achieve
+            max_iter (int): Maximum number of calculation iterations
+
+        Returns:
+            joints (np.array): target joint angles
+        """
+        iterator = 1
+        EPS = float(1E-12)
+        dof = len(current_joints)
+        wn_pos = 1/0.3
+        wn_ang = 1/(2*np.pi)
+        We = np.diag([wn_pos, wn_pos, wn_pos, wn_ang, wn_ang, wn_ang])
+        Wn = np.eye(dof)
+
+        target_pose = tf.get_h_mat(target_pose[:3], target_pose[3:])
+
+        cur_fk = self.forward_kinematics(frames, current_joints)
+        cur_pose = list(cur_fk.values())[-1].h_mat
+
+        err = calc_pose_error(target_pose, cur_pose, EPS)
+        Ek = float(np.dot(np.dot(err.T, We), err)[0])
+
+        while Ek > EPS:
+            iterator += 1
+            if iterator > max_iter:
+                break
+            
+            lamb = Ek + 0.002
+
+            J = jac.calc_jacobian(frames, cur_fk, len(current_joints))
+
+            JT = np.dot(np.dot(J.T, We), J)
+            J_dls = JT + np.dot(np.diag(np.diag(JT)), lamb)
+            
+            gerr = np.dot(np.dot(J.T, We), err)
+            dq = np.dot(np.linalg.inv(J_dls), gerr)
+            current_joints = [current_joints[i] + dq[i] for i in range(dof)]
+           
+            cur_fk = self.forward_kinematics(frames, current_joints)
+            cur_pose = list(cur_fk.values())[-1].h_mat
+            err = calc_pose_error(target_pose, cur_pose, EPS)
+            Ek2 = float(np.dot(np.dot(err.T, We), err)[0])
+            
+            if Ek2 < Ek:
+                Ek = Ek2
+            else:
+                current_joints = [current_joints[i] - dq[i] for i in range(dof)]
+                cur_fk = self.forward_kinematics(frames, current_joints)
+                break
+            
+        print(f"Iterators : {iterator-1}")
+        current_joints = np.array([float(current_joint) for current_joint in current_joints])
+        return current_joints
 class Baxter:
     left_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])
     left_w0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.088, 0.,    0.   ])
