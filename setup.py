@@ -27,11 +27,11 @@ setup(
     include_package_data=True,
     python_requires='>=3',
     description="Robotics Kinematics Library",
-    author="Dae Jong Jin",
+    author="Daejong Jin, Youngtaek Hong, Juhan Park",
     url="https://github.com/jdj2261/pykin.git",
 	download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
     author_email="wlseoeo@gmail.com",
-    version="1.5.1",
+    version="1.5.2",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )
