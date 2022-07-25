@@ -91,6 +91,13 @@ class Kinematics:
                 target_pose, 
                 max_iter=max_iter
             )
+        if method == "GaBO":
+            joints = self._compute_IK_GaBO(
+                frames,
+                target_pose,
+                max_iter=max_iter,
+                opt_dimension=2
+            )
         return joints
 
     def _compute_FK(self, frames, offset, thetas):
@@ -312,6 +319,174 @@ class Kinematics:
         print(f"Iterators : {iterator-1}")
         current_joints = np.array([float(current_joint) for current_joint in current_joints])
         return current_joints
+    
+    def _compute_IK_GaBO(
+        self,
+        frames,
+        target_pose,
+        max_iter,
+        opt_dimension,
+    ):
+        """
+        Computes inverse kinematics using Geometric-aware Bayesian Optimization method
+
+        Args:
+            frames (list or Frame()): robot's frame for forward kinematics
+            target_pose (np.array): goal pose to achieve
+            max_iter (int): Maximum number of bayesian optimization iterations
+            opt_dimension (int) : torus dimension to optimize from end-effector frame to backward order (Recommended : 2~3)
+
+        Returns:
+            joints (np.array): target joint angles
+        """
+        try:
+            import torch, gpytorch, botorch, pymanopt
+        except ImportError:
+            import os
+            print("ImportError: No module found to run GaBO IK method. Try install requirements")
+            os.system("pip install -r pykin/utils/gabo/requirements.txt")
+            print("Requirement installation finished. Please re-execute python file")
+            os._exit(0)
+        from botorch.acquisition import ExpectedImprovement
+        from pykin.utils.gabo.module.torus import Torus
+        from pykin.utils.gabo.module.manifold_optimize import joint_optimize_manifold
+        from pykin.utils.error_utils import BimanualTypeError
+        import pykin.utils.gabo.gabo_util as g_util
+        
+        if self.robot_name == "baxter":
+            raise BimanualTypeError
+
+        # Check cuda device, torch setting
+        if torch.cuda.is_available():
+            device = torch.cuda.current_device()
+        else:
+            device = 'cpu'
+        torch.set_default_dtype(torch.float32)
+
+        # Define pose error objective function
+        def get_pose_error(target_pose, cur_point):
+            cur_angle = g_util.convert_point_to_angle_torch(cur_point)
+            cur_fk = self.forward_kinematics(frames, cur_angle)
+            cur_pose = list(cur_fk.values())[-1].h_mat
+            err = calc_pose_error(target_pose, cur_pose, EPS)
+            return np.linalg.norm(err)
+
+        target_pose = t_utils.get_h_mat(target_pose[:3], target_pose[3:])
+
+        # Define hyperparameters
+        opt_dimension = opt_dimension
+        robot_dimension = len(self.active_joint_names)
+        nb_data_init = 10000
+        nb_iter_bo = max_iter
+        enough_sample = 4
+        EPS = float(1e-6)
+
+
+        # Define torus manifold
+        opt_manifold = Torus(dimension=opt_dimension)
+        robot_manifold = Torus(dimension=robot_dimension)
+        
+        # Get initial x data batches
+        print("Start Pose Random Sampling")
+        scaled_x = []   
+        scaled_y = []
+        
+        while True:
+            x_init = np.array([np.array(robot_manifold.rand()).reshape(2 * robot_dimension) for n in range(nb_data_init)])
+            x_data = torch.tensor(x_init)
+            y_data = torch.zeros(nb_data_init, dtype=torch.float64)
+
+            for n in range(nb_data_init):
+                err = get_pose_error(target_pose, cur_point=x_data[n])
+                y_data[n] = err
+            
+            for idx, data in enumerate(y_data):
+                if data < 0.4:
+                    scaled_y.append(y_data[idx])
+                    scaled_x.append(x_data[idx])
+            
+            if len(scaled_y) > enough_sample:
+                break
+            print(f"\tNot enough samples.. Resampling ({len(scaled_y)} collected)")
+
+        x_data = torch.stack(scaled_x, 0)
+        y_data = torch.stack(scaled_y, 0)
+        reduced_x_data = x_data[:, -opt_dimension * 2:]
+        print(f"Sampling Done : Collected proper samples {y_data.shape[0]}")
+
+        # Initialize best observation and function value list
+        new_best_f, index = y_data.min(0)
+        best_x = [x_data[index]]
+        best_f = [new_best_f]
+
+        # Adjust x, y data to new data format
+        determined_joint = best_x[0][:-opt_dimension*2]
+        x_data = reduced_x_data
+
+        for n in range(y_data.shape[0]):
+            adjusted_x = torch.cat([determined_joint, x_data[n]])
+            err = get_pose_error(target_pose, cur_point=adjusted_x)
+            y_data[n] = err
+
+        # Re-calculate best observation
+        new_best_f, index = y_data.min(0)
+        best_x = [x_data[index]]    
+        best_f = [new_best_f]
+        print(f"Initial best guess of error {best_f[0]}")
+
+        determined_joint = determined_joint.to(device)
+        x_data = x_data.to(device)
+        y_data = y_data.to(device)
+
+        # Define the GPR model
+        mll_fct, model, solver, bounds, constraints = g_util.init_gp_model(opt_dimension, device, x_data, y_data)
+
+        # BO loop
+        print("\n== Start optimization process ==")
+        for iteration in range(nb_iter_bo):
+            # Fit GP model
+            botorch.fit_gpytorch_model(mll=mll_fct)
+
+            # Define the acquisition function
+            acq_fct = ExpectedImprovement(model=model, best_f=best_f[-1], maximize=False)
+            acq_fct.to(device)
+
+            # Get new candidate
+            new_x = joint_optimize_manifold(acq_fct, opt_manifold, solver, q=1, num_restarts=5, raw_samples=100,
+                                            bounds=bounds,
+                                            pre_processing_manifold=None,
+                                            post_processing_manifold=None,
+                                            approx_hessian=False, inequality_constraints=constraints)
+
+            new_x_cat = torch.cat([determined_joint, new_x[0]]) 
+
+            # Get new observation
+            err = get_pose_error(target_pose, cur_point=new_x_cat)
+            new_y = torch.tensor(err)[None]
+            new_y = new_y.to(device)
+            
+            # Update training points
+            x_data = torch.cat((x_data, new_x))
+            y_data = torch.cat((y_data, new_y))
+
+            # Update best observation
+            new_best_f, index = y_data.min(0)
+            best_x.append(x_data[index])
+            best_f.append(new_best_f)
+
+            # Update the model
+            model.set_train_data(x_data, y_data, strict=False)  # strict False necessary to add datapoints
+            print("Iteration " + str(iteration) + "\t Best error " + str(new_best_f.item()))
+            print(f"\t>> New error : {new_y.item()}")
+            
+            if new_best_f.item() < 0.2:
+                break
+        
+        # Convert x, y point to radian angle
+        joint_point = torch.cat([determined_joint, best_x[-1]])
+        joint_angle = g_util.convert_point_to_angle_torch(joint_point)
+
+        return joint_angle
 
 class Baxter:
     left_e0_fixed_offset = Transform(rot=[0.5, 0.5, 0.5, 0.5], pos=[0.107, 0.,    0.   ])

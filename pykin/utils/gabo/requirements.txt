@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+torch
+gpytorch
+botorch
+
+-e git+https://github.com/NoemieJaquier/pymanopt.git#egg=pymanopt

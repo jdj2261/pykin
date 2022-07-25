@@ -104,6 +104,17 @@ You can see various examples in example directory
   $ python robot_ik_baxter_test.py
   ~~~
 
+- Sampling based Inverse Kinematics
+
+  You can compute the inverse kinematics using geometric-aware bayesian optimization(GaBO) method
+  
+  For more detailed information, check [GaBO module](/pykin/utils/gabo/)
+  
+  ~~~shell
+  $ cd example/inverse_kinematics
+  $ python robot_ik_gabo_test.py
+  ~~~
+
 - Collision check
 
   The image below shows the collision result as well as visualize robot using trimesh.Scene class
