@@ -51,3 +51,9 @@ class OriValueError(Exception):
     def __str__(self):
         return "Expecting the shape of the orientation to be (3,), (3,3), or (4,), instead got:""{}".format(self.data)
 
+class BimanualTypeError(Exception):
+    """
+    Class of custom Exception about unexpected bimanual robot type
+    """
+    def __init__(self):
+        super().__init__("GaBO IK solver does not support Bimanual robot. Please use SingleArm robot")
