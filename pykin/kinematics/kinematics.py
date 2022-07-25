@@ -345,7 +345,8 @@ class Kinematics:
             import os
             print("ImportError: No module found to run GaBO IK method. Try install requirements")
             os.system("pip install -r pykin/utils/gabo/requirements.txt")
-
+            print("Requirement installation finished. Please re-execute python file")
+            os._exit(0)
         from botorch.acquisition import ExpectedImprovement
         from pykin.utils.gabo.module.torus import Torus
         from pykin.utils.gabo.module.manifold_optimize import joint_optimize_manifold
