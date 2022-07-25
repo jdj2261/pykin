@@ -208,7 +208,7 @@ def plot_objects(ax, objects, alpha=0.5):
         o_param = info.gparam
         o_pose = info.h_mat
         if o_type == "mesh":
-            for obj_name in ["table", "tray", "shelf_9", "clearbox"]:
+            for obj_name in ["table", "tray", "shelf_8", "shelf_9", "shelf_15", "clearbox"]:
                 if obj_name in info.name:
                     _alpha = 0.2
                     break
