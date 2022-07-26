@@ -1,8 +1,38 @@
 import numpy as np
+import os, datetime
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from pykin.utils import transform_utils as t_utils
+
+
+def init_2d_figure(name=None, figsize=(15,7.5), dpi= 80):
+    fig = plt.figure(name, figsize=figsize, dpi= dpi)
+    return fig
+
+
+def createDirectory(directory): 
+    try: 
+        if not os.path.exists(directory): 
+            print(f"Create {directory} direcoty")
+            os.makedirs(directory) 
+    except OSError: print("Error: Failed to create the directory.")
+
+
+def plot_values(values, label="", title="result", is_save=False, save_dir_name="result_images"):
+    plt.plot(values, label=label)
+
+    if is_save:
+        createDirectory(save_dir_name)
+        file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
+        print(f"Save {file_name}")
+        plt.savefig(file_name)
+        
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.xlabel("Number of simulations",fontsize=12)
+    plt.ylabel("Max Value",fontsize=12)
+    plt.legend(prop={'size' : 12})
 
 
 def init_3d_figure(name=None, figsize=(12,8), dpi=100, visible_axis=False):
@@ -24,7 +54,6 @@ def show_figure():
     Show figure
     """
     plt.show()
-
 
 
 def plot_basis(ax=None, robot=None):
