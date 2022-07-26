@@ -93,18 +93,13 @@ class Robotiq140Gripper(Gripper):
         max_width=0.140
         max_depth=0.2
         tcp_position=np.array([0, 0, 0.2075])
+        self.finger_names = ["left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad"]
         super(Robotiq140Gripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position)
 
     def open_gripper(self, z_dis=0.02):
-        self.info['right_inner_finger_pad'][3][:3, 3] = self.info['right_inner_finger_pad'][3][:3, 3] + z_dis * self.info['right_inner_finger_pad'][3][:3,2]
-        self.info['right_inner_finger'][3][:3, 3] = self.info['right_inner_finger'][3][:3, 3] - z_dis * self.info['right_inner_finger'][3][:3,2]
-
-        self.info['left_inner_finger_pad'][3][:3, 3] = self.info['left_inner_finger_pad'][3][:3, 3] + z_dis * self.info['left_inner_finger_pad'][3][:3,2]
-        self.info['left_inner_finger'][3][:3, 3] = self.info['left_inner_finger'][3][:3, 3] - z_dis * self.info['left_inner_finger'][3][:3,2]
+        for finger in self.finger_names:
+            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] + z_dis * self.info[finger][3][:3,2]
 
     def close_gripper(self, z_dis=0.02):
-        self.info['right_inner_finger_pad'][3][:3, 3] = self.info['right_inner_finger_pad'][3][:3, 3] - z_dis * self.info['right_inner_finger_pad'][3][:3,2]
-        self.info['right_inner_finger'][3][:3, 3] = self.info['right_inner_finger'][3][:3, 3] - z_dis * self.info['right_inner_finger'][3][:3,2]
-
-        self.info['left_inner_finger_pad'][3][:3, 3] = self.info['left_inner_finger_pad'][3][:3, 3] - z_dis * self.info['left_inner_finger_pad'][3][:3,2]
-        self.info['left_inner_finger'][3][:3, 3] = self.info['left_inner_finger'][3][:3, 3] - z_dis * self.info['left_inner_finger'][3][:3,2]
+        for finger in self.finger_names:
+            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] - z_dis * self.info[finger][3][:3,2]
