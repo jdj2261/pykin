@@ -22,6 +22,7 @@ setup(
         "tqdm",
         "pyyaml",
         "python-fcl",
+        "Pillow",
     ],
     eager_resources=['*'],
     include_package_data=True,

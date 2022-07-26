@@ -1,9 +1,10 @@
-import os
+import os, io, datetime
 import trimesh
 import numpy as np
 from copy import deepcopy
-
+from PIL import Image
 from pykin.utils import transform_utils as t_utils
+from pykin.utils.plot_utils import createDirectory
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -31,23 +32,28 @@ def get_mesh_bounds(mesh, pose=np.eye(4)):
 def normalize(vec):
     return vec / np.linalg.norm(vec)
 
+
 def surface_sampling(mesh, n_samples=2, face_weight=None):
     vertices, face_ind = trimesh.sample.sample_surface(mesh, count=n_samples, face_weight=face_weight)
     normals = mesh.face_normals[face_ind]
     return vertices, face_ind, normals
 
+
 def projection(v, u):
     return np.dot(v, u) / np.dot(u, u) * u
+
 
 def get_absolute_transform(A, B):
     # TA = B
     # T = B * inv(A)
     return np.dot(B, np.linalg.inv(A))
 
+
 def get_relative_transform(A, B):
     # AT = B
     # T = inv(A) * B
     return np.dot(np.linalg.inv(A), B)
+
 
 def get_grasp_directions(line, n_trials):
     """
@@ -71,6 +77,7 @@ def get_grasp_directions(line, n_trials):
         normal_dir = np.cos(theta) * v1 + np.sin(theta) * v2
         yield normal_dir
 
+
 def get_rotation_from_vectors(A, B):
     unit_A = A / np.linalg.norm(A)
     unit_B = B / np.linalg.norm(B)
@@ -81,3 +88,12 @@ def get_rotation_from_vectors(A, B):
     R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
 
     return R
+
+
+def save_image(scene:trimesh.Scene, resolution=(1024,1024), title="result", save_dir_name="result_images"):
+    createDirectory(save_dir_name)
+    scene_data = scene.save_image(resolution=resolution)
+    img = Image.open(io.BytesIO(scene_data))
+    file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
+    print(f"Save {file_name}")
+    img.save(file_name + '.png')
