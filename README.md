@@ -117,7 +117,7 @@ You can see various examples in example directory
 
 - Collision check
 
-  The image below shows the collision result as well as visualize robot using trimesh.Scene class
+  The below images show the collision result as well as visualize robot using trimesh.Scene class
 
   ~~~shell
   $ cd example/trimesh_renders
