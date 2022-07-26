@@ -18,14 +18,14 @@ init_thetas = np.random.randn(robot.arm_dof)
 robot.setup_link_name("base_0", "link6")
 robot.set_transform(target_thetas)
 
-robot.close_gripper(0.05)
+robot.close_gripper(0.03)
 _, ax = p_utils.init_3d_figure("Close Gripper", visible_axis=True)
 p_utils.plot_robot(ax=ax, 
                robot=robot,
                geom="collision",
                only_visible_geom=True,)
 
-robot.open_gripper(0.01)
+robot.open_gripper(0.03)
 _, ax = p_utils.init_3d_figure("Open Gripper", visible_axis=True)
 p_utils.plot_robot(ax=ax, 
                robot=robot,

@@ -256,17 +256,24 @@ class Robot(URDFModel):
         return compute_pose_error(target, result)
 
     def open_gripper(self, z_dis=0.02):
-        if "robotiq140" in self.gripper_name:
-            for geom in ['collision', 'visual']:
-                for finger in self.gripper.finger_names:
+        for geom in ['collision', 'visual']:
+            for finger in self.gripper.finger_names:
+                if "robotiq140" in self.gripper_name:
                     self.info[geom][finger][3][:3, 3] = self.info[geom][finger][3][:3, 3] + z_dis * self.info[geom][finger][3][:3,2]
+                if "panda" in self.gripper_name:
+                    self.info[geom][finger][3][:3, 3] = self.info[geom][finger][3][:3, 3] + z_dis * self.info[geom][finger][3][:3,1]
+        
+        self.gripper.open_gripper(z_dis)
 
     def close_gripper(self, z_dis=0.02):        
-        if "robotiq140" in self.gripper_name:
-            for geom in ['collision', 'visual']:
-                for finger in self.gripper.finger_names:
+        for geom in ['collision', 'visual']:
+            for finger in self.gripper.finger_names:
+                if "robotiq140" in self.gripper_name:
                     self.info[geom][finger][3][:3, 3] = self.info[geom][finger][3][:3, 3] - z_dis * self.info[geom][finger][3][:3,2]
-
+                if "panda" in self.gripper_name:
+                    self.info[geom][finger][3][:3, 3] = self.info[geom][finger][3][:3, 3] - z_dis * self.info[geom][finger][3][:3,1]
+        self.gripper.close_gripper(z_dis)
+            
     @property
     def offset(self):
         return self._offset
