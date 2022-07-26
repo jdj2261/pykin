@@ -255,6 +255,22 @@ class Robot(URDFModel):
         """
         return compute_pose_error(target, result)
 
+    def open_gripper(self, z_dis=0.02):
+        if "robotiq140" in self.gripper_name:
+            for geom in ['collision', 'visual']:
+                self.info[geom]['right_inner_finger_pad'][3][:3, 3] = self.info[geom]['right_inner_finger_pad'][3][:3, 3] + z_dis * self.info[geom]['right_inner_finger_pad'][3][:3,2]
+                self.info[geom]['right_inner_finger'][3][:3, 3] = self.info[geom]['right_inner_finger'][3][:3, 3] + z_dis * self.info[geom]['right_inner_finger'][3][:3,2]
+                self.info[geom]['left_inner_finger_pad'][3][:3, 3] = self.info[geom]['left_inner_finger_pad'][3][:3, 3] + z_dis * self.info[geom]['left_inner_finger_pad'][3][:3,2]
+                self.info[geom]['left_inner_finger'][3][:3, 3] = self.info[geom]['left_inner_finger'][3][:3, 3] + z_dis * self.info[geom]['left_inner_finger'][3][:3,2]
+
+    def close_gripper(self, z_dis=0.02):        
+        if "robotiq140" in self.gripper_name:
+            for geom in ['collision', 'visual']:
+                self.info[geom]['right_inner_finger_pad'][3][:3, 3] = self.info[geom]['right_inner_finger_pad'][3][:3, 3] - z_dis * self.info[geom]['right_inner_finger_pad'][3][:3,2]
+                self.info[geom]['right_inner_finger'][3][:3, 3] = self.info[geom]['right_inner_finger'][3][:3, 3] - z_dis * self.info[geom]['right_inner_finger'][3][:3,2]
+                self.info[geom]['left_inner_finger_pad'][3][:3, 3] = self.info[geom]['left_inner_finger_pad'][3][:3, 3] - z_dis * self.info[geom]['left_inner_finger_pad'][3][:3,2]
+                self.info[geom]['left_inner_finger'][3][:3, 3] = self.info[geom]['left_inner_finger'][3][:3, 3] - z_dis * self.info[geom]['left_inner_finger'][3][:3,2]
+
     @property
     def offset(self):
         return self._offset

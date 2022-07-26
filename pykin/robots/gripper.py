@@ -30,6 +30,8 @@ class Gripper:
         self.pick_obj_pose = None
         self.place_obj_pose = None
 
+        self.is_gripper_opened = True
+
     def get_gripper_pose(self):
         return self.info["right_hand"][3]
 
@@ -65,6 +67,14 @@ class Gripper:
             fk[link] = info[3]
         return fk
         
+    def open_gripper(self):
+        if not self.is_gripper_opened:
+            self.is_gripper_opened = True
+
+    def close_gripper(self):
+        if self.is_gripper_opened:
+            self.is_gripper_opened = False
+
 class PandaGripper(Gripper):
     def __init__(self):
         gripper_name="panda_gripper"
@@ -84,3 +94,17 @@ class Robotiq140Gripper(Gripper):
         max_depth=0.2
         tcp_position=np.array([0, 0, 0.2075])
         super(Robotiq140Gripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position)
+
+    def open_gripper(self, z_dis=0.02):
+        self.info['right_inner_finger_pad'][3][:3, 3] = self.info['right_inner_finger_pad'][3][:3, 3] + z_dis * self.info['right_inner_finger_pad'][3][:3,2]
+        self.info['right_inner_finger'][3][:3, 3] = self.info['right_inner_finger'][3][:3, 3] - z_dis * self.info['right_inner_finger'][3][:3,2]
+
+        self.info['left_inner_finger_pad'][3][:3, 3] = self.info['left_inner_finger_pad'][3][:3, 3] + z_dis * self.info['left_inner_finger_pad'][3][:3,2]
+        self.info['left_inner_finger'][3][:3, 3] = self.info['left_inner_finger'][3][:3, 3] - z_dis * self.info['left_inner_finger'][3][:3,2]
+
+    def close_gripper(self, z_dis=0.02):
+        self.info['right_inner_finger_pad'][3][:3, 3] = self.info['right_inner_finger_pad'][3][:3, 3] - z_dis * self.info['right_inner_finger_pad'][3][:3,2]
+        self.info['right_inner_finger'][3][:3, 3] = self.info['right_inner_finger'][3][:3, 3] - z_dis * self.info['right_inner_finger'][3][:3,2]
+
+        self.info['left_inner_finger_pad'][3][:3, 3] = self.info['left_inner_finger_pad'][3][:3, 3] - z_dis * self.info['left_inner_finger_pad'][3][:3,2]
+        self.info['left_inner_finger'][3][:3, 3] = self.info['left_inner_finger'][3][:3, 3] - z_dis * self.info['left_inner_finger'][3][:3,2]
