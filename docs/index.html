@@ -306,11 +306,11 @@ $ make install
 <span class="kn">from</span> <span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span>
 <span class="kn">from</span> <span class="nn">pykin.utils</span> <span class="kn">import</span> <span class="n">plot_utils</span> <span class="k">as</span> <span class="n">plt</span>
 
-<span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../asset/urdf/baxter/baxter.urdf&#39;</span>
+<span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../assets/urdf/baxter/baxter.urdf&#39;</span>
 
 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">robot_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../asset/urdf/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;.urdf&#39;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;../../assets/urdf/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">robot_name</span> <span class="o">+</span> <span class="s1">&#39;.urdf&#39;</span>
 <span class="n">robot</span> <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">init_3d_figure</span><span class="p">(</span><span class="s2">&quot;URDF&quot;</span><span class="p">)</span>
@@ -326,7 +326,7 @@ $ make install
                 <span class="n">name</span><span class="o">=</span><span class="n">robot</span><span class="o">.</span><span class="n">robot_name</span><span class="p">,</span>
                 <span class="n">visible_visual</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">only_visible_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">mesh_path</span><span class="o">=</span><span class="s1">&#39;../../asset/urdf/baxter/&#39;</span><span class="p">)</span>
+                <span class="n">mesh_path</span><span class="o">=</span><span class="s1">&#39;../../assets/urdf/baxter/&#39;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show_figure</span><span class="p">()</span>
 </pre>
@@ -343,7 +343,7 @@ $ make install
 <span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span> <span class="kn">from</span> <span class="nn">pykin.utils.kin</span>\<span class="n">_utils</span>
 <span class="kn">import</span> <span class="nn">ShellColors</span> <span class="k">as</span> <span class="nn">sc</span>
 
-<span class="c1"># baxter\_example file\_path = &#39;../asset/urdf/baxter/baxter.urdf&#39; robot</span>
+<span class="c1"># baxter\_example file\_path = &#39;../assets/urdf/baxter/baxter.urdf&#39; robot</span>
 <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
 
 <span class="c1"># set input joints head\_thetas = [0.0] right\_arm\_thetas = [0, 0, 0,</span>
@@ -368,7 +368,7 @@ $ make install
 
 <span class="c1"># import jacobian from pykin.kinematics import jacobian as jac</span>
 
-<span class="n">file</span>\<span class="n">_path</span> <span class="o">=</span> <span class="s1">&#39;../asset/urdf/baxter/baxter.urdf&#39;</span> <span class="n">robot</span> <span class="o">=</span>
+<span class="n">file</span>\<span class="n">_path</span> <span class="o">=</span> <span class="s1">&#39;../assets/urdf/baxter/baxter.urdf&#39;</span> <span class="n">robot</span> <span class="o">=</span>
 <span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
 
 <span class="n">left</span>\<span class="n">_arm</span>\<span class="n">_thetas</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
@@ -399,7 +399,7 @@ $ make install
                       <pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="kn">from</span> <span class="nn">pykin.robot</span> <span class="kn">import</span> <span class="n">Robot</span> <span class="kn">from</span>
 <span class="nn">pykin.kinematics.transform</span> <span class="kn">import</span> <span class="n">Transform</span>
 
-<span class="c1"># baxter\_example file\_path = &#39;../asset/urdf/baxter/baxter.urdf&#39; robot</span>
+<span class="c1"># baxter\_example file\_path = &#39;../assets/urdf/baxter/baxter.urdf&#39; robot</span>
 <span class="o">=</span> <span class="n">Robot</span><span class="p">(</span><span class="n">file</span>\<span class="n">_path</span><span class="p">,</span> <span class="n">Transform</span><span class="p">(</span><span class="n">rot</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">pos</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
 
 <span class="c1"># set joints for targe pose right\_arm\_thetas = np.random.randn(7)</span>

@@ -1,1 +1,1 @@
-recursive-include pykin/asset/ *
+recursive-include pykin/assets/ *

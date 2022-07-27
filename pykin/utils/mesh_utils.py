@@ -11,13 +11,13 @@ np.seterr(divide='ignore', invalid='ignore')
 pykin_path = os.path.abspath(__file__ + "/../../")
 
 def get_mesh_path(mesh_path, robot_name):
-    result_path = pykin_path + "/asset/urdf/" + robot_name +"/"
+    result_path = pykin_path + "/assets/urdf/" + robot_name +"/"
     result_path = result_path + mesh_path
     return result_path
 
 
 def get_object_mesh(mesh_name, scale=[1.0, 1.0, 1.0]):
-    file_path = pykin_path + '/asset/objects/meshes/'
+    file_path = pykin_path + '/assets/objects/meshes/'
     mesh:trimesh.Trimesh = trimesh.load(file_path + mesh_name)
     mesh.apply_scale(scale)
     return mesh

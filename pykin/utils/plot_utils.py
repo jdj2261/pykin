@@ -21,18 +21,17 @@ def createDirectory(directory):
 
 def plot_values(values, label="", title="result", is_save=False, save_dir_name="result_images"):
     plt.plot(values, label=label)
-
-    if is_save:
-        createDirectory(save_dir_name)
-        file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
-        print(f"Save {file_name}")
-        plt.savefig(file_name)
-        
     plt.xticks(fontsize=10)
     plt.yticks(fontsize=10)
     plt.xlabel("Number of simulations",fontsize=12)
     plt.ylabel("Max Value",fontsize=12)
     plt.legend(prop={'size' : 12})
+    
+    if is_save:
+        createDirectory(save_dir_name)
+        file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
+        print(f"Save {file_name}")
+        plt.savefig(file_name)
 
 
 def init_3d_figure(name=None, figsize=(12,8), dpi=100, visible_axis=False):
@@ -182,6 +181,7 @@ def plot_robot(
             ax.scatter([x[0] for x in nodes], [x[1] for x in nodes],
                 [x[2] for x in nodes], s=20, c=lines[0].get_color())
 
+
 def plot_attached_object(ax, robot, alpha):
     plot_mesh(
         ax, 
@@ -189,6 +189,7 @@ def plot_attached_object(ax, robot, alpha):
         h_mat=robot.gripper.info[robot.gripper.attached_obj_name][3], 
         alpha=alpha,
         color=robot.gripper.info[robot.gripper.attached_obj_name][4])
+
 
 def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     """
@@ -198,6 +199,7 @@ def plot_geom(ax, robot, geom="collision", alpha=0.4, color=None):
     plot_basis(ax, robot)
     for link, info in robot.info[geom].items():
         plot_geom_from_info(ax, robot, link, geom, info, alpha, color)
+
 
 def plot_geom_from_info(ax, robot, link, geom, info, alpha, color):
     h_mat = info[3]
@@ -227,6 +229,7 @@ def plot_geom_from_info(ax, robot, link, geom, info, alpha, color):
             size = param
             box_color = get_color(robot.links[link].visual.gparam, idx)
             plot_box(ax, size, h_mat=h_mat, alpha=alpha, color=box_color)
+
 
 def plot_objects(ax, objects, alpha=0.5):    
     """
@@ -314,6 +317,7 @@ def get_mesh_color(robot, link, geom, idx=0, color=None):
                         if robot.gripper.info.get(robot.gripper.attached_obj_name) is not None:
                             mesh_color = robot.gripper.info.get(robot.gripper.attached_obj_name)[4]
     return mesh_color
+
 
 def get_color(params, idx=0):
     def convert_color_type(color):

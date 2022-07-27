@@ -60,12 +60,12 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 ### Install Pykin
 
 ~~~
-pip install pykin
+pip3 install pykin
 ~~~
 
 ## Quick Start
 
-You can see various examples in example directory
+You can see various examples in examples directory
 
 - Robot Info
 
@@ -74,7 +74,7 @@ You can see various examples in example directory
   `baxter, sawyer, iiwa14, iiwa7, panda, ur5e, doosan`
 
   ~~~shell
-  $ cd example
+  $ cd examples
   $ python robot_info.py $(robot_name)
   # baxter
   $ python robot_info.py baxter
@@ -87,7 +87,7 @@ You can see various examples in example directory
   You can compute the forward kinematics as well as visualize the visual or collision geometry.
 
   ~~~shell
-  $ cd example/forward_kinematics
+  $ cd examples/forward_kinematics
   $ python robot_fk_baxter_test.py
   ~~~
 
@@ -100,7 +100,7 @@ You can see various examples in example directory
   You can compute the inverse kinematics using levenberg marquardt(LM) or newton raphson(NR) method
 
   ~~~shell
-  $ cd example/inverse_kinematics
+  $ cd s/inverse_kinematics
   $ python robot_ik_baxter_test.py
   ~~~
 
@@ -111,7 +111,7 @@ You can see various examples in example directory
   For more detailed information, check [GaBO module](/pykin/utils/gabo/)
   
   ~~~shell
-  $ cd example/inverse_kinematics
+  $ cd examples/inverse_kinematics
   $ python robot_ik_gabo_test.py
   ~~~
 
@@ -120,7 +120,7 @@ You can see various examples in example directory
   The below images show the collision result as well as visualize robot using trimesh.Scene class
 
   ~~~shell
-  $ cd example/trimesh_renders
+  $ cd examples/trimesh_renders
   $ python sawyer_render.py
   ~~~
 

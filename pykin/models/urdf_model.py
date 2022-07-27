@@ -22,7 +22,7 @@ class URDFModel(RobotModel):
     def __init__(self, f_name):
         super().__init__()
 
-        self.file_path = pykin_path + "/asset/" + f_name
+        self.file_path = pykin_path + "/assets/" + f_name
         if not os.path.isfile(self.file_path):
             raise FileNotFoundError(f'{self.file_path} is not Found..')
 

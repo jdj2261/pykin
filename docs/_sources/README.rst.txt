@@ -131,7 +131,7 @@ You can see 4 example robot information.
     pykin.kinematics.transform import Transform from pykin.utils.kin\_utils
     import ShellColors as sc
 
-    # baxter\_example file\_path = '../asset/urdf/baxter/baxter.urdf' robot
+    # baxter\_example file\_path = '../assets/urdf/baxter/baxter.urdf' robot
     = Robot(file\_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
     # set input joints head\_thetas = [0.0] right\_arm\_thetas = [0, 0, 0,
@@ -151,7 +151,7 @@ You can see 4 example robot information.
 
     # import jacobian from pykin.kinematics import jacobian as jac
 
-    file\_path = '../asset/urdf/baxter/baxter.urdf' robot =
+    file\_path = '../assets/urdf/baxter/baxter.urdf' robot =
     Robot(file\_path, t_utils.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
     left\_arm\_thetas = [0, 0, 0, 0, 0, 0, 0]
@@ -177,7 +177,7 @@ You can see 4 example robot information.
     import numpy as np from pykin.robot import Robot from
     pykin.kinematics.transform import Transform
 
-    # baxter\_example file\_path = '../asset/urdf/baxter/baxter.urdf' robot
+    # baxter\_example file\_path = '../assets/urdf/baxter/baxter.urdf' robot
     = Robot(file\_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
     # set joints for targe pose right\_arm\_thetas = np.random.randn(7)
