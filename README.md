@@ -2,11 +2,9 @@
 
 [![PyPI version](https://badge.fury.io/py/pykin.svg)](https://badge.fury.io/py/pykin)  [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-Python Interface for the Robot Kinematics Library pykin
+Python Interface for the robot Kinematics library pykin
 
-This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a>
-
-You can see a Pick and Place demo video using pykin library <a href="https://youtu.be/p9TlIp-xxbs" target="_blank">here</a> in Mujoco 
+This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a>.
 
 ## Features
 
@@ -100,7 +98,7 @@ You can see various examples in examples directory
   You can compute the inverse kinematics using levenberg marquardt(LM) or newton raphson(NR) method
 
   ~~~shell
-  $ cd s/inverse_kinematics
+  $ cd examples/inverse_kinematics
   $ python robot_ik_baxter_test.py
   ~~~
 
