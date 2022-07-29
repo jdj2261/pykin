@@ -8,7 +8,8 @@ from pykin.utils import transform_utils as t_utils
 
 def init_2d_figure(name=None, figsize=(15,7.5), dpi= 80):
     fig = plt.figure(name, figsize=figsize, dpi= dpi)
-    return fig
+    ax = plt.gca()
+    return fig, ax
 
 
 def createDirectory(directory): 
@@ -19,17 +20,19 @@ def createDirectory(directory):
     except OSError: print("Error: Failed to create the directory.")
 
 
-def plot_values(values, label="", title="result", is_save=False, save_dir_name="result_images"):
-    plt.plot(values, label=label)
+def plot_values(ax, values, label="", title="result", is_save=False, save_dir_name="result_images", **configs):
+    if configs:
+        plt.title(f'Benchmark: {configs["num"]} (Algo: {configs["algo"]}, Constant: {configs["c"]})', loc='center')
+    ax.plot(values, label=label)
     plt.xticks(fontsize=10)
     plt.yticks(fontsize=10)
     plt.xlabel("Number of simulations",fontsize=12)
     plt.ylabel("Max Value",fontsize=12)
-    plt.legend(prop={'size' : 12})
-    
+    ax.legend(prop={'size' : 12})
+
     if is_save:
         createDirectory(save_dir_name)
-        file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
+        file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))    
         print(f"Save {file_name}")
         plt.savefig(file_name)
 
