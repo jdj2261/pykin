@@ -328,7 +328,7 @@
 
     <link name="right_hand"/>
     <joint name="right_hand_fixed" type="fixed">
-        <origin rpy="0 0 -1.5707963" xyz="0 0 0"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
         <parent link="link6"/>
         <child link="right_hand"/>
     </joint>
