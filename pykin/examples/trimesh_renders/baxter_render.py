@@ -13,7 +13,7 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = 'urdf/baxter/baxter.urdf'
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 
-custom_fpath = current_file_path + '/../../pykin/assets/config/baxter_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/baxter_init_params.yaml'
 print(custom_fpath)
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
@@ -31,7 +31,7 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
-milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
+milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()
