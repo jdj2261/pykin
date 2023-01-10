@@ -18,7 +18,7 @@ setup(
         "numpy",
         "matplotlib",
         "trimesh[easy]",
-        "pyglet",
+        "pyglet==1.5.21",
         "tqdm",
         "pyyaml",
         "python-fcl",
@@ -32,7 +32,7 @@ setup(
     url="https://github.com/jdj2261/pykin.git",
 	download_url="https://github.com/jdj2261/pykin/archive/refs/heads/main.zip",
     author_email="wlseoeo@gmail.com",
-    version="1.5.2",
+    version="1.5.5",
     long_description=long_description,
     long_description_content_type='text/markdown'
 )

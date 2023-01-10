@@ -15,7 +15,8 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = 'urdf/panda/panda.urdf'
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[0, 0, 0]))
 
-custom_fpath = current_file_path + '/../../pykin/assets/config/panda_init_params.yaml'
+print(current_file_path)
+custom_fpath = current_file_path + '/../../../pykin/assets/config/panda_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -35,7 +36,7 @@ scene.set_camera(np.array([np.pi/2, 0, np.pi]), 5, resolution=(1024, 512))
 # doosan
 file_path = 'urdf/doosan/doosan_with_robotiq140.urdf'
 doosan_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[-1, 0, 0]))
-custom_fpath = current_file_path + '/../../pykin/assets/config/doosan_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/doosan_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -54,7 +55,7 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=doosan_robot, geom=c_man
 file_path = 'urdf/iiwa14/iiwa14.urdf'
 iiwa14 = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[-2, 0, 0]))
 
-custom_fpath = current_file_path + '/../../pykin/assets/config/iiwa14_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/iiwa14_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -72,7 +73,7 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=iiwa14, geom=c_manager.g
 # ur5e
 file_path = 'urdf/ur5e/ur5e.urdf'
 ur5e_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[-3, 0, 0]))
-custom_fpath = current_file_path + '/../../pykin/assets/config/ur5e_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/ur5e_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -90,7 +91,7 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=ur5e_robot, geom=c_manag
 # sawyer
 file_path = 'urdf/sawyer/sawyer.urdf'
 sawyer_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[1, 0, 0]))
-custom_fpath = current_file_path + '/../../pykin/assets/config/sawyer_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/sawyer_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -108,7 +109,7 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=sawyer_robot, geom=c_man
 # baxter
 file_path = 'urdf/baxter/baxter.urdf'
 baxter_robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, np.pi/2], pos=[2, 0, 0]))
-custom_fpath = current_file_path + '/../../pykin/assets/config/baxter_init_params.yaml'
+custom_fpath = current_file_path + '/../../../pykin/assets/config/baxter_init_params.yaml'
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
