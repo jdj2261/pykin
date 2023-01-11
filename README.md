@@ -9,10 +9,10 @@ This library has been created simply by referring to <a href="https://github.com
 ## Features
 
 - Pure python library
-- Support only URDF file
+- Support only URDF file.
 - Compute forward, inverse kinematics and jacobian, referred to the [Introduction to Humanoid Robotics book](https://link.springer.com/book/10.1007/978-3-642-54536-8).
-- Check robot self-collision and collision between objects
-- Plot robot kinematic chain and mesh
+- Check robot self-collision and collision between robot's bodies and objects.
+- Plot robot kinematic chain and mesh using *matplotlib* or *trimesh* library
 
 ## Installation
 
@@ -31,7 +31,7 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 
     `git clone https://github.com/OctoMap/octomap.git`
 
-    ~~~
+    ~~~shell
     $ cd octomap
     $ mkdir build
     $ cd build
@@ -45,7 +45,7 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 
     Since python-fcl uses version 0.5.0 of fcl, checkout with tag 0.5.0
 
-    ~~~
+    ~~~shell
     $ cd fcl
     $ git checkout 0.5.0
     $ mkdir build
@@ -55,11 +55,37 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ sudo make install
     ~~~
 
-### Install Pykin
+### Install pykin
 
-~~~
-pip3 or pip install pykin
-~~~
+**pykin** supports macOS and Linux on Python 3.
+
+- Install from pip
+
+  ~~~shell
+  $ pip3 or pip install pykin
+  ~~~
+
+- Install from source **[recommend]**
+
+  ~~~shell
+  $ git clone https://github.com/jdj2261/pykin.git
+  $ cd pykin
+  $ python3 seup.py install or sudo python3 setup.py install
+  ~~~
+
+- pykin directory structure
+
+  ~~~
+  └── pykin
+      ├── assets
+      ├── collision
+      ├── examples
+      ├── geometry
+      ├── kinematics
+      ├── models
+      ├── robots
+      └── utils
+  ~~~
 
 ## Quick Start
 
