@@ -20,12 +20,12 @@ This library has been created simply by referring to <a href="https://github.com
 
 You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) package to do object collision checking.
 
-- For Ubuntu, using  `apt`
+- On Ubuntu, install two dependency libraries using `apt`
 
   `sudo apt install liboctomap-dev`
 
   `sudo apt install libfcl-dev`
-- For Mac, First, Download the source and build it.
+- On Mac, download the two dependency libraries from git repository and build it.
 
   - octomap
 
@@ -58,7 +58,7 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 ### Install Pykin
 
 ~~~
-pip3 install pykin
+pip3 or pip install pykin
 ~~~
 
 ## Quick Start
@@ -72,7 +72,7 @@ You can see various examples in examples directory
   `baxter, sawyer, iiwa14, iiwa7, panda, ur5e, doosan`
 
   ~~~shell
-  $ cd examples
+  $ cd pykin/examples
   $ python robot_info.py $(robot_name)
   # baxter
   $ python robot_info.py baxter
@@ -85,7 +85,7 @@ You can see various examples in examples directory
   You can compute the forward kinematics as well as visualize the visual or collision geometry.
 
   ~~~shell
-  $ cd examples/forward_kinematics
+  $ cd pykin/examples/forward_kinematics
   $ python robot_fk_baxter_test.py
   ~~~
 
@@ -98,7 +98,7 @@ You can see various examples in examples directory
   You can compute the inverse kinematics using levenberg marquardt(LM) or newton raphson(NR) method
 
   ~~~shell
-  $ cd examples/inverse_kinematics
+  $ cd pykin/examples/inverse_kinematics
   $ python robot_ik_baxter_test.py
   ~~~
 
@@ -109,7 +109,7 @@ You can see various examples in examples directory
   For more detailed information, check [GaBO module](/pykin/utils/gabo/)
   
   ~~~shell
-  $ cd examples/inverse_kinematics
+  $ cd pykin/examples/inverse_kinematics
   $ python robot_ik_gabo_test.py
   ~~~
 
@@ -118,7 +118,7 @@ You can see various examples in examples directory
   The below images show the collision result as well as visualize robot using trimesh.Scene class
 
   ~~~shell
-  $ cd examples/trimesh_renders
+  $ cd pykin/examples/trimesh_renders
   $ python sawyer_render.py
   ~~~
 
