@@ -15,12 +15,9 @@ class Link:
         visual (pykin.geometry.geometry.Visual): link visual described in the urdf file
         collision (pykin.geometry.geometry.Collision): link collision described in the urdf file
     """
+
     def __init__(
-        self, 
-        name=None, 
-        offset=Transform(), 
-        visual=Visual(), 
-        collision=Collision()
+        self, name=None, offset=Transform(), visual=Visual(), collision=Collision()
     ):
         self.name = name
         self.offset = offset
@@ -33,10 +30,11 @@ class Link:
             offset= {scolors.HEADER}{self.offset}{scolors.ENDC}
             visual= {scolors.HEADER}{self.visual}{scolors.ENDC} 
             collision= {scolors.HEADER}{self.collision}{scolors.ENDC}"""
-    
+
     def __repr__(self):
-        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
-        
+        return "pykin.geometry.frame.{}()".format(type(self).__name__)
+
+
 class Joint:
     """
     class of Joint
@@ -50,17 +48,18 @@ class Joint:
         parent (Link): joint parent link described in the urdf file
         child (Link): joint child link described in the urdf file
     """
-    TYPES = ['fixed', 'revolute', 'prismatic']
+
+    TYPES = ["fixed", "revolute", "prismatic"]
 
     def __init__(
         self,
-        name=None, 
+        name=None,
         offset=Transform(),
-        dtype='fixed', 
-        axis=None, 
-        limit=[None, None], 
-        parent=None, 
-        child=None
+        dtype="fixed",
+        axis=None,
+        limit=[None, None],
+        parent=None,
+        child=None,
     ):
         self.name = name
         self.offset = offset
@@ -80,7 +79,7 @@ class Joint:
             limit= {scolors.HEADER}{self.limit}{scolors.ENDC}"""
 
     def __repr__(self):
-        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
+        return "pykin.geometry.frame.{}()".format(type(self).__name__)
 
     @property
     def dtype(self):
@@ -93,14 +92,14 @@ class Joint:
         """
         if dtype is not None:
             dtype = dtype.lower().strip()
-            if dtype in {'fixed'}:
-                dtype = 'fixed'
+            if dtype in {"fixed"}:
+                dtype = "fixed"
                 self.num_dof = 0
-            elif dtype in {'revolute'}:
-                dtype = 'revolute'
+            elif dtype in {"revolute"}:
+                dtype = "revolute"
                 self.num_dof = 1
-            elif dtype in {'prismatic'}:
-                dtype = 'prismatic'
+            elif dtype in {"prismatic"}:
+                dtype = "prismatic"
                 self.num_dof = 1
         self._dtype = dtype
 
@@ -125,14 +124,9 @@ class Frame:
         joint (Joint): Joint frame
         children (list): all child frame
     """
-    def __init__(
-        self, 
-        name=None, 
-        link=Link(),
-        joint=Joint(), 
-        children=[]
-    ):
-        self.name = 'None' if name is None else name
+
+    def __init__(self, name=None, link=Link(), joint=Joint(), children=[]):
+        self.name = "None" if name is None else name
         self.link = link
         self.joint = joint
         self.children = children
@@ -144,7 +138,7 @@ class Frame:
         return ret
 
     def __repr__(self):
-        return 'pykin.geometry.frame.{}()'.format(type(self).__name__)
+        return "pykin.geometry.frame.{}()".format(type(self).__name__)
 
     def get_transform(self, theta):
         """
@@ -154,12 +148,12 @@ class Frame:
         Returns:
             Transform: Compute transform by multiplying current joint offset and transfrom obtained from input angle
         """
-        if self.joint.dtype == 'revolute':
+        if self.joint.dtype == "revolute":
             t = Transform(rot=t_utils.get_quaternion_about_axis(theta, self.joint.axis))
-        elif self.joint.dtype == 'prismatic':
+        elif self.joint.dtype == "prismatic":
             t = Transform(pos=theta * self.joint.axis)
-        elif self.joint.dtype == 'fixed':
+        elif self.joint.dtype == "fixed":
             t = Transform()
         else:
-            raise ValueError("Unsupported joint type %s." %self.joint.dtype)
+            raise ValueError("Unsupported joint type %s." % self.joint.dtype)
         return self.joint.offset * t

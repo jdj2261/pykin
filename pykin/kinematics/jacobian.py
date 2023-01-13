@@ -1,9 +1,7 @@
 import numpy as np
 
-def calc_jacobian(
-    frames: list, 
-    fk: dict, 
-    jsize: int) -> np.array:
+
+def calc_jacobian(frames: list, fk: dict, jsize: int) -> np.array:
     """
     Args:
         frames (list): frames to compute jacobian

@@ -37,12 +37,12 @@ def get_hessianfd(self, x, a):
         return np.zeros(grad.shape)
 
     # Parameter: how far do we look?
-    epsilon = 2**(-14)
+    epsilon = 2 ** (-14)
 
-    c = epsilon/norm_a
+    c = epsilon / norm_a
 
     # Compute a point a little further along a and the gradient there.
-    x1 = self.manifold.retr(x, c*a)
+    x1 = self.manifold.retr(x, c * a)
 
     grad1 = self.grad(x1)
 
@@ -57,6 +57,6 @@ def get_hessianfd(self, x, a):
             grad[k] /= c
         finite_difference_grad = grad1 - grad
     else:
-        finite_difference_grad = grad1/c - grad/c
+        finite_difference_grad = grad1 / c - grad / c
 
     return finite_difference_grad

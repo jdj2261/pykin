@@ -3,6 +3,7 @@ import numpy as np
 from pykin.utils import transform_utils as t_utils
 from pykin.utils.kin_utils import ShellColors as sc
 
+
 def convert_transform(origin):
     """
     Args:
@@ -16,6 +17,7 @@ def convert_transform(origin):
     else:
         return Transform(rot=origin.rot, pos=origin.pos)
 
+
 class Transform:
     """
     This class calculates the rotation and translation of a 3D rigid body.
@@ -24,11 +26,8 @@ class Transform:
         pos (sequence of float) : The translation parameter.
         rot (sequence of float) : The rotation parameter. Give in quaternions or roll pitch yaw.
     """
-    def __init__(
-        self, 
-        pos=np.zeros(3),
-        rot=np.array([1.0, 0.0, 0.0, 0.0]) 
-    ):
+
+    def __init__(self, pos=np.zeros(3), rot=np.array([1.0, 0.0, 0.0, 0.0])):
         # Set rotation, position
         self.pos = self._to_pos(pos)
         self.rot = self._to_quaternion(rot)
@@ -64,7 +63,7 @@ class Transform:
     @pos.setter
     def pos(self, pos):
         self._pos = self._to_pos(pos)
-        
+
     @property
     def rot(self):
         """
@@ -72,7 +71,7 @@ class Transform:
             np.array: rotation (quaternion)
         """
         return self._rot
-    
+
     @rot.setter
     def rot(self, rot):
         self._rot = self._to_quaternion(rot)
@@ -132,7 +131,7 @@ class Transform:
             np.array: rotation (quaternion)
         """
         if len(rot) == 3:
-            rot = t_utils.get_quaternion_from_rpy(rot, convention='wxyz')
+            rot = t_utils.get_quaternion_from_rpy(rot, convention="wxyz")
         elif len(rot) == 4:
             rot = np.array(rot)
         else:
@@ -156,5 +155,5 @@ class Transform:
             else:
                 raise ValueError("Size of pos must be 3.")
         assert pos.shape == (3,)
-        
+
         return pos

@@ -12,7 +12,6 @@ from pymanopt.manifolds.product import Product
 
 
 class Torus(Product):
-
     def __init__(self, dimension):
 
         self.manifolds = [Sphere(2)] * dimension

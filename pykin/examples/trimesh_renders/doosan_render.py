@@ -9,7 +9,7 @@ from pykin.utils.kin_utils import apply_robot_to_scene
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 
-file_path = 'urdf/doosan/doosan_with_robotiq140.urdf'
+file_path = "urdf/doosan/doosan_with_robotiq140.urdf"
 robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 print(robot.robot_name)
 c_manager = CollisionManager(is_robot=True)
@@ -18,7 +18,7 @@ c_manager.show_collision_info()
 robot.setup_link_name("base_0", "right_hand")
 
 # goal_qpos = np.array([ 0, 0, np.pi/1.5, 0, np.pi/3,  np.pi/2])
-goal_qpos = np.array([ 0, 0, 0, 0, 0,  0])
+goal_qpos = np.array([0, 0, 0, 0, 0, 0])
 robot.set_transform(goal_qpos)
 
 scene = trimesh.Scene()

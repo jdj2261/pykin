@@ -3,15 +3,10 @@ from collections import OrderedDict
 
 from pykin.utils.mesh_utils import get_absolute_transform
 
+
 class Gripper:
     def __init__(
-        self, 
-        name, 
-        element_names,
-        max_width,
-        max_depth,
-        tcp_position,
-        finger_names=[]
+        self, name, element_names, max_width, max_depth, tcp_position, finger_names=[]
     ):
         self.name = name
         self.element_names = element_names
@@ -19,15 +14,15 @@ class Gripper:
         self.max_depth = max_depth
         self.tcp_position = tcp_position
         self.finger_names = finger_names
-        
+
         self.info = OrderedDict()
-        
+
         self.is_attached = False
         self.attached_obj_name = None
-        
+
         self.grasp_pose = None
         self.release_pose = None
-    
+
         self.transform_bet_gripper_n_obj = None
         self.pick_obj_pose = None
         self.place_obj_pose = None
@@ -40,7 +35,7 @@ class Gripper:
         T = get_absolute_transform(self.info[self.element_names[-1]][3], tcp_pose)
         for link, info in self.info.items():
             self.info[link][3] = np.dot(T, info[3])
-            
+
     def get_gripper_tcp_pose(self):
         return self.info["tcp"][3]
 
@@ -52,13 +47,17 @@ class Gripper:
     def compute_eef_pose_from_tcp_pose(self, tcp_pose=np.eye(4)):
         eef_pose = np.eye(4)
         eef_pose[:3, :3] = tcp_pose[:3, :3]
-        eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(abs(self.tcp_position[-1]), tcp_pose[:3, 2])
+        eef_pose[:3, 3] = tcp_pose[:3, 3] - np.dot(
+            abs(self.tcp_position[-1]), tcp_pose[:3, 2]
+        )
         return eef_pose
 
     def compute_tcp_pose_from_eef_pose(self, eef_pose=np.eye(4)):
         tcp_pose = np.eye(4)
         tcp_pose[:3, :3] = eef_pose[:3, :3]
-        tcp_pose[:3, 3] = eef_pose[:3, 3] + np.dot(abs(self.tcp_position[-1]), eef_pose[:3, 2])
+        tcp_pose[:3, 3] = eef_pose[:3, 3] + np.dot(
+            abs(self.tcp_position[-1]), eef_pose[:3, 2]
+        )
         return tcp_pose
 
     def get_gripper_fk(self):
@@ -66,47 +65,95 @@ class Gripper:
         for link, info in self.info.items():
             fk[link] = info[3]
         return fk
-        
+
     def open_gripper(self, z_dis=0.02):
         pass
 
     def close_gripper(self, z_dis=0.02):
         pass
+
 
 class PandaGripper(Gripper):
     def __init__(self):
-        gripper_name="panda_gripper"
-        element_names=["right_hand", "right_gripper", "leftfinger", "rightfinger", "tcp"]
-        max_width=0.08
-        max_depth=0.035
-        tcp_position=np.array([0, 0, 0.097])
+        gripper_name = "panda_gripper"
+        element_names = [
+            "right_hand",
+            "right_gripper",
+            "leftfinger",
+            "rightfinger",
+            "tcp",
+        ]
+        max_width = 0.08
+        max_depth = 0.035
+        tcp_position = np.array([0, 0, 0.097])
         finger_names = ["leftfinger", "rightfinger"]
-        super(PandaGripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position, finger_names)
+        super(PandaGripper, self).__init__(
+            gripper_name,
+            element_names,
+            max_width,
+            max_depth,
+            tcp_position,
+            finger_names,
+        )
 
     def open_gripper(self, z_dis=0.02):
         for finger in self.finger_names:
-            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] + z_dis * self.info[finger][3][:3,1]
+            self.info[finger][3][:3, 3] = (
+                self.info[finger][3][:3, 3] + z_dis * self.info[finger][3][:3, 1]
+            )
 
     def close_gripper(self, z_dis=0.02):
         for finger in self.finger_names:
-            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] - z_dis * self.info[finger][3][:3,1]
+            self.info[finger][3][:3, 3] = (
+                self.info[finger][3][:3, 3] - z_dis * self.info[finger][3][:3, 1]
+            )
+
 
 class Robotiq140Gripper(Gripper):
     def __init__(self):
-        gripper_name="robotiq140_gripper"
-        element_names=["right_hand", "right_gripper", "left_outer_knuckle", "right_outer_knuckle", \
-                       "left_outer_finger", "right_outer_finger", "left_inner_knuckle", "right_inner_knuckle", \
-                       "left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad", "collision_pad", "tcp"]
-        max_width=0.140
-        max_depth=0.2
-        tcp_position=np.array([0, 0, 0.2075])
-        finger_names = ["left_inner_finger", "right_inner_finger", "right_inner_finger_pad","left_inner_finger_pad"]
-        super(Robotiq140Gripper, self).__init__(gripper_name, element_names, max_width, max_depth, tcp_position, finger_names)
+        gripper_name = "robotiq140_gripper"
+        element_names = [
+            "right_hand",
+            "right_gripper",
+            "left_outer_knuckle",
+            "right_outer_knuckle",
+            "left_outer_finger",
+            "right_outer_finger",
+            "left_inner_knuckle",
+            "right_inner_knuckle",
+            "left_inner_finger",
+            "right_inner_finger",
+            "right_inner_finger_pad",
+            "left_inner_finger_pad",
+            "collision_pad",
+            "tcp",
+        ]
+        max_width = 0.140
+        max_depth = 0.2
+        tcp_position = np.array([0, 0, 0.2075])
+        finger_names = [
+            "left_inner_finger",
+            "right_inner_finger",
+            "right_inner_finger_pad",
+            "left_inner_finger_pad",
+        ]
+        super(Robotiq140Gripper, self).__init__(
+            gripper_name,
+            element_names,
+            max_width,
+            max_depth,
+            tcp_position,
+            finger_names,
+        )
 
     def open_gripper(self, z_dis=0.02):
         for finger in self.finger_names:
-            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] + z_dis * self.info[finger][3][:3,2]
+            self.info[finger][3][:3, 3] = (
+                self.info[finger][3][:3, 3] + z_dis * self.info[finger][3][:3, 2]
+            )
 
     def close_gripper(self, z_dis=0.02):
         for finger in self.finger_names:
-            self.info[finger][3][:3, 3] = self.info[finger][3][:3, 3] - z_dis * self.info[finger][3][:3,2]
+            self.info[finger][3][:3, 3] = (
+                self.info[finger][3][:3, 3] - z_dis * self.info[finger][3][:3, 2]
+            )

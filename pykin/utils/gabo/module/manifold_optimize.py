@@ -33,8 +33,8 @@ from pykin.utils.gabo.module.approximate_hessian import get_hessianfd
 if torch.cuda.is_available():
     device = torch.cuda.current_device()
 else:
-    device = 'cpu'
-    
+    device = "cpu"
+
 torch.set_default_dtype(torch.float32)
 
 
@@ -91,12 +91,17 @@ def joint_optimize_manifold(
     """
 
     options = options or {}
-    batch_initial_conditions = \
-        gen_batch_initial_conditions_manifold(acq_function=acq_function, manifold=manifold, bounds=bounds,
-                                              q=None if isinstance(acq_function, AnalyticAcquisitionFunction) else q,
-                                              num_restarts=num_restarts, raw_samples=raw_samples,
-                                              sample_type=sample_type,
-                                              options=options, post_processing_manifold=post_processing_manifold)
+    batch_initial_conditions = gen_batch_initial_conditions_manifold(
+        acq_function=acq_function,
+        manifold=manifold,
+        bounds=bounds,
+        q=None if isinstance(acq_function, AnalyticAcquisitionFunction) else q,
+        num_restarts=num_restarts,
+        raw_samples=raw_samples,
+        sample_type=sample_type,
+        options=options,
+        post_processing_manifold=post_processing_manifold,
+    )
 
     batch_limit = options.get("batch_limit", num_restarts)
     batch_candidates_list = []
@@ -105,17 +110,25 @@ def joint_optimize_manifold(
     while start_idx < num_restarts:
         end_idx = min(start_idx + batch_limit, num_restarts)
         # optimize using random restart optimization
-        batch_candidates_curr, batch_acq_values_curr = \
-            gen_candidates_manifold(initial_conditions=batch_initial_conditions[start_idx:end_idx],
-                                    acquisition_function=acq_function, manifold=manifold, solver=solver,
-                                    pre_processing_manifold=pre_processing_manifold,
-                                    post_processing_manifold=post_processing_manifold,
-                                    lower_bounds=bounds[0], upper_bounds=bounds[1],
-                                    options={k: v for k, v in options.items()
-                                             if k not in ("batch_limit", "nonnegative")},
-                                    inequality_constraints=inequality_constraints,
-                                    equality_constraints=equality_constraints,
-                                    approx_hessian=approx_hessian, solver_init_conds=solver_init_conds)
+        batch_candidates_curr, batch_acq_values_curr = gen_candidates_manifold(
+            initial_conditions=batch_initial_conditions[start_idx:end_idx],
+            acquisition_function=acq_function,
+            manifold=manifold,
+            solver=solver,
+            pre_processing_manifold=pre_processing_manifold,
+            post_processing_manifold=post_processing_manifold,
+            lower_bounds=bounds[0],
+            upper_bounds=bounds[1],
+            options={
+                k: v
+                for k, v in options.items()
+                if k not in ("batch_limit", "nonnegative")
+            },
+            inequality_constraints=inequality_constraints,
+            equality_constraints=equality_constraints,
+            approx_hessian=approx_hessian,
+            solver_init_conds=solver_init_conds,
+        )
 
         batch_candidates_list.append(batch_candidates_curr)
         batch_acq_values_list.append(batch_acq_values_curr)
@@ -123,24 +136,26 @@ def joint_optimize_manifold(
 
     batch_candidates = torch.cat(batch_candidates_list)
     batch_acq_values = torch.cat(batch_acq_values_list)
-    return get_best_candidates(batch_candidates=batch_candidates, batch_values=batch_acq_values)
+    return get_best_candidates(
+        batch_candidates=batch_candidates, batch_values=batch_acq_values
+    )
 
 
 # This function is based on the botorch.gen.gen_candidates_scipy
 def gen_candidates_manifold(
-        initial_conditions: Tensor,
-        acquisition_function: Module,
-        manifold: Manifold,
-        solver: Solver,
-        pre_processing_manifold: Optional[Callable[[Tensor], Tensor]] = None,
-        post_processing_manifold: Optional[Callable[[Tensor], Tensor]] = None,
-        lower_bounds: Optional[Union[float, Tensor]] = None,
-        upper_bounds: Optional[Union[float, Tensor]] = None,
-        inequality_constraints: Optional[List[Callable]] = None,
-        equality_constraints: Optional[List[Callable]] = None,
-        approx_hessian: bool = False,
-        solver_init_conds: bool = False,
-        options: Optional[Dict[str, Union[bool, float, int]]] = None,
+    initial_conditions: Tensor,
+    acquisition_function: Module,
+    manifold: Manifold,
+    solver: Solver,
+    pre_processing_manifold: Optional[Callable[[Tensor], Tensor]] = None,
+    post_processing_manifold: Optional[Callable[[Tensor], Tensor]] = None,
+    lower_bounds: Optional[Union[float, Tensor]] = None,
+    upper_bounds: Optional[Union[float, Tensor]] = None,
+    inequality_constraints: Optional[List[Callable]] = None,
+    equality_constraints: Optional[List[Callable]] = None,
+    approx_hessian: bool = False,
+    solver_init_conds: bool = False,
+    options: Optional[Dict[str, Union[bool, float, int]]] = None,
 ) -> Tuple[Tensor, Tensor]:
     """
     This function generates a set of candidates using `scipy.optimize.minimize`
@@ -202,10 +217,10 @@ def gen_candidates_manifold(
     # This precon can be removed if the condition Hd==0 is checked before lines 451-5 in TrustRegions.
     def precon(x, d):
         if isinstance(d, list) or isinstance(d, tuple):
-            if np.sum(np.concatenate(d)) == 0.:
+            if np.sum(np.concatenate(d)) == 0.0:
                 for di in d:
                     di += 1e-30
-        elif np.sum(d) == 0.:
+        elif np.sum(d) == 0.0:
             d += 1e-30
         return d
 
@@ -225,15 +240,21 @@ def gen_candidates_manifold(
         candidates = torch.zeros((nb_initial_conditions, 1, dim_x), dtype=torch.float64)
     else:
         nb_initial_conditions = x0.shape[0]
-        candidates = torch.zeros(((nb_initial_conditions, 1) + x0.shape[1:]), dtype=torch.float64)
+        candidates = torch.zeros(
+            ((nb_initial_conditions, 1) + x0.shape[1:]), dtype=torch.float64
+        )
 
     # TODO this does not handle the case where q!=1
     for i in range(nb_initial_conditions):
         # with torch.autograd.detect_anomaly():
         if not solver_init_conds:
             if equality_constraints is not None or inequality_constraints is not None:
-                opt_x = solver.solve(problem, x=x0[i],
-                                     eq_constraints=equality_constraints, ineq_constraints=inequality_constraints)
+                opt_x = solver.solve(
+                    problem,
+                    x=x0[i],
+                    eq_constraints=equality_constraints,
+                    ineq_constraints=inequality_constraints,
+                )
             else:
                 opt_x = solver.solve(problem, x=x0[i])
         else:
@@ -314,11 +335,18 @@ def gen_batch_initial_conditions_manifold(
     while factor < max_factor:
         with warnings.catch_warnings(record=True) as ws:
             # Generate random points on the manifold
-            manifold_samples = [manifold.rand() for i in range(raw_samples * factor * q)]
+            manifold_samples = [
+                manifold.rand() for i in range(raw_samples * factor * q)
+            ]
             if not isinstance(manifold, Product):
-                points = [torch.from_numpy(point)[None, None] for point in manifold_samples]
+                points = [
+                    torch.from_numpy(point)[None, None] for point in manifold_samples
+                ]
             else:
-                points = [torch.from_numpy(np.concatenate(point))[None, None] for point in manifold_samples]
+                points = [
+                    torch.from_numpy(np.concatenate(point))[None, None]
+                    for point in manifold_samples
+                ]
 
             # Final tensor of random points
             # X_rnd = torch.cat(points).to(sample_type)
@@ -342,20 +370,28 @@ def gen_batch_initial_conditions_manifold(
 
                 Y_rnd = torch.cat(Y_rnd_list).to(X_rnd)
 
-            batch_initial_conditions = init_func(X=X_rnd, Y=Y_rnd, n=num_restarts, **init_kwargs)
+            batch_initial_conditions = init_func(
+                X=X_rnd, Y=Y_rnd, n=num_restarts, **init_kwargs
+            )
 
             # Post-process the initial conditions if we have a product of manifolds
             if isinstance(manifold, Product):
                 initial_conditions = []
                 for i in range(batch_initial_conditions.shape[0]):
                     for j in range(batch_initial_conditions.shape[1]):
-                        idx = (X_rnd == batch_initial_conditions[i, j]).nonzero(as_tuple=True)
+                        idx = (X_rnd == batch_initial_conditions[i, j]).nonzero(
+                            as_tuple=True
+                        )
                         # TODO if we use q!=1, we must check the following line.
-                        initial_conditions.append(manifold_samples[idx[0][0] + raw_samples * idx[1][0]])
+                        initial_conditions.append(
+                            manifold_samples[idx[0][0] + raw_samples * idx[1][0]]
+                        )
                 batch_initial_conditions = initial_conditions
             # Otherwise, squeeze and transform to numpy array
             else:
-                batch_initial_conditions = torch.squeeze(batch_initial_conditions).cpu().detach().numpy()
+                batch_initial_conditions = (
+                    torch.squeeze(batch_initial_conditions).cpu().detach().numpy()
+                )
 
             if not any(issubclass(w.category, BadInitialCandidatesWarning) for w in ws):
                 return batch_initial_conditions
@@ -363,6 +399,9 @@ def gen_batch_initial_conditions_manifold(
             if factor < max_factor:
                 factor += 1
 
-    warnings.warn("Unable to find non-zero acquisition function values - initial conditions are being selected "
-                  "randomly.", BadInitialCandidatesWarning,)
+    warnings.warn(
+        "Unable to find non-zero acquisition function values - initial conditions are being selected "
+        "randomly.",
+        BadInitialCandidatesWarning,
+    )
     return batch_initial_conditions
