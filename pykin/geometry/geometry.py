@@ -8,18 +8,15 @@ class Visual:
     Args:
         offset (Transform): visual offset
         geom_type (str): visual type (box, cylinder, spehre, mesh)
-        geom_param (dict): visual parameters 
+        geom_param (dict): visual parameters
     """
-    TYPES = ['box', 'cylinder', 'sphere', 'mesh']
-    def __init__(
-        self, 
-        offset=Transform(), 
-        geom_type="", 
-        geom_param=dict()
-    ):
+
+    TYPES = ["box", "cylinder", "sphere", "mesh"]
+
+    def __init__(self, offset=Transform(), geom_type="", geom_param=dict()):
         self.offset = offset
-        self.gtype:str = geom_type
-        self.gparam:dict = geom_param
+        self.gtype: str = geom_type
+        self.gparam: dict = geom_param
         self.gparam["filename"] = []
         self.gparam["color"] = []
 
@@ -29,7 +26,7 @@ class Visual:
                            geom_param={self.gparam})"""
 
     def __repr__(self):
-        return 'pykin.geometry.geometry.{}()'.format(type(self).__name__)
+        return "pykin.geometry.geometry.{}()".format(type(self).__name__)
 
     @property
     def offset(self):
@@ -52,15 +49,12 @@ class Collision:
     Args:
         offset (Transform): collision offset
         geom_type (str): collision type (box, cylinder, spehre, mesh)
-        geom_param (dict): collision parameters 
+        geom_param (dict): collision parameters
     """
-    TYPES = ['box', 'cylinder', 'sphere', 'mesh']
-    def __init__(
-        self, 
-        offset=Transform(), 
-        geom_type="", 
-        geom_param=dict()
-    ):
+
+    TYPES = ["box", "cylinder", "sphere", "mesh"]
+
+    def __init__(self, offset=Transform(), geom_type="", geom_param=dict()):
         self.offset = offset
         self.gtype = geom_type
         self.gparam = geom_param
@@ -73,7 +67,7 @@ class Collision:
                               geom_param={self.gparam})"""
 
     def __repr__(self):
-        return 'pykin.geometry.geometry.{}()'.format(type(self).__name__)
+        return "pykin.geometry.geometry.{}()".format(type(self).__name__)
 
     @property
     def offset(self):

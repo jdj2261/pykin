@@ -2,6 +2,7 @@ import numpy as np
 from pykin.robots.robot import Robot
 from pykin.utils.error_utils import NotFoundError
 
+
 class Bimanual(Robot):
     """
     Initializes a bimanual robot simulation object.
@@ -10,21 +11,16 @@ class Bimanual(Robot):
         f_name (str): path to the urdf file.
         offset (Transform): robot init offset
     """
-    def __init__(
-        self,
-        f_name: str,
-        offset=None,
-        has_gripper=False,
-        gripper_name=None
-    ):
+
+    def __init__(self, f_name: str, offset=None, has_gripper=False, gripper_name=None):
         super(Bimanual, self).__init__(f_name, offset, has_gripper, gripper_name)
         self._setup_input2dict()
         self._set_joint_limits_upper_and_lower()
-        
+
         self.info = {}
-        self.info= super()._init_robot_info()
+        self.info = super()._init_robot_info()
         self._init_qpos = np.zeros(self.arm_dof)
-        
+
         if has_gripper:
             self.gripper.info = super()._init_gripper_info()
 
@@ -46,7 +42,9 @@ class Bimanual(Robot):
         fk = self.forward_kin(thetas)
         for link, transform in fk.items():
 
-            collision_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
+            collision_h_mat = np.dot(
+                transform.h_mat, self.links[link].collision.offset.h_mat
+            )
             visual_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
 
             self.info["collision"][link][3] = collision_h_mat
@@ -83,9 +81,11 @@ class Bimanual(Robot):
 
         for arm in self._arms:
             self.joint_limits_lower[arm] = [
-                limit_lower for joint, limit_lower in limits_lower if arm in joint]
+                limit_lower for joint, limit_lower in limits_lower if arm in joint
+            ]
             self.joint_limits_upper[arm] = [
-                limit_upper for joint, limit_upper in limits_upper if arm in joint]
+                limit_upper for joint, limit_upper in limits_upper if arm in joint
+            ]
 
     def setup_link_name(self, base_name="", eef_name=None):
         """
@@ -100,7 +100,7 @@ class Bimanual(Robot):
             self._eef_name["right"] = eef_name
             self._set_desired_base_frame("right")
             self._set_desired_frame("right")
-            
+
         if "left" in eef_name:
             self._base_name["left"] = base_name
             self._eef_name["left"] = eef_name
@@ -117,7 +117,9 @@ class Bimanual(Robot):
         if self.base_name[arm] == "":
             self.desired_base_frame[arm] = self.root
         else:
-            self.desired_base_frame[arm] = super().find_frame(self.base_name[arm] + "_frame")
+            self.desired_base_frame[arm] = super().find_frame(
+                self.base_name[arm] + "_frame"
+            )
 
     def _set_desired_frame(self, arm):
         """
@@ -127,17 +129,19 @@ class Bimanual(Robot):
             arm (str): robot arm (right or left)
         """
         self.desired_frames[arm] = super().generate_desired_frame_recursive(
-            self.desired_base_frame[arm],
-            self.eef_name[arm])
+            self.desired_base_frame[arm], self.eef_name[arm]
+        )
 
         self._frames[arm] = self.desired_frames[arm]
-        self._revolute_joint_names[arm] = super().get_revolute_joint_names(self._frames[arm])
+        self._revolute_joint_names[arm] = super().get_revolute_joint_names(
+            self._frames[arm]
+        )
         self._target_pose[arm] = np.zeros(len(self._revolute_joint_names[arm]))
 
     def inverse_kin(self, current_joints, target_pose, method="LM", max_iter=100):
         """
         Returns joint angles obtained by computing IK
-        
+
         Args:
             current_joints (sequence of float): input joint angles
             target_pose (np.array): goal pose to achieve
@@ -156,14 +160,17 @@ class Bimanual(Robot):
         for arm in target_pose.keys():
             if self.eef_name[arm]:
                 self._set_desired_frame(arm)
-                self._target_pose[arm] = self._convert_target_pose_type_to_npy(target_pose[arm])
+                self._target_pose[arm] = self._convert_target_pose_type_to_npy(
+                    target_pose[arm]
+                )
 
                 joints[arm] = self.kin.inverse_kinematics(
                     self._frames[arm],
                     current_joints,
                     self._target_pose[arm],
                     method,
-                    max_iter)
+                    max_iter,
+                )
         return joints
 
     def _convert_target_pose_type_to_npy(self, value):
@@ -172,7 +179,7 @@ class Bimanual(Robot):
 
         Args:
             value(list or tupe)
-        
+
         Returns:
             np.array
         """
@@ -186,14 +193,16 @@ class Bimanual(Robot):
 
         Args:
             fk(OrderedDict)
-        
+
         Returns:
             vals(dict)
         """
         vals = {}
         for arm in self.arm_type:
             if self.eef_name[arm]:
-                vals[arm] = np.concatenate((fk[self.eef_name[arm]].pos, fk[self.eef_name[arm]].rot))
+                vals[arm] = np.concatenate(
+                    (fk[self.eef_name[arm]].pos, fk[self.eef_name[arm]].rot)
+                )
         return vals
 
     @property
@@ -209,7 +218,7 @@ class Bimanual(Robot):
     @property
     def arm_type(self):
         """
-        Return arm type 
+        Return arm type
         If number of eef_name is two, return tuple type("right", "left)
         otherwise, return list type(["right] or ["left"])
 
@@ -227,7 +236,9 @@ class Bimanual(Robot):
 
     @property
     def arm_dof(self):
-        return len([ joint for joint in self.get_revolute_joint_names() if "head" not in joint])
+        return len(
+            [joint for joint in self.get_revolute_joint_names() if "head" not in joint]
+        )
 
     @property
     def base_name(self):
@@ -240,7 +251,7 @@ class Bimanual(Robot):
     @property
     def active_joint_names(self):
         return self._revolute_joint_names
-        
+
     @property
     def init_qpos(self):
         return self._init_qpos

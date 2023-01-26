@@ -5,9 +5,10 @@ class NotFoundError(Exception):
     Args:
         data (all types): input data
     """
+
     def __init__(self, data):
         self.data = data
-    
+
     def __str__(self):
         return f"Not Found {self.data}, please check the name again"
 
@@ -19,11 +20,13 @@ class CollisionError(Exception):
     Args:
         data (all types): input data
     """
+
     def __init__(self, data):
         self.data = data
-    
+
     def __str__(self):
         return f"Check the collision.. {self.data}, please check settings again"
+
 
 class LimitJointError(Exception):
     """
@@ -32,11 +35,15 @@ class LimitJointError(Exception):
     Args:
         data (all types): input data
     """
+
     def __init__(self, *data):
         self.data = data
-    
+
     def __str__(self):
-        return f"Check the joints.. {self.data}, please check current joints setting again"
+        return (
+            f"Check the joints.. {self.data}, please check current joints setting again"
+        )
+
 
 class OriValueError(Exception):
     """
@@ -45,15 +52,23 @@ class OriValueError(Exception):
     Args:
         data (all types): input data
     """
+
     def __init__(self, data):
         self.data = data
-    
+
     def __str__(self):
-        return "Expecting the shape of the orientation to be (3,), (3,3), or (4,), instead got:""{}".format(self.data)
+        return (
+            "Expecting the shape of the orientation to be (3,), (3,3), or (4,), instead got:"
+            "{}".format(self.data)
+        )
+
 
 class BimanualTypeError(Exception):
     """
     Class of custom Exception about unexpected bimanual robot type
     """
+
     def __init__(self):
-        super().__init__("GaBO IK solver does not support Bimanual robot. Please use SingleArm robot")
+        super().__init__(
+            "GaBO IK solver does not support Bimanual robot. Please use SingleArm robot"
+        )

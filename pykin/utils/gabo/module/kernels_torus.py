@@ -16,7 +16,8 @@ from pykin.utils.gabo.module.util.jacobi_theta_functions import jacobi_theta_fun
 if torch.cuda.is_available():
     device = torch.cuda.current_device()
 else:
-    device = 'cpu'
+    device = "cpu"
+
 
 class TorusProductOfManifoldsRiemannianGaussianKernel(gpytorch.kernels.Kernel):
     """
@@ -33,6 +34,7 @@ class TorusProductOfManifoldsRiemannianGaussianKernel(gpytorch.kernels.Kernel):
     forward(point1_on_torus, point2_on_torus, diagonal_matrix_flag=False, **params):
 
     """
+
     def __init__(self, dim, **kwargs):
         """
         Initialisation.
@@ -46,15 +48,20 @@ class TorusProductOfManifoldsRiemannianGaussianKernel(gpytorch.kernels.Kernel):
         :param kwargs: additional arguments
         """
         self.has_lengthscale = True
-        super(TorusProductOfManifoldsRiemannianGaussianKernel, self).__init__(has_lengthscale=True, ard_num_dims=None,
-                                                                              **kwargs)
+        super(TorusProductOfManifoldsRiemannianGaussianKernel, self).__init__(
+            has_lengthscale=True, ard_num_dims=None, **kwargs
+        )
 
         # Dimension of the torus
         self.dim = dim
 
         # Initialise the product of kernels
-        kernels = [CircleRiemannianGaussianKernel(active_dims=torch.tensor(list(range(2*i, 2*i+2))))
-                   for i in range(self.dim)]
+        kernels = [
+            CircleRiemannianGaussianKernel(
+                active_dims=torch.tensor(list(range(2 * i, 2 * i + 2)))
+            )
+            for i in range(self.dim)
+        ]
 
         self.torus_kernel = gpytorch.kernels.ProductKernel(*kernels)
 
@@ -79,13 +86,17 @@ class TorusProductOfManifoldsRiemannianGaussianKernel(gpytorch.kernels.Kernel):
         """
         # If the points are given as angles, transform them into coordinates on circles
         if x1.shape[-1] == self.dim:
-            x1_circles = torch.zeros(list(x1.shape[:-1]) + [2 * self.dim], dtype=x1.dtype)
+            x1_circles = torch.zeros(
+                list(x1.shape[:-1]) + [2 * self.dim], dtype=x1.dtype
+            )
             x1_circles[..., ::2] = torch.cos(x1)
             x1_circles[..., 1::2] = torch.sin(x1)
         else:
             x1_circles = x1
         if x2.shape[-1] == self.dim:
-            x2_circles = torch.zeros(list(x2.shape[:-1]) + [2 * self.dim], dtype=x2.dtype)
+            x2_circles = torch.zeros(
+                list(x2.shape[:-1]) + [2 * self.dim], dtype=x2.dtype
+            )
             x2_circles[..., ::2] = torch.cos(x2)
             x2_circles[..., 1::2] = torch.sin(x2)
         else:
@@ -94,6 +105,7 @@ class TorusProductOfManifoldsRiemannianGaussianKernel(gpytorch.kernels.Kernel):
         # Kernel
         kernel = self.torus_kernel.forward(x1_circles, x2_circles)
         return kernel
+
 
 class CircleRiemannianGaussianKernel(gpytorch.kernels.Kernel):
     """
@@ -111,7 +123,8 @@ class CircleRiemannianGaussianKernel(gpytorch.kernels.Kernel):
     Static methods
     --------------
     """
-    def __init__(self, serie_nb_terms=100,  **kwargs):
+
+    def __init__(self, serie_nb_terms=100, **kwargs):
         """
         Initialisation.
 
@@ -124,7 +137,9 @@ class CircleRiemannianGaussianKernel(gpytorch.kernels.Kernel):
         :param kwargs: additional arguments
         """
         self.has_lengthscale = True
-        super(CircleRiemannianGaussianKernel, self).__init__(has_lengthscale=True, ard_num_dims=None, **kwargs)
+        super(CircleRiemannianGaussianKernel, self).__init__(
+            has_lengthscale=True, ard_num_dims=None, **kwargs
+        )
 
         # Number of term used to compute the jacobi theta function
         self.serie_nb_terms = serie_nb_terms
@@ -148,14 +163,16 @@ class CircleRiemannianGaussianKernel(gpytorch.kernels.Kernel):
         :return: kernel matrix between x1 and x2
         """
         # Compute distance
-        scaled_distance = sphere_distance_torch(x1, x2, diag=diag)/(2*np.pi)
+        scaled_distance = sphere_distance_torch(x1, x2, diag=diag) / (2 * np.pi)
 
         # Compute kernel equal to jacobi theta function
         q_param = torch.exp(-2 * np.pi**2 * self.lengthscale**2)
         kernel = jacobi_theta_function3(np.pi * scaled_distance, q_param).to(device)
 
         # Normalizing term
-        norm_factor = jacobi_theta_function3(torch.zeros((1, 1)).to(device), q_param).to(device)
+        norm_factor = jacobi_theta_function3(
+            torch.zeros((1, 1)).to(device), q_param
+        ).to(device)
 
         # Kernel
         return kernel / norm_factor

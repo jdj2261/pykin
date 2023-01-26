@@ -10,7 +10,7 @@ import torch
 if torch.cuda.is_available():
     device = torch.cuda.current_device()
 else:
-    device = 'cpu'
+    device = "cpu"
 
 
 def sphere_distance_torch(x1, x2, diag=False):
@@ -44,7 +44,9 @@ def sphere_distance_torch(x1, x2, diag=False):
         x2 = x2.unsqueeze(-1)
 
         # Compute the inner product (should be [-1,1])
-        inner_product = torch.bmm(x1.view(-1, 1, x1.shape[-1]), x2.view(-1, x2.shape[-2], 1)).view(x1.shape[:-2])
+        inner_product = torch.bmm(
+            x1.view(-1, 1, x1.shape[-1]), x2.view(-1, x2.shape[-2], 1)
+        ).view(x1.shape[:-2])
 
     else:
         # Expand dimensions to compute all vector-vector distances
@@ -54,8 +56,6 @@ def sphere_distance_torch(x1, x2, diag=False):
 
     # Clamp in case any value is not in the interval [-1,1]
     # A small number is added/substracted to the bounds to avoid NaNs during backward computation.
-    inner_product = inner_product.clamp(-1.+1e-15, 1.-1e-15)
+    inner_product = inner_product.clamp(-1.0 + 1e-15, 1.0 - 1e-15)
 
     return torch.acos(inner_product)
-
-

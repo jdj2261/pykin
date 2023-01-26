@@ -5,7 +5,7 @@ from pykin.robots.bimanual import Bimanual
 from pykin.kinematics import jacobian as jac
 
 
-file_path = 'urdf/baxter/baxter.urdf'
+file_path = "urdf/baxter/baxter.urdf"
 robot = Bimanual(file_path, t_utils.Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 
 left_arm_thetas = np.zeros(15)

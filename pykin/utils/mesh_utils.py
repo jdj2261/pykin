@@ -6,19 +6,20 @@ from PIL import Image
 from pykin.utils import transform_utils as t_utils
 from pykin.utils.plot_utils import createDirectory
 
-np.seterr(divide='ignore', invalid='ignore')
+np.seterr(divide="ignore", invalid="ignore")
 
 pykin_path = os.path.abspath(__file__ + "/../../")
 
+
 def get_mesh_path(mesh_path, robot_name):
-    result_path = pykin_path + "/assets/urdf/" + robot_name +"/"
+    result_path = pykin_path + "/assets/urdf/" + robot_name + "/"
     result_path = result_path + mesh_path
     return result_path
 
 
 def get_object_mesh(mesh_name, scale=[1.0, 1.0, 1.0]):
-    file_path = pykin_path + '/assets/objects/meshes/'
-    mesh:trimesh.Trimesh = trimesh.load(file_path + mesh_name)
+    file_path = pykin_path + "/assets/objects/meshes/"
+    mesh: trimesh.Trimesh = trimesh.load(file_path + mesh_name)
     mesh.apply_scale(scale)
     return mesh
 
@@ -34,7 +35,9 @@ def normalize(vec):
 
 
 def surface_sampling(mesh, n_samples=2, face_weight=None):
-    vertices, face_ind = trimesh.sample.sample_surface(mesh, count=n_samples, face_weight=face_weight)
+    vertices, face_ind = trimesh.sample.sample_surface(
+        mesh, count=n_samples, face_weight=face_weight
+    )
     normals = mesh.face_normals[face_ind]
     return vertices, face_ind, normals
 
@@ -59,6 +62,8 @@ def get_grasp_directions(line, n_trials):
     """
     Generate grasp dicrections
 
+    Gram-Schmidt orthonormalization
+
     Args:
         line (np.array): line from vectorA to vector B
         n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
@@ -82,18 +87,37 @@ def get_rotation_from_vectors(A, B):
     unit_A = A / np.linalg.norm(A)
     unit_B = B / np.linalg.norm(B)
     dot_product = np.dot(unit_A, unit_B)
+
     angle = np.arccos(dot_product)
 
     rot_axis = np.cross(unit_B, unit_A)
-    R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
+    """ jh 수정
+     rot_axis가 unit하게 안들어가니까 rot_matrix가 det가 1이 아니라 다른 matrix가 나옴
+     이렇게 되면 object가 평평한 곳에 있지 않을 때, 기울어진 면의 normal vector에 대해서 place가 안됨.
+     """
+    if np.any(rot_axis, 0):
+        unit_rot_axis = rot_axis / np.linalg.norm(rot_axis)
+        R = t_utils.get_matrix_from_axis_angle(unit_rot_axis, angle)
+    else:
+        R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
 
     return R
 
 
-def save_image(scene:trimesh.Scene, resolution=(1024,1024), title="result", save_dir_name="result_images"):
+def save_image(
+    scene: trimesh.Scene,
+    resolution=(1024, 1024),
+    title="result",
+    save_dir_name="result_images",
+):
     createDirectory(save_dir_name)
     scene_data = scene.save_image(resolution=resolution)
     img = Image.open(io.BytesIO(scene_data))
-    file_name = save_dir_name + '/' + title + '_{}.png'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))    
+    file_name = (
+        save_dir_name
+        + "/"
+        + title
+        + "_{}.png".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    )
     print(f"Save {file_name}")
-    img.save(file_name + '.png')
+    img.save(file_name + ".png")

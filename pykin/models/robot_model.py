@@ -1,10 +1,12 @@
 from collections import OrderedDict
 
+
 class RobotModel:
     """
     Base class of robot model from urdf file
     When initialized, loads links and joints of robot.
     """
+
     def __init__(self):
         self._links = OrderedDict()
         self._joints = OrderedDict()
