@@ -62,6 +62,8 @@ def get_grasp_directions(line, n_trials):
     """
     Generate grasp dicrections
 
+    Gram-Schmidt orthonormalization
+
     Args:
         line (np.array): line from vectorA to vector B
         n_trials (int): parameter to obtain grasp poses by 360/n_trials angle around a pair of contact points
@@ -85,10 +87,15 @@ def get_rotation_from_vectors(A, B):
     unit_A = A / np.linalg.norm(A)
     unit_B = B / np.linalg.norm(B)
     dot_product = np.dot(unit_A, unit_B)
-    angle = np.arccos(dot_product)
 
+    angle = np.arccos(dot_product)
     rot_axis = np.cross(unit_B, unit_A)
-    R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
+
+    if np.any(rot_axis, 0):
+        unit_rot_axis = rot_axis / np.linalg.norm(rot_axis)
+        R = t_utils.get_matrix_from_axis_angle(unit_rot_axis, angle)
+    else:
+        R = t_utils.get_matrix_from_axis_angle(rot_axis, angle)
 
     return R
 

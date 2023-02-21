@@ -94,6 +94,7 @@ def plot_basis(ax=None, robot=None):
     ax.set_xlim3d([-offset, offset])
     ax.set_ylim3d([-offset, offset])
     ax.set_zlim3d([-offset, offset])
+    return ax
 
 
 def plot_robot(

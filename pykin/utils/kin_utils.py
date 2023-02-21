@@ -163,9 +163,7 @@ def apply_objects_to_scene(trimesh_scene=None, objs=None):
             trimesh_scene.add_geometry(box_mesh, transform=info.h_mat)
 
         if info.gtype == "cylinder":
-            capsule_mesh = trimesh.creation.cylinder(
-                height=info.gparam[0], radius=info.gparam[1]
-            )
+            capsule_mesh = trimesh.creation.cylinder(height=info.gparam[0], radius=info.gparam[1])
             capsule_mesh.visual.face_colors = color
             trimesh_scene.add_geometry(capsule_mesh, transform=info.h_mat)
 
@@ -189,12 +187,20 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision"):
             continue
 
         if info[1] == "mesh":
-            for idx, mesh in enumerate(info[2]):
-                mesh_color = p_utils.get_mesh_color(robot, link, geom, idx=idx)
+            if isinstance(info[2], list):
+                for idx, mesh in enumerate(info[2]):
+                    mesh_color = p_utils.get_mesh_color(robot, link, geom, idx=idx)
+                    if len(info) > 4:
+                        mesh_color = info[4]
+                    mesh.visual.face_colors = mesh_color
+                    trimesh_scene.add_geometry(mesh, transform=h_mat)
+            else:
+                mesh_color = p_utils.get_mesh_color(robot, link, geom)
                 if len(info) > 4:
                     mesh_color = info[4]
                 mesh.visual.face_colors = mesh_color
                 trimesh_scene.add_geometry(mesh, transform=h_mat)
+
         if info[1] == "box":
             for idx, param in enumerate(info[2]):
                 box_mesh = trimesh.creation.box(extents=param)
@@ -204,9 +210,7 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision"):
 
         if info[1] == "cylinder":
             for idx, param in enumerate(info[2]):
-                capsule_mesh = trimesh.creation.cylinder(
-                    height=param[0], radius=param[1]
-                )
+                capsule_mesh = trimesh.creation.cylinder(height=param[0], radius=param[1])
                 capsule_color = p_utils.get_mesh_color(robot, link, geom, idx)
                 capsule_mesh.visual.face_colors = capsule_color
                 trimesh_scene.add_geometry(capsule_mesh, transform=h_mat)
@@ -229,8 +233,15 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
         h_mat = info[3]
 
         if info[1] == "mesh":
-            for idx, mesh in enumerate(info[2]):
-                mesh_color = p_utils.get_mesh_color(robot, link, geom, idx)
+            if isinstance(info[2], list):
+                for idx, mesh in enumerate(info[2]):
+                    mesh_color = p_utils.get_mesh_color(robot, link, geom, idx)
+                    if len(info) > 4:
+                        mesh_color = info[4]
+                    mesh.visual.face_colors = mesh_color
+                    trimesh_scene.add_geometry(mesh, transform=h_mat)
+            else:
+                mesh_color = p_utils.get_mesh_color(robot, link, geom)
                 if len(info) > 4:
                     mesh_color = info[4]
                 mesh.visual.face_colors = mesh_color
@@ -245,9 +256,7 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
 
         if info[1] == "cylinder":
             for idx, param in enumerate(info[2]):
-                capsule_mesh = trimesh.creation.cylinder(
-                    height=param[0], radius=param[1]
-                )
+                capsule_mesh = trimesh.creation.cylinder(height=param[0], radius=param[1])
                 capsule_color = p_utils.get_mesh_color(robot, link, geom, idx)
                 capsule_mesh.visual.face_colors = capsule_color
                 trimesh_scene.add_geometry(capsule_mesh, transform=h_mat)

@@ -52,7 +52,7 @@ class Kinematics:
 
     @logging_time
     def inverse_kinematics(
-        self, frames, current_joints, target_pose, method="LM", max_iter=1000
+        self, frames, current_joints, target_pose, method="LM2", max_iter=1000
     ):
         """
         Returns joint angles obtained by computing IK
@@ -182,6 +182,7 @@ class Kinematics:
         Returns:
             joints (np.array): target joint angles
         """
+        print("solve with LM1")
         iterator = 1
         EPS = float(1e-12)
         dof = len(current_joints)
@@ -243,6 +244,7 @@ class Kinematics:
         Returns:
             joints (np.array): target joint angles
         """
+        print("solve the problem using LM2!! ")
         iterator = 1
         EPS = float(1e-12)
         dof = len(current_joints)

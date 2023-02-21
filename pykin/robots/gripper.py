@@ -12,8 +12,9 @@ class Gripper:
         self.element_names = element_names
         self.max_width = max_width
         self.max_depth = max_depth
-        self.tcp_position = tcp_position
         self.finger_names = finger_names
+
+        self.tcp_position = tcp_position
 
         self.info = OrderedDict()
 
