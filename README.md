@@ -4,7 +4,7 @@
 
 Python Interface for the robot Kinematics library pykin
 
-This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a>.
+This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a> and <a href="https://github.com/neka-nat/kinpy" target="_blank">kinpy</a> .
 
 ## Features
 
