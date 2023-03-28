@@ -67,7 +67,6 @@ def init_3d_figure(name=None, figsize=(12, 8), dpi=100, visible_axis=False):
     ax.set_facecolor("beige")
     return fig, ax
 
-
 def show_figure():
     """
     Show figure

@@ -5,6 +5,8 @@ from copy import deepcopy
 from PIL import Image
 from pykin.utils import transform_utils as t_utils
 from pykin.utils.plot_utils import createDirectory
+import h5py
+
 
 np.seterr(divide="ignore", invalid="ignore")
 
@@ -23,6 +25,18 @@ def get_object_mesh(mesh_name, scale=[1.0, 1.0, 1.0]):
     mesh.apply_scale(scale)
     return mesh
 
+# for acronym
+def get_object_mesh_acronym(filename:str, mesh_root_dir:str, scale=[1.0, 1.0, 1.0]):
+    if filename.endswith(".h5"):
+        data = h5py.File(filename, "r")
+        mesh_fname = data["object/file"][()].decode('utf-8')
+        mesh_scale = data["object/scale"][()] if scale is None else scale
+    else:
+        raise RuntimeError("Unknown file ending:", filename)
+
+    mesh = trimesh.load(os.path.join(mesh_root_dir, mesh_fname))
+    mesh.apply_scale(mesh_scale)
+    return mesh
 
 def get_mesh_bounds(mesh, pose=np.eye(4)):
     copied_mesh = deepcopy(mesh)
@@ -89,12 +103,8 @@ def get_rotation_from_vectors(A, B):
     dot_product = np.dot(unit_A, unit_B)
 
     angle = np.arccos(dot_product)
-
     rot_axis = np.cross(unit_B, unit_A)
-    """ jh 수정
-     rot_axis가 unit하게 안들어가니까 rot_matrix가 det가 1이 아니라 다른 matrix가 나옴
-     이렇게 되면 object가 평평한 곳에 있지 않을 때, 기울어진 면의 normal vector에 대해서 place가 안됨.
-     """
+
     if np.any(rot_axis, 0):
         unit_rot_axis = rot_axis / np.linalg.norm(rot_axis)
         R = t_utils.get_matrix_from_axis_angle(unit_rot_axis, angle)
