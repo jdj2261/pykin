@@ -6,21 +6,20 @@ from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import apply_robot_to_scene
+from pykin.utils.kin_utils import ShellColors as sc
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 
-from pykin.utils import plot_utils as p_utils
+file_path = "urdf/sawyer/sawyer.urdf"
+robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+robot.setup_link_name("sawyer_base", "sawyer_right_hand")
 
-
-urdf_path = "urdf/iiwa14/iiwa14.urdf"
-robot = SingleArm(urdf_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
-robot.setup_link_name("iiwa14_link_0", "iiwa14_right_hand")
 
 c_manager = CollisionManager(is_robot=True)
-c_manager.setup_robot_collision(robot, geom="visual")
+c_manager.setup_robot_collision(robot, geom="collision")
 c_manager.show_collision_info()
 
-goal_qpos = np.zeros(7)
+goal_qpos = np.array([0, 0, 0, 0, 0, 0, 0, 0])
 robot.set_transform(goal_qpos)
 
 
@@ -28,7 +27,11 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
+<<<<<<< HEAD:pykin/examples/trimesh_renders/sawyer_render.py
+milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
+=======
 milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
+>>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/sawyer_render.py
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()
@@ -50,10 +53,11 @@ scene.add_geometry(
     test_mesh, node_name="milk2", transform=Transform(pos=[0.4, 0, 0.4]).h_mat
 )
 
-result, name = c_manager.in_collision_internal(return_names=True)
-print(result, name)
+# result, name = c_manager.in_collision_internal(return_names=True)
+# print(result, name)
 
 result, name = c_manager.in_collision_other(o_manager, return_names=True)
-print(result, name)
 
+if result:
+    print(f"{sc.FAIL}Collide!! {sc.ENDC}{list(name)[0][0]} and {list(name)[0][1]}")
 scene.show()

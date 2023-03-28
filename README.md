@@ -4,15 +4,15 @@
 
 Python Interface for the robot Kinematics library pykin
 
-This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a>.
+This library has been created simply by referring to <a href="https://github.com/Phylliade/ikpy.git" target="_blank">ikpy</a> and <a href="https://github.com/neka-nat/kinpy" target="_blank">kinpy</a> .
 
 ## Features
 
 - Pure python library
-- Support only URDF file
+- Support only URDF file.
 - Compute forward, inverse kinematics and jacobian, referred to the [Introduction to Humanoid Robotics book](https://link.springer.com/book/10.1007/978-3-642-54536-8).
-- Check robot self-collision and collision between objects
-- Plot robot kinematic chain and mesh
+- Check robot self-collision and collision between robot's bodies and objects.
+- Plot robot kinematic chain and mesh using *matplotlib* or *trimesh* library
 
 ## Installation
 
@@ -20,18 +20,18 @@ This library has been created simply by referring to <a href="https://github.com
 
 You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) package to do object collision checking.
 
-- For Ubuntu, using  `apt`
+- On Ubuntu, install two dependency libraries using `apt`
 
   `sudo apt install liboctomap-dev`
 
   `sudo apt install libfcl-dev`
-- For Mac, First, Download the source and build it.
+- On Mac, download the two dependency libraries from git repository and build it.
 
   - octomap
 
     `git clone https://github.com/OctoMap/octomap.git`
 
-    ~~~
+    ~~~shell
     $ cd octomap
     $ mkdir build
     $ cd build
@@ -45,7 +45,7 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 
     Since python-fcl uses version 0.5.0 of fcl, checkout with tag 0.5.0
 
-    ~~~
+    ~~~shell
     $ cd fcl
     $ git checkout 0.5.0
     $ mkdir build
@@ -55,11 +55,37 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
     $ sudo make install
     ~~~
 
-### Install Pykin
+### Install pykin
 
-~~~
-pip3 install pykin
-~~~
+**pykin** supports macOS and Linux on Python 3.
+
+- Install from pip
+
+  ~~~shell
+  $ pip3 or pip install pykin
+  ~~~
+
+- Install from source **[recommend]**
+
+  ~~~shell
+  $ git clone https://github.com/jdj2261/pykin.git
+  $ cd pykin
+  $ python3 seup.py install or sudo python3 setup.py install
+  ~~~
+
+- pykin directory structure
+
+  ~~~
+  └── pykin
+      ├── assets
+      ├── collision
+      ├── examples
+      ├── geometry
+      ├── kinematics
+      ├── models
+      ├── robots
+      └── utils
+  ~~~
 
 ## Quick Start
 
@@ -72,7 +98,7 @@ You can see various examples in examples directory
   `baxter, sawyer, iiwa14, iiwa7, panda, ur5e, doosan`
 
   ~~~shell
-  $ cd examples
+  $ cd pykin/examples
   $ python robot_info.py $(robot_name)
   # baxter
   $ python robot_info.py baxter
@@ -85,7 +111,7 @@ You can see various examples in examples directory
   You can compute the forward kinematics as well as visualize the visual or collision geometry.
 
   ~~~shell
-  $ cd examples/forward_kinematics
+  $ cd pykin/examples/forward_kinematics
   $ python robot_fk_baxter_test.py
   ~~~
 
@@ -98,7 +124,7 @@ You can see various examples in examples directory
   You can compute the inverse kinematics using levenberg marquardt(LM) or newton raphson(NR) method
 
   ~~~shell
-  $ cd examples/inverse_kinematics
+  $ cd pykin/examples/inverse_kinematics
   $ python robot_ik_baxter_test.py
   ~~~
 
@@ -109,7 +135,7 @@ You can see various examples in examples directory
   For more detailed information, check [GaBO module](/pykin/utils/gabo/)
   
   ~~~shell
-  $ cd examples/inverse_kinematics
+  $ cd pykin/examples/inverse_kinematics
   $ python robot_ik_gabo_test.py
   ~~~
 
@@ -118,7 +144,7 @@ You can see various examples in examples directory
   The below images show the collision result as well as visualize robot using trimesh.Scene class
 
   ~~~shell
-  $ cd examples/trimesh_renders
+  $ cd pykin/examples/trimesh_renders
   $ python sawyer_render.py
   ~~~
 

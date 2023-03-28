@@ -1,37 +1,38 @@
 import numpy as np
 import trimesh
-import yaml
 import os
 
-from pykin.robots.bimanual import Bimanual
+from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
 from pykin.collision.collision_manager import CollisionManager
 from pykin.utils.kin_utils import apply_robot_to_scene
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 
-file_path = "urdf/baxter/baxter.urdf"
-robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+from pykin.utils import plot_utils as p_utils
 
-custom_fpath = current_file_path + "/../../pykin/assets/config/baxter_init_params.yaml"
-print(custom_fpath)
-with open(custom_fpath) as f:
-    controller_config = yaml.safe_load(f)
 
-init_qpos = controller_config["init_qpos"]
-init_qpos = np.concatenate((np.zeros(1), np.array(init_qpos)))
-robot.set_transform(init_qpos)
+urdf_path = "urdf/iiwa14/iiwa14.urdf"
+robot = SingleArm(urdf_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+robot.setup_link_name("iiwa14_link_0", "iiwa14_right_hand")
 
 c_manager = CollisionManager(is_robot=True)
-c_manager.setup_robot_collision(robot, geom="collision")
+c_manager.setup_robot_collision(robot, geom="visual")
 c_manager.show_collision_info()
+
+goal_qpos = np.zeros(7)
+robot.set_transform(goal_qpos)
 
 
 for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
+<<<<<<< HEAD:pykin/examples/trimesh_renders/iiwa14_render.py
+milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
+=======
 milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
+>>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/iiwa14_render.py
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()

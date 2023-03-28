@@ -1,6 +1,7 @@
 import numpy as np
 import trimesh
 import os
+import yaml
 
 from pykin.robots.single_arm import SingleArm
 from pykin.kinematics.transform import Transform
@@ -12,32 +13,39 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 from pykin.utils import plot_utils as p_utils
 
 
-file_path = "urdf/panda/panda.urdf"
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+urdf_path = "urdf/ur5e/ur5e_with_robotiq140.urdf"
+robot = SingleArm(
+    urdf_path,
+    Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]),
+    has_gripper=True,
+    gripper_name="robotiq140_gripper",
+)
+robot.setup_link_name("ur5e_base_link", "ur5e_right_hand")
 
 c_manager = CollisionManager(is_robot=True)
-c_manager.setup_robot_collision(robot, geom="collision")
+c_manager.setup_robot_collision(robot, geom="visual")
 c_manager.show_collision_info()
 
-goal_qpos = np.array(
-    [
-        0.00872548,
-        0.12562256,
-        -0.81809503,
-        -1.53245947,
-        2.48667667,
-        2.6287517,
-        -1.93698104,
-    ]
-)
-robot.set_transform(goal_qpos)
+<<<<<<< HEAD:pykin/examples/trimesh_renders/ur5e_render.py
+custom_fpath = current_file_path + "/../../../pykin/assets/config/ur5e_init_params.yaml"
+=======
+custom_fpath = current_file_path + "/../../pykin/assets/config/ur5e_init_params.yaml"
+>>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/ur5e_render.py
+with open(custom_fpath) as f:
+    controller_config = yaml.safe_load(f)
+init_qpos = controller_config["init_qpos"]
+robot.set_transform(np.array(init_qpos))
 
 
 for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
+<<<<<<< HEAD:pykin/examples/trimesh_renders/ur5e_render.py
+milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
+=======
 milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
+>>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/ur5e_render.py
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()

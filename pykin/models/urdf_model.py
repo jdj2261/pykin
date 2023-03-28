@@ -298,7 +298,7 @@ class URDFModel(RobotModel):
         return children
 
     @staticmethod
-    def _find_name_recursive(name, frame, frame_type):
+    def _find_name_recursive(name, frames, frame_type):
         """
         Return the name of the frame, link, or joint you want to find.
 
@@ -310,7 +310,9 @@ class URDFModel(RobotModel):
         Returns:
             3 types: Frame, Link, Joint
         """
-        for frame in frame.children:
+        ret = None
+        for frame in frames.children:
+            # print(frame, frame.link.name, name)
             if frame_type == "frame" and frame.name == name:
                 return frame
             if frame_type == "link" and frame.link.name == name:
@@ -318,6 +320,8 @@ class URDFModel(RobotModel):
             if frame_type == "joint" and frame.joint.name == name:
                 return frame.joint
             ret = URDFModel._find_name_recursive(name, frame, frame_type)
+            if ret is not None:
+                return ret
 
             assert ret != None, f"Not Found {name}, please check the name again"
             return ret
