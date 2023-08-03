@@ -66,10 +66,7 @@ class Robot(URDFModel):
     def set_transform(self, thetas):
         fk = self.forward_kin(thetas)
         for link, transform in fk.items():
-
-            collision_h_mat = np.dot(
-                transform.h_mat, self.links[link].collision.offset.h_mat
-            )
+            collision_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
             visual_h_mat = np.dot(transform.h_mat, self.links[link].visual.offset.h_mat)
 
             self.info["collision"][link][3] = collision_h_mat
@@ -109,9 +106,7 @@ class Robot(URDFModel):
             vis_gtype = self.links[link].visual.gtype
 
             if col_gtype == "mesh":
-                mesh_path = self.mesh_path + self.links[link].collision.gparam.get(
-                    "filename"
-                )
+                mesh_path = self.mesh_path + self.links[link].collision.gparam.get("filename")
                 mesh = trimesh.load_mesh(mesh_path)
                 col_gparam.append(mesh)
             if col_gtype == "box":
@@ -121,9 +116,7 @@ class Robot(URDFModel):
                 radius = float(self.links[link].collision.gparam.get("radius"))
                 col_gparam.append((length, radius))
             if col_gtype == "sphere":
-                col_gparam.append(
-                    float(self.links[link].collision.gparam.get("radius"))
-                )
+                col_gparam.append(float(self.links[link].collision.gparam.get("radius")))
             col_h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
             robot_info["collision"][link] = [link, col_gtype, col_gparam, col_h_mat]
 
@@ -154,9 +147,7 @@ class Robot(URDFModel):
                 gtype = self.links[link].collision.gtype
                 mesh = None
                 if gtype == "mesh":
-                    mesh_path = self.mesh_path + self.links[link].collision.gparam.get(
-                        "filename"
-                    )
+                    mesh_path = self.mesh_path + self.links[link].collision.gparam.get("filename")
                     mesh = trimesh.load_mesh(mesh_path)
                     col_gparam.append(mesh)
                 if gtype == "box":
@@ -166,9 +157,7 @@ class Robot(URDFModel):
                     radius = float(self.links[link].collision.gparam.get("radius"))
                     col_gparam.append((length, radius))
                 if gtype == "sphere":
-                    col_gparam.append(
-                        float(self.links[link].collision.gparam.get("radius"))
-                    )
+                    col_gparam.append(float(self.links[link].collision.gparam.get("radius")))
                 h_mat = np.dot(transform.h_mat, self.links[link].collision.offset.h_mat)
                 gripper_info[link] = [link, gtype, col_gparam, h_mat]
         return gripper_info
