@@ -15,14 +15,11 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = "urdf/panda/panda.urdf"
 panda_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[0, 0, 0]))
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
-print(current_file_path)
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/panda_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/panda_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]

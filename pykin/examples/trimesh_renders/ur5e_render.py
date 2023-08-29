@@ -26,11 +26,8 @@ c_manager = CollisionManager(is_robot=True)
 c_manager.setup_robot_collision(robot, geom="visual")
 c_manager.show_collision_info()
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/ur5e_render.py
 custom_fpath = current_file_path + "/../../../pykin/assets/config/ur5e_init_params.yaml"
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/ur5e_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/ur5e_render.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -41,11 +38,9 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/ur5e_render.py
+
 milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
-=======
-milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/ur5e_render.py
+
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()
