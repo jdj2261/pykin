@@ -43,13 +43,11 @@ file_path = "urdf/doosan/doosan_with_robotiq140.urdf"
 doosan_robot = SingleArm(
     file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[-1, 0, 0])
 )
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/doosan_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/doosan_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -70,13 +68,11 @@ scene = apply_robot_to_scene(
 file_path = "urdf/iiwa14/iiwa14.urdf"
 iiwa14 = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[-2, 0, 0]))
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/iiwa14_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/iiwa14_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -94,11 +90,9 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=iiwa14, geom=c_manager.g
 # ur5e
 file_path = "urdf/ur5e/ur5e.urdf"
 ur5e_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[-3, 0, 0]))
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
+
 custom_fpath = current_file_path + "/../../../pykin/assets/config/ur5e_init_params.yaml"
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/ur5e_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -116,13 +110,11 @@ scene = apply_robot_to_scene(trimesh_scene=scene, robot=ur5e_robot, geom=c_manag
 # sawyer
 file_path = "urdf/sawyer/sawyer.urdf"
 sawyer_robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[1, 0, 0]))
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/sawyer_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/sawyer_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]
@@ -142,13 +134,11 @@ scene = apply_robot_to_scene(
 # baxter
 file_path = "urdf/baxter/baxter.urdf"
 baxter_robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, np.pi / 2], pos=[2, 0, 0]))
-<<<<<<< HEAD:pykin/examples/trimesh_renders/all_robot_renders.py
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/baxter_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/baxter_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/all_robot_renders.py
+
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)
 init_qpos = controller_config["init_qpos"]

@@ -13,13 +13,11 @@ current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = "urdf/baxter/baxter.urdf"
 robot = Bimanual(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/baxter_render.py
+
 custom_fpath = (
     current_file_path + "/../../../pykin/assets/config/baxter_init_params.yaml"
 )
-=======
-custom_fpath = current_file_path + "/../../pykin/assets/config/baxter_init_params.yaml"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/baxter_render.py
+
 print(custom_fpath)
 with open(custom_fpath) as f:
     controller_config = yaml.safe_load(f)

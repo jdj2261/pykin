@@ -28,11 +28,9 @@ for link, info in robot.info[c_manager.geom].items():
     if link in c_manager._objs:
         c_manager.set_transform(name=link, h_mat=info[3])
 
-<<<<<<< HEAD:pykin/examples/trimesh_renders/iiwa14_render.py
+
 milk_path = current_file_path + "/../../../pykin/assets/objects/meshes/milk.stl"
-=======
-milk_path = current_file_path + "/../../pykin/assets/objects/meshes/milk.stl"
->>>>>>> 7c47be578801440134e21defc1dc00ea90f06c38:examples/trimesh_renders/iiwa14_render.py
+
 test_mesh = trimesh.load_mesh(milk_path)
 
 o_manager = CollisionManager()
