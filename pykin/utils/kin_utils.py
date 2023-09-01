@@ -177,7 +177,7 @@ def apply_objects_to_scene(trimesh_scene=None, objs=None):
     return trimesh_scene
 
 
-def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision"):
+def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision", color=None):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()
 
@@ -190,9 +190,12 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision"):
 
         if info[1] == "mesh":
             for idx, mesh in enumerate(info[2]):
-                mesh_color = p_utils.get_mesh_color(robot, link, geom, idx=idx)
-                if len(info) > 4:
-                    mesh_color = info[4]
+                if color is None:
+                    mesh_color = p_utils.get_mesh_color(robot, link, geom, idx=idx)
+                    if len(info) > 4:
+                        mesh_color = info[4]
+                else:
+                    mesh_color = np.asfarray(color)
                 mesh.visual.face_colors = mesh_color
                 trimesh_scene.add_geometry(mesh, transform=h_mat)
         if info[1] == "box":
