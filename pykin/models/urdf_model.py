@@ -3,7 +3,7 @@ from xml.etree import ElementTree as ET
 from collections import OrderedDict
 from copy import deepcopy
 
-pykin_path = os.path.abspath(os.path.dirname(__file__) + "/../")
+# pykin_path = os.path.abspath(os.path.dirname(__file__) + "/../")
 
 from pykin.models.robot_model import RobotModel
 from pykin.geometry.frame import Joint, Link, Frame
@@ -25,7 +25,7 @@ class URDFModel(RobotModel):
     def __init__(self, f_name):
         super().__init__()
 
-        self.file_path = pykin_path + "/assets/" + f_name
+        self.file_path = f_name
         if not os.path.isfile(self.file_path):
             raise FileNotFoundError(f"{self.file_path} is not Found..")
 
