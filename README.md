@@ -62,7 +62,7 @@ You need a [python-fcl](https://github.com/BerkeleyAutomation/python-fcl) packag
 - Install from pip
 
   ~~~shell
-  $ pip3 or pip install pykin
+  $ pip3 or pip install .
   ~~~
 
 - Install from source **[recommend]**
