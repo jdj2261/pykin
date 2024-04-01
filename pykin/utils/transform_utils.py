@@ -1,6 +1,9 @@
 import numpy as np
 import math
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 
 def vector_norm(data, axis=None, out=None):
