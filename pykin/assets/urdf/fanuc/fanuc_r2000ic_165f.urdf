@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+
+<robot name="fanuc_r2000ic_165f" xmlns:xacro="http://wiki.ros.org/xacro">
+    <link name="base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/base_link.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.4 0.4 0.4 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/base_link.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="10.0"/>
+            <origin rpy="0.002688 0.004043 0.006103" xyz="-0.064613 -0.005314 0.100271"/>
+            <inertia ixx="0.002695" ixy="0.000023" ixz="0.000157" iyy="0.004043" iyz="0.000023" izz="0.006096"/>
+        </inertial>
+    </link>
+    <link name="link_1">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_1.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_1.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="5.0"/>
+            <origin rpy="0.011358 0.019634 0.020073" xyz="0.010863 0.053239 0.523328"/>
+            <inertia ixx="0.012932" ixy="0.003309" ixz=" -0.000331" iyy="0.018366" iyz="-0.000071" izz="0.019767"/>
+        </inertial>
+    </link>
+    <link name="link_2">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_2.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_2.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="4.0"/>
+            <origin rpy="0.001934 0.014381 0.015249" xyz="-0.001481 0.204359 0.436864"/>
+            <inertia ixx="0.014390" ixy="0.000091" ixz="-0.000323" iyy="0.015120" iyz="-0.001213" izz="0.002053"/>
+        </inertial>
+    </link>
+    <link name="link_3">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_3.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_3.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="4.0"/>
+            <origin rpy="0.000964 0.001451 0.001518" xyz="0.059293 0.012994 0.109078"/>
+            <inertia ixx="0.001451" ixy="0.000017" ixz="-0.000177" iyy="0.001441" iyz="0.000072" izz="0.001041"/>
+        </inertial>
+    </link>
+    <link name="link_4">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_4.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_4.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="5.0"/>
+            <origin rpy="0.000333 0.004282 0.004287" xyz="0.711733 -0.002537 -0.000643"/>
+            <inertia ixx="0.000333" ixy="0.000044" ixz="0.000006" iyy="0.004287" iyz="-0.000000" izz="0.004282"/>
+        </inertial>
+    </link>
+    <link name="link_5">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_5.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_5.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="8.0"/>
+            <origin rpy="0.000078 0.000103 0.000118" xyz="0.042035 -0.024095 -0.001620"/>
+            <inertia ixx="0.000088" ixy="-0.000012" ixz="0.000000" iyy="0.000094" iyz="0.000000" izz="0.000118"/>
+        </inertial>
+    </link>
+    <link name="link_6">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/visual/link_6.stl"/>
+            </geometry>
+            <material name="">
+            <color rgba="0.15 0.15 0.15 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+            <mesh filename="meshes/r2000ic165f/collision/link_6.stl"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="5.0"/>
+            <origin rpy="0.000001 0.000001 0.000002" xyz="-0.018677 -0.000000 -0.000002"/>
+            <inertia ixx="0.000002" ixy="0.000000" ixz="-0.000000" iyy="0.000001" iyz="0.000000" izz="0.000001"/>
+        </inertial>
+    </link>
+        <!-- joints: main serial chain -->
+        <joint name="joint_1" type="revolute">
+            <origin xyz="0 0 0.670" rpy="0 0 0"/>
+            <parent link="base_link"/>
+            <child link="link_1"/>
+            <axis xyz="0 0 1"/>
+            <limit lower="-3.22886" upper="3.22886" effort="0" velocity="2.26893"/>
+        </joint>
+        <joint name="joint_2" type="revolute">
+            <origin xyz="0.312 0 0" rpy="0 0 0"/>
+            <parent link="link_1"/>
+            <child link="link_2"/>
+            <axis xyz="0 1 0"/>
+            <limit lower="-1.0472" upper="1.32645" effort="0" velocity="2.00713"/>
+        </joint>
+        <joint name="joint_3" type="revolute">
+            <origin xyz="0 0 1.075" rpy="0 0 0"/>
+            <parent link="link_2"/>
+            <child link="link_3"/>
+            <axis xyz="0 -1 0"/>
+            <limit lower="-2.30383" upper="3.14159" effort="0" velocity="2.18166"/>
+        </joint>
+        <joint name="joint_4" type="revolute">
+            <origin xyz="0 0 0.225" rpy="0 0 0"/>
+            <parent link="link_3"/>
+            <child link="link_4"/>
+            <axis xyz="-1 0 0"/>
+            <limit lower="-6.28319" upper="6.28319" effort="0" velocity="3.14159"/>
+        </joint>
+        <joint name="joint_5" type="revolute">
+            <origin xyz="1.280 0 0" rpy="0 0 0"/>
+            <parent link="link_4"/>
+            <child link="link_5"/>
+            <axis xyz="0 -1 0"/>
+            <limit lower="-2.18166" upper="2.18166" effort="0" velocity="3.14159"/>
+        </joint>
+        <joint name="joint_6" type="revolute">
+            <origin xyz="0.215 0 0" rpy="0 0 0"/>
+            <parent link="link_5"/>
+            <child link="link_6"/>
+            <axis xyz="-1 0 0"/>
+            <limit lower="-6.28319" upper="6.28319" effort="0" velocity="4.53786"/>
+        </joint>
+
+        <!-- ROS-Industrial 'base' frame: base_link to Fanuc World Coordinates transform -->
+        <link name="base" />
+        <joint name="base_link-base" type="fixed">
+        <origin xyz="0 0 0.670" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="base"/>
+        </joint>
+
+        <!-- ROS-Industrial 'flange' frame: attachment point for EEF models -->
+        <link name="flange" />
+        <joint name="joint_6-flange" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="link_6" />
+        <child link="flange" />
+        </joint>
+
+        <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
+        <link name="tool0" />
+        <joint name="link_6-tool0" type="fixed">
+        <origin xyz="0 0 0" rpy="3.14 -1.57 0" />
+        <parent link="link_6" />
+        <child link="tool0" />
+        </joint>
+</robot>
