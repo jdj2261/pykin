@@ -19,7 +19,7 @@ setup(
         "numpy",
         "matplotlib",
         "trimesh[easy]",
-        "pyglet",
+        "pyglet==1.5.29",
         "tqdm",
         "pyyaml",
         "python-fcl",
