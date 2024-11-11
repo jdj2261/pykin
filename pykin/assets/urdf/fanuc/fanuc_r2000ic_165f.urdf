@@ -25,7 +25,7 @@
     </link>
     <link name="link_1">
         <visual>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <origin rpy="0 0 0" xyz="0 0 -0.670"/>
             <geometry>
             <mesh filename="meshes/r2000ic165f/visual/link_1.stl"/>
             </geometry>

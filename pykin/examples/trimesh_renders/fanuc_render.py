@@ -10,7 +10,7 @@ from pykin.utils.kin_utils import apply_robot_to_scene
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 
 file_path = "urdf/fanuc/fanuc_r2000ic_165f.urdf"
-robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0.913]))
+robot = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
 print(robot.robot_name)
 c_manager = CollisionManager(is_robot=True)
 c_manager.setup_robot_collision(robot, geom="visual")
