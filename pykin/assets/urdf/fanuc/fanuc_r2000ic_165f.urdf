@@ -38,6 +38,9 @@
             <geometry>
             <mesh filename="meshes/r2000ic165f/collision/link_1.stl"/>
             </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="5.0"/>
@@ -60,6 +63,9 @@
             <geometry>
             <mesh filename="meshes/r2000ic165f/collision/link_2.stl"/>
             </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="4.0"/>
@@ -82,6 +88,9 @@
             <geometry>
             <mesh filename="meshes/r2000ic165f/collision/link_3.stl"/>
             </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="4.0"/>
@@ -104,6 +113,9 @@
             <geometry>
             <mesh filename="meshes/r2000ic165f/collision/link_4.stl"/>
             </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="5.0"/>
@@ -126,6 +138,9 @@
             <geometry>
             <mesh filename="meshes/r2000ic165f/collision/link_5.stl"/>
             </geometry>
+            <material name="">
+            <color rgba="0.96 0.76 0.13 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="8.0"/>
@@ -137,7 +152,7 @@
         <visual>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-            <mesh filename="meshes/r2000ic165f/visual/link_6.stl"/>
+                <mesh filename="meshes/r2000ic165f/visual/link_6.stl"/>
             </geometry>
             <material name="">
             <color rgba="0.15 0.15 0.15 1.0"/>
@@ -146,8 +161,11 @@
         <collision>
             <origin rpy="0 0 0" xyz="0 0 0"/>
             <geometry>
-            <mesh filename="meshes/r2000ic165f/collision/link_6.stl"/>
+                <mesh filename="meshes/r2000ic165f/collision/link_6.stl"/>
             </geometry>
+            <material name="">
+                <color rgba="0.15 0.15 0.15 1.0"/>
+            </material>
         </collision>
         <inertial>
             <mass value="5.0"/>
@@ -155,71 +173,47 @@
             <inertia ixx="0.000002" ixy="0.000000" ixz="-0.000000" iyy="0.000001" iyz="0.000000" izz="0.000001"/>
         </inertial>
     </link>
-        <!-- joints: main serial chain -->
-        <joint name="joint_1" type="revolute">
-            <origin xyz="0 0 0.670" rpy="0 0 0"/>
-            <parent link="base_link"/>
-            <child link="link_1"/>
-            <axis xyz="0 0 1"/>
-            <limit lower="-3.22886" upper="3.22886" effort="0" velocity="2.26893"/>
-        </joint>
-        <joint name="joint_2" type="revolute">
-            <origin xyz="0.312 0 0" rpy="0 0 0"/>
-            <parent link="link_1"/>
-            <child link="link_2"/>
-            <axis xyz="0 1 0"/>
-            <limit lower="-1.0472" upper="1.32645" effort="0" velocity="2.00713"/>
-        </joint>
-        <joint name="joint_3" type="revolute">
-            <origin xyz="0 0 1.075" rpy="0 0 0"/>
-            <parent link="link_2"/>
-            <child link="link_3"/>
-            <axis xyz="0 -1 0"/>
-            <limit lower="-2.30383" upper="3.14159" effort="0" velocity="2.18166"/>
-        </joint>
-        <joint name="joint_4" type="revolute">
-            <origin xyz="0 0 0.225" rpy="0 0 0"/>
-            <parent link="link_3"/>
-            <child link="link_4"/>
-            <axis xyz="-1 0 0"/>
-            <limit lower="-6.28319" upper="6.28319" effort="0" velocity="3.14159"/>
-        </joint>
-        <joint name="joint_5" type="revolute">
-            <origin xyz="1.280 0 0" rpy="0 0 0"/>
-            <parent link="link_4"/>
-            <child link="link_5"/>
-            <axis xyz="0 -1 0"/>
-            <limit lower="-2.18166" upper="2.18166" effort="0" velocity="3.14159"/>
-        </joint>
-        <joint name="joint_6" type="revolute">
-            <origin xyz="0.215 0 0" rpy="0 0 0"/>
-            <parent link="link_5"/>
-            <child link="link_6"/>
-            <axis xyz="-1 0 0"/>
-            <limit lower="-6.28319" upper="6.28319" effort="0" velocity="4.53786"/>
-        </joint>
-
-        <!-- ROS-Industrial 'base' frame: base_link to Fanuc World Coordinates transform -->
-        <link name="base" />
-        <joint name="base_link-base" type="fixed">
+    <!-- joints: main serial chain -->
+    <joint name="joint_1" type="revolute">
         <origin xyz="0 0 0.670" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="base"/>
-        </joint>
-
-        <!-- ROS-Industrial 'flange' frame: attachment point for EEF models -->
-        <link name="flange" />
-        <joint name="joint_6-flange" type="fixed">
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <parent link="link_6" />
-        <child link="flange" />
-        </joint>
-
-        <!-- ROS-Industrial 'tool0' frame: all-zeros tool frame -->
-        <link name="tool0" />
-        <joint name="link_6-tool0" type="fixed">
-        <origin xyz="0 0 0" rpy="3.14 -1.57 0" />
-        <parent link="link_6" />
-        <child link="tool0" />
-        </joint>
+        <child link="link_1"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.22886" upper="3.22886" effort="0" velocity="2.26893"/>
+    </joint>
+    <joint name="joint_2" type="revolute">
+        <origin xyz="0.312 0 0" rpy="0 0 0"/>
+        <parent link="link_1"/>
+        <child link="link_2"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-1.0472" upper="1.32645" effort="0" velocity="2.00713"/>
+    </joint>
+    <joint name="joint_3" type="revolute">
+        <origin xyz="0 0 1.075" rpy="0 0 0"/>
+        <parent link="link_2"/>
+        <child link="link_3"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-2.30383" upper="3.14159" effort="0" velocity="2.18166"/>
+    </joint>
+    <joint name="joint_4" type="revolute">
+        <origin xyz="0 0 0.225" rpy="0 0 0"/>
+        <parent link="link_3"/>
+        <child link="link_4"/>
+        <axis xyz="-1 0 0"/>
+        <limit lower="-6.28319" upper="6.28319" effort="0" velocity="3.14159"/>
+    </joint>
+    <joint name="joint_5" type="revolute">
+        <origin xyz="1.280 0 0" rpy="0 0 0"/>
+        <parent link="link_4"/>
+        <child link="link_5"/>
+        <axis xyz="0 -1 0"/>
+        <limit lower="-2.18166" upper="2.18166" effort="0" velocity="3.14159"/>
+    </joint>
+    <joint name="joint_6" type="revolute">
+        <origin xyz="0.215 0 0" rpy="0 0 0"/>
+        <parent link="link_5"/>
+        <child link="link_6"/>
+        <axis xyz="-1 0 0"/>
+        <limit lower="-6.28319" upper="6.28319" effort="0" velocity="4.53786"/>
+    </joint>
 </robot>
