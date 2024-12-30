@@ -22,13 +22,13 @@ end_pose = robot.get_info()['visual']['link_6'][-1]
 print(end_pose)
 print(np.rad2deg(t_utils.get_rpy_from_matrix(end_pose)))
 
-# fk = robot.forward_kin(target_thetas)
-# target_pose = robot.compute_eef_pose(fk)
-# joints = robot.inverse_kin(init_thetas, target_pose, method="LM")
+fk = robot.forward_kin(target_thetas)
+target_pose = robot.compute_eef_pose(fk)
+joints = robot.inverse_kin(init_thetas, target_pose, method="LM")
 
-# print(joints)
+print(joints)
 
-# robot.set_transform(joints)
-# _, ax = p_utils.init_3d_figure("IK", visible_axis=True)
-# p_utils.plot_robot(ax=ax, robot=robot, geom="visual", only_visible_geom=False, alpha=1)
+robot.set_transform(joints)
+_, ax = p_utils.init_3d_figure("IK", visible_axis=True)
+p_utils.plot_robot(ax=ax, robot=robot, geom="visual", only_visible_geom=False, alpha=1)
 p_utils.show_figure()

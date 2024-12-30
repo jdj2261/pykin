@@ -223,7 +223,10 @@ def apply_gripper_to_scene(trimesh_scene=None, robot=None, geom="collision"):
                 trimesh_scene.add_geometry(sphere_mesh, transform=h_mat)
     return trimesh_scene
 
-
+def create_coordinate_frame(size=0.05):
+    """Create coordinate frame mesh"""
+    return trimesh.creation.axis(origin_size=size)
+    
 def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
     if trimesh_scene is None:
         trimesh_scene = trimesh.Scene()
@@ -240,6 +243,7 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
                         mesh_color = info[4]
                     mesh.visual.face_colors = mesh_color
                     trimesh_scene.add_geometry(mesh, transform=h_mat)
+                    trimesh_scene.add_geometry(create_coordinate_frame(), transform=h_mat)
             else:
                 mesh_color = p_utils.get_mesh_color(robot, link, geom)
                 if len(info) > 4:
