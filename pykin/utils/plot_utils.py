@@ -283,6 +283,8 @@ def plot_robot(
                 nodes[eef_idx][0], nodes[eef_idx][1], nodes[eef_idx][2], label, size="8"
             )
 
+            render_axis(ax, matrix, scale=0.1)
+
         if visible_scatter:
             ax.scatter(
                 [x[0] for x in nodes],

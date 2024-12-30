@@ -45,13 +45,31 @@ def get_pose_from_homogeneous(h_mat):
 
 def get_rpy_from_matrix(R):
     """
-    Returns roll pitch, yaw from Rotation matrix
+    Returns roll, pitch, yaw angles (in radians) from Rotation matrix
+    Handles gimbal lock cases and ensures angles are in [-pi, pi] range
     """
-    r = np.arctan2(R[2, 1], R[2, 2])
-    p = np.arctan2(-R[2, 0], np.sqrt(R[0, 0] ** 2 + R[1, 0] ** 2))
-    y = np.arctan2(R[1, 0], R[0, 0])
-
-    return np.asarray([r, p, y])
+    # Calculate pitch first
+    pitch = np.arctan2(-R[2, 0], np.sqrt(R[2, 1]**2 + R[2, 2]**2))
+    
+    # Check for gimbal lock (pitch = ±90°)
+    if abs(pitch) > np.pi/2.0 - 1e-10:
+        # Pitch is ±90°
+        pitch = np.copysign(np.pi/2.0, pitch)
+        # Set roll to 0 and calculate yaw
+        roll = 0.0
+        yaw = np.arctan2(R[0, 1], R[1, 1])
+    else:
+        # Normal case
+        roll = np.arctan2(R[2, 1], R[2, 2])
+        yaw = np.arctan2(R[1, 0], R[0, 0])
+    
+    rpy = np.array([roll, pitch, yaw])
+    
+    # Ensure angles are in [-pi, pi] range
+    rpy = np.where(rpy <= -np.pi, rpy + 2*np.pi, rpy)
+    rpy = np.where(rpy > np.pi, rpy - 2*np.pi, rpy)
+    
+    return rpy
 
 
 def get_rpy_from_quaternion(q, convention="wxyz"):

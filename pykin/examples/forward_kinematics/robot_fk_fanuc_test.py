@@ -11,7 +11,7 @@ from pykin.utils.kin_utils import apply_robot_to_scene
 
 current_file_path = os.path.abspath(os.path.dirname(__file__))
 file_path = "urdf/fanuc/fanuc_r2000ic_165f.urdf"
-goal_qpos = np.array([0, 0, 0, 0, 0, 0])
+goal_qpos = np.array([np.pi/4, 0, np.pi/4, 0, np.pi/4, 0])
 
 # Visual geometry 케이스
 robot_visual = SingleArm(file_path, Transform(rot=[0.0, 0.0, 0.0], pos=[0, 0, 0]))
