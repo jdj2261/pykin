@@ -243,7 +243,7 @@ def apply_robot_to_scene(trimesh_scene=None, robot=None, geom="collision"):
                         mesh_color = info[4]
                     mesh.visual.face_colors = mesh_color
                     trimesh_scene.add_geometry(mesh, transform=h_mat)
-                    trimesh_scene.add_geometry(create_coordinate_frame(), transform=h_mat)
+                    # trimesh_scene.add_geometry(create_coordinate_frame(), transform=h_mat)
             else:
                 mesh_color = p_utils.get_mesh_color(robot, link, geom)
                 if len(info) > 4:
